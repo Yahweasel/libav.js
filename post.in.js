@@ -57,7 +57,7 @@ Module.mkwriterdev = function(loc, mode) {
 };
 
 /* Metafunction to initialize an encoder with all the bells and whistles
- * Returns [AVCodec AVCodecContext, AVFrame, AVPacket] */
+ * Returns [AVCodec, AVCodecContext, AVFrame, AVPacket, frame_size] */
 var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_base_num, time_base_den) {
     var codec = avcodec_find_encoder_by_name(name);
     if (codec === 0)
@@ -94,11 +94,43 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
     return [codec, c, frame, pkt, frame_size];
 };
 
+/* Metafunction to initialize a decoder with all the bells and whistles.
+ * Similar to ff_init_encoder but doesn't need to initialize the frame.
+ * Returns [AVCodec, AVCodecContext, AVPacket, AVFrame] */
+var ff_init_decoder = Module.ff_init_decoder = function(name) {
+    var codec = avcodec_find_decoder_by_name(name);
+    if (codec === 0)
+        throw new Error("Codec not found");
+
+    var c = avcodec_alloc_context3(codec);
+    if (c === 0)
+        throw new Error("Could not allocate audio codec context");
+
+    var ret = avcodec_open2(c, codec, 0);
+    if (ret < 0)
+        throw new Error("Could not open codec (" + ret + ")");;
+
+    var pkt = av_packet_alloc();
+    if (pkt === 0)
+        throw new Error("Could not allocate packet");
+
+    var frame = av_frame_alloc();
+    if (frame === 0)
+        throw new Error("Could not allocate frame");
+
+    return [codec, c, pkt, frame];
+};
+
 /* Free everything allocated by ff_init_encoder */
 var ff_free_encoder = Module.ff_free_encoder = function(c, frame, pkt) {
     av_frame_free_js(frame);
     av_packet_free_js(pkt);
     avcodec_free_context_js(c);
+};
+
+/* Free everything allocated by ff_init_decoder */
+var ff_free_decoder = Module.ff_free_decoder = function(c, pkt, frame) {
+    ff_free_encoder(c, frame, pkt);
 };
 
 /* Encode many frames at once, done at this level to avoid message passing */
@@ -109,7 +141,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, copyin,
         if (inFrame !== null) {
             if (av_frame_make_writable(frame) < 0)
                 throw new Error("Failed to make frame writable");
-            var samples = AVFrame_data0(frame);
+            var samples = AVFrame_data_a(frame, 0);
             Module[copyin + "i"](samples, inFrame.data);
             if (inFrame.pts)
                 AVFrame_pts_s(frame, inFrame.pts);
@@ -142,6 +174,71 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, copyin,
         handleFrame(null);
 
     return outPackets;
+};
+
+/* Decode many packets at once, done at this level to avoid message passing */
+var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPackets, fin) {
+    var outFrames = [];
+
+    function handlePacket(inPacket) {
+        if (inPacket !== null) {
+            if (av_packet_make_writable(pkt) < 0)
+                throw new Error("Failed to make packet writable");
+            ff_set_packet(pkt, inPacket.data);
+            if (inPacket.pts)
+                AVPacket_pts_s(pkt, inPacket.pts);
+            if (inPacket.dts)
+                AVPacket_dts_s(pkt, inPacket.dts);
+        } else {
+            av_packet_unref(pkt);
+        }
+
+        if (avcodec_send_packet(ctx, pkt) < 0)
+            throw new Error("Error submitting the packet to the decoder");
+
+        while (true) {
+            var ret = avcodec_receive_frame(ctx, frame);
+            if (ret === -11 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
+                return;
+            else if (ret < 0)
+                throw new Error("Error decoding audio frame");
+
+            var sample_fmt = AVCodecContext_sample_fmt(ctx);
+            var channels = AVCodecContext_channels(ctx);
+            var nb_samples = AVFrame_nb_samples(frame);
+            var ct = channels*nb_samples;
+            var data = AVFrame_data_a(frame, 0);
+            var outFrame = {data: null, sample_fmt: sample_fmt, channels: channels, pts: AVFrame_pts(frame)};
+
+            // FIXME: Need to support *every* format here
+            switch (sample_fmt) {
+                case 0: // U8
+                    outFrame.data = copyout_u8(data, ct).slice(0);
+                    break;
+
+                case 1: // S16
+                    outFrame.data = copyout_s16(data, ct).slice(0);
+                    break;
+
+                case 2: // S32
+                    outFrame.data = copyout_s32(data, ct).slice(0);
+                    break;
+
+                case 3: // FLT
+                    outFrame.data = copyout_f32(data, ct).slice(0);
+                    break;
+            }
+
+            outFrames.push(outFrame);
+        }
+    }
+
+    inPackets.forEach(handlePacket);
+
+    if (fin)
+        handlePacket(null);
+
+    return outFrames;
 };
 
 /* Set the content of a packet. Necessary because we tend to strip packets of their content. */

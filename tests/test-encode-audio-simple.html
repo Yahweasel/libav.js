@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>LibAV Opus encoding test</title>
+        <title>LibAV encode-audio-simple</title>
     </head>
     <body>
         <script type="text/javascript">LibAV = {base:".."}</script>
@@ -44,15 +44,10 @@
                     return libav.ff_encode_multi(c, frame, pkt, "copyin_f32", frames, true);
 
                 }).then(function(ret) {
-                    var div = document.createElement("div");
-                    div.innerText = ret.map(function(pkt) {
-                        var part = "";
-                        pkt.data.forEach(function(b) {
-                            if (b < 16) part += "0";
-                            part += b.toString(16);
-                        });
-                        return part;
-                    }).join("\n");
+                    var div = document.createElement("pre");
+                    div.innerText = "[\n" + ret.map(function(pkt) {
+                        return "new Uint8Array([" + Array.prototype.join.call(pkt.data, ", ") + "])";
+                    }).join(",\n") + "\n]";
                     document.body.appendChild(div);
 
                     return libav.ff_free_encoder(c, frame, pkt);

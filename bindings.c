@@ -21,6 +21,10 @@
     type struc ## _ ## field(struc *a) { return a->field; } \
     void struc ## _ ## field ## _s(struc *a, type b) { a->field = b; }
 
+#define AA(struc, type, field) \
+    type struc ## _ ## field ## _a(struc *a, size_t c) { return a->field[c]; } \
+    void struc ## _ ## field ## _a_s(struc *a, size_t c, type b) { a->field[c] = b; }
+
 
 /****************************************************************
  * libavutil
@@ -28,14 +32,14 @@
 
 /* AVFrame */
 #define B(type, field) A(AVFrame, type, field)
+#define BA(type, field) AA(AVFrame, type, field)
 B(uint64_t, channel_layout)
+BA(uint8_t *, data)
 B(int, format)
 B(int, nb_samples)
 B(int64_t, pts)
 #undef B
-
-uint8_t *AVFrame_data0(struct AVFrame *a) { return a->data[0]; }
-void AVFrame_data0_s(struct AVFrame *a, uint8_t *b) { a->data[0] = b; }
+#undef BA
 
 
 /****************************************************************
@@ -57,6 +61,11 @@ void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
     a->time_base.den = d;
 }
 
+/* AVCodecParameters */
+#define B(type, field) A(AVCodecParameters, type, field)
+B(enum AVCodecID, codec_id)
+#undef B
+
 /* AVPacket */
 #define B(type, field) A(AVPacket, type, field)
 B(uint8_t *, data)
@@ -72,9 +81,12 @@ B(int64_t, pts)
 
 /* AVFormatContext */
 #define B(type, field) A(AVFormatContext, type, field)
+#define BA(type, field) AA(AVFormatContext, type, field)
 B(struct AVOutputFormat *, oformat)
 B(AVIOContext *, pb)
+BA(AVStream *, streams)
 #undef B
+#undef BA
 
 /* AVStream */
 #define B(type, field) A(AVStream, type, field)
@@ -88,29 +100,22 @@ void AVStream_time_base_s(AVStream *a, int n, int d) {
 
 
 /****************************************************************
- * Helper functions from examples, and bindings to avoid pointer
- * issues
+ * Bindings to avoid pointer issues
  ***************************************************************/
 
-/* from encode_audio.c */
-int ff_check_sample_fmt(const AVCodec *codec, enum AVSampleFormat sample_fmt)
-{
-    const enum AVSampleFormat *p = codec->sample_fmts;
-
-    while (*p != AV_SAMPLE_FMT_NONE) {
-        if (*p == sample_fmt)
-            return 1;
-        p++;
-    }
-    return 0;
-}
-
-/* pointer issues */
 AVFormatContext *avformat_alloc_output_context2_js(AVOutputFormat *oformat,
     const char *format_name, const char *filename)
 {
     AVFormatContext *ret = NULL;
     avformat_alloc_output_context2(&ret, oformat, format_name, filename);
+    return ret;
+}
+
+AVFormatContext *avformat_open_input_js(const char *url, AVInputFormat *fmt,
+    AVDictionary **options)
+{
+    AVFormatContext *ret = NULL;
+    avformat_open_input(&ret, url, fmt, options);
     return ret;
 }
 

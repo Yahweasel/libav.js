@@ -9,7 +9,10 @@ function s(x) {
 function accessors(f) {
     funcs.accessors.forEach((type) => {
         type[1].forEach((field) => {
-            f(type[0] + "_" + field);
+            if (typeof field === "object")
+                f(type[0] + "_" + field.name + "_a", field);
+            else
+                f(type[0] + "_" + field, null);
         });
     });
 }
@@ -44,9 +47,14 @@ function decls(f, meta) {
     funcs.functions.forEach((decl) => {
         outp += "var " + decl[0] + " = Module." + decl[0] + " = Module.cwrap(" + s(decl[0]) + ", " + s(decl[1]) + ", " + s(decl[2]) + ");\n";
     });
-    accessors((decl) => {
-        outp += "var " + decl + " = Module." + decl + " = Module.cwrap(" + s(decl) + ", \"number\", [\"number\"]);\n" +
-            "var " + decl + "_s = Module." + decl + "_s = Module." + decl + "_si = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\"]);\n";
+    accessors((decl, field) => {
+        if (field && field.array) {
+            outp += "var " + decl + " = Module." + decl + " = Module.cwrap(" + s(decl) + ", \"number\", [\"number\", \"number\"]);\n" +
+                "var " + decl + "_s = Module." + decl + "_s = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\", \"number\"]);\n";
+        } else {
+            outp += "var " + decl + " = Module." + decl + " = Module.cwrap(" + s(decl) + ", \"number\", [\"number\"]);\n" +
+                "var " + decl + "_s = Module." + decl + "_s = Module." + decl + "_si = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\"]);\n";
+        }
     });
 
     funcs.freers.forEach((decl) => {

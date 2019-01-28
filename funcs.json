@@ -1,5 +1,6 @@
 {
     "functions": [
+        ["av_get_bytes_per_sample", "number", ["number"]],
         ["av_frame_alloc", "number", []],
         ["av_frame_free", null, ["number"]],
         ["av_frame_get_buffer", "number", ["number", "number"]],
@@ -17,11 +18,14 @@
 
         ["avcodec_alloc_context3", "number", ["number"]],
         ["avcodec_close", "number", ["number"]],
+        ["avcodec_find_decoder", "number", ["number"]],
         ["avcodec_find_decoder_by_name", "number", ["string"]],
+        ["avcodec_find_encoder", "number", ["number"]],
         ["avcodec_find_encoder_by_name", "number", ["string"]],
         ["avcodec_free_context", null, ["number"]],
         ["avcodec_open2", "number", ["number", "number", "number"]],
         ["avcodec_parameters_from_context" ,"number", ["number", "number"]],
+        ["avcodec_parameters_to_context" ,"number", ["number", "number"]],
         ["avcodec_receive_frame", "number", ["number", "number"]],
         ["avcodec_receive_packet", "number", ["number", "number"]],
         ["avcodec_send_frame", "number", ["number", "number"]],
@@ -32,17 +36,17 @@
         ["avformat_find_stream_info", "number", ["number", "number"]],
         ["avformat_free_context", null, ["number"]],
         ["avformat_new_stream", "number", ["number", "number"]],
-        ["avformat_open_input", "number", ["number", "string", "number", "number"]],
+        ["avformat_open_input_js", "number", ["string", "number", "number"]],
         ["avformat_write_header", "number", ["number", "number"]],
         ["avio_open2_js", "number", ["string", "number", "number", "number"]],
         ["avio_close", "number", ["number"]],
+        ["av_find_best_stream", "number", ["number", "number", "number", "number", "number", "number"]],
         ["av_grow_packet", "number", ["number", "number"]],
         ["av_interleaved_write_frame", "number", ["number", "number"]],
         ["av_packet_make_writable", "number", ["number"]],
+        ["av_read_frame", "number", ["number", "number"]],
         ["av_shrink_packet", null, ["number", "number"]],
         ["av_write_trailer", "number", ["number"]],
-
-        ["ff_check_sample_fmt", "number", ["number", "number"]],
 
         ["AVCodecContext_time_base_s", null, ["number", "number", "number"]],
         ["AVStream_time_base_s", null, ["number", "number", "number"]],
@@ -59,8 +63,11 @@
         "mkdev",
         "mkwriterdev",
         "ff_init_encoder",
+        "ff_init_decoder",
         "ff_free_encoder",
+        "ff_free_decoder",
         "ff_encode_multi",
+        "ff_decode_multi",
         "ff_set_packet",
         "ff_init_format",
         "ff_free_format",
@@ -70,7 +77,7 @@
     "accessors": [
         ["AVFrame", [
             "channel_layout",
-            "data0",
+            {"name": "data", "array": true},
             "format",
             "nb_samples",
             "pts"
@@ -83,6 +90,9 @@
             "sample_fmt",
             "sample_rate"
         ]],
+        ["AVCodecParameters", [
+            "codec_id"
+        ]],
         ["AVPacket", [
             "data",
             "dts",
@@ -91,7 +101,8 @@
         ]],
         ["AVFormatContext", [
             "oformat",
-            "pb"
+            "pb",
+            {"name": "streams", "array": true}
         ]],
         ["AVStream", [
             "codecpar"
@@ -101,12 +112,15 @@
     "freers": [
         "av_frame_free",
         "av_packet_free",
+        "avformat_close_input",
         "avcodec_free_context",
         "avfilter_graph_free"
     ],
 
     "copiers": [
         ["u8", "Uint8Array"],
+        ["s16", "Int16Array"],
+        ["s32", "Int32Array"],
         ["f32", "Float32Array"]
     ]
 }
