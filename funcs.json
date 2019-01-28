@@ -1,0 +1,112 @@
+{
+    "functions": [
+        ["av_frame_alloc", "number", []],
+        ["av_frame_free", null, ["number"]],
+        ["av_frame_get_buffer", "number", ["number", "number"]],
+        ["av_frame_make_writable", "number", ["number"]],
+        ["av_packet_alloc", "number", []],
+        ["av_packet_free", null, ["number"]],
+        ["av_packet_unref", null, ["number"]],
+
+        ["avfilter_get_by_name", "number", ["string"]],
+        ["avfilter_graph_alloc", "number", []],
+        ["avfilter_graph_config", "number", ["number", "number"]],
+        ["avfilter_graph_create_filter_js", "number", ["number", "string", "string", "number", "number"]],
+        ["avfilter_graph_parse2", "number", ["number", "string", "number", "number"]],
+        ["avfilter_link", "number", ["number", "number", "number", "number"]],
+
+        ["avcodec_alloc_context3", "number", ["number"]],
+        ["avcodec_close", "number", ["number"]],
+        ["avcodec_find_decoder_by_name", "number", ["string"]],
+        ["avcodec_find_encoder_by_name", "number", ["string"]],
+        ["avcodec_free_context", null, ["number"]],
+        ["avcodec_open2", "number", ["number", "number", "number"]],
+        ["avcodec_parameters_from_context" ,"number", ["number", "number"]],
+        ["avcodec_receive_frame", "number", ["number", "number"]],
+        ["avcodec_receive_packet", "number", ["number", "number"]],
+        ["avcodec_send_frame", "number", ["number", "number"]],
+        ["avcodec_send_packet", "number", ["number", "number"]],
+
+        ["avformat_alloc_output_context2_js", "number", ["number", "string", "string"]],
+        ["avformat_close_input", null, ["number"]],
+        ["avformat_find_stream_info", "number", ["number", "number"]],
+        ["avformat_free_context", null, ["number"]],
+        ["avformat_new_stream", "number", ["number", "number"]],
+        ["avformat_open_input", "number", ["number", "string", "number", "number"]],
+        ["avformat_write_header", "number", ["number", "number"]],
+        ["avio_open2_js", "number", ["string", "number", "number", "number"]],
+        ["avio_close", "number", ["number"]],
+        ["av_grow_packet", "number", ["number", "number"]],
+        ["av_interleaved_write_frame", "number", ["number", "number"]],
+        ["av_packet_make_writable", "number", ["number"]],
+        ["av_shrink_packet", null, ["number", "number"]],
+        ["av_write_trailer", "number", ["number"]],
+
+        ["ff_check_sample_fmt", "number", ["number", "number"]],
+
+        ["AVCodecContext_time_base_s", null, ["number", "number", "number"]],
+        ["AVStream_time_base_s", null, ["number", "number", "number"]],
+
+        ["calloc", "number", ["number", "number"]],
+        ["free", null, ["number"]],
+        ["malloc", "number", ["number"]]
+    ],
+
+    "meta": [
+        "readFile",
+        "writeFile",
+        "unlink",
+        "mkdev",
+        "mkwriterdev",
+        "ff_init_encoder",
+        "ff_free_encoder",
+        "ff_encode_multi",
+        "ff_set_packet",
+        "ff_init_format",
+        "ff_free_format",
+        "ff_write_multi"
+    ],
+
+    "accessors": [
+        ["AVFrame", [
+            "channel_layout",
+            "data0",
+            "format",
+            "nb_samples",
+            "pts"
+        ]],
+        ["AVCodecContext", [
+            "bit_rate",
+            "channel_layout",
+            "channels",
+            "frame_size",
+            "sample_fmt",
+            "sample_rate"
+        ]],
+        ["AVPacket", [
+            "data",
+            "dts",
+            "size",
+            "pts"
+        ]],
+        ["AVFormatContext", [
+            "oformat",
+            "pb"
+        ]],
+        ["AVStream", [
+            "codecpar"
+        ]]
+    ],
+
+    "freers": [
+        "av_frame_free",
+        "av_packet_free",
+        "avcodec_free_context",
+        "avfilter_graph_free"
+    ],
+
+    "copiers": [
+        ["u8", "Uint8Array"],
+        ["f32", "Float32Array"]
+    ]
+}

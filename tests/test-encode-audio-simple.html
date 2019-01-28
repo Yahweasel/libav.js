@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LibAV Opus encoding test</title>
+    </head>
+    <body>
+        <script type="text/javascript">LibAV = {base:".."}</script>
+        <script type="text/javascript" src="../libav-1.4.1-default.js"></script>
+        <script type="text/javascript">
+            /* This is a port of doc/examples/encode_audio.c, simplified with
+             * some metafunctions. Note that this version isn't just easier on
+             * the eyes, it's faster. */
+            function main() {
+                var libav = LibAV;
+                var codec, c, pkt, frame, frame_size;
+                libav.ff_init_encoder("libopus", {
+                    bit_rate: 128000,
+                    sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+                    sample_rate: 48000,
+                    channel_layout: 4,
+                    channels: 1
+                }, 1, 48000).then(function(ret) {
+                    codec = ret[0];
+                    c = ret[1];
+                    frame = ret[2];
+                    pkt = ret[3];
+                    frame_size = ret[4];
+
+                    var t = 0;
+                    var tincr = 2 * Math.PI * 440 / 48000;
+                    var frames = [];
+
+                    for (var i = 0; i < 200; i++) {
+                        var samples = [];
+
+                        for (var j = 0; j < frame_size; j++) {
+                            samples[j] = Math.sin(t);
+                            t += tincr;
+                        }
+
+                        frames.push({data: samples});
+                    }
+
+                    return libav.ff_encode_multi(c, frame, pkt, "copyin_f32", frames, true);
+
+                }).then(function(ret) {
+                    var div = document.createElement("div");
+                    div.innerText = ret.map(function(pkt) {
+                        var part = "";
+                        pkt.data.forEach(function(b) {
+                            if (b < 16) part += "0";
+                            part += b.toString(16);
+                        });
+                        return part;
+                    }).join("\n");
+                    document.body.appendChild(div);
+
+                    return libav.ff_free_encoder(c, frame, pkt);
+
+                }).then(function() {
+                    // Nothing
+
+                }).catch(function(err) {
+                    alert(err);
+                });
+            }
+
+            if (LibAV.ready) {
+                main();
+            } else {
+                LibAV.onready = main;
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,2 @@
+tmp-inst/lib/pkgconfig/vorbis.pc
+tmp-inst/lib/libmp3lame.a
