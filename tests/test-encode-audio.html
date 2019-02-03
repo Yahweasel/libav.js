@@ -25,26 +25,22 @@
                                     return;
                                 }
 
-                                return Promise.all([
-                                    libav.AVPacket_data(pkt),
-                                    libav.AVPacket_size(pkt)
-                                ]);
+                                return libav.ff_copyout_packet(pkt);
 
                             }).then(function(ret) {
-                                return libav.copyout_u8(ret[0], ret[1]);
-
-                            }).then(function(ret) {
+                                if (!ret) return;
                                 var div = document.createElement("div");
                                 var part = "";
-                                ret.forEach(function(b) {
+                                ret.data.forEach(function(b) {
                                     if (b < 16) part += "0";
                                     part += b.toString(16);
                                 });
                                 div.innerText = part;
                                 document.body.appendChild(div);
 
-                                return libav.av_packet_unref(pkt);
-                            }).then(packet).catch(rej);
+                                return libav.av_packet_unref(pkt).then(packet).catch(rej);
+
+                            }).catch(rej);
                         }
                         packet();
                     });
@@ -117,6 +113,7 @@
                             if (ret < 0)
                                 throw new Error();
                             return libav.AVFrame_data_a(frame, 0);
+
                         }).then(function(ret) {
                             samples = ret;
                             var samplesIn = [];

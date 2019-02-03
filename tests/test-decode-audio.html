@@ -28,30 +28,12 @@
                                     return;
                                 }
 
-                                return libav.AVCodecContext_sample_fmt(dec_ctx);
+                                return libav.ff_copyout_frame(dec_ctx, frame);
 
                             }).then(function(ret) {
-                                return Promise.all([
-                                    libav.av_get_bytes_per_sample(ret),
-                                    libav.AVFrame_nb_samples(frame),
-                                    libav.AVFrame_data_a(frame, 0)
-                                ]);
-
-                            }).then(function(ret) {
-                                var bps = ret[0];
-                                var nbs = ret[1];
-                                var data = ret[2];
-
-                                return libav.copyout_u8(data, bps*nbs);
-
-                            }).then(function(ret) {
+                                if (!ret) return;
                                 var div = document.createElement("div");
-                                var part = "";
-                                ret.forEach(function(b) {
-                                    if (b < 16) part += "0";
-                                    part += b.toString(16);
-                                });
-                                div.innerText = part;
+                                div.innerText = Array.prototype.join.call(ret.data, ", ");
                                 document.body.appendChild(div);
 
                                 readFrame();

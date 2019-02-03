@@ -71,6 +71,7 @@ B(enum AVCodecID, codec_id)
 B(uint8_t *, data)
 B(int64_t, dts)
 B(int, size)
+B(int, stream_index)
 B(int64_t, pts)
 #undef B
 

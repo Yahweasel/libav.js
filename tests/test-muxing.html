@@ -96,11 +96,7 @@
                         }).then(function(ret) {
                             if (ret < 0)
                                 throw new Error();
-                            return Promise.all([
-                                libav.ff_set_packet(pkt, inPacket.data),
-                                libav.AVPacket_pts_s(pkt, inPacket.pts),
-                                libav.AVPacket_dts_s(pkt, inPacket.dts)
-                            ]);
+                            return libav.ff_copyin_packet(pkt, inPacket);
                         }).then(function() {
                             // FIXME: av_packet_rescale_ts
                             // FIXME: pkt->stream_index = st->index

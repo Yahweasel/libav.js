@@ -141,10 +141,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, copyin,
         if (inFrame !== null) {
             if (av_frame_make_writable(frame) < 0)
                 throw new Error("Failed to make frame writable");
-            var samples = AVFrame_data_a(frame, 0);
-            Module[copyin + "i"](samples, inFrame.data);
-            if (inFrame.pts)
-                AVFrame_pts_s(frame, inFrame.pts);
+            ff_copyin_frame(ctx, frame, inFrame);
         }
 
         var ret = avcodec_send_frame(ctx, inFrame?frame:0);
@@ -158,13 +155,9 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, copyin,
             else if (ret < 0)
                 throw new Error("Error encoding audio frame");
 
-            var data = AVPacket_data(pkt);
-            var size = AVPacket_size(pkt);
-            outPackets.push({
-                data: copyout_u8(data, size).slice(0),
-                pts: AVPacket_pts(pkt),
-                dts: AVPacket_dts(pkt)
-            });
+            var outPacket = ff_copyout_packet(pkt);
+            outPacket.data = outPacket.data.slice(0);
+            outPackets.push(outPacket);
         }
     }
 
@@ -184,17 +177,15 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
         if (inPacket !== null) {
             if (av_packet_make_writable(pkt) < 0)
                 throw new Error("Failed to make packet writable");
-            ff_set_packet(pkt, inPacket.data);
-            if (inPacket.pts)
-                AVPacket_pts_s(pkt, inPacket.pts);
-            if (inPacket.dts)
-                AVPacket_dts_s(pkt, inPacket.dts);
+            console.error(inPacket);
+            ff_copyin_packet(pkt, inPacket);
         } else {
             av_packet_unref(pkt);
         }
 
         if (avcodec_send_packet(ctx, pkt) < 0)
             throw new Error("Error submitting the packet to the decoder");
+        av_packet_unref(pkt);
 
         while (true) {
             var ret = avcodec_receive_frame(ctx, frame);
@@ -203,32 +194,8 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
             else if (ret < 0)
                 throw new Error("Error decoding audio frame");
 
-            var sample_fmt = AVCodecContext_sample_fmt(ctx);
-            var channels = AVCodecContext_channels(ctx);
-            var nb_samples = AVFrame_nb_samples(frame);
-            var ct = channels*nb_samples;
-            var data = AVFrame_data_a(frame, 0);
-            var outFrame = {data: null, sample_fmt: sample_fmt, channels: channels, pts: AVFrame_pts(frame)};
-
-            // FIXME: Need to support *every* format here
-            switch (sample_fmt) {
-                case 0: // U8
-                    outFrame.data = copyout_u8(data, ct).slice(0);
-                    break;
-
-                case 1: // S16
-                    outFrame.data = copyout_s16(data, ct).slice(0);
-                    break;
-
-                case 2: // S32
-                    outFrame.data = copyout_s32(data, ct).slice(0);
-                    break;
-
-                case 3: // FLT
-                    outFrame.data = copyout_f32(data, ct).slice(0);
-                    break;
-            }
-
+            var outFrame = ff_copyout_frame(ctx, frame);
+            outFrame.data = outFrame.data.slice(0);
             outFrames.push(outFrame);
         }
     }
@@ -302,12 +269,94 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets) {
     inPackets.forEach(function(inPacket) {
         if (av_packet_make_writable(pkt) < 0)
             throw new Error();
-        ff_set_packet(pkt, inPacket.data);
-        AVPacket_pts_s(pkt, inPacket.pts);
-        AVPacket_dts_s(pkt, inPacket.dts);
+        ff_copyin_packet(pkt, inPacket);
         av_interleaved_write_frame(oc, pkt);
+        av_packet_unref(pkt);
     });
     av_packet_unref(pkt);
+};
+
+/* Copy out a frame */
+var ff_copyout_frame = Module.ff_copyout_frame = function(ctx, frame) {
+    var sample_fmt = AVCodecContext_sample_fmt(ctx);
+    var channels = AVCodecContext_channels(ctx);
+    var nb_samples = AVFrame_nb_samples(frame);
+    var ct = channels*nb_samples;
+    var data = AVFrame_data_a(frame, 0);
+    var outFrame = {data: null, sample_fmt: sample_fmt, channels: channels, pts: AVFrame_pts(frame)};
+
+    // FIXME: Need to support *every* format here
+    switch (sample_fmt) {
+        case 0: // U8
+            outFrame.data = copyout_u8(data, ct);
+            break;
+
+        case 1: // S16
+            outFrame.data = copyout_s16(data, ct);
+            break;
+
+        case 2: // S32
+            outFrame.data = copyout_s32(data, ct);
+            break;
+
+        case 3: // FLT
+            outFrame.data = copyout_f32(data, ct);
+            break;
+    }
+
+    return outFrame;
+};
+
+/* Copy in a frame */
+var ff_copyin_frame = Module.ff_copyin_frame = function(ctx, framePtr, frame) {
+    var sample_fmt = AVCodecContext_sample_fmt(ctx);
+    var data = AVFrame_data_a(framePtr, 0);
+
+    if (frame.pts)
+        AVFrame_pts_s(framePtr, frame.pts);
+
+    // FIXME: Need to support *every* format here
+    switch (sample_fmt) {
+        case 0: // U8
+            copyin_u8(data, frame.data);
+            break;
+
+        case 1: // S16
+            copyin_s16(data, frame.data);
+            break;
+
+        case 2: // S32
+            copyin_s32(data, frame.data);
+            break;
+
+        case 3: // FLT
+            copyin_f32(data, frame.data);
+            break;
+    }
+};
+
+/* Copy out a packet */
+var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
+    var data = AVPacket_data(pkt);
+    var size = AVPacket_size(pkt);
+    return {
+        data: copyout_u8(data, size),
+        pts: AVPacket_pts(pkt),
+        dts: AVPacket_dts(pkt),
+        stream_index: AVPacket_stream_index(pkt)
+    };
+};
+
+/* Copy in a packet */
+var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
+    ff_set_packet(pktPtr, packet.data);
+
+    if (packet.pts)
+        AVPacket_pts_s(pktPtr, packet.pts);
+    if (packet.dts)
+        AVPacket_dts_s(pktPtr, packet.dts);
+    if (packet.stream_index)
+        AVPacket_stream_index_s(pktPtr, packet.stream_index);
 };
 
 if (typeof importScripts !== "undefined") {

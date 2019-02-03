@@ -71,7 +71,11 @@
         "ff_set_packet",
         "ff_init_format",
         "ff_free_format",
-        "ff_write_multi"
+        "ff_write_multi",
+        "ff_copyout_frame",
+        "ff_copyin_frame",
+        "ff_copyout_packet",
+        "ff_copyin_packet"
     ],
 
     "accessors": [
@@ -97,6 +101,7 @@
             "data",
             "dts",
             "size",
+            "stream_index",
             "pts"
         ]],
         ["AVFormatContext", [

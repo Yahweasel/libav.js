@@ -114,21 +114,14 @@
                                     return;
                                 }
 
-                                return Promise.all([
-                                    libav.AVPacket_data(pkt),
-                                    libav.AVPacket_size(pkt)
-                                ]);
+                                return libav.ff_copyout_packet(pkt);
 
                             }).then(function(ret) {
-                                return Promise.all([
-                                    libav.copyout_u8(ret[0], ret[1]),
-                                    libav.AVPacket_pts(pkt),
-                                    libav.AVPacket_dts(pkt)
-                                ]);
-
-                            }).then(function(ret) {
-                                inPackets.push({data: ret[0], pts: ret[1], dts: ret[2]});
+                                if (!ret) return;
+                                console.error(ret);
+                                inPackets.push(ret);
                                 readFrame();
+
                             }).catch(rej);
                         }
                         readFrame();
