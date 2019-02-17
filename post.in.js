@@ -98,7 +98,11 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
  * Similar to ff_init_encoder but doesn't need to initialize the frame.
  * Returns [AVCodec, AVCodecContext, AVPacket, AVFrame] */
 var ff_init_decoder = Module.ff_init_decoder = function(name) {
-    var codec = avcodec_find_decoder_by_name(name);
+    var codec;
+    if (typeof name === "string")
+        codec = avcodec_find_decoder_by_name(name);
+    else
+        codec = avcodec_find_decoder(name);
     if (codec === 0)
         throw new Error("Codec not found");
 
@@ -221,8 +225,8 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
     Module.HEAPU8.set(data, ptr);
 };
 
-/* Initialize a format, format context and some number of streams */
-var ff_init_format = Module.ff_init_format = function(opts, streamCtxs) {
+/* Initialize a muxer format, format context and some number of streams */
+var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
     var oformat = opts.oformat ? opts.oformat : 0;
     var format_name = opts.format_name ? opts.format_name : null;
     var filename = opts.filename ? opts.filename : null;
@@ -257,12 +261,31 @@ var ff_init_format = Module.ff_init_format = function(opts, streamCtxs) {
     return [oc, fmt, pb, sts];
 };
 
-/* Free up a format and/or file */
-var ff_free_format = Module.ff_free_format = function(oc, pb) {
+/* Free up a muxer format and/or file */
+var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
     avformat_free_context(oc);
     if (pb)
         avio_close(pb);
 };
+
+/* Initialize a demuxer from a file, format context, and get the list of codecs/types */
+var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename) {
+    var fmt_ctx = avformat_open_input_js(filename, null, null);
+    if (fmt_ctx === 0)
+        throw new Error("Could not open source file");
+    var nb_streams = AVFormatContext_nb_streams(fmt_ctx);
+    var streams = [];
+    for (var i = 0; i < nb_streams; i++) {
+        var inStream = AVFormatContext_stream_a(fmt_ctx, i);
+        var outStream = {};
+        var codecpar = AVStream_codecpar(inStream);
+        outStream.index = i;
+        outStream.codec_type = AVCodecParameters_codec_type(codecpar);
+        outStream.codec_id = AVCodecParameters_codec_id(codecpar);
+        streams.push(outStream);
+    }
+    return [fmt_ctx, streams];
+}
 
 /* Write many packets at once, done at this level to avoid message passing */
 var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets) {

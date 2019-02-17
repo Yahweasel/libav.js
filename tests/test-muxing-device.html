@@ -36,7 +36,7 @@
                     pkt = ret[3];
                     frame_size = ret[4];
 
-                    return libav.ff_init_format({filename: "tmp.ogg", open: true, device: true}, [[c, 1, 48000]]);
+                    return libav.ff_init_muxer({filename: "tmp.ogg", open: true, device: true}, [[c, 1, 48000]]);
 
                 }).then(function(ret) {
                     oc = ret[0];
@@ -73,7 +73,7 @@
                     return libav.av_write_trailer(oc);
 
                 }).then(function() {
-                    return libav.ff_free_format(oc, pb);
+                    return libav.ff_free_muxer(oc, pb);
 
                 }).then(function() {
                     return libav.ff_free_encoder(c, frame, pkt);

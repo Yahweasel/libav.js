@@ -64,6 +64,7 @@ void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
 /* AVCodecParameters */
 #define B(type, field) A(AVCodecParameters, type, field)
 B(enum AVCodecID, codec_id)
+B(enum AVMediaType, codec_type)
 #undef B
 
 /* AVPacket */
@@ -83,6 +84,7 @@ B(int64_t, pts)
 /* AVFormatContext */
 #define B(type, field) A(AVFormatContext, type, field)
 #define BA(type, field) AA(AVFormatContext, type, field)
+B(unsigned int, nb_streams)
 B(struct AVOutputFormat *, oformat)
 B(AVIOContext *, pb)
 BA(AVStream *, streams)

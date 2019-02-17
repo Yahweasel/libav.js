@@ -69,8 +69,8 @@
         "ff_encode_multi",
         "ff_decode_multi",
         "ff_set_packet",
-        "ff_init_format",
-        "ff_free_format",
+        "ff_init_muxer",
+        "ff_free_muxer",
         "ff_write_multi",
         "ff_copyout_frame",
         "ff_copyin_frame",
@@ -95,7 +95,8 @@
             "sample_rate"
         ]],
         ["AVCodecParameters", [
-            "codec_id"
+            "codec_id",
+            "codec_type"
         ]],
         ["AVPacket", [
             "data",
@@ -105,6 +106,7 @@
             "pts"
         ]],
         ["AVFormatContext", [
+            "nb_streams",
             "oformat",
             "pb",
             {"name": "streams", "array": true}
