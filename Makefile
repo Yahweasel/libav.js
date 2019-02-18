@@ -50,8 +50,11 @@ libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg expo
 	cat configs/$*/license.js $@ > $@.tmp
 	mv $@.tmp $@
 
-exports.json libav-$(LIBAVJS_VERSION).js post.js: libav-$(LIBAVJS_VERSION).in.js post.in.js funcs.json apply-funcs.js
+exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 	./apply-funcs.js $(LIBAVJS_VERSION)
+
+libav-$(LIBAVJS_VERSION).js post.js: exports.json
+	true
 
 halfclean:
 	-rm -f libav-$(LIBAVJS_VERSION)-*.js libav-$(LIBAVJS_VERSION)-*.wasm

@@ -85,7 +85,7 @@ function decls(f, meta) {
 // libav.js
 (function() {
     var ver = process.argv[2];
-    var inp = fs.readFileSync("libav-" + ver + ".in.js", "utf8");
+    var inp = fs.readFileSync("libav.in.js", "utf8");
 
     var outp = [];
     decls((decl) => {
