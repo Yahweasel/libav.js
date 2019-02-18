@@ -181,7 +181,6 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
         if (inPacket !== null) {
             if (av_packet_make_writable(pkt) < 0)
                 throw new Error("Failed to make packet writable");
-            console.error(inPacket);
             ff_copyin_packet(pkt, inPacket);
         } else {
             av_packet_unref(pkt);
@@ -276,7 +275,7 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename) {
     var nb_streams = AVFormatContext_nb_streams(fmt_ctx);
     var streams = [];
     for (var i = 0; i < nb_streams; i++) {
-        var inStream = AVFormatContext_stream_a(fmt_ctx, i);
+        var inStream = AVFormatContext_streams_a(fmt_ctx, i);
         var outStream = {};
         var codecpar = AVStream_codecpar(inStream);
         outStream.index = i;
@@ -297,6 +296,24 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets) {
         av_packet_unref(pkt);
     });
     av_packet_unref(pkt);
+};
+
+/* Read many packets at once, done at this level to avoid message passing */
+var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, limit) {
+    var sz = 0;
+    var outPackets = [];
+
+    while (true) {
+        var ret = av_read_frame(fmt_ctx, pkt);
+        if (ret < 0)
+            return [ret, outPackets];
+
+        var packet = ff_copyout_packet(pkt);
+        outPackets.push(packet);
+        sz += packet.data.length;
+        if (limit && sz >= limit)
+            return [-11 /* EAGAIN */, outPackets];
+    }
 };
 
 /* Copy out a frame */
