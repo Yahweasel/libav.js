@@ -64,6 +64,6 @@ users are idiots. Friends don't let friends use MP3.
 
 To create other variants, simply create the configuration for them in `configs`
 and, if necessary, add Makefile fragments to `mk`. This is intentionally
-designed so that you can overly new configurations without needing to patch
+designed so that you can add new configurations without needing to patch
 anything that already exists. See the two existing variants' configuration
 files in `config` and the existing fragments in `mk` to understand how.
