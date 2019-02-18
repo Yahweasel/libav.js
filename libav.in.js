@@ -30,25 +30,30 @@
 
     var libav;
     var base = ".";
+    var nodejs = (typeof process !== "undefined");
 
-    // Make sure LibAV is defined
-    if (typeof LibAV === "undefined")
-        LibAV = {};
-    libav = LibAV;
+    if (!nodejs) {
+        // Make sure LibAV is defined for later loading
+        if (typeof LibAV === "undefined")
+            LibAV = {};
+        libav = LibAV;
 
-    if (libav.base)
-        base = libav.base;
+        if (libav.base)
+            base = libav.base;
+
+    } else {
+        // Node.js: Load LibAV now
+        libav = LibAV = require(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
+
+    }
 
     libav.ready = false;
 
     var wasm = !libav.nowasm && isWebAssemblySupported();
-    
-    if (typeof Worker !== "undefined" && !libav.noworker) {
+
+    if (!nodejs && typeof Worker !== "undefined" && !libav.noworker) {
         // Load the worker
-        if (wasm)
-            libav.worker = new Worker(base + "/libav-@VER-@CONFIG.wasm.js");
-        else
-            libav.worker = new Worker(base + "/libav-@VER-@CONFIG.asm.js");
+        libav.worker = new Worker(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
 
         libav.on = 1;
         libav.handlers = {
@@ -87,14 +92,12 @@
         defineWrappers();
 
     } else {
-        // Wrappers for our script version
+        // Wrappers for our script or Node.js version
         libav.worker = false;
         libav.c = function(func) {
             var args = Array.prototype.slice.call(arguments, 1);
             return new Promise(function(res, rej) {
-                setTimeout(function() {
-                    res(libav[func].apply(libav, args));
-                }, 0);
+                res(libav[func].apply(libav, args));
             });
         };
         libav.onRuntimeInitialized = function() {
@@ -105,13 +108,13 @@
                 this.onready();
         };
 
-        var scr = document.createElement("script");
-        if (wasm)
-            scr.src = base + "/libav-@VER-@CONFIG.wasm.js";
-        else
-            scr.src = base + "/libav-@VER-@CONFIG.asm.js";
-        scr.async = true;
-        document.body.appendChild(scr);
+        if (!nodejs) {
+            // Start it loading
+            var scr = document.createElement("script");
+            scr.src = base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js";
+            scr.async = true;
+            document.body.appendChild(scr);
+        }
     }
 
     // Now add wrappers for everything
@@ -123,9 +126,7 @@
                 libav[f] = function() {
                     var args = arguments;
                     return new Promise(function(res, rej) {
-                        setTimeout(function() {
-                            res(real.apply(libav, args));
-                        }, 0);
+                        res(real.apply(libav, args));
                     });
                 }
 
@@ -184,6 +185,11 @@
         // Errors
         libav.EAGAIN = 11;
         libav.AVERROR_EOF = -0x20464f45;
+    }
+
+    if (nodejs) {
+        module.exports = libav;
+        libav.onRuntimeInitialized();
     }
 
 })();
