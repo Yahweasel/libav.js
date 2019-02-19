@@ -313,6 +313,93 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, limit) {
     }
 };
 
+/* Initialize a filter graph. No equivalent free since you just need to free
+ * the graph itself, and everything under it will be freed automatically. */
+var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, channel_layout, sample_fmt, sample_rate, frame_size) {
+    var abuffersrc, abuffersink, filter_graph, src_ctx, sink_ctx, outputs, inputs, int32s, int64s;
+    var instr, outstr;
+
+    // FIXME: This has so many allocations, it should have a try-finally to clean up
+
+    abuffersrc = avfilter_get_by_name("abuffer");
+    if (abuffersrc === 0)
+        throw new Error("Failed to load abuffer filter");
+
+    abuffersink = avfilter_get_by_name("abuffersink");
+    if (abuffersink === 0)
+        throw new Error("Failed to load abuffersink filter");
+
+    outputs = avfilter_inout_alloc();
+    if (outputs === 0)
+        throw new Error("Failed to allocate outputs");
+
+    inputs = avfilter_inout_alloc();
+    if (inputs === 0)
+        throw new Error("Failed to allocate inputs");
+
+    filter_graph = avfilter_graph_alloc();
+    if (filter_graph === 0)
+        throw new Error("Failed to allocate filter graph");
+
+    // Now create our input and output filters
+    src_ctx = avfilter_graph_create_filter_js(abuffersrc, "in",
+        "time_base=1/" + sample_rate + ":sample_rate=" + sample_rate +
+        ":sample_fmt=" + sample_fmt + ":channel_layout=" + channel_layout,
+        null, filter_graph);
+    if (src_ctx === 0)
+        throw new Error("Cannot create audio buffer source");
+
+    sink_ctx = avfilter_graph_create_filter_js(abuffersink, "out", null, null,
+        filter_graph);
+    if (sink_ctx === 0)
+        throw new Error("Cannot create audio buffer sink");
+
+    // Allocate space to transfer our options
+    int32s = ff_malloc_int32_list([sample_fmt, -1, sample_rate, -1]);
+    int64s = ff_malloc_int64_list([channel_layout, -1]);
+    instr = av_strdup("in");
+    outstr = av_strdup("out");
+    if (int32s === 0 || int64s === 0 || instr === 0 || outstr === 0)
+        throw new Error("Failed to transfer parameters");
+
+    if (
+        av_opt_set_int_list_js(sink_ctx, "sample_fmts", 4, int32s, -1, 1 /* AV_OPT_SEARCH_CHILDREN */) < 0 ||
+        av_opt_set_int_list_js(sink_ctx, "channel_layouts", 8, int64s, -1, 1) < 0 ||
+        av_opt_set_int_list_js(sink_ctx, "sample_rates", 4, int32s + 8, -1, 1) < 0)
+    {
+        throw new Error("Failed to set filter parameters");
+    }
+
+    AVFilterInOut_name_s(outputs, instr);
+    AVFilterInOut_filter_ctx_s(outputs, src_ctx);
+    AVFilterInOut_pad_idx_s(outputs, 0);
+    AVFilterInOut_next_s(outputs, 0);
+    AVFilterInOut_name_s(inputs, outstr);
+    AVFilterInOut_filter_ctx_s(inputs, sink_ctx);
+    AVFilterInOut_pad_idx_s(inputs, 0);
+    AVFilterInOut_next_s(inputs, 0);
+
+    // Parse it
+    if (avfilter_graph_parse(filter_graph, filters_descr, inputs, outputs, 0) < 0)
+        throw new Error("Failed to initialize filters");
+
+    // Set the output frame size
+    av_buffersink_set_frame_size(sink_ctx, frame_size);
+
+    // Configure it
+    if (avfilter_graph_config(filter_graph, 0) < 0)
+        throw new Error("Failed to configure filter graph");
+
+    // Free our leftovers
+    avfilter_inout_free_js(outputs);
+    avfilter_inout_free_js(inputs);
+    free(int32s);
+    free(int64s);
+
+    // And finally, return the critical parts
+    return [filter_graph, src_ctx, sink_ctx];
+};
+
 /* Filter many frames at once */
 var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersink_ctx, inFramePtr, inFrames, fin) {
     var outFrames = [];
