@@ -315,7 +315,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, limit) {
 
 /* Initialize a filter graph. No equivalent free since you just need to free
  * the graph itself, and everything under it will be freed automatically. */
-var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, channel_layout, sample_fmt, sample_rate, frame_size) {
+var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, input, output) {
     var abuffersrc, abuffersink, filter_graph, src_ctx, sink_ctx, outputs, inputs, int32s, int64s;
     var instr, outstr;
 
@@ -343,8 +343,10 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
 
     // Now create our input and output filters
     src_ctx = avfilter_graph_create_filter_js(abuffersrc, "in",
-        "time_base=1/" + sample_rate + ":sample_rate=" + sample_rate +
-        ":sample_fmt=" + sample_fmt + ":channel_layout=" + channel_layout,
+        "time_base=1/" + (input.sample_rate?input.sample_rate:48000) +
+        ":sample_rate=" + (input.sample_rate?input.sample_rate:48000) +
+        ":sample_fmt=" + (input.sample_fmt?input.sample_fmt:3/*FLT*/) +
+        ":channel_layout=" + (input.channel_layout?input.channel_layout:4/*MONO*/),
         null, filter_graph);
     if (src_ctx === 0)
         throw new Error("Cannot create audio buffer source");
@@ -355,8 +357,8 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
         throw new Error("Cannot create audio buffer sink");
 
     // Allocate space to transfer our options
-    int32s = ff_malloc_int32_list([sample_fmt, -1, sample_rate, -1]);
-    int64s = ff_malloc_int64_list([channel_layout, -1]);
+    int32s = ff_malloc_int32_list([output.sample_fmt?output.sample_fmt:3/*FLT*/, -1, output.sample_rate?output.sample_rate:48000, -1]);
+    int64s = ff_malloc_int64_list([output.channel_layout?output.channel_layout:4/*MONO*/, -1]);
     instr = av_strdup("in");
     outstr = av_strdup("out");
     if (int32s === 0 || int64s === 0 || instr === 0 || outstr === 0)
@@ -384,7 +386,8 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
         throw new Error("Failed to initialize filters");
 
     // Set the output frame size
-    av_buffersink_set_frame_size(sink_ctx, frame_size);
+    if (output.frame_size)
+        av_buffersink_set_frame_size(sink_ctx, output.frame_size);
 
     // Configure it
     if (avfilter_graph_config(filter_graph, 0) < 0)

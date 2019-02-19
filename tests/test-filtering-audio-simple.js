@@ -43,7 +43,16 @@ function main() {
 
         return Promise.all([
             libav.avformat_write_header(oc, 0),
-            libav.ff_init_filter_graph("atempo=0.5,volume=0.1", 4, libav.AV_SAMPLE_FMT_FLT, 48000, frame_size)
+            libav.ff_init_filter_graph("atempo=0.5,volume=0.1", {
+                sample_rate: 48000,
+                sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+                channel_layout: 4
+            }, {
+                sample_rate: 48000,
+                sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+                channel_layout: 4,
+                frame_size: frame_size
+            })
         ]);
 
     }).then(function(ret) {
