@@ -4,9 +4,9 @@ syntax: glob
 *.wasm.*
 *.tar.*
 exports.json
-libav-1.4.1.js
-libav-1.4.1-default.js
-libav-1.4.1-obsolete.js
+libav-1.0.4.1.js
+libav-1.0.4.1-default.js
+libav-1.0.4.1-obsolete.js
 post.js
 ffmpeg-4*/
 opus-*/
