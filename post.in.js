@@ -13,7 +13,54 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-var fileCallbacks = {
+var readerCallbacks = {
+    open: function(stream) {
+        if (stream.flags & 3) {
+            // Opened in write mode, which can't work
+            throw new FS.ErrnoError(ERRNO_CODES.EPERM);
+        }
+    },
+
+    close: function(stream) {
+        delete Module.readBuffers[stream.node.name];
+    },
+
+    read: function(stream, buffer, offset, length, position) {
+        var data = Module.readBuffers[stream.node.name];
+        if (!data)
+            throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        if (data.buf.length === 0) {
+            if (data.eof)
+                return 0;
+            else
+                throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        }
+
+        var ret;
+        if (length < data.buf.length) {
+            // Cut a slice
+            ret = data.buf.slice(0, length);
+            data.buf = data.buf.slice(length);
+        } else {
+            // Get the beginning
+            ret = data.buf;
+            data.buf = new Uint8Array(0);
+        }
+
+        (new Uint8Array(buffer.buffer)).set(ret, offset);
+        return ret.length;
+    },
+
+    write: function() {
+        throw new FS.ErrnoError(ERRNO_CODES.EIO);
+    },
+
+    llseek: function() {
+        throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
+    }
+};
+
+var writerCallbacks = {
     open: function(stream) {
         if (!(stream.flags & 1)) {
             // Opened in read mode, which can't work
@@ -45,15 +92,42 @@ var fileCallbacks = {
 
 @FUNCS
 
-var writerDev = FS.makedev(44, 0);
-FS.registerDevice(writerDev, fileCallbacks);
+var readerDev = FS.makedev(44, 0);
+FS.registerDevice(readerDev, readerCallbacks);
+Module.readBuffers = {};
+var writerDev = FS.makedev(44, 1);
+FS.registerDevice(writerDev, writerCallbacks);
 
 Module.readFile = FS.readFile.bind(FS);
 Module.writeFile = FS.writeFile.bind(FS);
 Module.unlink = FS.unlink.bind(FS);
 Module.mkdev = FS.mkdev.bind(FS);
+Module.mkreaderdev = function(loc, mode) {
+    FS.mkdev(loc, mode?mode:0777, readerDev);
+    return 0;
+};
 Module.mkwriterdev = function(loc, mode) {
-    return FS.mkdev(loc, mode?mode:0777, writerDev);
+    FS.mkdev(loc, mode?mode:0777, writerDev);
+    return 0;
+};
+
+/* Send some data to a reader device */
+var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
+    var idata;
+    if (!(name in Module.readBuffers))
+        Module.readBuffers[name] = {buf: new Uint8Array(0), eof: false};
+    idata = Module.readBuffers[name];
+
+    if (data === null) {
+        // EOF
+        idata.eof = true;
+        return;
+    }
+
+    var newbuf = new Uint8Array(idata.buf.length + data.length);
+    newbuf.set(idata.buf);
+    newbuf.set(data, idata.buf.length);
+    idata.buf = newbuf;
 };
 
 /* Metafunction to initialize an encoder with all the bells and whistles
@@ -265,8 +339,8 @@ var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
 };
 
 /* Initialize a demuxer from a file, format context, and get the list of codecs/types */
-var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename) {
-    var fmt_ctx = avformat_open_input_js(filename, null, null);
+var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt) {
+    var fmt_ctx = avformat_open_input_js(filename, fmt?fmt:null, null);
     if (fmt_ctx === 0)
         throw new Error("Could not open source file");
     var nb_streams = AVFormatContext_nb_streams(fmt_ctx);
@@ -296,15 +370,22 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets) {
 };
 
 /* Read many packets at once, done at this level to avoid message passing */
-var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, limit) {
+var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit) {
     var sz = 0;
     var outPackets = [];
+    var dev = Module.readBuffers[devfile];
 
     while (true) {
+        // If we risk running past the end of the currently-read data, stop now
+        if (dev && !dev.eof && dev.buf.length < 32*1024)
+            return [-11 /* EAGAIN */, outPackets];
+
+        // Read the frame
         var ret = av_read_frame(fmt_ctx, pkt);
         if (ret < 0)
             return [ret, outPackets];
 
+        // And copy it out
         var packet = ff_copyout_packet(pkt);
         outPackets.push(packet);
         sz += packet.data.length;

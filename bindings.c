@@ -13,6 +13,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <stdio.h>
+
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavfilter/avfilter.h"
@@ -151,7 +153,9 @@ AVFormatContext *avformat_alloc_output_context2_js(AVOutputFormat *oformat,
     const char *format_name, const char *filename)
 {
     AVFormatContext *ret = NULL;
-    avformat_alloc_output_context2(&ret, oformat, format_name, filename);
+    int err = avformat_alloc_output_context2(&ret, oformat, format_name, filename);
+    if (err < 0)
+        fprintf(stderr, "[avformat_alloc_output_context2_js] %s\n", av_err2str(err));
     return ret;
 }
 
@@ -159,7 +163,9 @@ AVFormatContext *avformat_open_input_js(const char *url, AVInputFormat *fmt,
     AVDictionary **options)
 {
     AVFormatContext *ret = NULL;
-    avformat_open_input(&ret, url, fmt, options);
+    int err = avformat_open_input(&ret, url, fmt, options);
+    if (err < 0)
+        fprintf(stderr, "[avformat_open_input_js] %s\n", av_err2str(err));
     return ret;
 }
 
@@ -167,7 +173,9 @@ AVIOContext *avio_open2_js(const char *url, int flags,
     const AVIOInterruptCB *int_cb, AVDictionary **options)
 {
     AVIOContext *ret = NULL;
-    avio_open2(&ret, url, flags, int_cb, options);
+    int err = avio_open2(&ret, url, flags, int_cb, options);
+    if (err < 0)
+        fprintf(stderr, "[avio_open2_js] %s\n", av_err2str(err));
     return ret;
 }
 
@@ -175,6 +183,8 @@ AVFilterContext *avfilter_graph_create_filter_js(const AVFilter *filt,
     const char *name, const char *args, void *opaque, AVFilterGraph *graph_ctx)
 {
     AVFilterContext *ret = NULL;
-    avfilter_graph_create_filter(&ret, filt, name, args, opaque, graph_ctx);
+    int err = avfilter_graph_create_filter(&ret, filt, name, args, opaque, graph_ctx);
+    if (err < 0)
+        fprintf(stderr, "[avfilter_graph_create_filter_js] %s\n", av_err2str(err));
     return ret;
 }
