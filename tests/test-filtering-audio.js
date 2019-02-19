@@ -89,10 +89,8 @@ function init_filters(filters_descr, sample_fmt, channel_layout, frame_size) {
         return libav.avfilter_graph_parse(filter_graph, filters_descr, inputs, outputs, 0);
 
     }).then(function(ret) {
-        if (ret[0] < 0)
+        if (ret < 0)
             throw new Error("Failed to initialize filters");
-        inputs = ret[1];
-        outputs = ret[2];
 
         return libav.av_buffersink_set_frame_size(buffersink_ctx, frame_size);
 
@@ -104,10 +102,9 @@ function init_filters(filters_descr, sample_fmt, channel_layout, frame_size) {
             throw new Error("Failed to configure filtergraph");
 
         return Promise.all([
-            libav.avfilter_inout_free_js(inputs),
-            libav.avfilter_inout_free_js(outputs)
+            libav.free(int32s),
+            libav.free(int64s)
         ]);
-
     });
 }
 

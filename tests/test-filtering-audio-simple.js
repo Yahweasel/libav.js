@@ -77,7 +77,6 @@ function main() {
         return libav.ff_filter_multi(buffersrc_ctx, buffersink_ctx, frame, frames, true);
 
     }).then(function(frames) {
-        console.error("Hewwo?");
         return libav.ff_encode_multi(c, frame, pkt, frames, true);
 
     }).then(function(packets) {

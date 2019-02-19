@@ -391,8 +391,6 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
         throw new Error("Failed to configure filter graph");
 
     // Free our leftovers
-    avfilter_inout_free_js(outputs);
-    avfilter_inout_free_js(inputs);
     free(int32s);
     free(int64s);
 
