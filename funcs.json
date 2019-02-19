@@ -1,19 +1,28 @@
 {
     "functions": [
         ["av_get_bytes_per_sample", "number", ["number"]],
+        ["av_opt_set_int_list_js", "number", ["number", "string", "number", "number", "number", "number"]],
         ["av_frame_alloc", "number", []],
         ["av_frame_free", null, ["number"]],
         ["av_frame_get_buffer", "number", ["number", "number"]],
         ["av_frame_make_writable", "number", ["number"]],
+        ["av_frame_unref", null, ["number"]],
         ["av_packet_alloc", "number", []],
         ["av_packet_free", null, ["number"]],
         ["av_packet_unref", null, ["number"]],
+        ["av_strdup", "number", ["string"]],
 
+        ["av_buffersink_get_frame", "number", ["number", "number"]],
+        ["av_buffersink_set_frame_size", null, ["number", "number"]],
+        ["av_buffersrc_add_frame_flags", "number", ["number", "number", "number"]],
         ["avfilter_get_by_name", "number", ["string"]],
         ["avfilter_graph_alloc", "number", []],
         ["avfilter_graph_config", "number", ["number", "number"]],
         ["avfilter_graph_create_filter_js", "number", ["number", "string", "string", "number", "number"]],
-        ["avfilter_graph_parse2", "number", ["number", "string", "number", "number"]],
+        ["avfilter_graph_free", null, ["number"]],
+        ["avfilter_graph_parse", "number", ["number", "string", "number", "number", "number"]],
+        ["avfilter_inout_alloc", "number", []],
+        ["avfilter_inout_free", null, ["number"]],
         ["avfilter_link", "number", ["number", "number", "number", "number"]],
 
         ["avcodec_alloc_context3", "number", ["number"]],
@@ -74,23 +83,32 @@
         "ff_init_demuxer_file",
         "ff_write_multi",
         "ff_read_multi",
+        "ff_filter_multi",
         "ff_copyout_frame",
         "ff_copyin_frame",
         "ff_copyout_packet",
-        "ff_copyin_packet"
+        "ff_copyin_packet",
+        "ff_malloc_int32_list",
+        "ff_malloc_int64_list"
     ],
 
     "accessors": [
         ["AVFrame", [
             "channel_layout",
+            "channel_layouthi",
+            "channels",
             {"name": "data", "array": true},
             "format",
             "nb_samples",
-            "pts"
+            "pts",
+            "ptshi",
+            "sample_rate"
         ]],
         ["AVCodecContext", [
             "bit_rate",
+            "bit_ratehi",
             "channel_layout",
+            "channel_layouthi",
             "channels",
             "frame_size",
             "sample_fmt",
@@ -103,9 +121,11 @@
         ["AVPacket", [
             "data",
             "dts",
+            "dtshi",
             "size",
             "stream_index",
-            "pts"
+            "pts",
+            "ptshi"
         ]],
         ["AVFormatContext", [
             "nb_streams",
@@ -115,6 +135,12 @@
         ]],
         ["AVStream", [
             "codecpar"
+        ]],
+        ["AVFilterInOut", [
+            "filter_ctx",
+            "name",
+            "next",
+            "pad_idx"
         ]]
     ],
 
@@ -123,7 +149,8 @@
         "av_packet_free",
         "avformat_close_input",
         "avcodec_free_context",
-        "avfilter_graph_free"
+        "avfilter_graph_free",
+        "avfilter_inout_free"
     ],
 
     "copiers": [

@@ -35,6 +35,7 @@ function main() {
 
         var t = 0;
         var tincr = 2 * Math.PI * 440 / 48000;
+        var pts = 0;
         var frames = [];
 
         for (var i = 0; i < 200; i++) {
@@ -45,10 +46,17 @@ function main() {
                 t += tincr;
             }
 
-            frames.push({data: samples});
+            frames.push({
+                data: samples,
+                channel_layout: 4,
+                format: libav.AV_SAMPLE_FMT_FLT,
+                pts: pts,
+                sample_rate: 48000
+            });
+            pts += frame_size;
         }
 
-        return libav.ff_encode_multi(c, frame, pkt, "copyin_f32", frames, true);
+        return libav.ff_encode_multi(c, frame, pkt, frames, true);
 
     }).then(function(ret) {
         print("[\n" +

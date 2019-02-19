@@ -141,7 +141,8 @@
         // Convenience multi-part setters
         [
         "AVFrame",
-        "AVCodecContext"
+        "AVCodecContext",
+        "AVFilterInOut"
         ].forEach(function(type) {
             libav[type + "_set"] = function(obj, vals) {
                 var promises = [];
@@ -162,6 +163,9 @@
                 libav[val] = i++;
             });
         }
+
+        // AV_OPT
+        libav.AV_OPT_SEARCH_CHILDREN = 1;
 
         // AVMediaType
         enume(["AVMEDIA_TYPE_UNKNOWN", "AVMEDIA_TYPE_VIDEO",

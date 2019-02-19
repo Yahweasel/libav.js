@@ -35,7 +35,7 @@ function decode(dec_ctx, pkt, frame) {
                         return;
                     }
 
-                    return libav.ff_copyout_frame(dec_ctx, frame);
+                    return libav.ff_copyout_frame(frame);
 
                 }).then(function(ret) {
                     if (!ret) return;

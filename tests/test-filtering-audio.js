@@ -17,9 +17,12 @@ function print(txt) {
 /* This is sort of a port of doc/examples/filtering_audio.c, but
  * with fixed input and output formats */
 var filter_graph;
+var buffersink_ctx, buffersrc_ctx;
 
-function init_filters(filters_descr, channel_layout) {
+function init_filters(filters_descr, sample_fmt, channel_layout, frame_size) {
+    var libav = LibAV;
     var abuffersrc, abuffersink, outputs, inputs;
+    var int32s, int64s;
     return Promise.all([
         libav.avfilter_get_by_name("abuffer"),
         libav.avfilter_get_by_name("abuffersink"),
@@ -38,19 +41,72 @@ function init_filters(filters_descr, channel_layout) {
 
         return Promise.all([
             libav.avfilter_graph_create_filter_js(abuffersrc, "in",
-                "time_base=1/48000:sample_rate=48000:sample_fmt=flt:channel_layout=" + channel_layout,
+                "time_base=1/48000:sample_rate=48000:sample_fmt=" + sample_fmt + ":channel_layout=" + channel_layout,
                 null, filter_graph),
-            libav.avfilter_graph_create_filter_js(abuffersink,
-                "out",
-                "sample_rate=48000:sample_fmt=flt:channel_layout=" + channel_layout,
-                null, filter_graph)
+            libav.avfilter_graph_create_filter_js(abuffersink, "out", null,
+                null, filter_graph),
+            libav.ff_malloc_int32_list([sample_fmt, -1, 48000, -1]),
+            libav.ff_malloc_int64_list([channel_layout, -1]),
+            libav.av_strdup("in"),
+            libav.av_strdup("out")
         ]);
 
     }).then(function(ret) {
-        if (ret[0] < 0)
+        if (ret[0] === 0)
             throw new Error("Cannot create audio buffer source");
-        if (ret[1] < 0)
+        if (ret[1] === 0)
             throw new Error("Cannot create audio buffer sink");
+        if (ret[4] === 0 || ret[5] === 0)
+            throw new Error("Failed to strdup");
+
+        buffersrc_ctx = ret[0];
+        buffersink_ctx = ret[1];
+        int32s = ret[2];
+        int64s = ret[3];
+
+        return Promise.all([
+            libav.av_opt_set_int_list_js(buffersink_ctx, "sample_fmts", 4, int32s, -1, libav.AV_OPT_SEARCH_CHILDREN),
+            libav.av_opt_set_int_list_js(buffersink_ctx, "channel_layouts", 8, int64s, -1, libav.AV_OPT_SEARCH_CHILDREN),
+            libav.av_opt_set_int_list_js(buffersink_ctx, "sample_rates", 4, int32s + 8, -1, libav.AV_OPT_SEARCH_CHILDREN),
+            libav.AVFilterInOut_set(outputs, {
+                name: ret[4],
+                filter_ctx: buffersrc_ctx,
+                pad_idx: 0,
+                next: 0
+            }),
+            libav.AVFilterInOut_set(inputs, {
+                name: ret[5],
+                filter_ctx: buffersink_ctx,
+                pad_idx: 0,
+                next: 0
+            })
+        ]);
+
+    }).then(function(ret) {
+        if (ret[0] < 0 || ret[1] < 0 || ret[2] < 0)
+            throw new Error("Cannot set audio buffer sink properties");
+
+        return libav.avfilter_graph_parse(filter_graph, filters_descr, inputs, outputs, 0);
+
+    }).then(function(ret) {
+        if (ret[0] < 0)
+            throw new Error("Failed to initialize filters");
+        inputs = ret[1];
+        outputs = ret[2];
+
+        return libav.av_buffersink_set_frame_size(buffersink_ctx, frame_size);
+
+    }).then(function() {
+        return libav.avfilter_graph_config(filter_graph, 0);
+
+    }).then(function(ret) {
+        if (ret < 0)
+            throw new Error("Failed to configure filtergraph");
+
+        return Promise.all([
+            libav.avfilter_inout_free_js(inputs),
+            libav.avfilter_inout_free_js(outputs)
+        ]);
 
     });
 }
@@ -79,9 +135,13 @@ function main() {
         pb = ret[2];
         st = ret[3][0];
 
-        return libav.avformat_write_header(oc, 0)
+        return Promise.all([
+            libav.avformat_write_header(oc, 0),
+            init_filters("atempo=0.5,volume=0.1", libav.AV_SAMPLE_FMT_FLT, 4, frame_size),
+            libav.AVFrame_sample_rate_s(frame, 48000)
+        ]);
 
-    }).then(function(ret) {
+    }).then(function() {
         var t = 0;
         var tincr = 2 * Math.PI * 440 / 48000;
         var pts = 0;
@@ -95,17 +155,29 @@ function main() {
                 t += tincr;
             }
 
-            frames.push({data: samples, pts: pts});
+            frames.push({
+                data: samples,
+                channel_layout: 4,
+                format: libav.AV_SAMPLE_FMT_FLT,
+                pts: pts,
+                sample_rate: 48000
+            });
             pts += frame_size;
         }
 
-        return libav.ff_encode_multi(c, frame, pkt, "copyin_f32", frames, true);
+        return libav.ff_filter_multi(buffersrc_ctx, buffersink_ctx, frame, frames, true);
+
+    }).then(function(frames) {
+        return libav.ff_encode_multi(c, frame, pkt, frames, true);
 
     }).then(function(packets) {
         return libav.ff_write_multi(oc, pkt, packets);
 
     }).then(function() {
         return libav.av_write_trailer(oc);
+
+    }).then(function() {
+        return libav.avfilter_graph_free_js(filter_graph);
 
     }).then(function() {
         return libav.ff_free_muxer(oc, pb);
@@ -130,7 +202,7 @@ function main() {
         }
 
     }).catch(function(err) {
-        print(err + "");
+        print(err + "\n" + err.stack);
     });
 }
 

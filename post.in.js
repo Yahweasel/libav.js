@@ -138,15 +138,12 @@ var ff_free_decoder = Module.ff_free_decoder = function(c, pkt, frame) {
 };
 
 /* Encode many frames at once, done at this level to avoid message passing */
-var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, copyin, inFrames, fin) {
+var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrames, fin) {
     var outPackets = [];
 
     function handleFrame(inFrame) {
-        if (inFrame !== null) {
-            if (av_frame_make_writable(frame) < 0)
-                throw new Error("Failed to make frame writable");
-            ff_copyin_frame(ctx, frame, inFrame);
-        }
+        if (inFrame !== null)
+            ff_copyin_frame(frame, inFrame);
 
         var ret = avcodec_send_frame(ctx, inFrame?frame:0);
         if (ret < 0)
@@ -197,7 +194,7 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
             else if (ret < 0)
                 throw new Error("Error decoding audio frame");
 
-            var outFrame = ff_copyout_frame(ctx, frame);
+            var outFrame = ff_copyout_frame(frame);
             outFrame.data = outFrame.data.slice(0);
             outFrames.push(outFrame);
         }
@@ -316,17 +313,64 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, limit) {
     }
 };
 
+/* Filter many frames at once */
+var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersink_ctx, inFramePtr, inFrames, fin) {
+    var outFrames = [];
+    var outFramePtr = av_frame_alloc();
+    if (outFramePtr === 0)
+        throw new Error("Failed to allocate output frame");
+
+    function handleFrame(inFrame) {
+        if (inFrame !== null)
+            ff_copyin_frame(inFramePtr, inFrame);
+
+        var ret = av_buffersrc_add_frame_flags(buffersrc_ctx, inFrame ? inFramePtr : 0, 8 /* AV_BUFFERSRC_FLAG_KEEP_REF */);
+        if (ret < 0)
+            throw new Error("Error while feeding the audio filtergraph");
+        av_frame_unref(inFramePtr);
+
+        while (true) {
+            ret = av_buffersink_get_frame(buffersink_ctx, outFramePtr);
+            if (ret === -11 /* EGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
+                break;
+            if (ret < 0)
+                throw new Error("Error while receiving a frame from the filtergraph");
+            var outFrame = ff_copyout_frame(outFramePtr);
+            outFrame.data = outFrame.data.slice(0);
+            outFrames.push(outFrame);
+            av_frame_unref(outFramePtr);
+        }
+    }
+
+    inFrames.forEach(handleFrame);
+
+    if (fin)
+        handleFrame(null);
+
+    av_frame_free(outFramePtr);
+
+    return outFrames;
+};
+
 /* Copy out a frame */
-var ff_copyout_frame = Module.ff_copyout_frame = function(ctx, frame) {
-    var sample_fmt = AVCodecContext_sample_fmt(ctx);
-    var channels = AVCodecContext_channels(ctx);
+var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
+    var channels = AVFrame_channels(frame);
     var nb_samples = AVFrame_nb_samples(frame);
     var ct = channels*nb_samples;
     var data = AVFrame_data_a(frame, 0);
-    var outFrame = {data: null, sample_fmt: sample_fmt, channels: channels, pts: AVFrame_pts(frame)};
+    var outFrame = {
+        data: null,
+        channel_layout: AVFrame_channel_layout(frame),
+        channels: channels,
+        format: AVFrame_format(frame),
+        nb_samples: AVFrame_nb_samples(frame),
+        pts: AVFrame_pts(frame),
+        ptshi: AVFrame_ptshi(frame),
+        sample_rate: AVFrame_sample_rate(frame)
+    };
 
     // FIXME: Need to support *every* format here
-    switch (sample_fmt) {
+    switch (outFrame.format) {
         case 0: // U8
             outFrame.data = copyout_u8(data, ct);
             break;
@@ -348,15 +392,27 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(ctx, frame) {
 };
 
 /* Copy in a frame */
-var ff_copyin_frame = Module.ff_copyin_frame = function(ctx, framePtr, frame) {
-    var sample_fmt = AVCodecContext_sample_fmt(ctx);
+var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
+    [
+        "channel_layout", "channels", "format", "pts", "ptshi", "sample_rate"
+    ].forEach(function(key) {
+        if (key in frame)
+            Module["AVFrame_" + key + "_si"](framePtr, frame[key]);
+    });
+
+    /* FIXME: nb_samples needs to be divided by channel count, and we need to
+     * clear the frame if this is problematic */
+    AVFrame_nb_samples_s(framePtr, frame.data.length);
+
+    // We may or may not need to actually allocate
+    if (av_frame_make_writable(framePtr) < 0)
+        if (av_frame_get_buffer(framePtr, 0) < 0)
+            throw new Error("Failed to allocate frame buffers");
+
     var data = AVFrame_data_a(framePtr, 0);
 
-    if (frame.pts)
-        AVFrame_pts_s(framePtr, frame.pts);
-
     // FIXME: Need to support *every* format here
-    switch (sample_fmt) {
+    switch (frame.format) {
         case 0: // U8
             copyin_u8(data, frame.data);
             break;
@@ -382,7 +438,9 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
     return {
         data: copyout_u8(data, size),
         pts: AVPacket_pts(pkt),
+        ptshi: AVPacket_ptshi(pkt),
         dts: AVPacket_dts(pkt),
+        dtshi: AVPacket_dtshi(pkt),
         stream_index: AVPacket_stream_index(pkt)
     };
 };
@@ -391,12 +449,36 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
 var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     ff_set_packet(pktPtr, packet.data);
 
-    if (packet.pts)
-        AVPacket_pts_s(pktPtr, packet.pts);
-    if (packet.dts)
-        AVPacket_dts_s(pktPtr, packet.dts);
-    if (packet.stream_index)
-        AVPacket_stream_index_s(pktPtr, packet.stream_index);
+    [
+        "dts", "dtshi", "stream_index", "pts", "pts_hi"
+    ].forEach(function(key) {
+        if (key in packet)
+            Module["AVPacket_" + key + "_si"](pktPtr, packet[key]);
+    });
+};
+
+/* Allocate and copy in a 32-bit int list */
+var ff_malloc_int32_list = Module.ff_malloc_int32_list = function(list) {
+    var ptr = malloc(list.length * 4);
+    if (ptr === 0)
+        throw new Error("Failed to malloc");
+    var arr = new Uint32Array(Module.HEAPU8.buffer, ptr, list.length);
+    for (var i = 0; i < list.length; i++)
+        arr[i] = list[i];
+    return ptr;
+};
+
+/* Allocate and copy in a 64-bit int list */
+var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
+    var ptr = malloc(list.length * 8);
+    if (ptr === 0)
+        throw new Error("Failed to malloc");
+    var arr = new Int32Array(Module.HEAPU8.buffer, ptr, list.length*2);
+    for (var i = 0; i < list.length; i++) {
+        arr[i*2] = list[i];
+        arr[i*2+1] = (list[i]<0)?-1:0;
+    }
+    return ptr;
 };
 
 if (typeof importScripts !== "undefined") {

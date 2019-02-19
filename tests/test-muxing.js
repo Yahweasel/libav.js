@@ -87,11 +87,17 @@ function main() {
                 t += tincr;
             }
 
-            frames.push({data: samples, pts: pts});
+            frames.push({
+                data: samples,
+                channel_layout: 4,
+                format: libav.AV_SAMPLE_FMT_FLT,
+                pts: pts,
+                sample_rate: 48000
+            });
             pts += frame_size;
         }
 
-        return libav.ff_encode_multi(c, frame, pkt, "copyin_f32", frames, true);
+        return libav.ff_encode_multi(c, frame, pkt, frames, true);
 
     }).then(function(packets) {
         var p = Promise.all([]);

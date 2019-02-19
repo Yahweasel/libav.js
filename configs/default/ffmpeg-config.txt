@@ -14,4 +14,4 @@
 --enable-filter=aresample --enable-filter=atempo --enable-filter=bandpass
 --enable-filter=bandreject --enable-filter=dynaudnorm --enable-filter=equalizer
 --enable-filter=loudnorm --enable-filter=pan --enable-filter=abuffer
---enable-filter=abuffersink --enable-filter=amix
+--enable-filter=abuffersink --enable-filter=amix --enable-filter=volume

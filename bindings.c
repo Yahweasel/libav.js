@@ -16,10 +16,18 @@
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavfilter/avfilter.h"
+#include "libavutil/avutil.h"
+#include "libavutil/opt.h"
 
 #define A(struc, type, field) \
     type struc ## _ ## field(struc *a) { return a->field; } \
     void struc ## _ ## field ## _s(struc *a, type b) { a->field = b; }
+
+#define AL(struc, type, field) \
+    uint32_t struc ## _ ## field(struc *a) { return (uint32_t) a->field; } \
+    uint32_t struc ## _ ## field ## hi(struc *a) { return (uint32_t) (a->field >> 32); } \
+    void struc ## _ ## field ## _s(struc *a, uint32_t b) { a->field = b; } \
+    void struc ## _ ## field ## hi_s(struc *a, uint32_t b) { a->field |= (((type) b) << 32); }
 
 #define AA(struc, type, field) \
     type struc ## _ ## field ## _a(struc *a, size_t c) { return a->field[c]; } \
@@ -32,14 +40,30 @@
 
 /* AVFrame */
 #define B(type, field) A(AVFrame, type, field)
+#define BL(type, field) AL(AVFrame, type, field)
 #define BA(type, field) AA(AVFrame, type, field)
-B(uint64_t, channel_layout)
+BL(uint64_t, channel_layout)
+B(int, channels)
 BA(uint8_t *, data)
 B(int, format)
 B(int, nb_samples)
-B(int64_t, pts)
+BL(int64_t, pts)
+B(int, sample_rate)
 #undef B
+#undef BL
 #undef BA
+
+int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, int term, int flags)
+{
+    switch (width) {
+        case 4:
+            return av_opt_set_int_list(obj, name, ((int32_t *) val), term, flags);
+        case 8:
+            return av_opt_set_int_list(obj, name, ((int64_t *) val), term, flags);
+        default:
+            return AVERROR(EINVAL);
+    }
+}
 
 
 /****************************************************************
@@ -48,13 +72,15 @@ B(int64_t, pts)
 
 /* AVCodecContext */
 #define B(type, field) A(AVCodecContext, type, field)
-B(int64_t, bit_rate)
-B(uint64_t, channel_layout)
+#define BL(type, field) AL(AVCodecContext, type, field)
+BL(int64_t, bit_rate)
+BL(uint64_t, channel_layout)
 B(int, channels)
 B(int, frame_size)
 B(int, sample_fmt)
 B(int, sample_rate)
 #undef B
+#undef BL
 
 void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
     a->time_base.num = n;
@@ -69,12 +95,14 @@ B(enum AVMediaType, codec_type)
 
 /* AVPacket */
 #define B(type, field) A(AVPacket, type, field)
+#define BL(type, field) AL(AVPacket, type, field)
 B(uint8_t *, data)
-B(int64_t, dts)
+BL(int64_t, dts)
 B(int, size)
 B(int, stream_index)
-B(int64_t, pts)
+BL(int64_t, pts)
 #undef B
+#undef BL
 
 
 /****************************************************************
@@ -100,6 +128,19 @@ void AVStream_time_base_s(AVStream *a, int n, int d) {
     a->time_base.num = n;
     a->time_base.den = d;
 }
+
+
+/****************************************************************
+ * avfilter
+ ***************************************************************/
+
+/* AVFilterInOut */
+#define B(type, field) A(AVFilterInOut, type, field)
+B(AVFilterContext *, filter_ctx)
+B(char *, name)
+B(AVFilterInOut *, next)
+B(int, pad_idx)
+#undef B
 
 
 /****************************************************************

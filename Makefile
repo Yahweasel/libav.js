@@ -7,7 +7,8 @@ EFLAGS=\
 	-s "EXPORT_NAME='LibAV'" \
 	-s "EXPORTED_FUNCTIONS=@exports.json" \
 	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
-	-s MODULARIZE_INSTANCE=1
+	-s MODULARIZE_INSTANCE=1 \
+	-s ALLOW_MEMORY_GROWTH=1
 
 LIBS=\
 	bindings.c \
