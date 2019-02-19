@@ -1,7 +1,7 @@
 LIBAVJS_VERSION=1.0.4.1
 EMCC=emcc
-MINIFIER=cat
-CFLAGS=-O0
+MINIFIER=closure-compiler
+CFLAGS=-Oz
 EFLAGS=\
 	--memory-init-file 0 --post-js post.js \
 	-s "EXPORT_NAME='LibAV'" \
