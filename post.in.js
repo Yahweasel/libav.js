@@ -147,7 +147,7 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
 
     var ret = avcodec_open2(c, codec, 0);
     if (ret < 0)
-        throw new Error("Could not open codec (" + ret + ")");
+        throw new Error("Could not open codec: " + ff_error(ret));
 
     var frame = av_frame_alloc();
     if (frame === 0)
@@ -162,8 +162,9 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
     AVFrame_format_s(frame, ctxProps.sample_fmt);
     AVFrame_channel_layout_s(frame, ctxProps.channel_layout);
 
-    if (av_frame_get_buffer(frame, 0) < 0)
-        throw new Error("Could not allocate audio data buffers");
+    ret = av_frame_get_buffer(frame, 0);
+    if (ret < 0)
+        throw new Error("Could not allocate audio data buffers: " + ff_error(ret));
 
     return [codec, c, frame, pkt, frame_size];
 };
@@ -186,7 +187,7 @@ var ff_init_decoder = Module.ff_init_decoder = function(name) {
 
     var ret = avcodec_open2(c, codec, 0);
     if (ret < 0)
-        throw new Error("Could not open codec (" + ret + ")");;
+        throw new Error("Could not open codec: " + ff_error(ret));
 
     var pkt = av_packet_alloc();
     if (pkt === 0)
@@ -221,14 +222,14 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
 
         var ret = avcodec_send_frame(ctx, inFrame?frame:0);
         if (ret < 0)
-            throw new Error("Error sending the frame to the encoder");
+            throw new Error("Error sending the frame to the encoder: " + ff_error(ret));
 
         while (true) {
             ret = avcodec_receive_packet(ctx, pkt);
             if (ret === -11 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
                 return;
             else if (ret < 0)
-                throw new Error("Error encoding audio frame");
+                throw new Error("Error encoding audio frame: " + ff_error(ret));
 
             var outPacket = ff_copyout_packet(pkt);
             outPacket.data = outPacket.data.slice(0);
@@ -249,24 +250,28 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
     var outFrames = [];
 
     function handlePacket(inPacket) {
+        var ret;
+
         if (inPacket !== null) {
-            if (av_packet_make_writable(pkt) < 0)
-                throw new Error("Failed to make packet writable");
+            ret = av_packet_make_writable(pkt);
+            if (ret < 0)
+                throw new Error("Failed to make packet writable: " + ff_error(ret));
             ff_copyin_packet(pkt, inPacket);
         } else {
             av_packet_unref(pkt);
         }
 
-        if (avcodec_send_packet(ctx, pkt) < 0)
-            throw new Error("Error submitting the packet to the decoder");
+        ret = avcodec_send_packet(ctx, pkt);
+        if (ret < 0)
+            throw new Error("Error submitting the packet to the decoder: " + ff_error(ret));
         av_packet_unref(pkt);
 
         while (true) {
-            var ret = avcodec_receive_frame(ctx, frame);
+            ret = avcodec_receive_frame(ctx, frame);
             if (ret === -11 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
                 return;
             else if (ret < 0)
-                throw new Error("Error decoding audio frame");
+                throw new Error("Error decoding audio frame: " + ff_error(ret));
 
             var outFrame = ff_copyout_frame(frame);
             outFrame.data = outFrame.data.slice(0);
@@ -288,7 +293,7 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
     if (size < data.length) {
         var ret = av_grow_packet(pkt, data.length - size);
         if (ret < 0)
-            throw new Error("Error growing packet: " + ret);
+            throw new Error("Error growing packet: " + ff_error(ret));
     } else if (size > data.length)
         av_shrink_packet(pkt, data.length);
     var ptr = AVPacket_data(pkt);
@@ -310,8 +315,9 @@ var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
         if (st === 0)
             throw new Error("Could not allocate stream");
         var codecpar = AVStream_codecpar(st);
-        if (avcodec_parameters_from_context(codecpar, ctx[0]) < 0)
-            throw new Error("Could not copy the stream parameters");
+        var ret = avcodec_parameters_from_context(codecpar, ctx[0]);
+        if (ret < 0)
+            throw new Error("Could not copy the stream parameters: " + ff_error(ret));
         AVStream_time_base_s(st, ctx[1], ctx[2]);
     });
 
@@ -360,8 +366,9 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
 /* Write many packets at once, done at this level to avoid message passing */
 var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets) {
     inPackets.forEach(function(inPacket) {
-        if (av_packet_make_writable(pkt) < 0)
-            throw new Error();
+        var ret = av_packet_make_writable(pkt);
+        if (ret < 0)
+            throw new Error("Error making packet writable: " + ff_error(ret));
         ff_copyin_packet(pkt, inPacket);
         av_interleaved_write_frame(oc, pkt);
         av_packet_unref(pkt);
@@ -387,6 +394,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit
 
         // And copy it out
         var packet = ff_copyout_packet(pkt);
+        packet.data = packet.data.slice(0);
         outPackets.push(packet);
         sz += packet.data.length;
         if (limit && sz >= limit)
@@ -463,16 +471,18 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
     AVFilterInOut_next_s(inputs, 0);
 
     // Parse it
-    if (avfilter_graph_parse(filter_graph, filters_descr, inputs, outputs, 0) < 0)
-        throw new Error("Failed to initialize filters");
+    var ret = avfilter_graph_parse(filter_graph, filters_descr, inputs, outputs, 0);
+    if (ret < 0)
+        throw new Error("Failed to initialize filters: " + ff_error(ret));
 
     // Set the output frame size
     if (output.frame_size)
         av_buffersink_set_frame_size(sink_ctx, output.frame_size);
 
     // Configure it
-    if (avfilter_graph_config(filter_graph, 0) < 0)
-        throw new Error("Failed to configure filter graph");
+    ret = avfilter_graph_config(filter_graph, 0);
+    if (ret < 0)
+        throw new Error("Failed to configure filter graph: " + ff_error(ret));
 
     // Free our leftovers
     free(int32s);
@@ -495,7 +505,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersin
 
         var ret = av_buffersrc_add_frame_flags(buffersrc_ctx, inFrame ? inFramePtr : 0, 8 /* AV_BUFFERSRC_FLAG_KEEP_REF */);
         if (ret < 0)
-            throw new Error("Error while feeding the audio filtergraph");
+            throw new Error("Error while feeding the audio filtergraph: " + ff_error(ret));
         av_frame_unref(inFramePtr);
 
         while (true) {
@@ -503,7 +513,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersin
             if (ret === -11 /* EGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
                 break;
             if (ret < 0)
-                throw new Error("Error while receiving a frame from the filtergraph");
+                throw new Error("Error while receiving a frame from the filtergraph: " + ff_error(ret));
             var outFrame = ff_copyout_frame(outFramePtr);
             outFrame.data = outFrame.data.slice(0);
             outFrames.push(outFrame);
@@ -574,9 +584,11 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
     AVFrame_nb_samples_s(framePtr, frame.data.length);
 
     // We may or may not need to actually allocate
-    if (av_frame_make_writable(framePtr) < 0)
-        if (av_frame_get_buffer(framePtr, 0) < 0)
-            throw new Error("Failed to allocate frame buffers");
+    if (av_frame_make_writable(framePtr) < 0) {
+        var ret = av_frame_get_buffer(framePtr, 0);
+        if (ret < 0)
+            throw new Error("Failed to allocate frame buffers: " + ff_error(ret));
+    }
 
     var data = AVFrame_data_a(framePtr, 0);
 

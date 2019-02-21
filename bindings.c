@@ -14,6 +14,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
@@ -187,4 +188,15 @@ AVFilterContext *avfilter_graph_create_filter_js(const AVFilter *filt,
     if (err < 0)
         fprintf(stderr, "[avfilter_graph_create_filter_js] %s\n", av_err2str(err));
     return ret;
+}
+
+
+/* Errors */
+#define ERR_BUF_SZ 256
+static char err_buf[ERR_BUF_SZ];
+
+char *ff_error(int err)
+{
+    av_strerror(err, err_buf, ERR_BUF_SZ - 1);
+    return err_buf;
 }

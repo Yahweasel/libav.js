@@ -62,6 +62,8 @@
         ["AVCodecContext_time_base_s", null, ["number", "number", "number"]],
         ["AVStream_time_base_s", null, ["number", "number", "number"]],
 
+        ["ff_error", "string", ["number"]],
+
         ["calloc", "number", ["number", "number"]],
         ["free", null, ["number"]],
         ["malloc", "number", ["number"]]
