@@ -172,8 +172,8 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
 /* Metafunction to initialize a decoder with all the bells and whistles.
  * Similar to ff_init_encoder but doesn't need to initialize the frame.
  * Returns [AVCodec, AVCodecContext, AVPacket, AVFrame] */
-var ff_init_decoder = Module.ff_init_decoder = function(name) {
-    var codec;
+var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
+    var codec, ret;
     if (typeof name === "string")
         codec = avcodec_find_decoder_by_name(name);
     else
@@ -185,7 +185,13 @@ var ff_init_decoder = Module.ff_init_decoder = function(name) {
     if (c === 0)
         throw new Error("Could not allocate audio codec context");
 
-    var ret = avcodec_open2(c, codec, 0);
+    if (codecpar) {
+        ret = avcodec_parameters_to_context(c, codecpar);
+        if (ret < 0)
+            throw new Error("Could not set codec parameters: " + ff_error(ret));
+    }
+
+    ret = avcodec_open2(c, codec, 0);
     if (ret < 0)
         throw new Error("Could not open codec: " + ff_error(ret));
 
@@ -354,6 +360,7 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
         var outStream = {};
         var codecpar = AVStream_codecpar(inStream);
         outStream.index = i;
+        outStream.codecpar = codecpar;
         outStream.codec_type = AVCodecParameters_codec_type(codecpar);
         outStream.codec_id = AVCodecParameters_codec_id(codecpar);
         streams.push(outStream);
