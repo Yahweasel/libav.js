@@ -232,7 +232,6 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
                 throw new Error("Error encoding audio frame: " + ff_error(ret));
 
             var outPacket = ff_copyout_packet(pkt);
-            outPacket.data = outPacket.data.slice(0);
             outPackets.push(outPacket);
         }
     }
@@ -274,7 +273,6 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
                 throw new Error("Error decoding audio frame: " + ff_error(ret));
 
             var outFrame = ff_copyout_frame(frame);
-            outFrame.data = outFrame.data.slice(0);
             outFrames.push(outFrame);
         }
     }
@@ -394,7 +392,6 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit
 
         // And copy it out
         var packet = ff_copyout_packet(pkt);
-        packet.data = packet.data.slice(0);
         outPackets.push(packet);
         sz += packet.data.length;
         if (limit && sz >= limit)
@@ -515,7 +512,6 @@ var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersin
             if (ret < 0)
                 throw new Error("Error while receiving a frame from the filtergraph: " + ff_error(ret));
             var outFrame = ff_copyout_frame(outFramePtr);
-            outFrame.data = outFrame.data.slice(0);
             outFrames.push(outFrame);
             av_frame_unref(outFramePtr);
         }
@@ -534,37 +530,66 @@ var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersin
 /* Copy out a frame */
 var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     var channels = AVFrame_channels(frame);
+    var format = AVFrame_format(frame);
     var nb_samples = AVFrame_nb_samples(frame);
-    var ct = channels*nb_samples;
-    var data = AVFrame_data_a(frame, 0);
     var outFrame = {
         data: null,
         channel_layout: AVFrame_channel_layout(frame),
         channels: channels,
-        format: AVFrame_format(frame),
-        nb_samples: AVFrame_nb_samples(frame),
+        format: format,
+        nb_samples: nb_samples,
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
         sample_rate: AVFrame_sample_rate(frame)
     };
 
     // FIXME: Need to support *every* format here
-    switch (outFrame.format) {
-        case 0: // U8
-            outFrame.data = copyout_u8(data, ct);
-            break;
+    if (format >= 5 /* U8P */) {
+        // Planar format, multiple data pointers
+        var data = [];
+        for (var ci = 0; ci < channels; ci++) {
+            var inData = AVFrame_data_a(frame, ci);
+            switch (format) {
+                case 5: // U8P
+                    data.push(copyout_u8(inData, nb_samples).slice(0));
+                    break;
 
-        case 1: // S16
-            outFrame.data = copyout_s16(data, ct);
-            break;
+                case 6: // S16P
+                    data.push(copyout_s16(inData, nb_samples).slice(0));
+                    break;
 
-        case 2: // S32
-            outFrame.data = copyout_s32(data, ct);
-            break;
+                case 7: // S32P
+                    data.push(copyout_s32(inData, nb_samples).slice(0));
+                    break;
 
-        case 3: // FLT
-            outFrame.data = copyout_f32(data, ct);
-            break;
+                case 8: // FLT
+                    data.push(copyout_f32(inData, nb_samples).slice(0));
+                    break;
+            }
+        }
+        outFrame.data = data;
+
+    } else {
+        var ct = channels*nb_samples;
+        var inData = AVFrame_data_a(frame, 0);
+        switch (format) {
+            case 0: // U8
+                outFrame.data = copyout_u8(inData, ct).slice(0);
+                break;
+
+            case 1: // S16
+                outFrame.data = copyout_s16(inData, ct).slice(0);
+                break;
+
+            case 2: // S32
+                outFrame.data = copyout_s32(inData, ct).slice(0);
+                break;
+
+            case 3: // FLT
+                outFrame.data = copyout_f32(inData, ct).slice(0);
+                break;
+        }
+
     }
 
     return outFrame;
@@ -572,6 +597,18 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
 
 /* Copy in a frame */
 var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
+    var format = frame.format;
+    var channels = frame.channels;
+    if (!channels) {
+        // channel_layout must be set
+        var channel_layout = frame.channel_layout;
+        channels = 0;
+        while (channel_layout) {
+            if (channel_layout&1) channels++;
+            channel_layout>>>=1;
+        }
+    }
+
     [
         "channel_layout", "channels", "format", "pts", "ptshi", "sample_rate"
     ].forEach(function(key) {
@@ -579,9 +616,16 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
             Module["AVFrame_" + key + "_si"](framePtr, frame[key]);
     });
 
-    /* FIXME: nb_samples needs to be divided by channel count, and we need to
-     * clear the frame if this is problematic */
-    AVFrame_nb_samples_s(framePtr, frame.data.length);
+    var nb_samples;
+    if (format >= 5 /* U8P */) {
+        // Planar, so nb_samples is out of data[0]
+        nb_samples = frame.data[0].length;
+    } else {
+        // Non-planar, divide by channel count
+        nb_samples = frame.data.length / channels;
+    }
+
+    AVFrame_nb_samples_s(framePtr, nb_samples);
 
     // We may or may not need to actually allocate
     if (av_frame_make_writable(framePtr) < 0) {
@@ -590,25 +634,53 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
             throw new Error("Failed to allocate frame buffers: " + ff_error(ret));
     }
 
-    var data = AVFrame_data_a(framePtr, 0);
+    if (format >= 5 /* U8P */) {
+        // A planar format
+        for (var ci = 0; ci < channels; ci++) {
+            var data = AVFrame_data_a(framePtr, ci);
+            var inData = frame.data[ci];
+            switch (format) {
+                case 5: // U8P
+                    copyin_u8(data, inData);
+                    break;
 
-    // FIXME: Need to support *every* format here
-    switch (frame.format) {
-        case 0: // U8
-            copyin_u8(data, frame.data);
-            break;
+                case 6: // S16P
+                    copyin_s16(data, inData);
+                    break;
 
-        case 1: // S16
-            copyin_s16(data, frame.data);
-            break;
+                case 7: // S32P
+                    copyin_s32(data, inData);
+                    break;
 
-        case 2: // S32
-            copyin_s32(data, frame.data);
-            break;
+                case 8: // FLT
+                    copyin_f32(data, inData);
+                    break;
+            }
+        }
 
-        case 3: // FLT
-            copyin_f32(data, frame.data);
-            break;
+    } else {
+        var data = AVFrame_data_a(framePtr, 0);
+        var inData = frame.data;
+
+        // FIXME: Need to support *every* format here
+        switch (format) {
+            case 0: // U8
+                copyin_u8(data, inData);
+                break;
+
+            case 1: // S16
+                copyin_s16(data, inData);
+                break;
+
+            case 2: // S32
+                copyin_s32(data, inData);
+                break;
+
+            case 3: // FLT
+                copyin_f32(data, inData);
+                break;
+        }
+
     }
 };
 
@@ -617,7 +689,7 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
     var data = AVPacket_data(pkt);
     var size = AVPacket_size(pkt);
     return {
-        data: copyout_u8(data, size),
+        data: copyout_u8(data, size).slice(0),
         pts: AVPacket_pts(pkt),
         ptshi: AVPacket_ptshi(pkt),
         dts: AVPacket_dts(pkt),
