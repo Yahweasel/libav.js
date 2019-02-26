@@ -360,9 +360,18 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
         var outStream = {};
         var codecpar = AVStream_codecpar(inStream);
         outStream.index = i;
+
+        // Codec info
         outStream.codecpar = codecpar;
         outStream.codec_type = AVCodecParameters_codec_type(codecpar);
         outStream.codec_id = AVCodecParameters_codec_id(codecpar);
+
+        // Duration and related
+        outStream.time_base_num = AVStream_time_base_num(inStream);
+        outStream.time_base_den = AVStream_time_base_den(inStream);
+        outStream.duration_time_base = AVStream_duration(inStream) + (AVStream_durationhi(inStream)*0x100000000);
+        outStream.duration = outStream.duration_time_base * outStream.time_base_num / outStream.time_base_den;
+
         streams.push(outStream);
     }
     return [fmt_ctx, streams];

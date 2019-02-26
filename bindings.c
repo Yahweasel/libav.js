@@ -124,8 +124,19 @@ BA(AVStream *, streams)
 
 /* AVStream */
 #define B(type, field) A(AVStream, type, field)
-B(AVCodecParameters *, codecpar);
+#define BL(type, field) AL(AVStream, type, field)
+B(AVCodecParameters *, codecpar)
+BL(int64_t, duration)
 #undef B
+#undef BL
+
+int AVStream_time_base_num(AVStream *a) {
+    return a->time_base.num;
+}
+
+int AVStream_time_base_den(AVStream *a) {
+    return a->time_base.den;
+}
 
 void AVStream_time_base_s(AVStream *a, int n, int d) {
     a->time_base.num = n;

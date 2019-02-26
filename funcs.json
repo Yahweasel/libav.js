@@ -60,6 +60,8 @@
         ["av_write_trailer", "number", ["number"]],
 
         ["AVCodecContext_time_base_s", null, ["number", "number", "number"]],
+        ["AVStream_time_base_num", "number", ["number"]],
+        ["AVStream_time_base_den", "number", ["number"]],
         ["AVStream_time_base_s", null, ["number", "number", "number"]],
 
         ["ff_error", "string", ["number"]],
@@ -141,7 +143,9 @@
             {"name": "streams", "array": true}
         ]],
         ["AVStream", [
-            "codecpar"
+            "codecpar",
+            "duration",
+            "durationhi"
         ]],
         ["AVFilterInOut", [
             "filter_ctx",
