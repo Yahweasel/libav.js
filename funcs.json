@@ -15,6 +15,7 @@
         ["av_buffersink_get_frame", "number", ["number", "number"]],
         ["av_buffersink_set_frame_size", null, ["number", "number"]],
         ["av_buffersrc_add_frame_flags", "number", ["number", "number", "number"]],
+        ["avfilter_free", null, ["number"]],
         ["avfilter_get_by_name", "number", ["string"]],
         ["avfilter_graph_alloc", "number", []],
         ["avfilter_graph_config", "number", ["number", "number"]],
