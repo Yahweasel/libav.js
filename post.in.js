@@ -563,14 +563,27 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
     return [filter_graph, multiple_inputs ? src_ctxs : src_ctxs[0], multiple_outputs ? sink_ctxs : sink_ctxs[0]];
 };
 
-/* Filter many frames at once */
-var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersink_ctx, inFramePtr, inFrames, fin) {
+/* Filter many frames at once, possibly to many sources at once */
+var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, inFramePtr, inFrames, fin) {
     var outFrames = [];
     var outFramePtr = av_frame_alloc();
     if (outFramePtr === 0)
         throw new Error("Failed to allocate output frame");
 
-    function handleFrame(inFrame) {
+    if (!srcs.length) {
+        srcs = [srcs];
+        inFrames = [inFrames];
+        fin = [fin];
+    }
+
+    // Find the longest buffer (ideally they're all the same)
+    var max = inFrames.map(function(srcFrames) {
+        return srcFrames.length;
+    }).reduce(function(a, b) {
+        return Math.max(a, b);
+    });
+
+    function handleFrame(buffersrc_ctx, inFrame) {
         if (inFrame !== null)
             ff_copyin_frame(inFramePtr, inFrame);
 
@@ -591,10 +604,14 @@ var ff_filter_multi = Module.ff_filter_multi = function(buffersrc_ctx, buffersin
         }
     }
 
-    inFrames.forEach(handleFrame);
-
-    if (fin)
-        handleFrame(null);
+    // Handle in *frame* order
+    for (var fi = 0; fi <= max; fi++) {
+        for (var ti = 0; ti < inFrames.length; ti++) {
+            var inFrame = inFrames[ti][fi];
+            if (inFrame) handleFrame(srcs[ti], inFrame);
+            else if (fin[ti]) handleFrame(srcs[ti], null);
+        }
+    }
 
     av_frame_free(outFramePtr);
 
