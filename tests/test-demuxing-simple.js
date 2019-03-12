@@ -73,7 +73,7 @@ function main() {
         if (ret[0] !== libav.AVERROR_EOF)
             throw new Error("Error reading: " + ret[0]);
 
-        return libav.ff_decode_multi(c, pkt, frame, ret[1], true);
+        return libav.ff_decode_multi(c, pkt, frame, ret[1][audio_stream_idx], true);
 
     }).then(function(ret) {
         print("[\n" +

@@ -79,7 +79,8 @@ function main() {
         return new Promise(function(res, rej) {
             function go() {
                 libav.ff_read_multi(fmt_ctx, pkt, "tmp.opus").then(function(ret) {
-                    packets = packets.concat(ret[1]);
+                    if (audio_stream_idx in ret[1])
+                        packets = packets.concat(ret[1][audio_stream_idx]);
 
                     if (ret[0] === -libav.EAGAIN) {
                         // We need more data!

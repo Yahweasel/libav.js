@@ -393,7 +393,7 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets) {
 /* Read many packets at once, done at this level to avoid message passing */
 var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit) {
     var sz = 0;
-    var outPackets = [];
+    var outPackets = {};
     var dev = Module.readBuffers[devfile];
 
     while (true) {
@@ -408,7 +408,9 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit
 
         // And copy it out
         var packet = ff_copyout_packet(pkt);
-        outPackets.push(packet);
+        if (!(packet.stream_index in outPackets))
+            outPackets[packet.stream_index] = [];
+        outPackets[packet.stream_index].push(packet);
         sz += packet.data.length;
         if (limit && sz >= limit)
             return [-11 /* EAGAIN */, outPackets];
