@@ -446,6 +446,7 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
 
         // Allocate all the "outputs" (our inputs)
         io_outputs = 0;
+        var ii = 0;
         input.forEach(function(input) {
             // Allocate the output itself
             var next_io_outputs = avfilter_inout_alloc();
@@ -476,10 +477,12 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
             AVFilterInOut_filter_ctx_s(io_outputs, tmp_src_ctx);
             tmp_src_ctx = 0;
             AVFilterInOut_pad_idx_s(io_outputs, 0);
+            ii++;
         });
 
         // Allocate all the "inputs" (our outputs)
         io_inputs = 0;
+        var oi = 0;
         output.forEach(function(output) {
             // Allocate the input itself
             var next_io_inputs = avfilter_inout_alloc();
@@ -521,6 +524,7 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
             AVFilterInOut_filter_ctx_s(io_inputs, tmp_sink_ctx);
             tmp_sink_ctx = 0;
             AVFilterInOut_pad_idx_s(io_inputs, 0);
+            oi++;
         });
 
         // Parse it
