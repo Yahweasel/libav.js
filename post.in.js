@@ -157,6 +157,7 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
         throw new Error("Could not allocate packet");
 
     var frame_size = AVCodecContext_frame_size(c);
+    if (!frame_size) frame_size = ctxProps.sample_rate;
 
     AVFrame_nb_samples_s(frame, frame_size);
     AVFrame_format_s(frame, ctxProps.sample_fmt);
