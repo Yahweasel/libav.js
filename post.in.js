@@ -230,6 +230,8 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
         var ret = avcodec_send_frame(ctx, inFrame?frame:0);
         if (ret < 0)
             throw new Error("Error sending the frame to the encoder: " + ff_error(ret));
+        if (inFrame)
+            av_frame_unref(frame);
 
         while (true) {
             ret = avcodec_receive_packet(ctx, pkt);
@@ -240,6 +242,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
 
             var outPacket = ff_copyout_packet(pkt);
             outPackets.push(outPacket);
+            av_packet_unref(pkt);
         }
     }
 
@@ -281,6 +284,7 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
 
             var outFrame = ff_copyout_frame(frame);
             outFrames.push(outFrame);
+            av_frame_unref(frame);
         }
     }
 
@@ -412,6 +416,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit
         if (!(packet.stream_index in outPackets))
             outPackets[packet.stream_index] = [];
         outPackets[packet.stream_index].push(packet);
+        av_packet_unref(pkt);
         sz += packet.data.length;
         if (limit && sz >= limit)
             return [-11 /* EAGAIN */, outPackets];
