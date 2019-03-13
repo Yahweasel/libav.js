@@ -157,15 +157,6 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
         throw new Error("Could not allocate packet");
 
     var frame_size = AVCodecContext_frame_size(c);
-    if (!frame_size) frame_size = ctxProps.sample_rate;
-
-    AVFrame_nb_samples_s(frame, frame_size);
-    AVFrame_format_s(frame, ctxProps.sample_fmt);
-    AVFrame_channel_layout_s(frame, ctxProps.channel_layout);
-
-    ret = av_frame_get_buffer(frame, 0);
-    if (ret < 0)
-        throw new Error("Could not allocate audio data buffers: " + ff_error(ret));
 
     return [codec, c, frame, pkt, frame_size];
 };
