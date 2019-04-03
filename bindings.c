@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <malloc.h>
+
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavfilter/avfilter.h"
@@ -210,4 +212,9 @@ char *ff_error(int err)
 {
     av_strerror(err, err_buf, ERR_BUF_SZ - 1);
     return err_buf;
+}
+
+int mallinfo_uordblks()
+{
+    return mallinfo().uordblks;
 }

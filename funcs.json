@@ -69,7 +69,8 @@
 
         ["calloc", "number", ["number", "number"]],
         ["free", null, ["number"]],
-        ["malloc", "number", ["number"]]
+        ["malloc", "number", ["number"]],
+        ["mallinfo_uordblks", "number", []]
     ],
 
     "meta": [
