@@ -841,6 +841,8 @@ if (typeof importScripts !== "undefined") {
     };
 
     Module.onwrite = function(name, pos, buf) {
-        postMessage(["onwrite", "onwrite", true, [name, pos, buf]]);
+        /* We have to buf.slice(0) so we don't duplicate the entire heap just
+         * to get one part of it in postMessage */
+        postMessage(["onwrite", "onwrite", true, [name, pos, buf.slice(0)]]);
     };
 }
