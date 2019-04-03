@@ -563,11 +563,8 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
 };
 
 /* Filter many frames at once, possibly to many sources at once */
-var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, inFramePtr, inFrames, fin) {
+var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, framePtr, inFrames, fin) {
     var outFrames = [];
-    var outFramePtr = av_frame_alloc();
-    if (outFramePtr === 0)
-        throw new Error("Failed to allocate output frame");
 
     if (!srcs.length) {
         srcs = [srcs];
@@ -584,22 +581,22 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, in
 
     function handleFrame(buffersrc_ctx, inFrame) {
         if (inFrame !== null)
-            ff_copyin_frame(inFramePtr, inFrame);
+            ff_copyin_frame(framePtr, inFrame);
 
-        var ret = av_buffersrc_add_frame_flags(buffersrc_ctx, inFrame ? inFramePtr : 0, 8 /* AV_BUFFERSRC_FLAG_KEEP_REF */);
+        var ret = av_buffersrc_add_frame_flags(buffersrc_ctx, inFrame ? framePtr : 0, 8 /* AV_BUFFERSRC_FLAG_KEEP_REF */);
         if (ret < 0)
             throw new Error("Error while feeding the audio filtergraph: " + ff_error(ret));
-        av_frame_unref(inFramePtr);
+        av_frame_unref(framePtr);
 
         while (true) {
-            ret = av_buffersink_get_frame(buffersink_ctx, outFramePtr);
+            ret = av_buffersink_get_frame(buffersink_ctx, framePtr);
             if (ret === -11 /* EGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
                 break;
             if (ret < 0)
                 throw new Error("Error while receiving a frame from the filtergraph: " + ff_error(ret));
-            var outFrame = ff_copyout_frame(outFramePtr);
+            var outFrame = ff_copyout_frame(framePtr);
             outFrames.push(outFrame);
-            av_frame_unref(outFramePtr);
+            av_frame_unref(framePtr);
         }
     }
 
@@ -611,8 +608,6 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, in
             else if (fin[ti]) handleFrame(srcs[ti], null);
         }
     }
-
-    av_frame_free_js(outFramePtr);
 
     return outFrames;
 };
