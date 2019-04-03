@@ -612,7 +612,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, in
         }
     }
 
-    av_frame_free(outFramePtr);
+    av_frame_free_js(outFramePtr);
 
     return outFrames;
 };
