@@ -58,6 +58,7 @@
         ["av_packet_make_writable", "number", ["number"]],
         ["av_read_frame", "number", ["number", "number"]],
         ["av_shrink_packet", null, ["number", "number"]],
+        ["av_write_frame", "number", ["number", "number"]],
         ["av_write_trailer", "number", ["number"]],
 
         ["AVCodecContext_time_base_s", null, ["number", "number", "number"]],
