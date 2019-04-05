@@ -289,13 +289,17 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
 
 /* Set the content of a packet. Necessary because we tend to strip packets of their content. */
 var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
-    var size = AVPacket_size(pkt);
-    if (size < data.length) {
-        var ret = av_grow_packet(pkt, data.length - size);
-        if (ret < 0)
-            throw new Error("Error growing packet: " + ff_error(ret));
-    } else if (size > data.length)
-        av_shrink_packet(pkt, data.length);
+    if (data.length === 0) {
+        av_packet_unref(pkt);
+    } else {
+        var size = AVPacket_size(pkt);
+        if (size < data.length) {
+            var ret = av_grow_packet(pkt, data.length - size);
+            if (ret < 0)
+                throw new Error("Error growing packet: " + ff_error(ret));
+        } else if (size > data.length)
+            av_shrink_packet(pkt, data.length);
+    }
     var ptr = AVPacket_data(pkt);
     Module.HEAPU8.set(data, ptr);
 };
@@ -781,8 +785,30 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
         ptshi: AVPacket_ptshi(pkt),
         dts: AVPacket_dts(pkt),
         dtshi: AVPacket_dtshi(pkt),
+        duration: AVPacket_duration(pkt),
+        durationhi: AVPacket_durationhi(pkt),
+        side_data: ff_copyout_side_data(pkt),
         stream_index: AVPacket_stream_index(pkt)
     };
+};
+
+/* Copy out a packet's side data */
+var ff_copyout_side_data = Module.ff_copyout_side_data = function(pkt) {
+    var side_data = AVPacket_side_data(pkt);
+    var side_data_elems = AVPacket_side_data_elems(pkt);
+    if (!side_data) return null;
+
+    var ret = [];
+    for (var i = 0; i < side_data_elems; i++) {
+        var data = AVPacketSideData_data(side_data, i);
+        var size = AVPacketSideData_size(side_data, i);
+        ret.push({
+            data: copyout_u8(data, size).slice(0),
+            type: AVPacketSideData_type(side_data, i)
+        });
+    }
+
+    return ret;
 };
 
 /* Copy in a packet */
@@ -790,10 +816,23 @@ var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     ff_set_packet(pktPtr, packet.data);
 
     [
-        "dts", "dtshi", "stream_index", "pts", "pts_hi"
+        "dts", "dtshi", "duration", "durationhi", "side_data", "side_data_elems", "stream_index", "pts", "ptshi"
     ].forEach(function(key) {
         if (key in packet)
             Module["AVPacket_" + key + "_si"](pktPtr, packet[key]);
+    });
+
+    if (packet.side_data)
+        ff_copyin_side_data(pktPtr, packet.side_data);
+};
+
+/* Copy in a packet's side data */
+var ff_copyin_side_data = Module.ff_copyin_side_data = function(pktPtr, side_data) {
+    side_data.forEach(function(elem) {
+        var data = av_packet_new_side_data(pktPtr, elem.type, elem.data.length);
+        if (data === 0)
+            throw new Error("Failed to allocate side data!");
+        copyin_u8(data, elem.data);
     });
 };
 

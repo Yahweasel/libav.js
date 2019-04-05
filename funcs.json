@@ -9,6 +9,7 @@
         ["av_frame_unref", null, ["number"]],
         ["av_packet_alloc", "number", []],
         ["av_packet_free", null, ["number"]],
+        ["av_packet_new_side_data", "number", ["number", "number", "number"]],
         ["av_packet_unref", null, ["number"]],
         ["av_strdup", "number", ["string"]],
 
@@ -65,6 +66,9 @@
         ["AVStream_time_base_num", "number", ["number"]],
         ["AVStream_time_base_den", "number", ["number"]],
         ["AVStream_time_base_s", null, ["number", "number", "number"]],
+        ["AVPacketSideData_data", "number", ["number", "number"]],
+        ["AVPacketSideData_size", "number", ["number", "number"]],
+        ["AVPacketSideData_type", "number", ["number", "number"]],
 
         ["ff_error", "string", ["number"]],
 
@@ -134,6 +138,10 @@
             "data",
             "dts",
             "dtshi",
+            "duration",
+            "durationhi",
+            "side_data",
+            "side_data_elems",
             "size",
             "stream_index",
             "pts",

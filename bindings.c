@@ -103,11 +103,28 @@ B(enum AVMediaType, codec_type)
 #define BL(type, field) AL(AVPacket, type, field)
 B(uint8_t *, data)
 BL(int64_t, dts)
+BL(int64_t, duration)
+B(AVPacketSideData *, side_data)
+B(int, side_data_elems)
 B(int, size)
 B(int, stream_index)
 BL(int64_t, pts)
 #undef B
 #undef BL
+
+
+/* AVPacketSideData uses special accessors because it's usually an array */
+uint8_t *AVPacketSideData_data(AVPacketSideData *a, int idx) {
+    return a[idx].data;
+}
+
+int AVPacketSideData_size(AVPacketSideData *a, int idx) {
+    return a[idx].size;
+}
+
+enum AVPacketSideDataType AVPacketSideData_type(AVPacketSideData *a, int idx) {
+    return a[idx].type;
+}
 
 
 /****************************************************************
@@ -160,7 +177,7 @@ B(int, pad_idx)
 
 
 /****************************************************************
- * Bindings to avoid pointer issues
+ * Other bindings
  ***************************************************************/
 
 AVFormatContext *avformat_alloc_output_context2_js(AVOutputFormat *oformat,
