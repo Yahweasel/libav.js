@@ -31,6 +31,7 @@
     var libav;
     var base = ".";
     var nodejs = (typeof process !== "undefined");
+    var threads = 1;
 
     if (!nodejs) {
         // Make sure LibAV is defined for later loading
@@ -47,36 +48,53 @@
 
     }
 
+    libav.targets = [libav];
     libav.ready = false;
 
     var wasm = !libav.nowasm && isWebAssemblySupported();
 
     if (!nodejs && typeof Worker !== "undefined" && !libav.noworker) {
-        // Load the worker
-        libav.worker = new Worker(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
+        if (libav.threads > 1)
+            threads = libav.threads;
+        libav.threads = threads;
 
+        // Load the workers
+        var workerScr = base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js";
+        var workers = libav.workers = [];
+        for (var i = 0; i < threads; i++)
+            workers.push(new Worker(workerScr));
+        libav.worker = workers[0];
+
+        // Count how many are ready
+        var ready = 0;
+
+        // Our handlers
         libav.on = 1;
         libav.handlers = {
-            0: [function() {
-                libav.ready = true;
-                if (libav.onready)
-                    libav.onready();
+            onready: [function() {
+                if (++ready === threads) {
+                    libav.ready = true;
+                    if (libav.onready)
+                        libav.onready();
+                }
             }, null],
             onwrite: [function(args) {
                 if (libav.onwrite)
                     libav.onwrite.apply(libav, args);
             }, null]
         };
-        libav.c = function() {
-            var args = Array.prototype.slice.call(arguments);
+
+        // And passthru functions
+        libav.c = function(thread) {
+            var msg = Array.prototype.slice.call(arguments);
             return new Promise(function(res, rej) {
                 var id = libav.on++;
-                var msg = [id].concat(args);
+                msg[0] = id;
                 libav.handlers[id] = [res, rej];
-                libav.worker.postMessage(msg);
+                libav.workers[thread].postMessage(msg);
             });
         };
-        libav.worker.onmessage = function(e) {
+        function onworkermessage(e) {
             var id = e.data[0];
             var h = libav.handlers[id];
             if (h) {
@@ -88,14 +106,21 @@
                     delete libav.handlers[id];
             }
         };
+        for (var i = 0; i < threads; i++)
+            libav.workers[i].onmessage = onworkermessage;
+
+        // Make sure we have as many callable targets as threads
+        for (var i = 1; i < threads; i++)
+            libav.targets.push({});
 
         defineWrappers();
 
     } else {
         // Wrappers for our script or Node.js version
         libav.worker = false;
-        libav.c = function(func) {
-            var args = Array.prototype.slice.call(arguments, 1);
+        libav.threads = 1;
+        libav.c = function(thread, func) {
+            var args = Array.prototype.slice.call(arguments, 2);
             return new Promise(function(res, rej) {
                 res(libav[func].apply(libav, args));
             });
@@ -132,13 +157,19 @@
 
             } else {
                 libav[f] = function() {
-                    return libav.c.apply(libav, [f].concat(Array.prototype.slice.call(arguments)));
+                    return libav.c.apply(libav, [0, f].concat(Array.prototype.slice.call(arguments)));
                 };
+
+                for (var i = 1; i < threads; i++) (function(i) {
+                    libav.targets[i][f] = function() {
+                        return libav.c.apply(libav, [i, f].concat(Array.prototype.slice.call(arguments)));
+                    };
+                })(i);
 
             }
         });
 
-        // Convenience multi-part setters
+        // Convenience multi-part setters (NOTE: Only single-threaded!)
         [
         "AVFrame",
         "AVCodecContext",

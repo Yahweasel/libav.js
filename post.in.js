@@ -878,7 +878,7 @@ if (typeof importScripts !== "undefined") {
     };
 
     Module.onRuntimeInitialized = function() {
-        postMessage([0, "onRuntimeInitialized", true, null]);
+        postMessage(["onready", "onRuntimeInitialized", true, null]);
     };
 
     Module.onwrite = function(name, pos, buf) {
