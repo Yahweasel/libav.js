@@ -881,6 +881,11 @@ if (typeof importScripts !== "undefined") {
         postMessage(["onready", "onRuntimeInitialized", true, null]);
     };
 
+    // If we're not WebAssembly, then we're already initialized
+    var wasmMemory;
+    if (!wasmMemory)
+        Module.onRuntimeInitialized();
+
     Module.onwrite = function(name, pos, buf) {
         /* We have to buf.slice(0) so we don't duplicate the entire heap just
          * to get one part of it in postMessage */

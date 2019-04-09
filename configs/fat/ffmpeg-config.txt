@@ -4,10 +4,12 @@
 --enable-decoder=libopus --enable-decoder=aac
 --enable-decoder=libvorbis
 --enable-decoder=wavpack
+--enable-decoder=alac
 --enable-encoder=pcm_s16le --enable-encoder=pcm_s24le --enable-encoder=flac
 --enable-encoder=libopus --enable-encoder=aac
 --enable-encoder=libvorbis
 --enable-encoder=wavpack
+--enable-encoder=alac
 --enable-demuxer=wav --enable-demuxer=flac --enable-demuxer=ogg
 --enable-demuxer=matroska --enable-demuxer=mov
 --enable-demuxer=wv
