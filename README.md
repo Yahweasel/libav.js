@@ -71,6 +71,12 @@ software, so Vorbis is still useful. MP3, on the other hand, is completely
 worthless, and is only supplied in case your end users are idiots. Friends
 don't let friends use MP3.
 
+The “opus” variant is intended just for encoding or decoding Opus. It includes
+only the Opus format, the ogg container, and the aresample filter. This is a
+better option than a simple conversion of libopus to JavaScript because Opus
+mandates a limited range of audio sample rates, so having a resampler is
+beneficial.
+
 To create other variants, simply create the configuration for them in `configs`
 and, if necessary, add Makefile fragments to `mk`. This is intentionally
 designed so that you can add new configurations without needing to patch
