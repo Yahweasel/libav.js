@@ -54,13 +54,22 @@ any codec in Matroska (since WebM is Matroska), FLAC in ogg, etc.
 Use `make build-variant`, replacing `variant` with the variant name, to build
 another variant.
 
-The second variant that ships with libav.js is the “obsolete” variant,
-including two obsolete but still commonly found audio formats, namely Vorbis in
-the ogg container and MP3 in its own container. Note that while Vorbis has been
-formally replaced by Opus, at the time of this writing, Opus still has
-lackluster support in audio software, so Vorbis is still useful. MP3, on the
-other hand, is completely worthless, and is only supplied in case your end
-users are idiots. Friends don't let friends use MP3.
+libav.js includes three other variants:
+
+The “lite” variant removes, relative to the default variant, AAC and the M4A
+container.
+
+The “fat” variant adds, relative to the default variant, Vorbis, wavpack and
+its container, and ALAC, as well as the “pipe” meta-protocol to make continuous
+data easier to use.
+
+The “obsolete” variant adds, relative to the default variant, two obsolete but
+still commonly found audio formats, namely Vorbis in the ogg container and MP3
+in its own container. Note that while Vorbis has been formally replaced by
+Opus, at the time of this writing, Opus still has lackluster support in audio
+software, so Vorbis is still useful. MP3, on the other hand, is completely
+worthless, and is only supplied in case your end users are idiots. Friends
+don't let friends use MP3.
 
 To create other variants, simply create the configuration for them in `configs`
 and, if necessary, add Makefile fragments to `mk`. This is intentionally
