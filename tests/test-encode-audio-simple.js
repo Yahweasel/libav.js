@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-1.3.4.1.5-default.js");
+    LibAV = require("../libav-1.3.4.2.2-default.js");
     fs = require("fs");
 }
 
@@ -20,7 +20,7 @@ function print(txt) {
 function main() {
     var libav = LibAV;
     var codec, c, pkt, frame, frame_size;
-    libav.ff_init_encoder("opus", {
+    libav.ff_init_encoder("libopus", {
         bit_rate: 128000,
         sample_fmt: libav.AV_SAMPLE_FMT_FLT,
         sample_rate: 48000,

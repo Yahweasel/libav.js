@@ -1,4 +1,4 @@
-FFMPEG_VERSION=4.1.5
+FFMPEG_VERSION=4.2.2
 
 ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg: ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
 	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; emmake $(MAKE)
