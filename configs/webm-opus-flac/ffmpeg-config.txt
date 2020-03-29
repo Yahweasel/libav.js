@@ -1,0 +1,10 @@
+--enable-libopus
+--enable-decoder=flac
+--enable-decoder=libopus
+--enable-encoder=flac
+--enable-encoder=libopus
+--enable-demuxer=matroska --enable-demuxer=flac --enable-demuxer=ogg
+--enable-muxer=matroska --enable-muxer=webm --enable-muxer=flac
+--enable-muxer=ogg
+--enable-protocol=data --enable-protocol=file --enable-protocol=pipe
+--enable-filter=aresample
