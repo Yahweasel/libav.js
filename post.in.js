@@ -882,8 +882,7 @@ if (typeof importScripts !== "undefined") {
     };
 
     // If we're not WebAssembly, then we're already initialized
-    var wasmMemory;
-    if (!wasmMemory)
+    if (!Module.wasmMemory)
         Module.onRuntimeInitialized();
 
     Module.onwrite = function(name, pos, buf) {
