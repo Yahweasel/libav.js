@@ -246,8 +246,13 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
 };
 
 /* Decode many packets at once, done at this level to avoid message passing */
-var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPackets, fin) {
+var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPackets, config) {
     var outFrames = [];
+    if (typeof config === "boolean") {
+        config = {fin: config};
+    } else {
+        config = config || {};
+    }
 
     function handlePacket(inPacket) {
         var ret;
@@ -262,8 +267,16 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
         }
 
         ret = avcodec_send_packet(ctx, pkt);
-        if (ret < 0)
-            throw new Error("Error submitting the packet to the decoder: " + ff_error(ret));
+        if (ret < 0) {
+            var err = "Error submitting the packet to the decoder: " + ff_error(ret);
+            if (!config.ignoreErrors)
+                throw new Error(err);
+            else {
+                console.log(err);
+                av_packet_unref(pkt);
+                return;
+            }
+        }
         av_packet_unref(pkt);
 
         while (true) {
@@ -281,7 +294,7 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
 
     inPackets.forEach(handlePacket);
 
-    if (fin)
+    if (config.fin)
         handlePacket(null);
 
     return outFrames;
