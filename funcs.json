@@ -135,17 +135,18 @@
             "codec_type"
         ]],
         ["AVPacket", [
-            "data",
+            "pts",
+            "ptshi",
             "dts",
             "dtshi",
-            "duration",
-            "durationhi",
-            "side_data",
-            "side_data_elems",
+            "data",
             "size",
             "stream_index",
-            "pts",
-            "ptshi"
+            "flags",
+            "side_data",
+            "side_data_elems",
+            "duration",
+            "durationhi"
         ]],
         ["AVFormatContext", [
             "nb_streams",

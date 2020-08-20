@@ -805,10 +805,11 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
         ptshi: AVPacket_ptshi(pkt),
         dts: AVPacket_dts(pkt),
         dtshi: AVPacket_dtshi(pkt),
+        stream_index: AVPacket_stream_index(pkt),
+        flags: AVPacket_flags(pkt),
         duration: AVPacket_duration(pkt),
         durationhi: AVPacket_durationhi(pkt),
-        side_data: ff_copyout_side_data(pkt),
-        stream_index: AVPacket_stream_index(pkt)
+        side_data: ff_copyout_side_data(pkt)
     };
 };
 
@@ -836,7 +837,7 @@ var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     ff_set_packet(pktPtr, packet.data);
 
     [
-        "dts", "dtshi", "duration", "durationhi", "side_data", "side_data_elems", "stream_index", "pts", "ptshi"
+        "dts", "dtshi", "duration", "durationhi", "flags", "side_data", "side_data_elems", "stream_index", "pts", "ptshi"
     ].forEach(function(key) {
         if (key in packet)
             Module["AVPacket_" + key + "_si"](pktPtr, packet[key]);

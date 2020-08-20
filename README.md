@@ -78,6 +78,9 @@ this is a better option than a simple conversion of libopus to JavaScript,
 because Opus mandates a limited range of audio sample rates, so having a
 resampler is beneficial.
 
+The “webm” variant includes support for vp8 video, but only enough to copy such
+streams; no actual video decoding or encoding is yet supported.
+
 To create other variants, simply create the configuration for them in `configs`
 and, if necessary, add Makefile fragments to `mk`. This is intentionally
 designed so that you can add new configurations without needing to patch

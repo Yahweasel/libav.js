@@ -1,8 +1,8 @@
 --enable-libopus
---enable-decoder=flac
---enable-decoder=libopus
---enable-encoder=flac
---enable-encoder=libopus
+--enable-decoder=flac --enable-decoder=libopus
+--enable-decoder=vp8
+--enable-encoder=flac --enable-encoder=libopus
+--enable-encoder=vp8
 --enable-demuxer=matroska --enable-demuxer=flac --enable-demuxer=ogg
 --enable-muxer=matroska --enable-muxer=webm --enable-muxer=flac
 --enable-muxer=ogg

@@ -104,11 +104,12 @@ B(enum AVMediaType, codec_type)
 B(uint8_t *, data)
 BL(int64_t, dts)
 BL(int64_t, duration)
+B(int, flags)
+BL(int64_t, pts)
 B(AVPacketSideData *, side_data)
 B(int, side_data_elems)
 B(int, size)
 B(int, stream_index)
-BL(int64_t, pts)
 #undef B
 #undef BL
 
