@@ -1,4 +1,4 @@
-LIBVORBIS_VERSION=1.3.6
+LIBVORBIS_VERSION=1.3.7
 
 tmp-inst/lib/pkgconfig/vorbis.pc: libvorbis-$(LIBVORBIS_VERSION)/config.h
 	cd libvorbis-$(LIBVORBIS_VERSION) ; \
