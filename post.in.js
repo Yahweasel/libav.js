@@ -13,6 +13,13 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+var ERRNO_CODES = {
+    EPERM: 1,
+    EIO: 5,
+    EAGAIN: 11,
+    ESPIPE: 29
+};
+
 var readerCallbacks = {
     open: function(stream) {
         if (stream.flags & 3) {

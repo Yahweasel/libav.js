@@ -179,7 +179,7 @@
                 var promises = [];
                 for (var key in vals) {
                     var val = vals[key];
-                    promises.push(libav.c(type + "_" + key + "_s", obj, val));
+                    promises.push(libav.c(0, type + "_" + key + "_s", obj, val));
                 }
                 return Promise.all(promises);
             };
