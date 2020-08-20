@@ -92,7 +92,7 @@ function main() {
 
     }).then(function() {
         // Create a gap by writing the first packet at the beginning first...
-        return libav.ff_write_multi(oc, pkt, packets.slice(1));
+        return libav.ff_write_multi(oc, pkt, packets.slice(0, 1));
 
     }).then(function() {
         // But then writing it, and everything else, much later
