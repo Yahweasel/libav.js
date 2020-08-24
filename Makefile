@@ -1,13 +1,13 @@
 LIBAVJS_VERSION=1.6.4.3.1
 EMCC=emcc
-MINIFIER=closure-compiler
-CFLAGS=-Oz
+MINIFIER=closure-compiler --language_in ECMASCRIPT5
+CFLAGS=
 EFLAGS=\
 	--memory-init-file 0 --post-js post.js \
-	-s "EXPORT_NAME='LibAV'" \
+	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@exports.json" \
 	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
-	-s MODULARIZE_INSTANCE=1 \
+	-s MODULARIZE=1 \
 	-s ALLOW_MEMORY_GROWTH=1
 
 LIBS=\
