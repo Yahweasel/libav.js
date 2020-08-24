@@ -37,7 +37,7 @@ function decode(libav, dec_ctx, pkt, frame) {
 
                 }).then(function(ret) {
                     if (!ret) return;
-                    print(Array.prototype.join.call(ret.data, ", "));
+                    //print(Array.prototype.join.call(ret.data, ", "));
                     readFrame();
                 }).catch(rej);
             }
@@ -113,7 +113,7 @@ function main() {
         ]);
 
     }).then(function() {
-        // Nothing
+        print("Done");
 
     }).catch(function(err) {
         print(err + "");

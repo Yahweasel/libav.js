@@ -16,15 +16,21 @@ function print(txt) {
 
 /* This is a port of doc/examples/muxing.c, simplified */
 function main() {
-    var libav = LibAV;
+    var libav;
     var oc, fmt, codec, c, frame, pkt, st, pb, frame_size;
-    libav.ff_init_encoder("libopus", {
-        bit_rate: 128000,
-        sample_fmt: libav.AV_SAMPLE_FMT_FLT,
-        sample_rate: 48000,
-        channel_layout: 4,
-        channels: 1
-    }, 1, 48000).then(function(ret) {
+
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+
+        return libav.ff_init_encoder("libopus", {
+            bit_rate: 128000,
+            sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+            sample_rate: 48000,
+            channel_layout: 4,
+            channels: 1
+        }, 1, 48000);
+
+    }).then(function(ret) {
         codec = ret[0];
         c = ret[1];
         frame = ret[2];
@@ -95,13 +101,11 @@ function main() {
 
         }
 
+        print("Done");
+
     }).catch(function(err) {
         print(err + "");
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

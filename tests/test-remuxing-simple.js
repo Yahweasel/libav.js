@@ -15,31 +15,36 @@ function print(txt) {
 }
 
 function main() {
-    var libav = LibAV;
+    var libav;
     var fmt_ctx, streams, stream, video_stream_idx, pkt, frame, codec, c, packets;
     var oc, fmt, pb, st;
 
-    new Promise(function(res, rej) {
-        if (typeof XMLHttpRequest !== "undefined") {
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = "arraybuffer";
-            xhr.open("GET", "exa.webm", true);
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
 
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200)
-                        res(xhr.response);
-                    else
-                        rej(xhr.status);
-                }
-            };
+        return new Promise(function(res, rej) {
+            if (typeof XMLHttpRequest !== "undefined") {
+                var xhr = new XMLHttpRequest();
+                xhr.responseType = "arraybuffer";
+                xhr.open("GET", "exa.webm", true);
 
-            xhr.send();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200)
+                            res(xhr.response);
+                        else
+                            rej(xhr.status);
+                    }
+                };
 
-        } else {
-            res(fs.readFileSync("exa.webm").buffer);
+                xhr.send();
 
-        }
+            } else {
+                res(fs.readFileSync("exa.webm").buffer);
+
+            }
+
+        });
 
     }).then(function(ret) {
         return libav.writeFile("tmp.webm", new Uint8Array(ret));
@@ -129,13 +134,11 @@ function main() {
 
         }
 
+        print("Done");
+
     }).catch(function(err) {
         print(err + "");
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

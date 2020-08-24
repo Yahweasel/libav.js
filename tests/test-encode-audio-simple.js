@@ -18,15 +18,21 @@ function print(txt) {
  * some metafunctions. Note that this version isn't just easier on
  * the eyes, it's faster. */
 function main() {
-    var libav = LibAV;
+    var libav;
     var codec, c, pkt, frame, frame_size;
-    libav.ff_init_encoder("libopus", {
-        bit_rate: 128000,
-        sample_fmt: libav.AV_SAMPLE_FMT_FLT,
-        sample_rate: 48000,
-        channel_layout: 4,
-        channels: 1
-    }, 1, 48000).then(function(ret) {
+
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+
+        return libav.ff_init_encoder("libopus", {
+            bit_rate: 128000,
+            sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+            sample_rate: 48000,
+            channel_layout: 4,
+            channels: 1
+        }, 1, 48000);
+
+    }).then(function(ret) {
         codec = ret[0];
         c = ret[1];
         frame = ret[2];
@@ -59,24 +65,20 @@ function main() {
         return libav.ff_encode_multi(c, frame, pkt, frames, true);
 
     }).then(function(ret) {
-        print("[\n" +
+        /*print("[\n" +
             ret.map(function(pkt) {
                 return "new Uint8Array([" + Array.prototype.join.call(pkt.data, ", ") + "])";
             }).join(",\n") +
-            "\n]");
+            "\n]");*/
 
         return libav.ff_free_encoder(c, frame, pkt);
 
     }).then(function() {
-        // Nothing
+        print("Done");
 
     }).catch(function(err) {
         print(err + "");
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

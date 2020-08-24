@@ -40,7 +40,7 @@ function encode(libav, ctx, frame, pkt) {
                         if (b < 16) part += "0";
                         part += b.toString(16);
                     });
-                    print(part);
+                    //print(part);
 
                     return libav.av_packet_unref(pkt).then(packet).catch(rej);
 
@@ -145,8 +145,6 @@ function main() {
         });
 
     }).then(function() {
-        print("Done");
-
         return Promise.all([
             libav.av_frame_free_js(frame),
             libav.av_packet_free_js(pkt),
@@ -154,7 +152,7 @@ function main() {
         ]);
 
     }).then(function() {
-        // Nothing
+        print("Done");
 
     }).catch(function(err) {
         print(err + "");

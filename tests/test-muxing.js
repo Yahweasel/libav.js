@@ -16,9 +16,15 @@ function print(txt) {
 
 /* This is a port of doc/examples/muxing.c, but with fixed output */
 function main() {
-    var libav = LibAV;
+    var libav;
     var oc, fmt, codec, c, frame, pkt, st, pb, frame_size;
-    libav.avformat_alloc_output_context2_js(0, null, "tmp.ogg").then(function(ret) {
+
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+
+        return libav.avformat_alloc_output_context2_js(0, null, "tmp.ogg");
+
+    }).then(function(ret) {
         oc = ret;
         if (oc === 0)
             throw new Error("Failed to allocate output context");
@@ -146,13 +152,11 @@ function main() {
 
         }
 
+        print("Done");
+
     }).catch(function(err) {
         print(err + "");
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

@@ -80,11 +80,11 @@ function main() {
         return libav.ff_decode_multi(c, pkt, frame, ret[1][audio_stream_idx], true);
 
     }).then(function(ret) {
-        print("[\n" +
+        /*print("[\n" +
             ret.map(function(pkt) {
                 return "new Uint8Array([" + Array.prototype.join.call(pkt.data, ", ") + "])";
             }).join(",\n") +
-            "\n]");
+            "\n]");*/
 
         return Promise.all([
             libav.ff_free_decoder(c, pkt, frame),
@@ -92,7 +92,7 @@ function main() {
         ]);
 
     }).then(function() {
-        // Nothing
+        print("Done");
 
     }).catch(function(err) {
         print(err + "");

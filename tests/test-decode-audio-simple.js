@@ -40,16 +40,16 @@ function main() {
         return libav.ff_decode_multi(c, pkt, frame, tmpPackets, true);
 
     }).then(function(ret) {
-        print("[\n" +
+        /*print("[\n" +
             ret.map(function(pkt) {
                 return "new Uint8Array([" + Array.prototype.join.call(pkt.data, ", ") + "])";
             }).join(",\n") +
-            "\n]");
+            "\n]");*/
 
         return libav.ff_free_decoder(c, pkt, frame);
 
     }).then(function() {
-        // Nothing
+        print("Done");
 
     }).catch(function(err) {
         print(err + "");

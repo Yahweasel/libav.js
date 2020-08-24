@@ -19,8 +19,7 @@ function print(txt) {
 var filter_graph;
 var buffersink_ctx, buffersrc_ctx;
 
-function init_filters(filters_descr, sample_fmt, channel_layout, frame_size) {
-    var libav = LibAV;
+function init_filters(libav, filters_descr, sample_fmt, channel_layout, frame_size) {
     var abuffersrc, abuffersink, outputs, inputs;
     var int32s, int64s;
     return Promise.all([
@@ -109,15 +108,21 @@ function init_filters(filters_descr, sample_fmt, channel_layout, frame_size) {
 }
 
 function main() {
-    var libav = LibAV;
+    var libav;
     var oc, fmt, codec, c, frame, pkt, st, pb, frame_size;
-    libav.ff_init_encoder("libopus", {
-        bit_rate: 128000,
-        sample_fmt: libav.AV_SAMPLE_FMT_FLT,
-        sample_rate: 48000,
-        channel_layout: 4,
-        channels: 1
-    }, 1, 48000).then(function(ret) {
+
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+
+        return libav.ff_init_encoder("libopus", {
+            bit_rate: 128000,
+            sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+            sample_rate: 48000,
+            channel_layout: 4,
+            channels: 1
+        }, 1, 48000);
+
+    }).then(function(ret) {
         codec = ret[0];
         c = ret[1];
         frame = ret[2];
@@ -134,7 +139,7 @@ function main() {
 
         return Promise.all([
             libav.avformat_write_header(oc, 0),
-            init_filters("atempo=0.5,volume=0.1", libav.AV_SAMPLE_FMT_FLT, 4, frame_size),
+            init_filters(libav, "atempo=0.5,volume=0.1", libav.AV_SAMPLE_FMT_FLT, 4, frame_size),
             libav.AVFrame_sample_rate_s(frame, 48000)
         ]);
 
@@ -198,13 +203,11 @@ function main() {
 
         }
 
+        print("Done");
+
     }).catch(function(err) {
         print(err + "\n" + err.stack);
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();
