@@ -3,7 +3,7 @@ EMCC=emcc
 MINIFIER=closure-compiler --language_in ECMASCRIPT5
 CFLAGS=
 EFLAGS=\
-	--memory-init-file 0 --post-js post.js \
+	--memory-init-file 0 --post-js post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@exports.json" \
 	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
@@ -25,7 +25,7 @@ build-%: libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION)-%.asm.js libav-$(L
 	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) > libav-$(LIBAVJS_VERSION)-$*.js
 
 
-libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg exports.json post.js bindings.c
+libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg exports.json post.js extern-post.js bindings.c
 	$(EMCC) $(CFLAGS) $(EFLAGS) -s WASM=0 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-$* \
 		bindings.c \
@@ -38,7 +38,7 @@ libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg expor
 	cat configs/$*/license.js $@ > $@.tmp
 	mv $@.tmp $@
 
-libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg exports.json post.js bindings.c
+libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg exports.json post.js extern-post.js bindings.c
 	$(EMCC) $(CFLAGS) $(EFLAGS) \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-$* \
 		bindings.c \

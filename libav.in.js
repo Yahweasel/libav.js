@@ -44,7 +44,7 @@
     libav.LibAV = function(opts) {
         opts = opts || {};
         var wasm = !opts.nowasm && isWebAssemblySupported();
-        var ret, threads;
+        var ret;
 
         return Promise.all([]).then(function() {
             // Step one: Get LibAV loaded
@@ -52,6 +52,9 @@
                 if (nodejs) {
                     // Node.js: Load LibAV now
                     libav.LibAVFactory = require(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
+
+                } else if (typeof Worker !== "undefined" && !opts.noworker) {
+                    // Worker: Nothing to load now
 
                 } else {
                     // Web: Load the script
@@ -72,7 +75,7 @@
 
         }).then(function() {
             // Step two: Create the underlying instance
-            if (!nodejs && typeof Worker !== "undefined" && !libav.noworker) {
+            if (!nodejs && typeof Worker !== "undefined" && !opts.noworker) {
                 // Worker thread
                 ret = {};
 
@@ -100,7 +103,7 @@
                         var msg = Array.prototype.slice.call(arguments);
                         return new Promise(function(res, rej) {
                             var id = ret.on++;
-                            msg[0] = id;
+                            msg = [id].concat(msg);
                             ret.handlers[id] = [res, rej];
                             ret.worker.postMessage(msg);
                         });
@@ -169,14 +172,8 @@
 
                 } else {
                     ret[f] = function() {
-                        return ret.c.apply(ret, [0, f].concat(Array.prototype.slice.call(arguments)));
+                        return ret.c.apply(ret, [f].concat(Array.prototype.slice.call(arguments)));
                     };
-
-                    for (var i = 1; i < threads; i++) (function(i) {
-                        ret.targets[i][f] = function() {
-                            return ret.c.apply(ret, [i, f].concat(Array.prototype.slice.call(arguments)));
-                        };
-                    })(i);
 
                 }
             });

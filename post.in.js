@@ -880,35 +880,3 @@ var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
     }
     return ptr;
 };
-
-if (typeof importScripts !== "undefined") {
-    // We're a WebWorker, so arrange messages
-    onmessage = function(e) {
-        var id = e.data[0];
-        var fun = e.data[1];
-        var args = e.data.slice(2);
-        var ret = void 0;
-        var succ = true;
-        try {
-            ret = Module[fun].apply(Module, args);
-        } catch (ex) {
-            succ = false;
-            ret = ex.toString() + "\n" + ex.stack;
-        }
-        postMessage([id, fun, succ, ret]);
-    };
-
-    Module.onRuntimeInitialized = function() {
-        postMessage(["onready", "onRuntimeInitialized", true, null]);
-    };
-
-    // If we're not WebAssembly, then we're already initialized
-    if (!Module.wasmMemory)
-        Module.onRuntimeInitialized();
-
-    Module.onwrite = function(name, pos, buf) {
-        /* We have to buf.slice(0) so we don't duplicate the entire heap just
-         * to get one part of it in postMessage */
-        postMessage(["onwrite", "onwrite", true, [name, pos, buf.slice(0)]]);
-    };
-}
