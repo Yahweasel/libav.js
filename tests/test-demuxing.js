@@ -15,8 +15,7 @@ function print(txt) {
 }
 
 // This is a loose port of doc/examples/demuxing_decoding.c
-function open_codec_context(fmt_ctx) {
-    var libav = LibAV;
+function open_codec_context(libav, fmt_ctx) {
     var stream_index, st, codecpar, dec, dec_ctx;
 
     return libav.av_find_best_stream(fmt_ctx, libav.AVMEDIA_TYPE_AUDIO, -1, -1, 0, 0).then(function(ret) {
@@ -65,31 +64,35 @@ function open_codec_context(fmt_ctx) {
 }
 
 function main() {
-    var libav = LibAV;
+    var libav;
     var fmt_ctx, audio_stream_idx, pkt, frame, codec, c;
     var inPackets;
 
-    new Promise(function(res, rej) {
-        if (typeof XMLHttpRequest !== "undefined") {
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = "arraybuffer";
-            xhr.open("GET", "exa.opus", true);
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+        return new Promise(function(res, rej) {
+            if (typeof XMLHttpRequest !== "undefined") {
+                var xhr = new XMLHttpRequest();
+                xhr.responseType = "arraybuffer";
+                xhr.open("GET", "exa.opus", true);
 
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200)
-                        res(xhr.response);
-                    else
-                        rej(xhr.status);
-                }
-            };
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200)
+                            res(xhr.response);
+                        else
+                            rej(xhr.status);
+                    }
+                };
 
-            xhr.send();
+                xhr.send();
 
-        } else {
-            res(fs.readFileSync("exa.opus").buffer);
+            } else {
+                res(fs.readFileSync("exa.opus").buffer);
 
-        }
+            }
+
+        });
 
     }).then(function(ret) {
         return libav.writeFile("tmp.opus", new Uint8Array(ret));
@@ -102,7 +105,7 @@ function main() {
         if (fmt_ctx === 0)
             throw new Error("Could not open source file");
 
-        return open_codec_context(fmt_ctx);
+        return open_codec_context(libav, fmt_ctx);
 
     }).then(function(ret) {
         audio_stream_idx = ret[0];
@@ -161,8 +164,4 @@ function main() {
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

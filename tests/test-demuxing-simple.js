@@ -15,30 +15,34 @@ function print(txt) {
 }
 
 function main() {
-    var libav = LibAV;
+    var libav;
     var fmt_ctx, streams, audio_stream_idx, pkt, frame, codec, c;
 
-    new Promise(function(res, rej) {
-        if (typeof XMLHttpRequest !== "undefined") {
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = "arraybuffer";
-            xhr.open("GET", "exa.opus", true);
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+        return new Promise(function(res, rej) {
+            if (typeof XMLHttpRequest !== "undefined") {
+                var xhr = new XMLHttpRequest();
+                xhr.responseType = "arraybuffer";
+                xhr.open("GET", "exa.opus", true);
 
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200)
-                        res(xhr.response);
-                    else
-                        rej(xhr.status);
-                }
-            };
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200)
+                            res(xhr.response);
+                        else
+                            rej(xhr.status);
+                    }
+                };
 
-            xhr.send();
+                xhr.send();
 
-        } else {
-            res(fs.readFileSync("exa.opus").buffer);
+            } else {
+                res(fs.readFileSync("exa.opus").buffer);
 
-        }
+            }
+
+        });
 
     }).then(function(ret) {
         return libav.writeFile("tmp.opus", new Uint8Array(ret));
@@ -95,8 +99,4 @@ function main() {
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

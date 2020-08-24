@@ -18,10 +18,14 @@ function print(txt) {
 /* This is sort of a port of doc/examples/decode_audio.c, but with
  * no demuxing, and with Opus */
 function main() {
-    var libav = LibAV;
+    var libav;
     var pkt, frame, codec, c;
 
-    libav.ff_init_decoder("libopus").then(function(ret) {
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+        return libav.ff_init_decoder("libopus");
+
+    }).then(function(ret) {
         codec = ret[0];
         c = ret[1];
         pkt = ret[2];
@@ -52,8 +56,4 @@ function main() {
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

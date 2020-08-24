@@ -15,8 +15,7 @@ function print(txt) {
 }
 
 // This is a port of doc/examples/encode_audio.c, but using Opus
-function encode(ctx, frame, pkt) {
-    var libav = LibAV;
+function encode(libav, ctx, frame, pkt) {
     return libav.avcodec_send_frame(ctx, frame).then(function(ret) {
         if (ret < 0)
             throw new Error("Error sending the frame to the encoder");
@@ -53,9 +52,14 @@ function encode(ctx, frame, pkt) {
 }
 
 function main() {
-    var libav = LibAV;
+    var libav;
     var codec, c, pkt, frame, frame_size;
-    libav.avcodec_find_encoder_by_name("libopus").then(function(ret) {
+
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+        return libav.avcodec_find_encoder_by_name("libopus");
+
+    }).then(function(ret) {
         codec = ret;
         if (codec === 0)
             throw new Error("Codec not found");
@@ -131,13 +135,13 @@ function main() {
                 return libav.copyin_f32(samples, samplesIn);
 
             }).then(function() {
-                return encode(c, frame, pkt);
+                return encode(libav, c, frame, pkt);
 
             });
         })(i);
 
         return p.then(function() {
-            return encode(c, 0, pkt);
+            return encode(libav, c, 0, pkt);
         });
 
     }).then(function() {
@@ -157,8 +161,4 @@ function main() {
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

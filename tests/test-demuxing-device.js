@@ -15,32 +15,36 @@ function print(txt) {
 }
 
 function main() {
-    var libav = LibAV;
+    var libav;
     var fmt_ctx, streams, audio_stream_idx, pkt, frame, codec, c;
     var buf, rd = 0;
     var packets = [];
 
-    new Promise(function(res, rej) {
-        if (typeof XMLHttpRequest !== "undefined") {
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = "arraybuffer";
-            xhr.open("GET", "exa.opus", true);
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+        return new Promise(function(res, rej) {
+            if (typeof XMLHttpRequest !== "undefined") {
+                var xhr = new XMLHttpRequest();
+                xhr.responseType = "arraybuffer";
+                xhr.open("GET", "exa.opus", true);
 
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200)
-                        res(xhr.response);
-                    else
-                        rej(xhr.status);
-                }
-            };
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200)
+                            res(xhr.response);
+                        else
+                            rej(xhr.status);
+                    }
+                };
 
-            xhr.send();
+                xhr.send();
 
-        } else {
-            res(fs.readFileSync("exa.opus").buffer);
+            } else {
+                res(fs.readFileSync("exa.opus").buffer);
 
-        }
+            }
+
+        })
 
     }).then(function(ret) {
         // Send the first 64K (NOTE: We know this as a magic number; use a larger buffer!)
@@ -133,8 +137,4 @@ function main() {
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();

@@ -17,9 +17,7 @@ function print(txt) {
 
 /* This is sort of a port of doc/examples/decode_audio.c, but with
  * no demuxing, and with Opus */
-function decode(dec_ctx, pkt, frame) {
-    var libav = LibAV;
-
+function decode(libav, dec_ctx, pkt, frame) {
     return libav.avcodec_send_packet(dec_ctx, pkt).then(function(ret) {
         if (ret < 0)
             throw new Error("Error submitting the packet to the decoder");
@@ -49,14 +47,17 @@ function decode(dec_ctx, pkt, frame) {
 }
 
 function main() {
-    var libav = LibAV;
+    var libav;
     var pkt, frame, codec, c;
 
-    Promise.all([
-        libav.av_packet_alloc(),
-        libav.av_frame_alloc(),
-        libav.avcodec_find_decoder_by_name("libopus")
-    ]).then(function(ret) {
+    LibAV.LibAV().then(function(ret) {
+        libav = ret;
+        return Promise.all([
+            libav.av_packet_alloc(),
+            libav.av_frame_alloc(),
+            libav.avcodec_find_decoder_by_name("libopus")
+        ])
+    }).then(function(ret) {
         pkt = ret[0];
         frame = ret[1];
         codec = ret[2];
@@ -93,7 +94,7 @@ function main() {
                     throw new Error();
                 return libav.ff_set_packet(pkt, inPacket);
             }).then(function() {
-                return decode(c, pkt, frame);
+                return decode(libav, c, pkt, frame);
             });
         });
 
@@ -101,7 +102,7 @@ function main() {
             return libav.av_packet_unref(pkt);
         }).then(function() {
             // Flush the decoder
-            return decode(c, pkt, frame);
+            return decode(libav, c, pkt, frame);
         });
 
     }).then(function() {
@@ -119,8 +120,4 @@ function main() {
     });
 }
 
-if (LibAV.ready) {
-    main();
-} else {
-    LibAV.onready = main;
-}
+main();
