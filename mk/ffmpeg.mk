@@ -8,11 +8,13 @@ ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak: ffmpeg-$(FFMPEG_VERSION)/co
 	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-$* ; \
 	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst/lib/pkgconfig" \
-		../configure --prefix=/opt/ffmpeg --cc=emcc \
+		../configure --prefix=/opt/ffmpeg \
+		--cc=emcc --ranlib=emranlib \
 		--extra-cflags="-I$(PWD)/tmp-inst/include" \
 		--extra-ldflags="-L$(PWD)/tmp-inst/lib" \
 		--arch=emscripten --enable-small --disable-doc \
-		--disable-stripping --disable-sdl2 \
+		--disable-stripping --disable-pthreads \
+		--disable-sdl2 \
 		--disable-everything \
 		`cat ../../configs/$*/ffmpeg-config.txt`
 

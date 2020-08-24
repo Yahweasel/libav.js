@@ -230,7 +230,7 @@
             ret.AVIO_FLAG_DIRECT = 0x8000;
 
             // Errors
-            ret.EAGAIN = 11;
+            ret.EAGAIN = 6;
             ret.AVERROR_EOF = -0x20464f45;
 
             return ret;

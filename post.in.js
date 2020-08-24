@@ -16,7 +16,7 @@
 var ERRNO_CODES = {
     EPERM: 1,
     EIO: 5,
-    EAGAIN: 11,
+    EAGAIN: 6,
     ESPIPE: 29
 };
 
@@ -233,7 +233,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
 
         while (true) {
             ret = avcodec_receive_packet(ctx, pkt);
-            if (ret === -11 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
+            if (ret === -6 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
                 return;
             else if (ret < 0)
                 throw new Error("Error encoding audio frame: " + ff_error(ret));
@@ -288,7 +288,7 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
 
         while (true) {
             ret = avcodec_receive_frame(ctx, frame);
-            if (ret === -11 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
+            if (ret === -6 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
                 return;
             else if (ret < 0)
                 throw new Error("Error decoding audio frame: " + ff_error(ret));
@@ -421,7 +421,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit
     while (true) {
         // If we risk running past the end of the currently-read data, stop now
         if (dev && !dev.eof && dev.buf.length < 32*1024)
-            return [-11 /* EAGAIN */, outPackets];
+            return [-6 /* EAGAIN */, outPackets];
 
         // Read the frame
         var ret = av_read_frame(fmt_ctx, pkt);
@@ -436,7 +436,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit
         av_packet_unref(pkt);
         sz += packet.data.length;
         if (limit && sz >= limit)
-            return [-11 /* EAGAIN */, outPackets];
+            return [-6 /* EAGAIN */, outPackets];
     }
 };
 
@@ -616,7 +616,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
 
         while (true) {
             ret = av_buffersink_get_frame(buffersink_ctx, framePtr);
-            if (ret === -11 /* EGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
+            if (ret === -6 /* EAGAIN */ || ret === -0x20464f45 /* AVERROR_EOF */)
                 break;
             if (ret < 0)
                 throw new Error("Error while receiving a frame from the filtergraph: " + ff_error(ret));
