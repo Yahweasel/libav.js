@@ -10,16 +10,18 @@ discussed below.
 libav.js exposes a global variable, LibAV, for all API access. If LibAV is set
 before loading the library, libav.js does *not* replace it, but extends it:
 This gives you an opportunity to pass in values critical for loading. In
-particular, libav-`version`-`variant`.js only chooses whether to use a Web
-Worker or not and whether to use WebAssembly or not, then loads the appropriate
-version, for which it needs the base directory from which to load. If the base
-directory isn't ".", set LibAV.base to the correct base directory.
+particular, if the base directory (directory in which libav's files are
+located) isn't ".", then you must set `LibAV.base` to the correct base
+directory.
 
-libav.js is ready when `LibAV.ready` is `true`. If `LibAV.ready` is false, you
-may set `LibAV.onready` to a function to call when it's ready.
+`LibAV.LibAV` is a factory function which returns a promise which resolves to a
+ready instance of libav. `LibAV.LibAV` takes an optional argument in which
+loading options may be provided, but they're rarely useful. The only loading
+options are `noworker` and `nowasm`, to disable using Web Workers are
+WebAssembly, respectively.
 
-Otherwise, the API exposed by `LibAV` is more-or-less exactly the functions
-exposed by the `libav` libraries, using promises. Because of the promise-based
+Otherwise, the API exposed by libav.js is more-or-less exactly the functions
+exposed by the libav libraries, using promises. Because of the promise-based
 design, the interface is identical whether Web Workers are used or not.
 
 For an exact list of the functions, see `funcs.json`. Some libav functions take
@@ -46,15 +48,16 @@ disable most bells and most whistles and build specific versions with specific
 features.
 
 The default build, libav-`version`-default.js, includes supports for all of the
-most important formats for the web: Opus in WebM or ogg containers, AAC in the
-M4A container, and FLAC and 16- or 24-bit wav in their respective containers.
-Also supported are all valid combinations of those formats and containers, e.g.
-any codec in Matroska (since WebM is Matroska), FLAC in ogg, etc.
+most important audio formats for the web: Opus in WebM or ogg containers, AAC
+in the M4A container, and FLAC and 16- or 24-bit wav in their respective
+containers. Also supported are all valid combinations of those formats and
+containers, e.g. any codec in Matroska (since WebM is Matroska), FLAC in ogg,
+etc.
 
 Use `make build-variant`, replacing `variant` with the variant name, to build
 another variant.
 
-libav.js includes three other variants:
+libav.js includes several other variants:
 
 The “lite” variant removes, relative to the default variant, AAC and the M4A
 container.
@@ -73,16 +76,20 @@ don't let friends use MP3.
 
 The “opus”, “flac”, and “opus-flac” variants are intended just for encoding or
 decoding Opus and/or FLAC. They include only their named format(s), the
-appropriate container(s), and the aresample filter. With Opus in particular,
-this is a better option than a simple conversion of libopus to JavaScript,
-because Opus mandates a limited range of audio sample rates, so having a
-resampler is beneficial.
+appropriate container(s), and the aresample filter; in particular, no other
+filters are provided whatsoever. With Opus in particular, this is a better
+option than a simple conversion of libopus to JavaScript, because Opus mandates
+a limited range of audio sample rates, so having a resampler is beneficial.
 
-The “webm” variant includes support for vp8 video, but only enough to copy such
-streams; no actual video decoding or encoding is yet supported.
+The “webm” variant, relative to the default variant, includes support for VP8
+video, but only enough to copy such streams; no actual video decoding or
+encoding is yet supported.
+
+The “webm-opus-flac” variant, relative to “opus-flac”, includes support for VP8
+video, as “webm”, but excludes all filters except aresample.
 
 To create other variants, simply create the configuration for them in `configs`
 and, if necessary, add Makefile fragments to `mk`. This is intentionally
 designed so that you can add new configurations without needing to patch
-anything that already exists. See the two existing variants' configuration
-files in `config` and the existing fragments in `mk` to understand how.
+anything that already exists. See the existing variants' configuration files in
+`config` and the existing fragments in `mk` to understand how.
