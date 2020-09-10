@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-2.0.4.3.1-webm.js");
+    LibAV = require("../libav-2.1.4.3.1-webm.js");
     fs = require("fs");
 }
 

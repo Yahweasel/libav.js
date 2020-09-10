@@ -1,7 +1,7 @@
-LIBAVJS_VERSION=2.0.4.3.1
+LIBAVJS_VERSION=2.1.4.3.1
 EMCC=emcc
 MINIFIER=closure-compiler --language_in ECMASCRIPT5
-CFLAGS=
+CFLAGS=-Oz
 EFLAGS=\
 	--memory-init-file 0 --post-js post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \

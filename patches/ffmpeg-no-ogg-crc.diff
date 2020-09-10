@@ -1,0 +1,24 @@
+diff -r 8f06199c290d PATCHED
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/PATCHED	Thu Sep 10 14:39:54 2020 -0400
+@@ -0,0 +1,1 @@
++PATCHED
+diff -r 8f06199c290d libavformat/oggdec.c
+--- a/libavformat/oggdec.c	Thu Sep 10 14:39:34 2020 -0400
++++ b/libavformat/oggdec.c	Thu Sep 10 14:39:54 2020 -0400
+@@ -408,6 +408,7 @@
+         return ret < 0 ? ret : AVERROR_EOF;
+     }
+ 
++#if 0
+     if (crc ^ ffio_get_checksum(bc)) {
+         av_log(s, AV_LOG_ERROR, "CRC mismatch!\n");
+         if (idx < 0)
+@@ -416,6 +417,7 @@
+         *sid = -1;
+         return 0;
+     }
++#endif
+ 
+     /* Since we're almost sure its a valid packet, checking the version after
+      * the checksum lets the demuxer be more tolerant */

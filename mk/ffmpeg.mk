@@ -3,7 +3,7 @@ FFMPEG_VERSION=4.3.1
 ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg: ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
 	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; emmake $(MAKE)
 
-ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak: ffmpeg-$(FFMPEG_VERSION)/configure configs/%/ffmpeg-config.txt
+ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak: ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
 	test ! -e configs/$*/deps.txt || $(MAKE) `cat configs/$*/deps.txt`
 	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-$* ; \
 	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; \
@@ -17,6 +17,9 @@ ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak: ffmpeg-$(FFMPEG_VERSION)/co
 		--disable-sdl2 \
 		--disable-everything \
 		`cat ../../configs/$*/ffmpeg-config.txt`
+
+ffmpeg-$(FFMPEG_VERSION)/PATCHED: ffmpeg-$(FFMPEG_VERSION)/configure
+	cd ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../patches/ffmpeg-no-ogg-crc.diff
 
 ffmpeg-$(FFMPEG_VERSION)/configure: ffmpeg-$(FFMPEG_VERSION).tar.xz
 	tar Jxf ffmpeg-$(FFMPEG_VERSION).tar.xz
