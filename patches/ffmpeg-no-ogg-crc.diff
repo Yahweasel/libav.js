@@ -1,12 +1,56 @@
-diff -r 8f06199c290d PATCHED
+diff -r 50c53263a5a6 PATCHED
 --- /dev/null	Thu Jan 01 00:00:00 1970 +0000
-+++ b/PATCHED	Thu Sep 10 14:39:54 2020 -0400
++++ b/PATCHED	Tue Nov 17 18:37:47 2020 -0500
 @@ -0,0 +1,1 @@
 +PATCHED
-diff -r 8f06199c290d libavformat/oggdec.c
---- a/libavformat/oggdec.c	Thu Sep 10 14:39:34 2020 -0400
-+++ b/libavformat/oggdec.c	Thu Sep 10 14:39:54 2020 -0400
-@@ -408,6 +408,7 @@
+diff -r 50c53263a5a6 libavformat/oggdec.c
+--- a/libavformat/oggdec.c	Tue Nov 17 18:26:46 2020 -0500
++++ b/libavformat/oggdec.c	Tue Nov 17 18:37:47 2020 -0500
+@@ -320,10 +320,12 @@
+     int flags, nsegs;
+     uint64_t gp;
+     uint32_t serial;
+-    uint32_t crc, crc_tmp;
++    uint32_t crc /*, crc_tmp*/;
+     int size = 0, idx;
+     int64_t version, page_pos;
++#if 0
+     int64_t start_pos;
++#endif
+     uint8_t sync[4];
+     uint8_t segments[255];
+     uint8_t *readout_buf;
+@@ -360,12 +362,14 @@
+         return AVERROR_INVALIDDATA;
+     }
+ 
++#if 0
+     /* 0x4fa9b05f = av_crc(AV_CRC_32_IEEE, 0x0, "OggS", 4) */
+     ffio_init_checksum(bc, ff_crc04C11DB7_update, 0x4fa9b05f);
+ 
+     /* To rewind if checksum is bad/check magic on switches - this is the max packet size */
+     ffio_ensure_seekback(bc, MAX_PAGE_SIZE);
+     start_pos = avio_tell(bc);
++#endif
+ 
+     version = avio_r8(bc);
+     flags   = avio_r8(bc);
+@@ -373,10 +377,14 @@
+     serial  = avio_rl32(bc);
+     avio_skip(bc, 4); /* seq */
+ 
++#if 0
+     crc_tmp = ffio_get_checksum(bc);
++#endif
+     crc     = avio_rb32(bc);
++#if 0
+     crc_tmp = ff_crc04C11DB7_update(crc_tmp, (uint8_t[4]){0}, 4);
+     ffio_init_checksum(bc, ff_crc04C11DB7_update, crc_tmp);
++#endif
+ 
+     nsegs    = avio_r8(bc);
+     page_pos = avio_tell(bc) - 27;
+@@ -408,6 +416,7 @@
          return ret < 0 ? ret : AVERROR_EOF;
      }
  
@@ -14,11 +58,11 @@ diff -r 8f06199c290d libavformat/oggdec.c
      if (crc ^ ffio_get_checksum(bc)) {
          av_log(s, AV_LOG_ERROR, "CRC mismatch!\n");
          if (idx < 0)
-@@ -416,6 +417,7 @@
+@@ -427,6 +436,7 @@
          *sid = -1;
          return 0;
      }
 +#endif
  
-     /* Since we're almost sure its a valid packet, checking the version after
-      * the checksum lets the demuxer be more tolerant */
+     /* CRC is correct so we can be 99% sure there's an actual change here */
+     if (idx < 0) {
