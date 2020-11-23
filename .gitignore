@@ -1,0 +1,8 @@
+*.tar.xz
+*.tar.gz
+ffmpeg-*/
+opus-*/
+tmp-inst/
+post.js
+exports.json
+libav-[0-9]*

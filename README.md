@@ -83,10 +83,11 @@ a limited range of audio sample rates, so having a resampler is beneficial.
 
 The “webm” variant, relative to the default variant, includes support for VP8
 video, but only enough to copy such streams; no actual video decoding or
-encoding is yet supported.
-
-The “webm-opus-flac” variant, relative to “opus-flac”, includes support for VP8
-video, as “webm”, but excludes all filters except aresample.
+encoding is yet supported. The “webm-opus-flac” variant, relative to
+“opus-flac”, includes support for VP8 video, as “webm”, but excludes all
+filters except aresample. The “mediarecorder-transcoder” variant, relative to
+“webm-opus-flac”, adds MPEG-4, making it sufficient for transcoding all formats
+MediaRecorder can produce on all platforms.
 
 To create other variants, simply create the configuration for them in `configs`
 and, if necessary, add Makefile fragments to `mk`. This is intentionally

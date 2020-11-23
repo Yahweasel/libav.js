@@ -1,0 +1,13 @@
+--enable-libopus
+--enable-decoder=flac --enable-decoder=libopus
+--enable-decoder=aac
+--enable-decoder=vp8 --enable-decoder=h264
+--enable-encoder=flac --enable-encoder=libopus
+--enable-encoder=aac
+--enable-encoder=vp8
+--enable-demuxer=matroska --enable-demuxer=mov --enable-demuxer=flac
+--enable-demuxer=ogg
+--enable-muxer=matroska --enable-muxer=webm --enable-muxer=ipod
+--enable-muxer=flac --enable-muxer=ogg
+--enable-protocol=data --enable-protocol=file --enable-protocol=pipe
+--enable-filter=aresample
