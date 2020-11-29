@@ -39,6 +39,25 @@ function decls(f, meta) {
     }
 }
 
+function mjs(inp, useMJS) {
+    var outp = "";
+    var includeBlock = true;
+    inp.trim().split("\n").forEach(line => {
+        if (line === "@IFMJS") {
+            if (!useMJS)
+                includeBlock = false;
+        } else if (line === "@IFNMJS") {
+            if (useMJS)
+                includeBlock = false;
+        } else if (line === "@ENDIF") {
+            includeBlock = true;
+        } else if (includeBlock) {
+            outp += line + "\n";
+        }
+    });
+    return outp;
+}
+
 // post.js
 (function() {
     var inp = fs.readFileSync("post.in.js", "utf8");
@@ -94,7 +113,13 @@ function decls(f, meta) {
 
     outp = inp.replace("@FUNCS", s(outp)).replace(/@VER/g, ver);
 
-    fs.writeFileSync("libav-" + ver + ".js", outp);
+    // Non-MJS version
+    var outpNMJS = mjs(outp, false);
+    fs.writeFileSync("libav-" + ver + ".js", outpNMJS);
+
+    // MJS version
+    var outpMJS = mjs(outp, true);
+    fs.writeFileSync("libav-" + ver + ".mjs", outpMJS);
 })();
 
 // exports.json

@@ -1,6 +1,7 @@
-LIBAVJS_VERSION=2.2.4.3.1
+LIBAVJS_VERSION=2.2a.4.3.1
 EMCC=emcc
-MINIFIER=closure-compiler --language_in ECMASCRIPT5
+MINIFIER=./node_modules/.bin/minify
+MFLAGS=--js
 CFLAGS=-Oz
 EFLAGS=\
 	--memory-init-file 0 --post-js post.js --extern-post-js extern-post.js \
@@ -10,10 +11,6 @@ EFLAGS=\
 	-s MODULARIZE=1 \
 	-s ALLOW_MEMORY_GROWTH=1
 
-LIBS=\
-	bindings.c \
-	tmp-inst/lib/libopus.a
-
 all: build-default
 
 include mk/*
@@ -21,8 +18,12 @@ include mk/*
 download: ffmpeg-$(FFMPEG_VERSION).tar.xz opus-$(OPUS_VERSION).tar.gz
 
 
-build-%: libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION)-%.asm.js libav-$(LIBAVJS_VERSION)-%.wasm.js
-	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) > libav-$(LIBAVJS_VERSION)-$*.js
+build-%: libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION).mjs \
+	 libav-$(LIBAVJS_VERSION)-%.asm.js libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	 $(MINIFIER)
+	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) $(MFLAGS) > libav-$(LIBAVJS_VERSION)-$*.js
+	sed "s/@CONFIG/$*/g" < libav-$(LIBAVJS_VERSION).mjs | $(MINIFIER) $(MFLAGS) > libav-$(LIBAVJS_VERSION)-$*.mjs
+	chmod a-x *.wasm
 
 
 libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg exports.json post.js extern-post.js bindings.c
@@ -54,12 +55,15 @@ libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg expo
 exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 	./apply-funcs.js $(LIBAVJS_VERSION)
 
-libav-$(LIBAVJS_VERSION).js post.js: exports.json
+libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION).mjs post.js: exports.json
 	true
 
+./node_modules/.bin/minify:
+	npm install minify
+
 halfclean:
-	-rm -f libav-$(LIBAVJS_VERSION)-*.js libav-$(LIBAVJS_VERSION)-*.wasm
-	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js
+	-rm -f libav-$(LIBAVJS_VERSION)-*.js libav-$(LIBAVJS_VERSION)-*.mjs libav-$(LIBAVJS_VERSION)-*.wasm
+	-rm -f exports.json libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION).mjs post.js
 
 clean: halfclean
 	-rm -rf tmp-inst
@@ -76,5 +80,6 @@ distclean: clean
 	-rm -rf libogg-$(LIBOGG_VERSION).tar.xz
 	-rm -rf lame-$(LAME_VERSION).tar.gz
 	-rm -f ffmpeg-$(FFMPEG_VERSION).tar.xz
+	-rm -rf node_modules
 
 .PRECIOUS: libav-$(LIBAVJS_VERSION)-%.wasm.js libav-$(LIBAVJS_VERSION)-%.asm.js ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak

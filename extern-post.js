@@ -28,13 +28,17 @@ if (typeof importScripts !== "undefined") {
                 succ = false;
                 ret = ex.toString() + "\n" + ex.stack;
             }
-            postMessage([id, fun, succ, ret]);
+            this.postMessage([id, fun, succ, ret]);
         };
 
         libav.onwrite = function(name, pos, buf) {
             /* We have to buf.slice(0) so we don't duplicate the entire heap just
              * to get one part of it in postMessage */
             postMessage(["onwrite", "onwrite", true, [name, pos, buf.slice(0)]]);
+        };
+
+        libav.addMessagePort = function(port) {
+            port.onmessage = onmessage;
         };
 
         postMessage(["onready", "onready", true, null]);

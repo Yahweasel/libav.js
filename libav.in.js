@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Yahweasel
+ * Copyright (C) 2020 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -12,6 +12,10 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+
+@IFMJS
+var LibAV;
+@ENDIF
 
 (function() {
     function isWebAssemblySupported() {
@@ -53,7 +57,7 @@
                     // Node.js: Load LibAV now
                     libav.LibAVFactory = require(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
 
-                } else if (typeof Worker !== "undefined" && !opts.noworker) {
+                } else if (opts.worker || (typeof Worker !== "undefined" && !opts.noworker)) {
                     // Worker: Nothing to load now
 
                 } else {
@@ -75,17 +79,18 @@
 
         }).then(function() {
             // Step two: Create the underlying instance
-            if (!nodejs && typeof Worker !== "undefined" && !opts.noworker) {
+            if (opts.worker || (!nodejs && typeof Worker !== "undefined" && !opts.noworker)) {
                 // Worker thread
                 ret = {};
 
                 // Load the worker
-                ret.worker = new Worker(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
+                if (opts.worker)
+                    ret.worker = opts.worker;
+                else
+                    ret.worker = new Worker((opts.base||base) + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
 
                 // Report our readiness
                 return new Promise(function(res, rej) {
-                    var ready = 0;
-
                     // Our handlers
                     ret.on = 1;
                     ret.handlers = {
@@ -121,6 +126,9 @@
                         }
                     };
                     ret.worker.onmessage = onworkermessage;
+
+                    if (opts.worker)
+                        res(); // Worker already ready
                 });
 
             } else { // Not Workers
@@ -177,6 +185,19 @@
 
                 }
             });
+
+            // Wrapper for adding a new port
+            if (ret.worker) {
+                ret.addMessagePort = function(port) {
+                    return new Promise(function(res, rej) {
+                        var id = ret.on++;
+                        msg = [id, "addMessagePort", port];
+                        ret.handlers[id] = [res, rej];
+                        ret.worker.postMessage(msg, [port]);
+                    });
+                };
+            }
+
 
             // Convenience multi-part setters (NOTE: Only single-threaded!)
             [
@@ -238,3 +259,7 @@
         module.exports = libav;
 
 })();
+
+@IFMJS
+export default LibAV;
+@ENDIF
