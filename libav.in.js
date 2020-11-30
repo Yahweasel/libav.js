@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Yahweasel
+ * Copyright (C) 2019-2020 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -49,18 +49,24 @@
         return Promise.all([]).then(function() {
             // Step one: Get LibAV loaded
             if (!libav.LibAVFactory) {
+                var toImport = base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js";
                 if (nodejs) {
                     // Node.js: Load LibAV now
-                    libav.LibAVFactory = require(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
+                    libav.LibAVFactory = require(toImport);
 
                 } else if (typeof Worker !== "undefined" && !opts.noworker) {
                     // Worker: Nothing to load now
+
+                } else if (typeof importScripts !== "undefined") {
+                    // Worker scope. Import it.
+                    importScripts(toImport);
+                    libav.LibAVFactory = LibAVFactory;
 
                 } else {
                     // Web: Load the script
                     return new Promise(function(res, rej) {
                         var scr = document.createElement("script");
-                        scr.src = base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js";
+                        scr.src = toImport;
                         scr.addEventListener("load", res);
                         scr.addEventListener("error", rej);
                         scr.async = true;

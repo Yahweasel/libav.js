@@ -13,7 +13,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-if (typeof importScripts !== "undefined") {
+if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" || !LibAV.nolibavworker)) {
     // We're a WebWorker, so arrange messages
     LibAVFactory().then(function(libav) {
         onmessage = function(e) {
