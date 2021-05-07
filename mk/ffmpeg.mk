@@ -1,4 +1,4 @@
-FFMPEG_VERSION=4.3.1
+FFMPEG_VERSION=4.4
 
 ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg: ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
 	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; emmake $(MAKE)
@@ -27,3 +27,6 @@ ffmpeg-$(FFMPEG_VERSION)/configure: ffmpeg-$(FFMPEG_VERSION).tar.xz
 
 ffmpeg-$(FFMPEG_VERSION).tar.xz:
 	curl https://ffmpeg.org/releases/ffmpeg-$(FFMPEG_VERSION).tar.xz -o $@
+
+ffmpeg-release:
+	cp ffmpeg-$(FFMPEG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/

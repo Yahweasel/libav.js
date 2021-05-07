@@ -17,3 +17,6 @@ opus-$(OPUS_VERSION)/configure: opus-$(OPUS_VERSION).tar.gz
 
 opus-$(OPUS_VERSION).tar.gz:
 	curl https://downloads.xiph.org/releases/opus/opus-$(OPUS_VERSION).tar.gz -L -o $@
+
+opus-release:
+	cp opus-$(OPUS_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/

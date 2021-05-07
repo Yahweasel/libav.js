@@ -16,3 +16,6 @@ lame-$(LAME_VERSION)/configure: lame-$(LAME_VERSION).tar.gz
 
 lame-$(LAME_VERSION).tar.gz:
 	curl https://sourceforge.net/projects/lame/files/lame/$(LAME_VERSION)/lame-$(LAME_VERSION).tar.gz -L -o $@
+
+lame-release:
+	cp lame-$(LAME_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/

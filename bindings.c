@@ -96,6 +96,7 @@ void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
 #define B(type, field) A(AVCodecParameters, type, field)
 B(enum AVCodecID, codec_id)
 B(enum AVMediaType, codec_type)
+B(uint8_t *, extradata)
 #undef B
 
 /* AVPacket */

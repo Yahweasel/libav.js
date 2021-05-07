@@ -20,3 +20,6 @@ libvorbis-$(LIBVORBIS_VERSION)/configure: libvorbis-$(LIBVORBIS_VERSION).tar.xz
 
 libvorbis-$(LIBVORBIS_VERSION).tar.xz:
 	curl https://downloads.xiph.org/releases/vorbis/libvorbis-$(LIBVORBIS_VERSION).tar.xz -L -o $@
+
+libvorbis-release:
+	cp libvorbis-$(LIBVORBIS_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/

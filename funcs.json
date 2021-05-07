@@ -132,7 +132,8 @@
         ]],
         ["AVCodecParameters", [
             "codec_id",
-            "codec_type"
+            "codec_type",
+            "extradata"
         ]],
         ["AVPacket", [
             "pts",

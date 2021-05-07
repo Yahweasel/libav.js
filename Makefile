@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=2.3.4.3.1
+LIBAVJS_VERSION=2.3.4.4
 EMCC=emcc
 MINIFIER=closure-compiler --language_in ECMASCRIPT5
 CFLAGS=-Oz
@@ -57,6 +57,27 @@ exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 
 libav-$(LIBAVJS_VERSION).js post.js: exports.json
 	true
+
+release:
+	mkdir libav.js-$(LIBAVJS_VERSION)
+	for v in default lite fat obsolete opus flac opus-flac webm webm-opus-flac mediarecorder-transcoder; \
+	do \
+	    $(MAKE) build-$$v; \
+	    cp libav-$(LIBAVJS_VERSION)-$$v.js \
+	       libav-$(LIBAVJS_VERSION)-$$v.asm.js \
+	       libav-$(LIBAVJS_VERSION)-$$v.wasm.js \
+	       libav-$(LIBAVJS_VERSION)-$$v.wasm.wasm \
+	       libav.js-$(LIBAVJS_VERSION)/; \
+	done
+	mkdir libav.js-$(LIBAVJS_VERSION)/sources
+	for t in ffmpeg lame libogg libvorbis opus; \
+	do \
+	    $(MAKE) $$t-release; \
+	done
+	git archive HEAD -o libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
+	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
+	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
+	rm -rf libav.js-$(LIBAVJS_VERSION)
 
 halfclean:
 	-rm -f libav-$(LIBAVJS_VERSION)-*.js libav-$(LIBAVJS_VERSION)-*.wasm

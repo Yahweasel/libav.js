@@ -1,8 +1,14 @@
 *.tar.xz
 *.tar.gz
 ffmpeg-*/
+lame-*/
+libogg-*/
+libvorbis-*/
 opus-*/
+tests/out.ogg
+tests/out.opus
 tmp-inst/
 post.js
 exports.json
 libav-[0-9]*
+libav.js-[0-9]*.zip

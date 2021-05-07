@@ -17,3 +17,6 @@ libogg-$(LIBOGG_VERSION)/configure: libogg-$(LIBOGG_VERSION).tar.xz
 
 libogg-$(LIBOGG_VERSION).tar.xz:
 	curl https://downloads.xiph.org/releases/ogg/libogg-$(LIBOGG_VERSION).tar.xz -L -o $@
+
+libogg-release:
+	cp libogg-$(LIBOGG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
