@@ -17,7 +17,7 @@ directory.
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
 ready instance of libav. `LibAV.LibAV` takes an optional argument in which
 loading options may be provided, but they're rarely useful. The only loading
-options are `noworker` and `nowasm`, to disable using Web Workers are
+options are `noworker` and `nowasm`, to disable using Web Workers and
 WebAssembly, respectively.
 
 Otherwise, the API exposed by libav.js is more-or-less exactly the functions
