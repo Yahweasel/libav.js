@@ -127,6 +127,11 @@
                         }
                     };
                     ret.worker.onmessage = onworkermessage;
+
+                    // And termination
+                    ret.terminate = function() {
+                        ret.worker.terminate();
+                    };
                 });
 
             } else { // Not Workers
@@ -154,6 +159,9 @@
                             }
                         });
                     };
+
+                    // No termination
+                    ret.terminate = function() {};
                 });
 
             }
