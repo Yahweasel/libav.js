@@ -413,14 +413,22 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
 };
 
 /* Read many packets at once, done at this level to avoid message passing */
-var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit) {
+var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts) {
     var sz = 0;
     var outPackets = {};
     var dev = Module.readBuffers[devfile];
 
+    if (typeof opts === "number")
+        opts = {limit: opts};
+    if (typeof opts === "undefined")
+        opts = {};
+    var devLimit = 32*1024;
+    if (opts.devLimit)
+        devLimit = opts.devLimit;
+
     while (true) {
         // If we risk running past the end of the currently-read data, stop now
-        if (dev && !dev.eof && dev.buf.length < 32*1024)
+        if (dev && !dev.eof && dev.buf.length < devLimit)
             return [-6 /* EAGAIN */, outPackets];
 
         // Read the frame
@@ -435,7 +443,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, limit
         outPackets[packet.stream_index].push(packet);
         av_packet_unref(pkt);
         sz += packet.data.length;
-        if (limit && sz >= limit)
+        if (opts.limit && sz >= opts.limit)
             return [-6 /* EAGAIN */, outPackets];
     }
 };

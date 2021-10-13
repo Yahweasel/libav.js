@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=2.3.4.4
+LIBAVJS_VERSION=2.4.4.4
 EMCC=emcc
 MINIFIER=closure-compiler --language_in ECMASCRIPT5
 CFLAGS=-Oz
