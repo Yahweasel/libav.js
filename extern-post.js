@@ -28,7 +28,21 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" || !Li
                 succ = false;
                 ret = ex.toString() + "\n" + ex.stack;
             }
-            postMessage([id, fun, succ, ret]);
+            if (succ && typeof ret === "object" && ret !== null && ret.then) {
+                // Let the promise resolve
+                ret.then(function(res) {
+                    ret = res;
+                }).catch(function(ex) {
+                    succ = false;
+                    ret = ex.toString() + "\n" + ex.stack;
+                }).then(function() {
+                    postMessage([id, fun, succ, ret]);
+                });
+
+            } else {
+                postMessage([id, fun, succ, ret]);
+
+            }
         };
 
         libav.onwrite = function(name, pos, buf) {

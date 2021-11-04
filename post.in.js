@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019, 2020 Yahweasel
+ * Copyright (C) 2019-2021 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -46,7 +46,7 @@ var readerCallbacks = {
         var ret;
         if (length < data.buf.length) {
             // Cut a slice
-            ret = data.buf.slice(0, length);
+            ret = data.buf.subarray(0, length);
             data.buf = data.buf.slice(length);
         } else {
             // Get the beginning
@@ -99,6 +99,7 @@ var writerCallbacks = {
 
 @FUNCS
 
+// Filesystem
 var readerDev = FS.makedev(44, 0);
 FS.registerDevice(readerDev, readerCallbacks);
 Module.readBuffers = {};
@@ -118,6 +119,9 @@ Module.mkwriterdev = function(loc, mode) {
     return 0;
 };
 
+// Users waiting to read
+Module.ff_reader_dev_waiters = [];
+
 /* Send some data to a reader device */
 var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
     var idata;
@@ -128,13 +132,20 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
     if (data === null) {
         // EOF
         idata.eof = true;
-        return;
+
+    } else {
+        var newbuf = new Uint8Array(idata.buf.length + data.length);
+        newbuf.set(idata.buf);
+        newbuf.set(data, idata.buf.length);
+        idata.buf = newbuf;
+
     }
 
-    var newbuf = new Uint8Array(idata.buf.length + data.length);
-    newbuf.set(idata.buf);
-    newbuf.set(data, idata.buf.length);
-    idata.buf = newbuf;
+    // Wake up waiters
+    var waiters = Module.ff_reader_dev_waiters;
+    Module.ff_reader_dev_waiters = [];
+    for (var i = 0; i < waiters.length; i++)
+        waiters[i]();
 };
 
 /* Metafunction to initialize an encoder with all the bells and whistles
@@ -370,31 +381,40 @@ var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
 
 /* Initialize a demuxer from a file, format context, and get the list of codecs/types */
 var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt) {
-    var fmt_ctx = avformat_open_input_js(filename, fmt?fmt:null, null);
-    if (fmt_ctx === 0)
-        throw new Error("Could not open source file");
-    var nb_streams = AVFormatContext_nb_streams(fmt_ctx);
-    var streams = [];
-    for (var i = 0; i < nb_streams; i++) {
-        var inStream = AVFormatContext_streams_a(fmt_ctx, i);
-        var outStream = {};
-        var codecpar = AVStream_codecpar(inStream);
-        outStream.index = i;
+    var fmt_ctx;
 
-        // Codec info
-        outStream.codecpar = codecpar;
-        outStream.codec_type = AVCodecParameters_codec_type(codecpar);
-        outStream.codec_id = AVCodecParameters_codec_id(codecpar);
+    return Promise.all([]).then(function() {
+        return avformat_open_input_js(filename, fmt?fmt:null, null);
 
-        // Duration and related
-        outStream.time_base_num = AVStream_time_base_num(inStream);
-        outStream.time_base_den = AVStream_time_base_den(inStream);
-        outStream.duration_time_base = AVStream_duration(inStream) + (AVStream_durationhi(inStream)*0x100000000);
-        outStream.duration = outStream.duration_time_base * outStream.time_base_num / outStream.time_base_den;
+    }).then(function(ret) {
+        fmt_ctx = ret;
+        if (fmt_ctx === 0)
+            throw new Error("Could not open source file");
 
-        streams.push(outStream);
-    }
-    return [fmt_ctx, streams];
+        var nb_streams = AVFormatContext_nb_streams(fmt_ctx);
+        var streams = [];
+        for (var i = 0; i < nb_streams; i++) {
+            var inStream = AVFormatContext_streams_a(fmt_ctx, i);
+            var outStream = {};
+            var codecpar = AVStream_codecpar(inStream);
+            outStream.index = i;
+
+            // Codec info
+            outStream.codecpar = codecpar;
+            outStream.codec_type = AVCodecParameters_codec_type(codecpar);
+            outStream.codec_id = AVCodecParameters_codec_id(codecpar);
+
+            // Duration and related
+            outStream.time_base_num = AVStream_time_base_num(inStream);
+            outStream.time_base_den = AVStream_time_base_den(inStream);
+            outStream.duration_time_base = AVStream_duration(inStream) + (AVStream_durationhi(inStream)*0x100000000);
+            outStream.duration = outStream.duration_time_base * outStream.time_base_num / outStream.time_base_den;
+
+            streams.push(outStream);
+        }
+        return [fmt_ctx, streams];
+
+    });
 }
 
 /* Write many packets at once, done at this level to avoid message passing */
@@ -426,26 +446,34 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
     if (opts.devLimit)
         devLimit = opts.devLimit;
 
-    while (true) {
+    function step() {
         // If we risk running past the end of the currently-read data, stop now
         if (dev && !dev.eof && dev.buf.length < devLimit)
             return [-6 /* EAGAIN */, outPackets];
 
-        // Read the frame
-        var ret = av_read_frame(fmt_ctx, pkt);
-        if (ret < 0)
-            return [ret, outPackets];
+        return Promise.all([]).then(function() {
+            // Read the frame
+            return av_read_frame(fmt_ctx, pkt);
 
-        // And copy it out
-        var packet = ff_copyout_packet(pkt);
-        if (!(packet.stream_index in outPackets))
-            outPackets[packet.stream_index] = [];
-        outPackets[packet.stream_index].push(packet);
-        av_packet_unref(pkt);
-        sz += packet.data.length;
-        if (opts.limit && sz >= opts.limit)
-            return [-6 /* EAGAIN */, outPackets];
+        }).then(function(ret) {
+            if (ret < 0)
+                return [ret, outPackets];
+
+            // And copy it out
+            var packet = ff_copyout_packet(pkt);
+            if (!(packet.stream_index in outPackets))
+                outPackets[packet.stream_index] = [];
+            outPackets[packet.stream_index].push(packet);
+            av_packet_unref(pkt);
+            sz += packet.data.length;
+            if (opts.limit && sz >= opts.limit)
+                return [-6 /* EAGAIN */, outPackets];
+
+            return Promise.all([]).then(step);
+        });
     }
+
+    return Promise.all([]).then(step);
 };
 
 /* Initialize a filter graph. No equivalent free since you just need to free

@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=2.4.4.4
+LIBAVJS_VERSION=2.5.4.4
 EMCC=emcc
 MINIFIER=closure-compiler --language_in ECMASCRIPT5
 CFLAGS=-Oz
@@ -8,6 +8,8 @@ EFLAGS=\
 	-s "EXPORTED_FUNCTIONS=@exports.json" \
 	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
 	-s MODULARIZE=1 \
+	-s ASYNCIFY \
+	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
 	-s ALLOW_MEMORY_GROWTH=1
 
 LIBS=\

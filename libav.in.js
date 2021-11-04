@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2020 Yahweasel
+ * Copyright (C) 2019-2021 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -177,7 +177,11 @@
                         var args = arguments;
                         return new Promise(function(res, rej) {
                             try {
-                                res(real.apply(ret, args));
+                                var p = real.apply(ret, args);
+                                if (typeof p === "object" && p !== null && p.then)
+                                    p.then(res).catch(rej);
+                                else
+                                    res(p);
                             } catch (ex) {
                                 rej(ex);
                             }

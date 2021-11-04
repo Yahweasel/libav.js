@@ -45,7 +45,10 @@ function decls(f, meta) {
 
     var outp = "";
     funcs.functions.forEach((decl) => {
-        outp += "var " + decl[0] + " = Module." + decl[0] + " = Module.cwrap(" + s(decl[0]) + ", " + s(decl[1]) + ", " + s(decl[2]) + ");\n";
+        outp += "var " + decl[0] + " = Module." + decl[0] + " = Module.cwrap(" + s(decl[0]) + ", " + s(decl[1]) + ", " + s(decl[2]);
+        if (decl[3])
+            outp += ", " + s(decl[3]);
+        outp += ");\n";
     });
     accessors((decl, field) => {
         if (field && field.array) {
