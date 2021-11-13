@@ -1,4 +1,4 @@
-LIBOGG_VERSION=1.3.4
+LIBOGG_VERSION=1.3.5
 
 tmp-inst/lib/pkgconfig/ogg.pc: libogg-$(LIBOGG_VERSION)/config.h
 	cd libogg-$(LIBOGG_VERSION) ; \
