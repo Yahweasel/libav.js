@@ -23,6 +23,7 @@
 #include "libavfilter/avfilter.h"
 #include "libavutil/avutil.h"
 #include "libavutil/opt.h"
+#include "libavutil/pixdesc.h"
 
 #define A(struc, type, field) \
     type struc ## _ ## field(struc *a) { return a->field; } \
@@ -51,12 +52,31 @@ BL(uint64_t, channel_layout)
 B(int, channels)
 BA(uint8_t *, data)
 B(int, format)
+B(int, height)
+BA(int, linesize)
 B(int, nb_samples)
 BL(int64_t, pts)
 B(int, sample_rate)
+B(int, width)
 #undef B
 #undef BL
 #undef BA
+
+int AVFrame_sample_aspect_ratio_num(AVFrame *a) {
+    return a->sample_aspect_ratio.num;
+}
+
+int AVFrame_sample_aspect_ratio_den(AVFrame *a) {
+    return a->sample_aspect_ratio.den;
+}
+
+void AVFrame_sample_aspect_ratio_s(AVFrame *a, int n, int d) {
+    a->sample_aspect_ratio.num = n;
+    a->sample_aspect_ratio.den = d;
+}
+
+/* AVPixFmtDescriptor */
+A(AVPixFmtDescriptor, uint8_t, log2_chroma_h)
 
 int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, int term, int flags)
 {
@@ -82,10 +102,40 @@ BL(int64_t, bit_rate)
 BL(uint64_t, channel_layout)
 B(int, channels)
 B(int, frame_size)
+B(int, gop_size)
+B(int, height)
+B(int, keyint_min)
+B(int, pix_fmt)
+BL(int64_t, rc_max_rate)
+BL(int64_t, rc_min_rate)
 B(int, sample_fmt)
 B(int, sample_rate)
+B(int, qmax)
+B(int, qmin)
+B(int, width)
 #undef B
 #undef BL
+
+int AVCodecContext_framerate_num(AVCodecContext *a) {
+    return a->framerate.num;
+}
+
+int AVCodecContext_framerate_den(AVCodecContext *a) {
+    return a->framerate.den;
+}
+
+void AVCodecContext_framerate_num_s(AVCodecContext *a, int b) {
+    a->framerate.num = b;
+}
+
+void AVCodecContext_framerate_den_s(AVCodecContext *a, int b) {
+    a->framerate.den = b;
+}
+
+void AVCodecContext_framerate_s(AVCodecContext *a, int n, int d) {
+    a->framerate.num = n;
+    a->framerate.den = d;
+}
 
 void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
     a->time_base.num = n;

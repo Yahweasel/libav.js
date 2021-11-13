@@ -1,10 +1,10 @@
---enable-libopus
+--enable-libopus --enable-libvpx
 --enable-decoder=flac --enable-decoder=libopus
---enable-decoder=vp8
+--enable-decoder=libvpx_vp8
 --enable-encoder=flac --enable-encoder=libopus
---enable-encoder=vp8
+--enable-encoder=libvpx_vp8
 --enable-demuxer=matroska --enable-demuxer=flac --enable-demuxer=ogg
 --enable-muxer=matroska --enable-muxer=webm --enable-muxer=flac
 --enable-muxer=ogg
---enable-protocol=data --enable-protocol=file --enable-protocol=pipe
+--enable-protocol=data --enable-protocol=file
 --enable-filter=aresample

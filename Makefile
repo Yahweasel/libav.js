@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=2.5.4.4
+LIBAVJS_VERSION=3.0a.4.4
 EMCC=emcc
 MINIFIER=closure-compiler --language_in ECMASCRIPT5
 CFLAGS=-Oz
@@ -72,7 +72,7 @@ release:
 	       libav.js-$(LIBAVJS_VERSION)/; \
 	done
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
-	for t in ffmpeg lame libogg libvorbis opus; \
+	for t in ffmpeg lame libogg libvorbis libvpx opus; \
 	do \
 	    $(MAKE) $$t-release; \
 	done
@@ -90,6 +90,7 @@ clean: halfclean
 	-rm -rf opus-$(OPUS_VERSION)
 	-rm -rf libvorbis-$(LIBVORBIS_VERSION)
 	-rm -rf libogg-$(LIBOGG_VERSION)
+	-rm -rf libvpx-$(LIBVPX_VERSION)
 	-rm -rf lame-$(LAME_VERSION)
 	-rm -rf ffmpeg-$(FFMPEG_VERSION)
 	-rm -f ffmpeg-$(FFMPEG_VERSION)/ffbuild/config.mak

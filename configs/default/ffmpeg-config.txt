@@ -7,7 +7,7 @@
 --enable-demuxer=matroska --enable-demuxer=mov
 --enable-muxer=wav --enable-muxer=flac --enable-muxer=ogg
 --enable-muxer=matroska --enable-muxer=webm --enable-muxer=ipod
---enable-protocol=data --enable-protocol=file --enable-protocol=pipe
+--enable-protocol=data --enable-protocol=file
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix

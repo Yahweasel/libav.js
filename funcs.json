@@ -58,11 +58,23 @@
         ["av_grow_packet", "number", ["number", "number"]],
         ["av_interleaved_write_frame", "number", ["number", "number"]],
         ["av_packet_make_writable", "number", ["number"]],
+        ["av_pix_fmt_desc_get", "number", ["number"]],
         ["av_read_frame", "number", ["number", "number"], {"async": true}],
         ["av_shrink_packet", null, ["number", "number"]],
         ["av_write_frame", "number", ["number", "number"]],
         ["av_write_trailer", "number", ["number"]],
 
+        ["av_dict_set", "number", ["number", "string", "string", "number"]],
+        ["av_dict_free", null, ["number"]],
+
+        ["AVFrame_sample_aspect_ratio_num", "number", ["number"]],
+        ["AVFrame_sample_aspect_ratio_den", "number", ["number"]],
+        ["AVFrame_sample_aspect_ratio_s", null, ["number", "number", "number"]],
+        ["AVCodecContext_framerate_num", "number", ["number"]],
+        ["AVCodecContext_framerate_den", "number", ["number"]],
+        ["AVCodecContext_framerate_num_s", null, ["number", "number"]],
+        ["AVCodecContext_framerate_den_s", null, ["number", "number"]],
+        ["AVCodecContext_framerate_s", null, ["number", "number", "number"]],
         ["AVCodecContext_time_base_s", null, ["number", "number", "number"]],
         ["AVStream_time_base_num", "number", ["number"]],
         ["AVStream_time_base_den", "number", ["number"]],
@@ -116,10 +128,16 @@
             "channels",
             {"name": "data", "array": true},
             "format",
+            "height",
+            {"name": "linesize", "array": true},
             "nb_samples",
             "pts",
             "ptshi",
-            "sample_rate"
+            "sample_rate",
+            "width"
+        ]],
+        ["AVPixFmtDescriptor", [
+            "log2_chroma_h"
         ]],
         ["AVCodecContext", [
             "bit_rate",
@@ -128,8 +146,19 @@
             "channel_layouthi",
             "channels",
             "frame_size",
+            "gop_size",
+            "height",
+            "keyint_min",
+            "pix_fmt",
+            "rc_max_rate",
+            "rc_max_ratehi",
+            "rc_min_rate",
+            "rc_min_ratehi",
             "sample_fmt",
-            "sample_rate"
+            "sample_rate",
+            "qmax",
+            "qmin",
+            "width"
         ]],
         ["AVCodecParameters", [
             "codec_id",

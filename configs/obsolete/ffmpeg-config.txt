@@ -3,4 +3,4 @@
 --enable-encoder=libvorbis --enable-encoder=libmp3lame
 --enable-demuxer=ogg --enable-demuxer=mp3
 --enable-muxer=ogg --enable-muxer=mp3
---enable-protocol=data --enable-protocol=file --enable-protocol=pipe
+--enable-protocol=data --enable-protocol=file

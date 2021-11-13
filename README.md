@@ -63,8 +63,7 @@ The “lite” variant removes, relative to the default variant, AAC and the M4A
 container.
 
 The “fat” variant adds, relative to the default variant, Vorbis, wavpack and
-its container, and ALAC, as well as the “pipe” meta-protocol to make continuous
-data easier to use.
+its container, and ALAC.
 
 The “obsolete” variant adds, relative to the default variant, two obsolete but
 still commonly found audio formats, namely Vorbis in the ogg container and MP3
@@ -82,12 +81,12 @@ option than a simple conversion of libopus to JavaScript, because Opus mandates
 a limited range of audio sample rates, so having a resampler is beneficial.
 
 The “webm” variant, relative to the default variant, includes support for VP8
-video, but only enough to copy such streams; no actual video decoding or
-encoding is yet supported. The “webm-opus-flac” variant, relative to
-“opus-flac”, includes support for VP8 video, as “webm”, but excludes all
-filters except aresample. The “mediarecorder-transcoder” variant, relative to
-“webm-opus-flac”, adds MPEG-4, making it sufficient for transcoding all formats
-MediaRecorder can produce on all platforms.
+video. The “webm-opus-flac” variant, relative to “opus-flac”, includes support
+for VP8 video, as “webm”, but excludes all filters except aresample. The
+“mediarecorder-transcoder” variant, relative to “webm-opus-flac”, adds MPEG-4
+H.264, making it sufficient for transcoding formats that MediaRecorder can
+produce on all platforms. Note that support is not included for *encoding*
+MPEG-4 video, only decoding.
 
 To create other variants, simply create the configuration for them in `configs`
 and, if necessary, add Makefile fragments to `mk`. This is intentionally

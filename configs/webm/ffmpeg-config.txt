@@ -1,15 +1,15 @@
---enable-libopus
+--enable-libopus --enable-libvpx
 --enable-decoder=pcm_s16le --enable-decoder=pcm_s24le --enable-decoder=flac
 --enable-decoder=libopus --enable-decoder=aac
---enable-decoder=vp8
+--enable-decoder=libvpx_vp8
 --enable-encoder=pcm_s16le --enable-encoder=pcm_s24le --enable-encoder=flac
 --enable-encoder=libopus --enable-encoder=aac
---enable-encoder=vp8
+--enable-encoder=libvpx_vp8
 --enable-demuxer=wav --enable-demuxer=flac --enable-demuxer=ogg
 --enable-demuxer=matroska --enable-demuxer=mov
 --enable-muxer=wav --enable-muxer=flac --enable-muxer=ogg
 --enable-muxer=matroska --enable-muxer=webm --enable-muxer=ipod
---enable-protocol=data --enable-protocol=file --enable-protocol=pipe
+--enable-protocol=data --enable-protocol=file
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix

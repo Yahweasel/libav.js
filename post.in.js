@@ -150,7 +150,9 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
 
 /* Metafunction to initialize an encoder with all the bells and whistles
  * Returns [AVCodec, AVCodecContext, AVFrame, AVPacket, frame_size] */
-var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_base_num, time_base_den) {
+var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
+    opts = opts || {};
+
     var codec = avcodec_find_encoder_by_name(name);
     if (codec === 0)
         throw new Error("Codec not found");
@@ -159,13 +161,28 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, ctxProps, time_bas
     if (c === 0)
         throw new Error("Could not allocate audio codec context");
 
+    var ctxProps = opts.ctx || {};
     for (var prop in ctxProps)
         this["AVCodecContext_" + prop + "_si"](c, ctxProps[prop]);
-    AVCodecContext_time_base_s(c, time_base_num, time_base_den);
 
-    var ret = avcodec_open2(c, codec, 0);
+    var time_base = opts.time_base || [1, 1000];
+    AVCodecContext_time_base_s(c, time_base[0], time_base[1]);
+
+    var options = 0;
+    if (opts.options) {
+        options = ff_malloc_int32_list([0]);
+        for (var prop in opts.options)
+            av_dict_set(options, prop, opts.options[prop], 0);
+    }
+
+    var ret = avcodec_open2(c, codec, options);
     if (ret < 0)
         throw new Error("Could not open codec: " + ff_error(ret));
+
+    if (options) {
+        av_dict_free(options);
+        free(options);
+    }
 
     var frame = av_frame_alloc();
     if (frame === 0)
@@ -676,9 +693,15 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
 
 /* Copy out a frame */
 var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
+    var nb_samples = AVFrame_nb_samples(frame);
+    if (nb_samples === 0) {
+        // Maybe a video frame?
+        var width = AVFrame_width(frame);
+        if (width)
+            return ff_copyout_frame_video(frame, width);
+    }
     var channels = AVFrame_channels(frame);
     var format = AVFrame_format(frame);
-    var nb_samples = AVFrame_nb_samples(frame);
     var outFrame = {
         data: null,
         channel_layout: AVFrame_channel_layout(frame),
@@ -742,8 +765,47 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     return outFrame;
 };
 
+/* Copy out a video frame */
+var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, width) {
+    var data = [];
+    var height = AVFrame_height(frame);
+    var format = AVFrame_format(frame);
+    var desc = av_pix_fmt_desc_get(format);
+    var outFrame = {
+        data: data,
+        width: width,
+        height: height,
+        format: AVFrame_format(frame),
+        pts: AVFrame_pts(frame),
+        ptshi: AVFrame_ptshi(frame),
+        sample_aspect_ratio: [
+            AVFrame_sample_aspect_ratio_num(frame),
+            AVFrame_sample_aspect_ratio_den(frame)
+        ]
+    };
+
+    for (var i = 0; i < 8 /* AV_NUM_DATA_POINTERS */; i++) {
+        var linesize = AVFrame_linesize_a(frame, i);
+        if (!linesize)
+            break;
+        var inData = AVFrame_data_a(frame, i);
+        var plane = [];
+        var h = height;
+        if (i === 1 || i === 2)
+            h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
+        for (var y = 0; y < h; y++)
+            plane.push(copyout_u8(inData + y * linesize, linesize).slice(0));
+        data.push(plane);
+    }
+
+    return outFrame;
+};
+
 /* Copy in a frame */
 var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
+    if (frame.width)
+        return ff_copyin_frame_video(framePtr, frame);
+
     var format = frame.format;
     var channels = frame.channels;
     if (!channels) {
@@ -828,6 +890,38 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
                 break;
         }
 
+    }
+};
+
+/* Copy in a video frame */
+var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, frame) {
+    [
+        "format", "height", "pts", "ptshi", "width"
+    ].forEach(function(key) {
+        if (key in frame)
+            Module["AVFrame_" + key + "_si"](framePtr, frame[key]);
+    });
+    if ("sample_aspect_ratio" in frame) {
+        AVFrame_sample_aspect_ratio_s(framePtr, frame.sample_aspect_ratio[0],
+            frame.sample_aspect_ratio[1]);
+    }
+
+    // We may or may not need to actually allocate
+    if (av_frame_make_writable(framePtr) < 0) {
+        var ret = av_frame_get_buffer(framePtr, 0);
+        if (ret < 0)
+            throw new Error("Failed to allocate frame buffers: " + ff_error(ret));
+    }
+
+    // Copy it in
+    for (var i = 0; i < 8 /* AV_NUM_DATA_POINTERS */; i++) {
+        var inData = frame.data[i];
+        if (inData) {
+            var linesize = AVFrame_linesize_a(framePtr, i);
+            var data = AVFrame_data_a(framePtr, i);
+            for (var y = 0; y < inData.length; y++)
+                copyin_u8(data + y * linesize, inData[y].subarray(0, linesize));
+        }
     }
 };
 
