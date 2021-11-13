@@ -12,10 +12,6 @@ EFLAGS=\
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
 	-s ALLOW_MEMORY_GROWTH=1
 
-LIBS=\
-	bindings.c \
-	tmp-inst/lib/libopus.a
-
 all: build-default
 
 include mk/*
