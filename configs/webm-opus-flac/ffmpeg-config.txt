@@ -7,4 +7,5 @@
 --enable-muxer=matroska --enable-muxer=webm --enable-muxer=flac
 --enable-muxer=ogg
 --enable-protocol=data --enable-protocol=file
+--enable-bsf=extract_extradata
 --enable-filter=aresample
