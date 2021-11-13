@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-2.5.4.4-default.js");
+    LibAV = require("../libav-3.0.4.4-default.js");
     fs = require("fs");
 }
 
@@ -32,12 +32,15 @@ function main() {
         return Promise.all([
             libav.AVFormatContext_oformat(oc),
             libav.ff_init_encoder("libopus", {
-                bit_rate: 128000,
-                sample_fmt: libav.AV_SAMPLE_FMT_FLT,
-                sample_rate: 48000,
-                channel_layout: 4,
-                channels: 1
-            }, 1, 48000)
+                ctx: {
+                    bit_rate: 128000,
+                    sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+                    sample_rate: 48000,
+                    channel_layout: 4,
+                    channels: 1
+                },
+                time_base: [1, 48000]
+            })
         ]);
 
     }).then(function(ret) {
