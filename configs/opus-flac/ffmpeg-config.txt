@@ -1,9 +1,11 @@
---enable-libopus
---enable-decoder=flac
---enable-decoder=libopus
---enable-encoder=flac
---enable-encoder=libopus
---enable-demuxer=flac --enable-demuxer=ogg
---enable-muxer=flac --enable-muxer=ogg
 --enable-protocol=data --enable-protocol=file
 --enable-filter=aresample
+--enable-demuxer=ogg
+--enable-muxer=ogg
+--enable-libopus
+--enable-decoder=libopus
+--enable-encoder=libopus
+--enable-decoder=flac
+--enable-encoder=flac
+--enable-demuxer=flac
+--enable-muxer=flac

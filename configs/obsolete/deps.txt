@@ -1,2 +1,3 @@
+tmp-inst/lib/pkgconfig/opus.pc
 tmp-inst/lib/pkgconfig/vorbis.pc
 tmp-inst/lib/libmp3lame.a

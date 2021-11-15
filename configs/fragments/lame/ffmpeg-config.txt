@@ -1,0 +1,5 @@
+--enable-libmp3lame
+--enable-decoder=mp3
+--enable-encoder=libmp3lame
+--enable-demuxer=mp3
+--enable-muxer=mp3

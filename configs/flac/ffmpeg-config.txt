@@ -1,6 +1,6 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-demuxer=flac
 --enable-muxer=flac
---enable-protocol=data --enable-protocol=file
---enable-filter=aresample

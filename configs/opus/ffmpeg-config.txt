@@ -1,7 +1,7 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=ogg
+--enable-muxer=ogg
 --enable-libopus
 --enable-decoder=libopus
 --enable-encoder=libopus
---enable-demuxer=ogg
---enable-muxer=ogg
---enable-protocol=data --enable-protocol=file
---enable-filter=aresample

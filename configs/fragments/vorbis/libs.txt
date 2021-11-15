@@ -1,0 +1,3 @@
+tmp-inst/lib/libvorbis.a
+tmp-inst/lib/libvorbisenc.a
+tmp-inst/lib/libogg.a

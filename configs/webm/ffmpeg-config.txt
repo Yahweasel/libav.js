@@ -1,20 +1,31 @@
---enable-libopus --enable-libvpx
---enable-decoder=pcm_s16le --enable-decoder=pcm_s24le --enable-decoder=flac
---enable-decoder=libopus --enable-decoder=aac
---enable-decoder=libvpx_vp8
---enable-encoder=pcm_s16le --enable-encoder=pcm_s24le --enable-encoder=flac
---enable-encoder=libopus --enable-encoder=aac
---enable-encoder=libvpx_vp8
---enable-demuxer=wav --enable-demuxer=flac --enable-demuxer=ogg
---enable-demuxer=matroska --enable-demuxer=mov
---enable-muxer=wav --enable-muxer=flac --enable-muxer=ogg
---enable-muxer=matroska --enable-muxer=webm --enable-muxer=ipod
 --enable-protocol=data --enable-protocol=file
---enable-bsf=extract_extradata
+--enable-filter=aresample
+--enable-demuxer=ogg
+--enable-muxer=ogg
+--enable-demuxer=matroska
+--enable-muxer=matroska --enable-muxer=webm
+--enable-libopus
+--enable-decoder=libopus
+--enable-encoder=libopus
+--enable-demuxer=mov
+--enable-muxer=ipod
+--enable-decoder=aac
+--enable-encoder=aac
+--enable-decoder=flac
+--enable-encoder=flac
+--enable-demuxer=flac
+--enable-muxer=flac
+--enable-libvpx
+--enable-decoder=libvpx_vp8
+--enable-encoder=libvpx_vp8
+--enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
+--enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
+--enable-demuxer=wav
+--enable-muxer=wav
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix
---enable-filter=aresample --enable-filter=atempo --enable-filter=bandpass
---enable-filter=bandreject --enable-filter=dynaudnorm --enable-filter=equalizer
---enable-filter=loudnorm --enable-filter=pan --enable-filter=amix
---enable-filter=volume
+--enable-filter=apad --enable-filter=atempo --enable-filter=atrim
+--enable-filter=bandpass --enable-filter=bandreject --enable-filter=dynaudnorm
+--enable-filter=equalizer --enable-filter=loudnorm --enable-filter=pan
+--enable-filter=amix --enable-filter=volume

@@ -54,16 +54,22 @@ containers. Also supported are all valid combinations of those formats and
 containers, e.g. any codec in Matroska (since WebM is Matroska), FLAC in ogg,
 etc.
 
+Built-in variants are created by combining “configuration fragments”, but
+variants may be created manually as well. The fragments for the default variant
+are `["ogg", "webm", "opus", "ipod", "aac", "flac", "wav", "audio-filters"]`.
+
 Use `make build-variant`, replacing `variant` with the variant name, to build
 another variant.
 
 libav.js includes several other variants:
 
-The “lite” variant removes, relative to the default variant, AAC and the M4A
-container.
+The “lite” variant removes, relative to the default variant, AAC, and the M4A
+and WebM/Matroska containers. (`["ogg", "opus", "flac", "wav",
+"audio-filters"]`)
 
 The “fat” variant adds, relative to the default variant, Vorbis, wavpack and
-its container, and ALAC.
+its container, and ALAC. (`["ogg", "webm", "opus", "ipod", "aac", "flac",
+"vorbis", "wavpack", "alac", "wav", "audio-filters"]`)
 
 The “obsolete” variant adds, relative to the default variant, two obsolete but
 still commonly found audio formats, namely Vorbis in the ogg container and MP3
@@ -71,25 +77,36 @@ in its own container. Note that while Vorbis has been formally replaced by
 Opus, at the time of this writing, Opus still has lackluster support in audio
 software, so Vorbis is still useful. MP3, on the other hand, is completely
 worthless, and is only supplied in case your end users are idiots. Friends
-don't let friends use MP3.
+don't let friends use MP3. (`["ogg", "webm", "opus", "ipod", "aac", "flac",
+"vorbis", "lame", "audio-filters"]`)
 
 The “opus”, “flac”, and “opus-flac” variants are intended just for encoding or
 decoding Opus and/or FLAC. They include only their named format(s), the
-appropriate container(s), and the aresample filter; in particular, no other
+appropriate container(s), and the `aresample` filter; in particular, no other
 filters are provided whatsoever. With Opus in particular, this is a better
 option than a simple conversion of libopus to JavaScript, because Opus mandates
 a limited range of audio sample rates, so having a resampler is beneficial.
+(`["ogg", "opus"]`, `["flac"]`, `["ogg", "opus", "flac"]`)
 
 The “webm” variant, relative to the default variant, includes support for VP8
 video. The “webm-opus-flac” variant, relative to “opus-flac”, includes support
 for VP8 video, as “webm”, but excludes all filters except aresample. The
 “mediarecorder-transcoder” variant, relative to “webm-opus-flac”, adds MPEG-4
-H.264, making it sufficient for transcoding formats that MediaRecorder can
-produce on all platforms. Note that support is not included for *encoding*
-MPEG-4 video, only decoding.
+AAC and H.264, making it sufficient for transcoding formats that MediaRecorder
+can produce on all platforms. Note that support is not included for *encoding*
+MPEG-4 video, only decoding. (`["ogg", "webm", "opus", "ipod", "aac", "flac",
+"vpx", "vp8", "wav", "audio-filters"]`, `["ogg", "webm", "opus", "flac", "vpx",
+"vp8"]`, `["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8",
+"h264"]`)
 
-To create other variants, simply create the configuration for them in `configs`
-and, if necessary, add Makefile fragments to `mk`. This is intentionally
-designed so that you can add new configurations without needing to patch
-anything that already exists. See the existing variants' configuration files in
-`config` and the existing fragments in `mk` to understand how.
+To create a variant from configuration fragments, run `./mkconfig.js` in the
+`configs` directory. The first argument is the name of the variant to make, and
+the second argument is the JSON array of fragments to include.
+
+To create other variants, simply create the configuration for them in
+subdirectories of `configs` and, if necessary, add Makefile fragments to `mk`.
+
+This is intentionally designed so that you can add new configurations without
+needing to patch anything that already exists. See the existing variants'
+configuration files in `config` and the existing fragments in `mk` to
+understand how.

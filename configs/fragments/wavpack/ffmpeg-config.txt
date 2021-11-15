@@ -1,0 +1,4 @@
+--enable-decoder=wavpack
+--enable-encoder=wavpack
+--enable-demuxer=wv
+--enable-muxer=wv
