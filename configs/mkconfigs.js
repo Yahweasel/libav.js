@@ -15,6 +15,8 @@
  */
 
 const cproc = require("child_process");
+const fs = require("fs");
+
 const configs = [
     ["default", ["ogg", "webm", "opus", "ipod", "aac", "flac", "wav", "audio-filters"]],
     ["lite", ["ogg", "opus", "flac", "wav", "audio-filters"]],
@@ -26,7 +28,10 @@ const configs = [
 
     ["webm", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8", "wav", "audio-filters"]],
     ["webm-opus-flac", ["ogg", "webm", "opus", "flac", "vpx", "vp8"]],
-    ["mediarecorder-transcoder", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8", "h264"]]
+    ["mediarecorder-transcoder", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8", "h264"]],
+
+    ["empty", []],
+    ["all", fs.readdirSync("fragments").filter(x => x !== "default")]
 ];
 
 (async function() {

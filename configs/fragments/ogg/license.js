@@ -4,6 +4,8 @@
  * ffmpeg oggdec:
  *
  *     Copyright (C) 2005  Michael Ahlberg, Måns Rullgård
+ *     Copyright (C) 2005  Matthieu CASTET, Alex Beregszaszi
+ *     Copyright (C) 2008  Reimar Döffinger
  *
  *     Permission is hereby granted, free of charge, to any person obtaining a
  *     copy of this software and associated documentation files (the
