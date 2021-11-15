@@ -38,7 +38,7 @@ the tests in `tests` for examples.
 In order to reduce license-header Hell, the small amount of wrapper functions
 provided by libav.js are all released under the so-called “0-clause BSD”
 license, which does not require that the license text itself appear in
-derivative works. Built libraries should have their correct license headers.
+derivative works. Built libraries have their correct license headers.
 
 
 ## VARIANTS
@@ -110,3 +110,38 @@ This is intentionally designed so that you can add new configurations without
 needing to patch anything that already exists. See the existing variants'
 configuration files in `config` and the existing fragments in `mk` to
 understand how.
+
+
+## SIZE
+
+libav.js is big.
+
+You can estimate the size of variants based on the size of the constituent
+fragments. As of version 3.0.4.4, an empty build is approximately 673KiB
+(WebAssembly), and the fragments add the following:
+
+| Fragment      | Size (KiB)    |
+| ------------: | :------------ |
+| ogg           | 67            |
+| webm          | 11            |
+| ipod          | 344           |
+|               |               |
+| opus          | 284           |
+| aac           | 281           |
+| vorbis        | 451           |
+| lame          | 278           |
+| flac          | 82            |
+| wav           | 48            |
+| wavpack       | 104           |
+| alac          | 25            |
+|               |               |
+| vpx+vp8       | 343           |
+| vpx+vp9       | 742           |
+| h264          | 544           |
+|               |               |
+| audio-filters | 133           |
+
+The asm.js versions are much bigger, but will not be loaded on
+WebAssembly-capable clients.
+
+The wrapper (“glue”) code is about 220KiB, but is highly compressible.
