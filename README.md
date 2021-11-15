@@ -1,8 +1,12 @@
 This is a compilation of the libraries associated with handling audio in
 ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for
-emscripten, and thus the web. This compilation exposes the *library* interface
-of ffmpeg, not ffmpeg itself, and there is a separate project by a different
-author, ffmpeg.js, if what you need is ffmpeg.
+WebAssembly and asm.js, and thus the web. It is compiled via emscripten.  This
+compilation exposes the *library* interface of ffmpeg, not ffmpeg itself, and
+there is a separate project by a different author, ffmpeg.js, if what you need
+is ffmpeg.
+
+In short, this is a pure JavaScript and WebAssembly system for low-level audio
+and video encoding, decoding, muxing, demuxing, and filtering.
 
 Include libav-`version`-`variant`.js to use libav.js. The variants are
 discussed below.
