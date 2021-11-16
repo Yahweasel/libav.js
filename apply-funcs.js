@@ -85,6 +85,77 @@ function decls(f, meta) {
     fs.writeFileSync("post.js", outp);
 })();
 
+// libav.types.d.ts
+(function() {
+    var inp = fs.readFileSync("libav.types.in.d.ts", "utf8");
+
+    function args(x) {
+        return x.map((t, idx) => `a${idx}: ${t}`).join(",");
+    }
+
+    function ret(x) {
+        return (x === null) ? "void" : x;
+    }
+
+    var outp = "";
+    funcs.functions.forEach((decl) => {
+        outp += `${decl[0]}(${args(decl[2])}): Promise<${ret(decl[1])}>;\n`;
+    });
+    accessors((decl, field) => {
+        if (field && field.array) {
+            outp += `${decl}(ptr: number, idx: number): Promise<number>;\n`;
+            outp += `${decl}_s(ptr: number, idx: number, val: number): Promise<void>;\n`;
+        } else {
+            outp += `${decl}(ptr: number): Promise<number>;\n`;
+            outp += `${decl}_s(ptr: number, val: number): Promise<void>;\n`;
+        }
+    });
+
+    funcs.freers.forEach((decl) => {
+        outp += `${decl}_js(ptr: number);\n`;
+    });
+
+    funcs.copiers.forEach((type) => {
+        outp += `copyin_${type[0]}(ptr: number, arr: ${type[1]}): Promise<void>;\n`;
+        outp += `copyout_${type[0]}(ptr: number, len: number): Promise<${type[1]}>;\n`;
+    });
+
+    inp = inp.replace("@FUNCS", outp);
+
+    /* We also read type declarations out of post.in.js, to keep all the decls
+     * in one place */
+    outp = "";
+    let lastComment = "";
+    let inComment = false;
+    let lastTypes = "";
+    let inTypes = false;
+    for (const line of fs.readFileSync("post.in.js", "utf8").split("\n")) {
+        if (line === "/**") {
+            inComment = true;
+            lastComment = line + "\n";
+        } else if (inComment) {
+            lastComment += line + "\n";
+            if (line === " */")
+                inComment = false;
+        } else if (line === "/* @types") {
+            inTypes = true;
+            lastTypes = "";
+        } else if (inTypes) {
+            if (line === " */") {
+                inTypes = false;
+                outp += lastComment + lastTypes.trim() + ";\n";
+            } else {
+                lastTypes += line.slice(3) + "\n";
+            }
+        } else if (line.slice(0, 10) === "/// @types") {
+            outp += lastComment + line.slice(11) + ";\n";
+        }
+    }
+    outp = inp.replace("@DECLS", outp);
+
+    fs.writeFileSync("libav.types.d.ts", outp);
+})();
+
 // libav.js
 (function() {
     var ver = process.argv[2];

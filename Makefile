@@ -74,6 +74,7 @@ release:
 	do \
 	    $(MAKE) $$t-release; \
 	done
+	cp libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/
 	git archive HEAD -o libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
@@ -88,7 +89,7 @@ publish:
 
 halfclean:
 	-rm -f libav-$(LIBAVJS_VERSION)-*.js libav-$(LIBAVJS_VERSION)-*.wasm
-	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js
+	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js libav.types.d.ts
 
 clean: halfclean
 	-rm -rf tmp-inst

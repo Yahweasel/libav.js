@@ -106,14 +106,48 @@ Module.readBuffers = {};
 var writerDev = FS.makedev(44, 1);
 FS.registerDevice(writerDev, writerCallbacks);
 
+/**
+ * Read a complete file from the in-memory filesystem.
+ * @param name  Filename to read
+ */
+/// @types readFile(name: string): Promise<Uint8Array>
 Module.readFile = FS.readFile.bind(FS);
+
+/**
+ * Write a complete file to the in-memory filesystem.
+ * @param name  Filename to write
+ * @param content  Content to write to the file
+ */
+/// @types writeFile(name: string, content: Uint8Array): Promise<Uint8Array>
 Module.writeFile = FS.writeFile.bind(FS);
+
+/**
+ * Delete a file in the in-memory filesystem.
+ * @param name  Filename to delete
+ */
+/// @types unlink(name: string): Promise<void>
 Module.unlink = FS.unlink.bind(FS);
+
 Module.mkdev = FS.mkdev.bind(FS);
+
+/**
+ * Make a reader device.
+ * @param name  Filename to create
+ * @param mode  Unix permissions (pointless since this is an in-memory
+ *              filesystem)
+ */
+/// @types mkreaderdev(name: string, mode?: number): Promise<void>
 Module.mkreaderdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0777, readerDev);
     return 0;
 };
+
+/**
+ * Make a writer device.
+ * @param name  Filename to create
+ * @param mode  Unix permissions
+ */
+/// @types mkwriterdev(name: string, mode?: number): Promise<void>
 Module.mkwriterdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0777, writerDev);
     return 0;
@@ -122,7 +156,12 @@ Module.mkwriterdev = function(loc, mode) {
 // Users waiting to read
 Module.ff_reader_dev_waiters = [];
 
-/* Send some data to a reader device */
+/**
+ * Send some data to a reader device
+ * @param name  Filename of the reader device
+ * @param data  Data to sending
+ */
+/// @types ff_reader_dev_send(name: string, data: Uint8Array): Promise<void>
 var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
     var idata;
     if (!(name in Module.readBuffers))
@@ -148,8 +187,19 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
         waiters[i]();
 };
 
-/* Metafunction to initialize an encoder with all the bells and whistles
- * Returns [AVCodec, AVCodecContext, AVFrame, AVPacket, frame_size] */
+/**
+ * Metafunction to initialize an encoder with all the bells and whistles.
+ * Returns [AVCodec, AVCodecContext, AVFrame, AVPacket, frame_size]
+ * @param name  libav name of the codec
+ * @param opts  Encoder options
+ */
+/* @types
+ * ff_init_encoder(
+ *     name: string, opts: {
+ *         ctx: AVCodecContextProps, options: Record<string, string>
+ *     }
+ * ): Promise<[number, number, number, number, number]>
+ */
 var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
     opts = opts || {};
 
@@ -196,9 +246,18 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
     return [codec, c, frame, pkt, frame_size];
 };
 
-/* Metafunction to initialize a decoder with all the bells and whistles.
+/**
+ * Metafunction to initialize a decoder with all the bells and whistles.
  * Similar to ff_init_encoder but doesn't need to initialize the frame.
- * Returns [AVCodec, AVCodecContext, AVPacket, AVFrame] */
+ * Returns [AVCodec, AVCodecContext, AVPacket, AVFrame]
+ * @param name  libav decoder identifier or name
+ * @param codecpar  Optional AVCodecParameters
+ */
+/* @types
+ * ff_init_decoder(
+ *     name: string | number, codecpar: number
+ * ): Promise<[number, number, number, number]>
+ */
 var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
     var codec, ret;
     if (typeof name === "string")
@@ -233,19 +292,53 @@ var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
     return [codec, c, pkt, frame];
 };
 
-/* Free everything allocated by ff_init_encoder */
+/**
+ * Free everything allocated by ff_init_encoder.
+ * @param c  AVCodecContext
+ * @param frame  AVFrame
+ * @param pkt  AVPacket
+ */
+/* @types
+ * ff_free_encoder(
+ *     c: number, frame: number, pkt: number
+ * ): Promise<void>
+ */
 var ff_free_encoder = Module.ff_free_encoder = function(c, frame, pkt) {
     av_frame_free_js(frame);
     av_packet_free_js(pkt);
     avcodec_free_context_js(c);
 };
 
-/* Free everything allocated by ff_init_decoder */
+/**
+ * Free everything allocated by ff_init_decoder
+ * @param c  AVCodecContext
+ * @param pkt  AVPacket
+ * @param frame  AVFrame
+ */
+/* @types
+ * ff_free_decoder(
+ *     c: number, pkt: number, frame: number
+ * ): Promise<void>
+ */
 var ff_free_decoder = Module.ff_free_decoder = function(c, pkt, frame) {
     ff_free_encoder(c, frame, pkt);
 };
 
-/* Encode many frames at once, done at this level to avoid message passing */
+/**
+ * Encode some number of frames at once. Done in one go to avoid excess message
+ * passing.
+ * @param ctx  AVCodecContext
+ * @param frame  AVFrame
+ * @param pkt  AVPacket
+ * @param inFrames  Array of frames in libav.js format
+ * @param fin  Set to true if this is the end of encoding
+ */
+/* @types
+ * ff_encode_multi(
+ *     ctx: number, frame: number, pkt: number, inFrames: Frame[],
+ *     fin?: boolean
+ * ): Promise<Packet[]>
+ */
 var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrames, fin) {
     var outPackets = [];
 
@@ -280,7 +373,24 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
     return outPackets;
 };
 
-/* Decode many packets at once, done at this level to avoid message passing */
+/**
+ * Decode some number of packets at once. Done in one go to avoid excess
+ * message passing.
+ * @param ctx  AVCodecContext
+ * @param pkt  AVPacket
+ * @param frame  AVFrame
+ * @param inPackets  Incoming packets to decode
+ * @param config  Decoding options. May be "true" to indicate end of stream.
+ */
+/* @types
+ * ff_decode_multi(
+ *     ctx: number, pkt: number, frame: number, inPackets: Packet[],
+ *     config: boolean | {
+ *         fin?: boolean,
+ *         ignoreErrors?: boolean
+ *     }
+ * ): Promise<Frame[]>
+ */
 var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPackets, config) {
     var outFrames = [];
     if (typeof config === "boolean") {
@@ -352,7 +462,24 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
     Module.HEAPU8.set(data, ptr);
 };
 
-/* Initialize a muxer format, format context and some number of streams */
+/**
+ * Initialize a muxer format, format context and some number of streams.
+ * Returns [AVFormatContext, AVOutputFormat, AVIOContext, AVStream[]]
+ * @param opts  Muxer options
+ * @param stramCtxs  Context info for each stream to mux
+ */
+/* @types
+ * ff_init_muxer(
+ *     opts: {
+ *         oformat: number, // format pointer
+ *         format_name: string, // libav name
+ *         filename: string,
+ *         device: boolean, // Create a writer device
+ *         open: boolean // Open the file for writing
+ *     },
+ *     streamCtxs: [number, number, number][] // AVCodecContext, time_base_num, time_base_den
+ * ): Promise<[number, number, number, number[]]>
+ */
 var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
     var oformat = opts.oformat ? opts.oformat : 0;
     var format_name = opts.format_name ? opts.format_name : null;
@@ -389,14 +516,30 @@ var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
     return [oc, fmt, pb, sts];
 };
 
-/* Free up a muxer format and/or file */
+/**
+ * Free up a muxer format and/or file
+ * @param oc  AVFormatContext
+ * @param pb  AVIOContext
+ */
+/// @types ff_free_muxer(oc: number, pb: number): Promise<void>
 var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
     avformat_free_context(oc);
     if (pb)
         avio_close(pb);
 };
 
-/* Initialize a demuxer from a file, format context, and get the list of codecs/types */
+/**
+ * Initialize a demuxer from a file and format context, and get the list of
+ * codecs/types.
+ * Returns [AVFormatContext, Stream[]]
+ * @param filename  Filename to open
+ * @param fmt  Format to use (optional)
+ */
+/* @types
+ * ff_init_demuxer_file(
+ *     filename: string, fmt?: string
+ * ): Promise<[number, Stream[]]>
+ */
 var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt) {
     var fmt_ctx;
 
@@ -434,7 +577,19 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
     });
 }
 
-/* Write many packets at once, done at this level to avoid message passing */
+/**
+ * Write some number of packets at once.
+ * @param oc  AVFormatContext
+ * @param pkt  AVPacket
+ * @param inPackets  Packets to write
+ * @param interleave  Set to false to *not* use the interleaved writer.
+ *                    Interleaving is the default.
+ */
+/* @types
+ * ff_write_multi(
+ *     oc: number, pkt: number, inPackets: Packet[], interleave?: boolean
+ * ): Promise<void>
+ */
 var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interleave) {
     var step = av_interleaved_write_frame;
     if (interleave === false) step = av_write_frame;
@@ -449,7 +604,26 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
     av_packet_unref(pkt);
 };
 
-/* Read many packets at once, done at this level to avoid message passing */
+/**
+ * Read many packets at once. If you don't set any limits, this function will
+ * block (asynchronously) until the whole file is read, so make sure you set
+ * some limits if you want to read a bit at a time. Returns a pair [result,
+ * Packet[]], where the result indicates whether an error was encountered, an
+ * EOF, or simply limits (EAGAIN).
+ * @param fmt_ctx  AVFormatContext
+ * @param pkt  AVPacket
+ * @param devfile  Name of the device file being read from, if applicable. Used
+ *                 to set limits on when to read based on available data.
+ * @param opts  Other options
+ */
+/* @types
+ * ff_read_multi(
+ *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ *         limit?: number, // OUTPUT limit, in bytes
+ *         devLimit?: number // INPUT limit, in bytes (don't read if less than this much data is available)
+ *     }
+ * ): Promise<[number, Packet[]]>
+ */
 var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts) {
     var sz = 0;
     var outPackets = {};
@@ -493,8 +667,40 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
     return Promise.all([]).then(step);
 };
 
-/* Initialize a filter graph. No equivalent free since you just need to free
- * the graph itself, and everything under it will be freed automatically. */
+/**
+ * Initialize a filter graph. No equivalent free since you just need to free
+ * the graph itself (av_filter_graph_free) and everything under it will be
+ * freed automatically.
+ * Returns [AVFilterGraph, AVFilterContext, AVFilterContext], where the second
+ * and third are the input and output buffer source/sink. For multiple
+ * inputs/outputs, the second and third will be arrays, as appropriate.
+ * @param filters_descr  Filtergraph description
+ * @param input  Input settings, or array of input settings for multiple inputs
+ * @param output  Output settings, or array of output settings for multiple
+ *                outputs
+ */
+/* @types
+ * ff_init_filter_graph(
+ *     filters_descr: string,
+ *     input: FilterIOSettings,
+ *     output: FilterIOSettings
+ * ): Promise<[number, number, number]>;
+ * ff_init_filter_graph(
+ *     filters_descr: string,
+ *     input: FilterIOSettings[],
+ *     output: FilterIOSettings
+ * ): Promise<[number, number[], number]>;
+ * ff_init_filter_graph(
+ *     filters_descr: string,
+ *     input: FilterIOSettings,
+ *     output: FilterIOSettings[]
+ * ): Promise<[number, number, number[]]>;
+ * ff_init_filter_graph(
+ *     filters_descr: string,
+ *     input: FilterIOSettings[],
+ *     output: FilterIOSettings[]
+ * ): Promise<[number, number[], number[]]>
+ */
 var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, input, output) {
     var abuffersrc, abuffersink, filter_graph, tmp_src_ctx, tmp_sink_ctx,
         src_ctxs, sink_ctxs, io_outputs, io_inputs, int32s, int64s;
@@ -641,7 +847,25 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
     return [filter_graph, multiple_inputs ? src_ctxs : src_ctxs[0], multiple_outputs ? sink_ctxs : sink_ctxs[0]];
 };
 
-/* Filter many frames at once, possibly to many sources at once */
+/**
+ * Filter some number of frames, possibly corresponding to multiple sources.
+ * @param srcs  AVFilterContext(s), input
+ * @param buffersink_ctx  AVFilterContext, output
+ * @param framePtr  AVFrame
+ * @param inFrames  Input frames, either as an array of frames or with frames
+ *                  per input
+ * @param fin  Indicate end-of-stream(s)
+ */
+/* @types
+ * ff_filter_multi(
+ *     srcs: number, buffersink_ctx: number, framePtr: number,
+ *     inFrames: Frame[], fin?: boolean
+ * ): Promise<Frame[]>;
+ * ff_filter_multi(
+ *     srcs: number[], buffersink_ctx: number, framePtr: number,
+ *     inFrames: Frame[][], fin?: boolean[]
+ * ): Promise<Frame[]>
+ */
 var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, framePtr, inFrames, fin) {
     var outFrames = [];
 
@@ -691,7 +915,11 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
     return outFrames;
 };
 
-/* Copy out a frame */
+/**
+ * Copy out a frame.
+ * @param frame  AVFrame
+ */
+/// @types ff_copyout_frame(frame: number): Promise<Frame>
 var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     var nb_samples = AVFrame_nb_samples(frame);
     if (nb_samples === 0) {
@@ -765,7 +993,7 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     return outFrame;
 };
 
-/* Copy out a video frame */
+// Copy out a video frame. Used internally by ff_copyout_frame.
 var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, width) {
     var data = [];
     var height = AVFrame_height(frame);
@@ -801,7 +1029,12 @@ var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, wid
     return outFrame;
 };
 
-/* Copy in a frame */
+/**
+ * Copy in a frame.
+ * @param framePtr  AVFrame
+ * @param frame  Frame to copy in
+ */
+/// @types ff_copyin_frame(framePtr: number, frame: Frame): Promise<void>
 var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
     if (frame.width)
         return ff_copyin_frame_video(framePtr, frame);
@@ -893,7 +1126,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
     }
 };
 
-/* Copy in a video frame */
+// Copy in a video frame. Used internally by ff_copyin_frame.
 var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, frame) {
     [
         "format", "height", "pts", "ptshi", "width"
@@ -925,7 +1158,11 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
     }
 };
 
-/* Copy out a packet */
+/**
+ * Copy out a packet.
+ * @param pkt  AVPacket
+ */
+/// @types ff_copyout_packet(pkt: number): Promise<Packet>
 var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
     var data = AVPacket_data(pkt);
     var size = AVPacket_size(pkt);
@@ -943,7 +1180,7 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
     };
 };
 
-/* Copy out a packet's side data */
+// Copy out a packet's side data. Used internally by ff_copyout_packet.
 var ff_copyout_side_data = Module.ff_copyout_side_data = function(pkt) {
     var side_data = AVPacket_side_data(pkt);
     var side_data_elems = AVPacket_side_data_elems(pkt);
@@ -962,7 +1199,12 @@ var ff_copyout_side_data = Module.ff_copyout_side_data = function(pkt) {
     return ret;
 };
 
-/* Copy in a packet */
+/**
+ * Copy in a packet.
+ * @param pktPtr  AVPacket
+ * @param packet  Packet to copy in.
+ */
+/// @types ff_copyin_packet(pktPtr: number, packet: Packet): Promise<void>
 var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     ff_set_packet(pktPtr, packet.data);
 
@@ -977,7 +1219,7 @@ var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
         ff_copyin_side_data(pktPtr, packet.side_data);
 };
 
-/* Copy in a packet's side data */
+// Copy in a packet's side data. Used internally by ff_copyin_packet.
 var ff_copyin_side_data = Module.ff_copyin_side_data = function(pktPtr, side_data) {
     side_data.forEach(function(elem) {
         var data = av_packet_new_side_data(pktPtr, elem.type, elem.data.length);
@@ -987,7 +1229,11 @@ var ff_copyin_side_data = Module.ff_copyin_side_data = function(pktPtr, side_dat
     });
 };
 
-/* Allocate and copy in a 32-bit int list */
+/**
+ * Allocate and copy in a 32-bit int list.
+ * @param list  List of numbers to copy in
+ */
+/// @types ff_malloc_int32_list(list: number[]): Promise<number>
 var ff_malloc_int32_list = Module.ff_malloc_int32_list = function(list) {
     var ptr = malloc(list.length * 4);
     if (ptr === 0)
@@ -998,7 +1244,11 @@ var ff_malloc_int32_list = Module.ff_malloc_int32_list = function(list) {
     return ptr;
 };
 
-/* Allocate and copy in a 64-bit int list */
+/**
+ * Allocate and copy in a 64-bit int list.
+ * @param list  List of numbers to copy in
+ */
+/// @types ff_malloc_int64_list(list: number[]): Promise<number>
 var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
     var ptr = malloc(list.length * 8);
     if (ptr === 0)
