@@ -79,6 +79,13 @@ release:
 	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
 	rm -rf libav.js-$(LIBAVJS_VERSION)
 
+publish:
+	unzip libav.js-$(LIBAVJS_VERSION).zip
+	( cd libav.js-$(LIBAVJS_VERSION) && \
+	  cp ../package.json ../README.md . && \
+	  npm publish )
+	rm -rf libav.js-$(LIBAVJS_VERSION)
+
 halfclean:
 	-rm -f libav-$(LIBAVJS_VERSION)-*.js libav-$(LIBAVJS_VERSION)-*.wasm
 	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js
