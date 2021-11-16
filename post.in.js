@@ -255,7 +255,7 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
  */
 /* @types
  * ff_init_decoder(
- *     name: string | number, codecpar: number
+ *     name: string | number, codecpar?: number
  * ): Promise<[number, number, number, number]>
  */
 var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
@@ -385,7 +385,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
 /* @types
  * ff_decode_multi(
  *     ctx: number, pkt: number, frame: number, inPackets: Packet[],
- *     config: boolean | {
+ *     config?: boolean | {
  *         fin?: boolean,
  *         ignoreErrors?: boolean
  *     }

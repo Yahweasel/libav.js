@@ -219,6 +219,81 @@ export interface LibAV {
      * it inoperable and freeing its memory.
      */
     terminate(): void;
+
+    // Enumerations:
+    AV_OPT_SEARCH_CHILDREN: number;
+    AVMEDIA_TYPE_UNKNOWN: number;
+    AVMEDIA_TYPE_VIDEO: number;
+    AVMEDIA_TYPE_AUDIO: number;
+    AVMEDIA_TYPE_DATA: number;
+    AVMEDIA_TYPE_SUBTITLE: number;
+    AVMEDIA_TYPE_ATTACHMENT: number;
+    AV_SAMPLE_FMT_NONE: number;
+    AV_SAMPLE_FMT_U8: number;
+    AV_SAMPLE_FMT_S16: number;
+    AV_SAMPLE_FMT_S32: number;
+    AV_SAMPLE_FMT_FLT: number;
+    AV_SAMPLE_FMT_DBL: number;
+    AV_SAMPLE_FMT_U8P: number;
+    AV_SAMPLE_FMT_S16P: number;
+    AV_SAMPLE_FMT_S32P: number;
+    AV_SAMPLE_FMT_FLTP: number;
+    AV_SAMPLE_FMT_DBLP: number;
+    AV_SAMPLE_FMT_S64: number;
+    AV_SAMPLE_FMT_S64P: number;
+    AV_SAMPLE_FMT_NB: number;
+    AV_PIX_FMT_NONE: number;
+    AV_PIX_FMT_YUV420P: number;
+    AV_PIX_FMT_YUYV422: number;
+    AV_PIX_FMT_RGB24: number;
+    AV_PIX_FMT_BGR24: number;
+    AV_PIX_FMT_YUV422P: number;
+    AV_PIX_FMT_YUV444P: number;
+    AV_PIX_FMT_YUV410P: number;
+    AV_PIX_FMT_YUV411P: number;
+    AV_PIX_FMT_GRAY8: number;
+    AV_PIX_FMT_MONOWHITE: number;
+    AV_PIX_FMT_MONOBLACK: number;
+    AV_PIX_FMT_PAL8: number;
+    AV_PIX_FMT_YUVJ420P: number;
+    AV_PIX_FMT_YUVJ422P: number;
+    AV_PIX_FMT_YUVJ444P: number;
+    AV_PIX_FMT_UYVY422: number;
+    AV_PIX_FMT_UYYVYY411: number;
+    AV_PIX_FMT_BGR8: number;
+    AV_PIX_FMT_BGR4: number;
+    AV_PIX_FMT_BGR4_BYTE: number;
+    AV_PIX_FMT_RGB8: number;
+    AV_PIX_FMT_RGB4: number;
+    AV_PIX_FMT_RGB4_BYTE: number;
+    AV_PIX_FMT_NV12: number;
+    AV_PIX_FMT_NV21: number;
+    AV_PIX_FMT_ARGB: number;
+    AV_PIX_FMT_RGBA: number;
+    AV_PIX_FMT_ABGR: number;
+    AV_PIX_FMT_BGRA: number;
+    AV_PIX_FMT_GRAY16BE: number;
+    AV_PIX_FMT_GRAY16LE: number;
+    AV_PIX_FMT_YUV440P: number;
+    AV_PIX_FMT_YUVJ440P: number;
+    AV_PIX_FMT_YUVA420P: number;
+    AV_PIX_FMT_RGB48BE: number;
+    AV_PIX_FMT_RGB48LE: number;
+    AV_PIX_FMT_RGB565BE: number;
+    AV_PIX_FMT_RGB565LE: number;
+    AV_PIX_FMT_RGB555BE: number;
+    AV_PIX_FMT_RGB555LE: number;
+    AV_PIX_FMT_BGR565BE: number;
+    AV_PIX_FMT_BGR565LE: number;
+    AV_PIX_FMT_BGR555BE: number;
+    AV_PIX_FMT_BGR555LE: number;
+    AVIO_FLAG_READ: number;
+    AVIO_FLAG_WRITE: number;
+    AVIO_FLAG_READ_WRITE: number;
+    AVIO_FLAG_NONBLOCK: number;
+    AVIO_FLAG_DIRECT: number;
+    EAGAIN: number;
+    AVERROR_EOF: number;
 }
 
 export interface LibAVWrapper {
