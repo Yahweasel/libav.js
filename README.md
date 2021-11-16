@@ -1,5 +1,5 @@
-This is a compilation of the libraries associated with handling audio in
-ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for
+This is a compilation of the libraries associated with handling audio and video
+in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for
 WebAssembly and asm.js, and thus the web. It is compiled via emscripten.  This
 compilation exposes the *library* interface of ffmpeg, not ffmpeg itself, and
 there is a separate project by a different author, ffmpeg.js, if what you need

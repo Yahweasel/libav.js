@@ -1,6 +1,6 @@
 LIBAVJS_VERSION=3.1a.4.4
 EMCC=emcc
-MINIFIER=closure-compiler --language_in ECMASCRIPT5
+MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
 EFLAGS=\
 	--memory-init-file 0 --post-js post.js --extern-post-js extern-post.js \
@@ -16,10 +16,9 @@ all: build-default
 
 include mk/*
 
-download: ffmpeg-$(FFMPEG_VERSION).tar.xz opus-$(OPUS_VERSION).tar.gz
 
-
-build-%: libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION)-%.asm.js libav-$(LIBAVJS_VERSION)-%.wasm.js
+build-%: libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION)-%.asm.js \
+	libav-$(LIBAVJS_VERSION)-%.wasm.js node_modules/.bin/uglifyjs
 	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) > libav-$(LIBAVJS_VERSION)-$*.js
 	chmod a-x *.wasm
 
@@ -55,6 +54,9 @@ exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 
 libav-$(LIBAVJS_VERSION).js post.js: exports.json
 	true
+
+node_modules/.bin/uglifyjs:
+	npm install
 
 release:
 	mkdir libav.js-$(LIBAVJS_VERSION)
