@@ -19,6 +19,7 @@ libvpx-$(LIBVPX_VERSION)/Makefile: libvpx-$(LIBVPX_VERSION)/configure
 			--enable-static --disable-shared \
 			--disable-webm-io \
 			--disable-examples --disable-tools --disable-docs
+	sed 's/^.* cfg = ".*/static const char* const cfg = "";/' -i libvpx-$(LIBVPX_VERSION)/vpx_config.c
 
 libvpx-$(LIBVPX_VERSION)/configure: libvpx-$(LIBVPX_VERSION).tar.gz
 	tar zxf libvpx-$(LIBVPX_VERSION).tar.gz
