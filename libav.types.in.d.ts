@@ -215,6 +215,11 @@ export interface LibAV {
 @DECLS
 
     /**
+     * Callback when writes occur. Set by the user.
+     */
+    onwrite?: (filename: string, position: number, buffer: Uint8Array | Int8Array) => void;
+
+    /**
      * Terminate the worker associated with this libav.js instance, rendering
      * it inoperable and freeing its memory.
      */
