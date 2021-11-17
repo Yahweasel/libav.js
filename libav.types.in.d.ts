@@ -42,7 +42,7 @@ export interface Frame {
      * Audio only. Channel layout. It is possible for only one of this and
      * channels to be set.
      */
-    channel_layout: number;
+    channel_layout?: number;
 
     /**
      * Audio only. Number of channels. It is possible for only one of this and
@@ -187,27 +187,27 @@ export interface FilterIOSettings {
  * Supported properties of an AVCodecContext, used by ff_init_encoder.
  */
 export interface AVCodecContextProps {
-    bit_rate: number,
-    bit_ratehi: number,
-    channel_layout: number,
-    channel_layouthi: number,
-    channels: number,
-    frame_size: number,
-    framerate_num: number,
-    framerate_den: number,
-    gop_size: number,
-    height: number,
-    keyint_min: number,
-    pix_fmt: number,
-    rc_max_rate: number,
-    rc_max_ratehi: number,
-    rc_min_rate: number,
-    rc_min_ratehi: number,
-    sample_fmt: number,
-    sample_rate: number,
-    qmax: number,
-    qmin: number,
-    width: number
+    bit_rate?: number,
+    bit_ratehi?: number,
+    channel_layout?: number,
+    channel_layouthi?: number,
+    channels?: number,
+    frame_size?: number,
+    framerate_num?: number,
+    framerate_den?: number,
+    gop_size?: number,
+    height?: number,
+    keyint_min?: number,
+    pix_fmt?: number,
+    rc_max_rate?: number,
+    rc_max_ratehi?: number,
+    rc_min_rate?: number,
+    rc_min_ratehi?: number,
+    sample_fmt?: number,
+    sample_rate?: number,
+    qmax?: number,
+    qmin?: number,
+    width?: number
 }
 
 export interface LibAV {

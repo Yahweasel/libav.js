@@ -195,8 +195,8 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
  */
 /* @types
  * ff_init_encoder(
- *     name: string, opts: {
- *         ctx: AVCodecContextProps, options: Record<string, string>
+ *     name: string, opts?: {
+ *         ctx?: AVCodecContextProps, options?: Record<string, string>
  *     }
  * ): Promise<[number, number, number, number, number]>
  */
@@ -471,11 +471,11 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
 /* @types
  * ff_init_muxer(
  *     opts: {
- *         oformat: number, // format pointer
- *         format_name: string, // libav name
- *         filename: string,
- *         device: boolean, // Create a writer device
- *         open: boolean // Open the file for writing
+ *         oformat?: number, // format pointer
+ *         format_name?: string, // libav name
+ *         filename?: string,
+ *         device?: boolean, // Create a writer device
+ *         open?: boolean // Open the file for writing
  *     },
  *     streamCtxs: [number, number, number][] // AVCodecContext, time_base_num, time_base_den
  * ): Promise<[number, number, number, number[]]>
