@@ -949,19 +949,19 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
             var inData = AVFrame_data_a(frame, ci);
             switch (format) {
                 case 5: // U8P
-                    data.push(copyout_u8(inData, nb_samples).slice(0));
+                    data.push(copyout_u8(inData, nb_samples));
                     break;
 
                 case 6: // S16P
-                    data.push(copyout_s16(inData, nb_samples).slice(0));
+                    data.push(copyout_s16(inData, nb_samples));
                     break;
 
                 case 7: // S32P
-                    data.push(copyout_s32(inData, nb_samples).slice(0));
+                    data.push(copyout_s32(inData, nb_samples));
                     break;
 
                 case 8: // FLT
-                    data.push(copyout_f32(inData, nb_samples).slice(0));
+                    data.push(copyout_f32(inData, nb_samples));
                     break;
             }
         }
@@ -972,19 +972,19 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
         var inData = AVFrame_data_a(frame, 0);
         switch (format) {
             case 0: // U8
-                outFrame.data = copyout_u8(inData, ct).slice(0);
+                outFrame.data = copyout_u8(inData, ct);
                 break;
 
             case 1: // S16
-                outFrame.data = copyout_s16(inData, ct).slice(0);
+                outFrame.data = copyout_s16(inData, ct);
                 break;
 
             case 2: // S32
-                outFrame.data = copyout_s32(inData, ct).slice(0);
+                outFrame.data = copyout_s32(inData, ct);
                 break;
 
             case 3: // FLT
-                outFrame.data = copyout_f32(inData, ct).slice(0);
+                outFrame.data = copyout_f32(inData, ct);
                 break;
         }
 
@@ -1022,7 +1022,7 @@ var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, wid
         if (i === 1 || i === 2)
             h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
         for (var y = 0; y < h; y++)
-            plane.push(copyout_u8(inData + y * linesize, linesize).slice(0));
+            plane.push(copyout_u8(inData + y * linesize, linesize));
         data.push(plane);
     }
 
@@ -1167,7 +1167,7 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
     var data = AVPacket_data(pkt);
     var size = AVPacket_size(pkt);
     return {
-        data: copyout_u8(data, size).slice(0),
+        data: copyout_u8(data, size),
         pts: AVPacket_pts(pkt),
         ptshi: AVPacket_ptshi(pkt),
         dts: AVPacket_dts(pkt),
@@ -1191,7 +1191,7 @@ var ff_copyout_side_data = Module.ff_copyout_side_data = function(pkt) {
         var data = AVPacketSideData_data(side_data, i);
         var size = AVPacketSideData_size(side_data, i);
         ret.push({
-            data: copyout_u8(data, size).slice(0),
+            data: copyout_u8(data, size),
             type: AVPacketSideData_type(side_data, i)
         });
     }

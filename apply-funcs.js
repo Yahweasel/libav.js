@@ -73,10 +73,10 @@ function decls(f, meta) {
     funcs.copiers.forEach((type) => {
         outp += "var copyin_" + type[0] + " = Module.copyin_" + type[0] + " = Module.copyin_" + type[0] + "i = function(ptr, arr) { " +
             "var buf = new " + type[1] + "(Module.HEAPU8.buffer, ptr); " +
-            "for (var i = 0; i < arr.length; i++) buf[i] = arr[i]; " +
+            "buf.set(arr); " +
             "};\n" +
             "var copyout_" + type[0] + " = Module.copyout_" + type[0] + " = function(ptr, len) { " +
-            "return new " + type[1] + "(Module.HEAPU8.buffer, ptr, len); " +
+            "return (new " + type[1] + "(Module.HEAPU8.buffer, ptr, len)).slice(0); " +
             "};\n";
     });
 

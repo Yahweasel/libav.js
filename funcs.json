@@ -145,6 +145,8 @@
             "channel_layout",
             "channel_layouthi",
             "channels",
+            "extradata",
+            "extradata_size",
             "frame_size",
             "gop_size",
             "height",
@@ -163,7 +165,8 @@
         ["AVCodecParameters", [
             "codec_id",
             "codec_type",
-            "extradata"
+            "extradata",
+            "extradata_size"
         ]],
         ["AVPacket", [
             "pts",

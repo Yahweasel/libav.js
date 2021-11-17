@@ -101,6 +101,8 @@ int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, in
 BL(int64_t, bit_rate)
 BL(uint64_t, channel_layout)
 B(int, channels)
+B(uint8_t *, extradata)
+B(int, extradata_size)
 B(int, frame_size)
 B(int, gop_size)
 B(int, height)
@@ -147,6 +149,7 @@ void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
 B(enum AVCodecID, codec_id)
 B(enum AVMediaType, codec_type)
 B(uint8_t *, extradata)
+B(int, extradata_size)
 #undef B
 
 /* AVPacket */
