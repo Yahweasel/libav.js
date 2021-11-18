@@ -213,7 +213,7 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
 
     var ctxProps = opts.ctx || {};
     for (var prop in ctxProps)
-        this["AVCodecContext_" + prop + "_si"](c, ctxProps[prop]);
+        this["AVCodecContext_" + prop + "_s"](c, ctxProps[prop]);
 
     var time_base = opts.time_base || [1, 1000];
     AVCodecContext_time_base_s(c, time_base[0], time_base[1]);
@@ -1055,7 +1055,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
         "channel_layout", "channels", "format", "pts", "ptshi", "sample_rate"
     ].forEach(function(key) {
         if (key in frame)
-            Module["AVFrame_" + key + "_si"](framePtr, frame[key]);
+            Module["AVFrame_" + key + "_s"](framePtr, frame[key]);
     });
 
     var nb_samples;
@@ -1132,7 +1132,7 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
         "format", "height", "pts", "ptshi", "width"
     ].forEach(function(key) {
         if (key in frame)
-            Module["AVFrame_" + key + "_si"](framePtr, frame[key]);
+            Module["AVFrame_" + key + "_s"](framePtr, frame[key]);
     });
     if ("sample_aspect_ratio" in frame) {
         AVFrame_sample_aspect_ratio_s(framePtr, frame.sample_aspect_ratio[0],
@@ -1212,7 +1212,7 @@ var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
         "dts", "dtshi", "duration", "durationhi", "flags", "side_data", "side_data_elems", "stream_index", "pts", "ptshi"
     ].forEach(function(key) {
         if (key in packet)
-            Module["AVPacket_" + key + "_si"](pktPtr, packet[key]);
+            Module["AVPacket_" + key + "_s"](pktPtr, packet[key]);
     });
 
     if (packet.side_data)

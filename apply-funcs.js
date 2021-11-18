@@ -56,7 +56,7 @@ function decls(f, meta) {
                 "var " + decl + "_s = Module." + decl + "_s = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\", \"number\"]);\n";
         } else {
             outp += "var " + decl + " = Module." + decl + " = Module.cwrap(" + s(decl) + ", \"number\", [\"number\"]);\n" +
-                "var " + decl + "_s = Module." + decl + "_s = Module." + decl + "_si = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\"]);\n";
+                "var " + decl + "_s = Module." + decl + "_s = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\"]);\n";
         }
     });
 
