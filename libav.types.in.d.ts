@@ -75,6 +75,16 @@ export interface Frame {
      * denominator. 0 is interpreted as 1 (square pixels).
      */
     sample_aspect_ratio?: [number, number];
+
+    /**
+     * Is this a keyframe? (1=yes, 0=maybe)
+     */
+    key_frame?: number;
+
+    /**
+     * Picture type (libav-specific value)
+     */
+    pict_type?: number;
 }
 
 /**

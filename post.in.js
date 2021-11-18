@@ -1008,6 +1008,8 @@ var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, wid
         width: width,
         height: height,
         format: AVFrame_format(frame),
+        key_frame: AVFrame_key_frame(frame),
+        pict_type: AVFrame_pict_type(frame),
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
         sample_aspect_ratio: [
@@ -1133,7 +1135,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
 // Copy in a video frame. Used internally by ff_copyin_frame.
 var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, frame) {
     [
-        "format", "height", "pts", "ptshi", "width"
+        "format", "height", "key_frame", "pict_type", "pts", "ptshi", "width"
     ].forEach(function(key) {
         if (key in frame)
             CAccessors["AVFrame_" + key + "_s"](framePtr, frame[key]);
