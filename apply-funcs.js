@@ -45,38 +45,63 @@ function decls(f, meta) {
 
     var outp = "";
     funcs.functions.forEach((decl) => {
-        outp += "var " + decl[0] + " = Module." + decl[0] + " = Module.cwrap(" + s(decl[0]) + ", " + s(decl[1]) + ", " + s(decl[2]);
+        outp += `var ${decl[0]} = ` +
+            `Module.${decl[0]} = ` +
+            `CAccessors.${decl[0]} = ` +
+            `Module.cwrap(${s(decl[0])}, ${s(decl[1])}, ${s(decl[2])}`;
         if (decl[3])
-            outp += ", " + s(decl[3]);
+            outp += `, ${s(decl[3])}`;
         outp += ");\n";
     });
     accessors((decl, field) => {
         if (field && field.array) {
-            outp += "var " + decl + " = Module." + decl + " = Module.cwrap(" + s(decl) + ", \"number\", [\"number\", \"number\"]);\n" +
-                "var " + decl + "_s = Module." + decl + "_s = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\", \"number\"]);\n";
+            outp += `var ${decl} = ` +
+                `Module.${decl} = ` +
+                `CAccessors.${decl} = ` +
+                `Module.cwrap(${s(decl)}, "number", ["number", "number"]);\n` +
+                `var ${decl}_s = ` +
+                `Module.${decl}_s = ` +
+                `CAccessors.${decl}_s = ` +
+                `Module.cwrap(${s(decl+"_s")}, null, ["number", "number", "number"]);\n`;
+
         } else {
-            outp += "var " + decl + " = Module." + decl + " = Module.cwrap(" + s(decl) + ", \"number\", [\"number\"]);\n" +
-                "var " + decl + "_s = Module." + decl + "_s = Module.cwrap(" + s(decl+"_s") + ", null, [\"number\", \"number\"]);\n";
+            outp += `var ${decl} = ` +
+                `Module.${decl} = ` +
+                `CAccessors.${decl} = ` +
+                `Module.cwrap(${s(decl)}, "number", ["number"]);\n` +
+                `var ${decl}_s = ` +
+                `Module.${decl}_s = ` +
+                `CAccessors.${decl}_s = ` +
+                `Module.cwrap(${s(decl+"_s")}, null, ["number", "number"]);\n`;
         }
     });
 
     funcs.freers.forEach((decl) => {
-        outp += "var " + decl + "_js = Module." + decl + "_js = function(p) { " +
+        outp += `var ${decl}_js = ` +
+            `Module.${decl}_js = ` +
+            `CAccessors.${decl}_js = ` +
+            "function(p) { " +
             "var p2 = malloc(4); " +
             "if (p2 === 0) throw new Error(\"Could not malloc\"); " +
             "(new Uint32Array(Module.HEAPU8.buffer, p2, 1))[0] = p; " +
-            "Module." + decl + "(p2); " +
+            `CAccessors.${decl}(p2); ` +
             "free(p2); " +
             "};\n";
     });
 
     funcs.copiers.forEach((type) => {
-        outp += "var copyin_" + type[0] + " = Module.copyin_" + type[0] + " = Module.copyin_" + type[0] + "i = function(ptr, arr) { " +
-            "var buf = new " + type[1] + "(Module.HEAPU8.buffer, ptr); " +
+        outp += `var copyin_${type[0]} = ` +
+            `Module.copyin_${type[0]} = ` +
+            `CAccessors.copyin_${type[0]} = ` +
+            "function(ptr, arr) { " +
+            `var buf = new ${type[1]}(Module.HEAPU8.buffer, ptr); ` +
             "buf.set(arr); " +
             "};\n" +
-            "var copyout_" + type[0] + " = Module.copyout_" + type[0] + " = function(ptr, len) { " +
-            "return (new " + type[1] + "(Module.HEAPU8.buffer, ptr, len)).slice(0); " +
+            `var copyout_${type[0]} = ` +
+            `Module.copyout_${type[0]} = ` +
+            `CAccessors.copyout_${type[0]} = ` +
+            "function(ptr, len) { " +
+            `return (new ${type[1]}(Module.HEAPU8.buffer, ptr, len)).slice(0); ` +
             "};\n";
     });
 

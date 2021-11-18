@@ -97,6 +97,10 @@ var writerCallbacks = {
     }
 };
 
+/* Original versions of all our functions, since the Module version is replaced
+ * if we're a Worker */
+var CAccessors = {};
+
 @FUNCS
 
 // Filesystem
@@ -1055,7 +1059,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
         "channel_layout", "channels", "format", "pts", "ptshi", "sample_rate"
     ].forEach(function(key) {
         if (key in frame)
-            Module["AVFrame_" + key + "_s"](framePtr, frame[key]);
+            CAccessors["AVFrame_" + key + "_s"](framePtr, frame[key]);
     });
 
     var nb_samples;
@@ -1132,7 +1136,7 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
         "format", "height", "pts", "ptshi", "width"
     ].forEach(function(key) {
         if (key in frame)
-            Module["AVFrame_" + key + "_s"](framePtr, frame[key]);
+            CAccessors["AVFrame_" + key + "_s"](framePtr, frame[key]);
     });
     if ("sample_aspect_ratio" in frame) {
         AVFrame_sample_aspect_ratio_s(framePtr, frame.sample_aspect_ratio[0],
@@ -1209,10 +1213,11 @@ var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     ff_set_packet(pktPtr, packet.data);
 
     [
-        "dts", "dtshi", "duration", "durationhi", "flags", "side_data", "side_data_elems", "stream_index", "pts", "ptshi"
+        "dts", "dtshi", "duration", "durationhi", "flags", "side_data",
+        "side_data_elems", "stream_index", "pts", "ptshi"
     ].forEach(function(key) {
         if (key in packet)
-            Module["AVPacket_" + key + "_s"](pktPtr, packet[key]);
+            CAccessors["AVPacket_" + key + "_s"](pktPtr, packet[key]);
     });
 
     if (packet.side_data)
