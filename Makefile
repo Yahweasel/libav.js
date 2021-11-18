@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=3.3d.4.4
+LIBAVJS_VERSION=3.3.4.4
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz

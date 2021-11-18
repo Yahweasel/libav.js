@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-3.2.4.4-default.js");
+    LibAV = require("../libav-3.3.4.4-default.js");
     fs = require("fs");
 }
 
