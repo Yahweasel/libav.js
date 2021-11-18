@@ -49,8 +49,8 @@ function decls(f, meta) {
             `Module.${decl[0]} = ` +
             `CAccessors.${decl[0]} = ` +
             `Module.cwrap(${s(decl[0])}, ${s(decl[1])}, ${s(decl[2])}`;
-        if (decl[3])
-            outp += `, ${s(decl[3])}`;
+        if (decl[3] && decl[3].async)
+            outp += `, {async:true}`;
         outp += ");\n";
     });
     accessors((decl, field) => {

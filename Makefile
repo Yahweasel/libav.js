@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=3.4.4.4
+LIBAVJS_VERSION=3.5a.4.4.1
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
@@ -26,12 +26,14 @@ build-%: libav-$(LIBAVJS_VERSION).js libav-$(LIBAVJS_VERSION)-%.asm.js \
 libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg exports.json post.js extern-post.js bindings.c
 	$(EMCC) $(CFLAGS) $(EFLAGS) -s WASM=0 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-$* \
+		`test ! -e configs/$*/link-flags.txt || cat configs/$*/link-flags.txt` \
 		bindings.c \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavformat/libavformat.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavfilter/libavfilter.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavcodec/libavcodec.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libswresample/libswresample.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$*/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-$*/libswscale/libswscale.a'` \
 		`test ! -e configs/$*/libs.txt || cat configs/$*/libs.txt` -o $@
 	cat configs/$*/license.js $@ > $@.tmp
 	mv $@.tmp $@
@@ -39,12 +41,14 @@ libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg expor
 libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg exports.json post.js extern-post.js bindings.c
 	$(EMCC) $(CFLAGS) $(EFLAGS) \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-$* \
+		`test ! -e configs/$*/link-flags.txt || cat configs/$*/link-flags.txt` \
 		bindings.c \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavformat/libavformat.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavfilter/libavfilter.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavcodec/libavcodec.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libswresample/libswresample.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$*/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$*/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-$*/libswscale/libswscale.a'` \
 		`test ! -e configs/$*/libs.txt || cat configs/$*/libs.txt` -o $@
 	cat configs/$*/license.js $@ > $@.tmp
 	mv $@.tmp $@

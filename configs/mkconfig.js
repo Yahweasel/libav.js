@@ -17,7 +17,7 @@
 const fs = require("fs");
 const name = process.argv[2];
 const parts = JSON.parse(process.argv[3]);
-const files = ["deps.txt", "ffmpeg-config.txt", "libs.txt"]; // license.js is special
+const files = ["deps.txt", "ffmpeg-config.txt", "libs.txt", "link-flags.txt"]; // license.js is special
 
 try {
     fs.mkdirSync(name);

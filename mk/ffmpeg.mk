@@ -1,4 +1,5 @@
-FFMPEG_VERSION=4.4
+#FFMPEG_VERSION=4.4.1
+FFMPEG_VERSION=f8012075
 
 ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg: ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
 	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; emmake $(MAKE)
@@ -21,12 +22,13 @@ ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak: ffmpeg-$(FFMPEG_VERSION)/PA
 ffmpeg-$(FFMPEG_VERSION)/PATCHED: ffmpeg-$(FFMPEG_VERSION)/configure
 	cd ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../patches/ffmpeg.diff
 
-ffmpeg-$(FFMPEG_VERSION)/configure: ffmpeg-$(FFMPEG_VERSION).tar.xz
-	tar Jxf ffmpeg-$(FFMPEG_VERSION).tar.xz
+ffmpeg-$(FFMPEG_VERSION)/configure: ffmpeg-$(FFMPEG_VERSION).tar.gz
+	tar zxf ffmpeg-$(FFMPEG_VERSION).tar.gz
 	touch ffmpeg-$(FFMPEG_VERSION)/configure
 
-ffmpeg-$(FFMPEG_VERSION).tar.xz:
-	curl https://ffmpeg.org/releases/ffmpeg-$(FFMPEG_VERSION).tar.xz -o $@
+ffmpeg-$(FFMPEG_VERSION).tar.gz:
+	#curl https://ffmpeg.org/releases/ffmpeg-$(FFMPEG_VERSION).tar.xz -o $@
+	curl https://git.ffmpeg.org/gitweb/ffmpeg.git/snapshot/$(FFMPEG_VERSION).tar.gz -o $@
 
 ffmpeg-release:
-	cp ffmpeg-$(FFMPEG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp ffmpeg-$(FFMPEG_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/

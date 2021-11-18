@@ -67,6 +67,13 @@
         ["av_dict_set", "number", ["number", "string", "string", "number"]],
         ["av_dict_free", null, ["number"]],
 
+        ["sws_getContext", "number",
+            ["number", "number", "number", "number", "number", "number",
+            "number", "number", "number", "number"]
+        ],
+        ["sws_freeContext", null, ["number"]],
+        ["sws_scale_frame", "number", ["number", "number", "number"]],
+
         ["AVFrame_sample_aspect_ratio_num", "number", ["number"]],
         ["AVFrame_sample_aspect_ratio_den", "number", ["number"]],
         ["AVFrame_sample_aspect_ratio_s", null, ["number", "number", "number"]],
@@ -88,7 +95,8 @@
         ["calloc", "number", ["number", "number"]],
         ["free", null, ["number"]],
         ["malloc", "number", ["number"]],
-        ["mallinfo_uordblks", "number", []]
+        ["mallinfo_uordblks", "number", []],
+        ["libavjs_with_swscale", "number", []]
     ],
 
     "meta": [

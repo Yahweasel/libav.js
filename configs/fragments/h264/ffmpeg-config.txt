@@ -1,2 +1,3 @@
+--enable-swscale
 --enable-decoder=h264
 --enable-bsf=extract_extradata

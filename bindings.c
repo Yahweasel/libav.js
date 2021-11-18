@@ -234,6 +234,25 @@ B(int, pad_idx)
 
 
 /****************************************************************
+ * swscale
+ ***************************************************************/
+int libavjs_with_swscale() {
+#ifdef LIBAVJS_WITH_SWSCALE
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+#ifndef LIBAVJS_WITH_SWSCALE
+/* swscale isn't included, but we need the symbols */
+void sws_getContext() {}
+void sws_freeContext() {}
+void sws_scale_frame() {}
+#endif
+
+
+/****************************************************************
  * Other bindings
  ***************************************************************/
 
