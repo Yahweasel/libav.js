@@ -11,13 +11,15 @@
 --enable-filter=bandpass --enable-filter=bandreject --enable-filter=dynaudnorm
 --enable-filter=equalizer --enable-filter=loudnorm --enable-filter=pan
 --enable-filter=amix --enable-filter=volume
+--enable-libaom
+--enable-decoder=libaom_av1
+--enable-encoder=libaom_av1
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-demuxer=flac
 --enable-muxer=flac
 --enable-decoder=pcm_f32le
 --enable-encoder=pcm_f32le
---enable-swscale
 --enable-decoder=h264
 --enable-bsf=extract_extradata
 --enable-demuxer=mov
@@ -41,7 +43,6 @@
 --enable-libvpx
 --enable-decoder=libvpx_vp9
 --enable-encoder=libvpx_vp9
---enable-swscale
 --enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
 --enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
 --enable-demuxer=wav

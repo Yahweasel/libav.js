@@ -1,0 +1,3 @@
+--enable-libaom
+--enable-decoder=libaom_av1
+--enable-encoder=libaom_av1

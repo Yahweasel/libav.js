@@ -26,9 +26,10 @@ const configs = [
     ["flac", ["flac"]],
     ["opus-flac", ["ogg", "opus", "flac"]],
 
-    ["webm", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8", "wav", "audio-filters"]],
-    ["webm-opus-flac", ["ogg", "webm", "opus", "flac", "vpx", "vp8"]],
-    ["mediarecorder-transcoder", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8", "h264"]],
+    ["webm", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "wav", "audio-filters"]],
+    ["webm-opus-flac", ["ogg", "webm", "opus", "flac", "swscale", "vpx", "vp8"]],
+    ["mediarecorder-transcoder", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264"]],
+    ["open-media", ["ogg", "webm", "opus", "flac", "vorbis", "swscale", "vpx", "vp8", "vp9", "av1"]],
 
     ["empty", []],
     ["all", fs.readdirSync("fragments").filter(x => x !== "default")]

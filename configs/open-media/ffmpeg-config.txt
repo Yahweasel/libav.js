@@ -11,6 +11,15 @@
 --enable-encoder=flac
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-libvorbis
+--enable-decoder=libvorbis
+--enable-encoder=libvorbis
 --enable-libvpx
 --enable-decoder=libvpx_vp8
 --enable-encoder=libvpx_vp8
+--enable-libvpx
+--enable-decoder=libvpx_vp9
+--enable-encoder=libvpx_vp9
+--enable-libaom
+--enable-decoder=libaom_av1
+--enable-encoder=libaom_av1

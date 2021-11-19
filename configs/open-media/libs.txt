@@ -1,7 +1,6 @@
-tmp-inst/lib/libaom.a
-tmp-inst/lib/libmp3lame.a
 tmp-inst/lib/libopus.a
 tmp-inst/lib/libvorbis.a
 tmp-inst/lib/libvorbisenc.a
 tmp-inst/lib/libogg.a
 tmp-inst/lib/libvpx.a
+tmp-inst/lib/libaom.a

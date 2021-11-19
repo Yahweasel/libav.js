@@ -1,0 +1,24 @@
+diff --git a/PATCHED b/PATCHED
+new file mode 100644
+index 0000000..e69de29
+diff --git a/av1/decoder/decodeframe.c b/av1/decoder/decodeframe.c
+index 08f81da..abfc1a7 100644
+--- a/av1/decoder/decodeframe.c
++++ b/av1/decoder/decodeframe.c
+@@ -2907,12 +2907,16 @@ static int tile_worker_hook(void *arg1, void *arg2) {
+   // The jmp_buf is valid only for the duration of the function that calls
+   // setjmp(). Therefore, this function must reset the 'setjmp' field to 0
+   // before it returns.
++#ifndef __EMSCRIPTEN__
++  /* NOTE: It's obviously wrong to comment out this setjmp, but for some
++   * reason, Emscripten fails to lower it! */
+   if (setjmp(thread_data->error_info.jmp)) {
+     thread_data->error_info.setjmp = 0;
+     thread_data->td->dcb.corrupted = 1;
+     return 0;
+   }
+   thread_data->error_info.setjmp = 1;
++#endif
+ 
+   allow_update_cdf = cm->tiles.large_scale ? 0 : 1;
+   allow_update_cdf = allow_update_cdf && !cm->features.disable_cdf_update;

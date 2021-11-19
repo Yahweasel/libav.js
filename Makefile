@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=3.5.4.4.1
+LIBAVJS_VERSION=3.6a.4.4.1
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
@@ -74,7 +74,7 @@ release:
 	       libav.js-$(LIBAVJS_VERSION)/; \
 	done
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
-	for t in ffmpeg lame libogg libvorbis libvpx opus; \
+	for t in ffmpeg lame libaom libogg libvorbis libvpx opus; \
 	do \
 	    $(MAKE) $$t-release; \
 	done
@@ -98,18 +98,20 @@ halfclean:
 clean: halfclean
 	-rm -rf tmp-inst
 	-rm -rf opus-$(OPUS_VERSION)
+	-rm -rf libaom-$(LIBAOM_VERSION)
 	-rm -rf libvorbis-$(LIBVORBIS_VERSION)
 	-rm -rf libogg-$(LIBOGG_VERSION)
 	-rm -rf libvpx-$(LIBVPX_VERSION)
 	-rm -rf lame-$(LAME_VERSION)
 	-rm -rf ffmpeg-$(FFMPEG_VERSION)
-	-rm -f ffmpeg-$(FFMPEG_VERSION)/ffbuild/config.mak
 
 distclean: clean
 	-rm -f opus-$(OPUS_VERSION).tar.gz
-	-rm -rf libvorbis-$(LIBVORBIS_VERSION).tar.xz
-	-rm -rf libogg-$(LIBOGG_VERSION).tar.xz
-	-rm -rf lame-$(LAME_VERSION).tar.gz
+	-rm -f libaom-$(LIBAOM_VERSION).tar.gz
+	-rm -f libvorbis-$(LIBVORBIS_VERSION).tar.xz
+	-rm -f libogg-$(LIBOGG_VERSION).tar.xz
+	-rm -f libvpx-$(LIBVPX_VERSION).tar.gz
+	-rm -f lame-$(LAME_VERSION).tar.gz
 	-rm -f ffmpeg-$(FFMPEG_VERSION).tar.xz
 
 .PRECIOUS: libav-$(LIBAVJS_VERSION)-%.wasm.js libav-$(LIBAVJS_VERSION)-%.asm.js ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
