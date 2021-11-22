@@ -172,7 +172,7 @@
             // Our direct function wrappers
             @FUNCS.forEach(function(f) {
                 if (ret[f]) {
-                    var real = ret[f];
+                    var real = ret[f + "_sync"] = ret[f];
                     ret[f] = function() {
                         var args = arguments;
                         return new Promise(function(res, rej) {
@@ -196,23 +196,7 @@
                 }
             });
 
-            // Convenience multi-part setters (NOTE: Only single-threaded!)
-            [
-            "AVFrame",
-            "AVCodecContext",
-            "AVFilterInOut"
-            ].forEach(function(type) {
-                ret[type + "_set"] = function(obj, vals) {
-                    var promises = [];
-                    for (var key in vals) {
-                        var val = vals[key];
-                        promises.push(ret.c(type + "_" + key + "_s", obj, val));
-                    }
-                    return Promise.all(promises);
-                };
-            });
-
-            // And some enumerations lifted directly from ffmpeg 4.1
+            // Some enumerations lifted directly from FFmpeg
             function enume(vals, first) {
                 if (typeof first === undefined)
                     first = 0;
