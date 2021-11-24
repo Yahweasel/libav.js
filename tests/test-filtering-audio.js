@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-3.5.4.4.1-default.js");
+    LibAV = require("../libav-3.6.4.4.1-default.js");
     fs = require("fs");
 }
 
@@ -67,18 +67,14 @@ function init_filters(libav, filters_descr, sample_fmt, channel_layout, frame_si
             libav.av_opt_set_int_list_js(buffersink_ctx, "sample_fmts", 4, int32s, -1, libav.AV_OPT_SEARCH_CHILDREN),
             libav.av_opt_set_int_list_js(buffersink_ctx, "channel_layouts", 8, int64s, -1, libav.AV_OPT_SEARCH_CHILDREN),
             libav.av_opt_set_int_list_js(buffersink_ctx, "sample_rates", 4, int32s + 8, -1, libav.AV_OPT_SEARCH_CHILDREN),
-            libav.AVFilterInOut_set(outputs, {
-                name: ret[4],
-                filter_ctx: buffersrc_ctx,
-                pad_idx: 0,
-                next: 0
-            }),
-            libav.AVFilterInOut_set(inputs, {
-                name: ret[5],
-                filter_ctx: buffersink_ctx,
-                pad_idx: 0,
-                next: 0
-            })
+            libav.AVFilterInOut_name_s(outputs, ret[4]),
+            libav.AVFilterInOut_filter_ctx_s(outputs, buffersrc_ctx),
+            libav.AVFilterInOut_pad_idx_s(outputs, 0),
+            libav.AVFilterInOut_next_s(outputs, 0),
+            libav.AVFilterInOut_name_s(inputs, ret[5]),
+            libav.AVFilterInOut_filter_ctx_s(inputs, buffersink_ctx),
+            libav.AVFilterInOut_pad_idx_s(inputs, 0),
+            libav.AVFilterInOut_next_s(inputs, 0)
         ]);
 
     }).then(function(ret) {

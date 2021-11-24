@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-3.5.4.4.1-default.js");
+    LibAV = require("../libav-3.6.4.4.1-default.js");
     fs = require("fs");
 }
 
@@ -69,16 +69,21 @@ function main() {
         c = ret;
         if (c === 0)
             throw new Error("Could not allocate audio codec context");;
-        return Promise.all([
-            libav.AVCodecContext_set(c, {
-                bit_rate: 128000,
-                sample_fmt: libav.AV_SAMPLE_FMT_FLT,
-                sample_rate: 48000,
-                channel_layout: 4,
-                channels: 1
-            }),
-            libav.AVCodecContext_time_base_s(c, 1, 48000)
-        ]);
+
+        var promises = [];
+        var ctx = {
+            bit_rate: 128000,
+            sample_fmt: libav.AV_SAMPLE_FMT_FLT,
+            sample_rate: 48000,
+            channel_layout: 4,
+            channels: 1
+        };
+        for (var key in ctx)
+            promises.push(libav["AVCodecContext_" + key + "_s"](c, ctx[key]));
+
+        promises.push(libav.AVCodecContext_time_base_s(c, 1, 48000));
+
+        return Promise.all(promises);
 
     }).then(function(ret) {
         return libav.avcodec_open2(c, codec, 0);
@@ -96,11 +101,11 @@ function main() {
         pkt = ret[0];
         frame = ret[1];
         frame_size = ret[2];
-        return libav.AVFrame_set(frame, {
-            nb_samples: frame_size,
-            format: libav.AV_SAMPLE_FMT_FLT,
-            channel_layout: 4
-        });
+        return Promise.all([
+            libav.AVFrame_nb_samples_s(frame, frame_size),
+            libav.AVFrame_format_s(frame, libav.AV_SAMPLE_FMT_FLT),
+            libav.AVFrame_channel_layout_s(frame, 4)
+        ]);
 
     }).then(function() {
         return libav.av_frame_get_buffer(frame, 0);
