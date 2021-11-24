@@ -215,6 +215,8 @@ export interface AVCodecContextProps {
     rc_max_ratehi?: number;
     rc_min_rate?: number;
     rc_min_ratehi?: number;
+    sample_aspect_ratio_num?: number;
+    sample_aspect_ratio_den?: number;
     sample_fmt?: number;
     sample_rate?: number;
     qmax?: number;

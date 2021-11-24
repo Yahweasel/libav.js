@@ -143,6 +143,27 @@ void AVCodecContext_framerate_s(AVCodecContext *a, int n, int d) {
     a->framerate.den = d;
 }
 
+int AVCodecContext_sample_aspect_ratio_num(AVCodecContext *a) {
+    return a->sample_aspect_ratio.num;
+}
+
+int AVCodecContext_sample_aspect_ratio_den(AVCodecContext *a) {
+    return a->sample_aspect_ratio.den;
+}
+
+void AVCodecContext_sample_aspect_ratio_num_s(AVCodecContext *a, int b) {
+    a->sample_aspect_ratio.num = b;
+}
+
+void AVCodecContext_sample_aspect_ratio_den_s(AVCodecContext *a, int b) {
+    a->sample_aspect_ratio.den = b;
+}
+
+void AVCodecContext_sample_aspect_ratio_s(AVCodecContext *a, int n, int d) {
+    a->sample_aspect_ratio.num = n;
+    a->sample_aspect_ratio.den = d;
+}
+
 void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
     a->time_base.num = n;
     a->time_base.den = d;
