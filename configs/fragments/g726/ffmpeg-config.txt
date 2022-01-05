@@ -1,0 +1,2 @@
+--enable-decoder=g726
+--enable-encoder=g726
