@@ -114,3 +114,14 @@ index a456c3d..a604699 100644
  
      /* CRC is correct so we can be 99% sure there's an actual change here */
      if (idx < 0) {
+--- a/libavcodec/libopenh264enc.c	2021-10-04 00:08:29.000000000 +0530
++++ b/libavcodec/libopenh264enc.c	2022-06-21 18:34:22.000000000 +0530
+@@ -377,7 +377,7 @@
+     sp.iPicHeight = avctx->height;
+ 
+     if (frame->pict_type == AV_PICTURE_TYPE_I) {
+-        (*s->encoder)->ForceIntraFrame(s->encoder, true);
++        (*s->encoder)->ForceIntraFrame(s->encoder, true, -1);
+     }
+ 
+     encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);
