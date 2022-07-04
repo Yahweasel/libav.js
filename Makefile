@@ -103,6 +103,7 @@ clean: halfclean
 	-rm -rf libogg-$(LIBOGG_VERSION)
 	-rm -rf libvpx-$(LIBVPX_VERSION)
 	-rm -rf lame-$(LAME_VERSION)
+	-rm -rf openh264-$(OPENH264_VERSION)
 	-rm -rf ffmpeg-$(FFMPEG_VERSION)
 
 distclean: clean
@@ -112,6 +113,7 @@ distclean: clean
 	-rm -f libogg-$(LIBOGG_VERSION).tar.xz
 	-rm -f libvpx-$(LIBVPX_VERSION).tar.gz
 	-rm -f lame-$(LAME_VERSION).tar.gz
+	-rm -rf openh264-$(OPENH264_VERSION).tar.gz
 	-rm -f ffmpeg-$(FFMPEG_VERSION).tar.xz
 
 .PRECIOUS: libav-$(LIBAVJS_VERSION)-%.wasm.js libav-$(LIBAVJS_VERSION)-%.asm.js ffmpeg-$(FFMPEG_VERSION)/build-%/ffmpeg ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak

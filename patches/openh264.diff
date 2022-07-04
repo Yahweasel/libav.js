@@ -1,0 +1,11 @@
+--- a/codec/api/svc/codec_api.h	2022-01-28 10:27:33.000000000 +0530
++++ b/codec/api/svc/codec_api.h	2022-06-21 18:32:08.000000000 +0530
+@@ -486,7 +486,7 @@
+ int (*EncodeFrame) (ISVCEncoder*, const SSourcePicture* kpSrcPic, SFrameBSInfo* pBsInfo);
+ int (*EncodeParameterSets) (ISVCEncoder*, SFrameBSInfo* pBsInfo);
+ 
+-int (*ForceIntraFrame) (ISVCEncoder*, bool bIDR);
++int (*ForceIntraFrame) (ISVCEncoder*, bool bIDR, int iLayerId);
+ 
+ int (*SetOption) (ISVCEncoder*, ENCODER_OPTION eOptionId, void* pOption);
+ int (*GetOption) (ISVCEncoder*, ENCODER_OPTION eOptionId, void* pOption);

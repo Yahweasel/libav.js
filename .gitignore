@@ -1,6 +1,7 @@
 *.tar.xz
 *.tar.gz
 .*.swp
+.vscode/
 
 ffmpeg-*/
 lame-*/
@@ -8,6 +9,7 @@ libogg-*/
 libvorbis-*/
 libvpx-*/
 opus-*/
+openh264-*/
 
 tests/out.ogg
 tests/out.opus
