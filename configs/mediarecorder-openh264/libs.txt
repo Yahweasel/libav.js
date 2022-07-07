@@ -1,2 +1,3 @@
 tmp-inst/lib/libopus.a
 tmp-inst/lib/libvpx.a
+tmp-inst/lib/libopenh264.a
