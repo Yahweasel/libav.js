@@ -1,0 +1,22 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=ogg
+--enable-muxer=ogg
+--enable-demuxer=matroska
+--enable-muxer=matroska --enable-muxer=webm
+--enable-libopus
+--enable-decoder=libopus
+--enable-encoder=libopus
+--enable-demuxer=mov
+--enable-muxer=ipod
+--enable-decoder=aac
+--enable-encoder=aac
+--enable-decoder=flac
+--enable-encoder=flac
+--enable-demuxer=flac
+--enable-muxer=flac
+--enable-libvpx
+--enable-decoder=libvpx_vp8
+--enable-encoder=libvpx_vp8
+--enable-decoder=h264
+--enable-bsf=extract_extradata

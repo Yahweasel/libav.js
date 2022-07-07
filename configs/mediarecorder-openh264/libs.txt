@@ -1,0 +1,2 @@
+tmp-inst/lib/libopus.a
+tmp-inst/lib/libvpx.a

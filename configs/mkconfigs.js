@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Copyright (C) 2021 Yahweasel
+ * Copyright (C) 2021, 2022 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -30,6 +30,8 @@ const configs = [
     ["webm-opus-flac", ["ogg", "webm", "opus", "flac", "swscale", "vpx", "vp8"]],
     ["mediarecorder-transcoder", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264"]],
     ["open-media", ["ogg", "webm", "opus", "flac", "vorbis", "swscale", "vpx", "vp8", "vp9", "av1"]],
+
+    ["mediarecorder-openh264", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264"]],
 
     ["empty", []],
     ["all", fs.readdirSync("fragments").filter(x => x !== "default")]

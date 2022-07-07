@@ -1,0 +1,2 @@
+tmp-inst/lib/pkgconfig/opus.pc
+tmp-inst/lib/pkgconfig/vpx.pc
