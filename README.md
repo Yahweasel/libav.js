@@ -196,6 +196,18 @@ MPEG-4 video, only decoding. (`["ogg", "webm", "opus", "ipod", "aac", "flac",
 "vp8"]`, `["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8",
 "h264"]`)
 
+Finally, the “mediarecorder-openh264” variant, relative to
+“mediarecorder-transcoder”, adds H.264 *encoding* support, through libopenh264.
+Note that H.264 is under patent until at least 2024, and the use of the
+libopenh264 encoder in this context before that time opens you to the
+possibility of patent litigation, unless you have patent rights. For this
+reason, this variant is not provided pre-built in releases, and you must build
+it yourself if you want it. Cisco, who authors libopenh264, grants a patent
+license to its users, but this license applies only to users of the precompiled
+version compiled by Cisco, and no such version is provided in WebAssembly, so
+it does not apply to use in libav.js. (`["ogg", "webm", "opus", "ipod", "aac",
+"flac", "swscale", "vpx", "vp8", "h264", "openh264"]`)
+
 To create a variant from configuration fragments, run `./mkconfig.js` in the
 `configs` directory. The first argument is the name of the variant to make, and
 the second argument is the JSON array of fragments to include.
