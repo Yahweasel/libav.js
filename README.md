@@ -224,35 +224,39 @@ understand how.
 ## Size
 
 FFmpeg is big, so libav.js is big. But, it's not ludicrous; the WebAssembly is
-usually between 2 and 3 MiB for fairly complete builds, and the asm.js is about
+usually between 1.5 and 3 MiB for fairly complete builds, and the asm.js is about
 double that.
 
 You can estimate the size of variants based on the size of the constituent
-fragments. As of version 3.0.4.4, an empty build is approximately 673KiB
+fragments. As of version 3.7.5.0.1, an empty build is approximately 520KiB
 (WebAssembly), and the fragments add the following:
 
 | Fragment      | Size (KiB)    |
 | ------------: | :------------ |
-| ogg           | 67            |
-| webm          | 11            |
-| ipod          | 344           |
+| ogg           | 64            |
+| webm          | 156           |
+| ipod          | 352           |
 |               |               |
-| opus          | 284           |
-| aac           | 281           |
-| vorbis        | 451           |
-| lame          | 278           |
-| flac          | 82            |
+| opus          | 280           |
+| aac           | 268           |
+| vorbis        | 448           |
+| lame          | 272           |
+| flac          | 80            |
 | wav           | 48            |
 | wavpack       | 104           |
-| alac          | 25            |
+| alac          | 24            |
 |               |               |
-| vpx+vp8       | 343           |
-| vpx+vp9       | 742           |
-| h264          | 544           |
+| vpx+vp8       | 340           |
+| vpx+vp9       | 811           |
+| av1           | 3474          |
+| h263p         | 412           |
+| h264          | 492           |
+| openh264      | 1118          |
 |               |               |
-| audio-filters | 133           |
+| audio-filters | 136           |
+| swscale       | 416           |
 
 The asm.js versions are much bigger, but will not be loaded on
 WebAssembly-capable clients.
 
-The wrapper (“glue”) code is about 220KiB, but is highly compressible.
+The wrapper (“glue”) code is about 232KiB, but is highly compressible.
