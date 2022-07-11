@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-3.7.5.0.1-webm.js");
+    LibAV = require("../libav-3.7.5.0.1-mediarecorder-openh264.js");
     fs = require("fs");
 }
 
@@ -89,16 +89,12 @@ function main() {
         ]);
 
     }).then(function() {
-        return libav.ff_init_encoder("libvpx", {
+        return libav.ff_init_encoder("libopenh264", {
             ctx: {
                 bit_rate: 1000000,
                 pix_fmt: frames[0].format,
                 width: frames[0].width,
                 height: frames[0].height
-            },
-            options: {
-                quality: "realtime",
-                "cpu-used": "8"
             }
         });
 
@@ -108,7 +104,11 @@ function main() {
         frame = ret[2];
         pkt = ret[3];
 
-        return libav.ff_init_muxer({filename: "tmp2.webm", open: true}, [[c, 1, 1000]]);
+        // We can't use arbitrary timebases for MP4, so scale to 1/16K
+        for (const frame of frames)
+            frame.pts *= 16;
+
+        return libav.ff_init_muxer({filename: "tmp.mp4", open: true}, [[c, 1, 16000]]);
 
     }).then(function(ret) {
         oc = ret[0];
@@ -134,7 +134,7 @@ function main() {
         ]);
 
     }).then(function() {
-        return libav.readFile("tmp2.webm");
+        return libav.readFile("tmp.mp4");
 
     }).then(function(ret) {
         if (typeof document !== "undefined") {
@@ -145,7 +145,7 @@ function main() {
             document.body.appendChild(a);
 
         } else {
-            fs.writeFileSync("out.webm", ret);
+            fs.writeFileSync("out.mp4", ret);
 
         }
 

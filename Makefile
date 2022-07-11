@@ -1,4 +1,4 @@
-LIBAVJS_VERSION=3.6.4.4.1
+LIBAVJS_VERSION=3.7.5.0.1
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
@@ -64,7 +64,7 @@ node_modules/.bin/uglifyjs:
 
 release:
 	mkdir libav.js-$(LIBAVJS_VERSION)
-	for v in default lite fat obsolete opus flac opus-flac webm webm-opus-flac mediarecorder-transcoder; \
+	for v in default lite fat obsolete opus flac opus-flac webm webm-opus-flac mediarecorder-transcoder open-media; \
 	do \
 	    $(MAKE) build-$$v; \
 	    cp libav-$(LIBAVJS_VERSION)-$$v.js \
