@@ -183,7 +183,20 @@
             "codec_id",
             "codec_type",
             "extradata",
-            "extradata_size"
+            "extradata_size",
+            "format",
+            "bit_rate",
+            "profile",
+            "level",
+            "width",
+            "height",
+            "color_range",
+            "color_primaries",
+            "color_trc",
+            "color_space",
+            "chroma_location",
+            "channels",
+            "sample_rate"
         ]],
         ["AVPacket", [
             "pts",
