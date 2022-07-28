@@ -185,7 +185,7 @@ B(enum AVColorRange, color_range)
 B(enum AVColorPrimaries, color_primaries)
 B(enum AVColorTransferCharacteristic, color_trc)
 B(enum AVColorSpace, color_space)
-B(enum AVChromaLocation , chroma_location)
+B(enum AVChromaLocation, chroma_location)
 B(int, channels)
 B(int, sample_rate)
 #undef B
