@@ -1,5 +1,5 @@
-tmp-inst/lib/libopus.a
-tmp-inst/lib/libvorbis.a
-tmp-inst/lib/libvorbisenc.a
-tmp-inst/lib/libogg.a
-tmp-inst/lib/libmp3lame.a
+tmp-inst-@TARGET/lib/libopus.a
+tmp-inst-@TARGET/lib/libvorbis.a
+tmp-inst-@TARGET/lib/libvorbisenc.a
+tmp-inst-@TARGET/lib/libogg.a
+tmp-inst-@TARGET/lib/libmp3lame.a

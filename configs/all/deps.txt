@@ -1,6 +1,6 @@
-tmp-inst/lib/pkgconfig/aom.pc
-tmp-inst/lib/libmp3lame.a
-tmp-inst/lib/pkgconfig/openh264.pc
-tmp-inst/lib/pkgconfig/opus.pc
-tmp-inst/lib/pkgconfig/vorbis.pc
-tmp-inst/lib/pkgconfig/vpx.pc
+tmp-inst-@TARGET/lib/pkgconfig/aom.pc
+tmp-inst-@TARGET/lib/libmp3lame.a
+tmp-inst-@TARGET/lib/pkgconfig/openh264.pc
+tmp-inst-@TARGET/lib/pkgconfig/opus.pc
+tmp-inst-@TARGET/lib/pkgconfig/vorbis.pc
+tmp-inst-@TARGET/lib/pkgconfig/vpx.pc

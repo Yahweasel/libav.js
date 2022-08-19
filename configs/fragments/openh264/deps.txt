@@ -1,1 +1,1 @@
-tmp-inst/lib/pkgconfig/openh264.pc
+tmp-inst-@TARGET/lib/pkgconfig/openh264.pc

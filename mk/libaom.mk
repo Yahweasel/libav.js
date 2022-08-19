@@ -1,14 +1,15 @@
 # 3.2.0
 LIBAOM_VERSION=6bbe6ae7
 
-tmp-inst/lib/pkgconfig/aom.pc: libaom-$(LIBAOM_VERSION)/bld/Makefile
+tmp-inst%/lib/pkgconfig/aom.pc: libaom-$(LIBAOM_VERSION)/build%/Makefile
 	cd libaom-$(LIBAOM_VERSION)/bld ; \
 		emmake $(MAKE) install
 
-libaom-$(LIBAOM_VERSION)/bld/Makefile: libaom-$(LIBAOM_VERSION)/PATCHED
-	mkdir -p libaom-$(LIBAOM_VERSION)/bld
-	cd libaom-$(LIBAOM_VERSION)/bld ; \
-		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst" \
+# FIXME: No actual simd build
+libaom-$(LIBAOM_VERSION)/build%/Makefile: tmp-inst%/cflags.txt libaom-$(LIBAOM_VERSION)/PATCHED
+	mkdir -p libaom-$(LIBAOM_VERSION)/build$*
+	cd libaom-$(LIBAOM_VERSION)/build$* ; \
+		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst$*" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \

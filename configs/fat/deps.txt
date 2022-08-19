@@ -1,2 +1,2 @@
-tmp-inst/lib/pkgconfig/opus.pc
-tmp-inst/lib/pkgconfig/vorbis.pc
+tmp-inst-@TARGET/lib/pkgconfig/opus.pc
+tmp-inst-@TARGET/lib/pkgconfig/vorbis.pc

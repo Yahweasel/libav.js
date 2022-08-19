@@ -1,13 +1,14 @@
 LAME_VERSION=3.100
 
-tmp-inst/lib/libmp3lame.a: lame-$(LAME_VERSION)/config.h
-	cd lame-$(LAME_VERSION) ; \
+tmp-inst%/lib/libmp3lame.a: lame-$(LAME_VERSION)/build%/config.h
+	cd lame-$(LAME_VERSION)/build$* ; \
 		emmake $(MAKE) install
 
-lame-$(LAME_VERSION)/config.h: lame-$(LAME_VERSION)/configure
-	cd lame-$(LAME_VERSION) ; \
-		emconfigure ./configure --prefix="$(PWD)/tmp-inst" \
-			--host=mipsel-sysv --disable-shared CFLAGS=-Oz && \
+lame-$(LAME_VERSION)/build%/config.h: tmp-inst%/cflags.txt lame-$(LAME_VERSION)/configure
+	mkdir -p lame-$(LAME_VERSION)/build$*
+	cd lame-$(LAME_VERSION)/build$* ; \
+		emconfigure ../configure --prefix="$(PWD)/tmp-inst$*" \
+			--host=mipsel-sysv --disable-shared CFLAGS="-Oz `cat $(PWD)/tmp-inst$*/cflags.txt`" && \
 		touch config.h
 
 lame-$(LAME_VERSION)/configure: lame-$(LAME_VERSION).tar.gz

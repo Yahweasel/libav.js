@@ -14,18 +14,25 @@
  */
 
 (function() {
-    function isWebAssemblySupported() {
+    function isWebAssemblySupported(module) {
+        module = module || [0x0, 0x61, 0x73, 0x6d, 0x1, 0x0, 0x0, 0x0];
         try {
             if (typeof WebAssembly === "object" &&
                     typeof WebAssembly.instantiate === "function") {
                 var module = new WebAssembly.Module(
-                        new Uint8Array([0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
+                        new Uint8Array(module));
                 if (module instanceof WebAssembly.Module)
                     return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
             }
         } catch (e) {
         }
         return false;
+    }
+
+    function isSIMDSupported() {
+        return isWebAssemblySupported([0x0, 0x61, 0x73, 0x6d, 0x1, 0x0, 0x0,
+            0x0, 0x1, 0x5, 0x1, 0x60, 0x0, 0x1, 0x7b, 0x3, 0x2, 0x1, 0x0, 0xa,
+            0xa, 0x1, 0x8, 0x0, 0x41, 0x0, 0xfd, 0xf, 0xfd, 0x62, 0xb]);
     }
 
     var libav;
@@ -44,12 +51,15 @@
     libav.LibAV = function(opts) {
         opts = opts || {};
         var wasm = !opts.nowasm && isWebAssemblySupported();
+        var simd = wasm && !opts.nosimd && isSIMDSupported();
+        if (!simd) throw new Error("SIMD ONLY!");
         var ret;
 
         return Promise.all([]).then(function() {
             // Step one: Get LibAV loaded
             if (!libav.LibAVFactory) {
-                var toImport = base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js";
+                var toImport = base + "/libav-@VER-@CONFIG." +
+                    (simd ? "simd" : (wasm?"w":"") + "asm") + ".js";
                 if (nodejs) {
                     // Node.js: Load LibAV now
                     libav.LibAVFactory = require(toImport);
@@ -86,7 +96,8 @@
                 ret = {};
 
                 // Load the worker
-                ret.worker = new Worker(base + "/libav-@VER-@CONFIG." + (wasm?"w":"") + "asm.js");
+                ret.worker = new Worker(base + "/libav-@VER-@CONFIG." +
+                    (simd ? "simd" : (wasm?"w":"") + "asm") + ".js");
 
                 // Report our readiness
                 return new Promise(function(res, rej) {

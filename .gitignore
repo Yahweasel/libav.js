@@ -19,7 +19,8 @@ tests/out.mp4
 
 node_modules/
 package-lock.json
-tmp-inst/
+tmp-inst-base/
+tmp-inst-simd/
 
 libav.types.d.ts
 post.js
