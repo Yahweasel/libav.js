@@ -16,16 +16,23 @@
 (function() {
     function isWebAssemblySupported(module) {
         module = module || [0x0, 0x61, 0x73, 0x6d, 0x1, 0x0, 0x0, 0x0];
+        if (typeof WebAssembly !== "object" || typeof WebAssembly.instantiate !== "function")
+            return false;
         try {
-            if (typeof WebAssembly === "object" &&
-                    typeof WebAssembly.instantiate === "function") {
-                var module = new WebAssembly.Module(
-                        new Uint8Array(module));
-                if (module instanceof WebAssembly.Module)
-                    return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
-            }
-        } catch (e) {
-        }
+            var module = new WebAssembly.Module(new Uint8Array(module));
+            if (module instanceof WebAssembly.Module)
+                return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
+        } catch (e) {}
+        return false;
+    }
+
+    function isThreadingSupported() {
+        try {
+            var mem = new WebAssembly.Memory({initial: 1, shared: true});
+            if (!(mem.buffer instanceof SharedArrayBuffer))
+                return false;
+            return true;
+        } catch (e) {}
         return false;
     }
 
@@ -47,19 +54,35 @@
     if (libav.base)
         base = libav.base;
 
+    // Proxy our detection functions
+    libav.isWebAssemblySupported = isWebAssemblySupported;
+    libav.isThreadingSupported = isThreadingSupported;
+    libav.isSIMDSupported = isSIMDSupported;
+
+    // Get the target that will load, given these options
+    function target(opts) {
+        opts = opts || {};
+        var wasm = !opts.nowasm && isWebAssemblySupported();
+        var thr = wasm && !opts.nothreads && isThreadingSupported();
+        var simd = wasm && !opts.nosimd && isSIMDSupported();
+        if (!wasm)
+            return "asm";
+        else if (!thr && !simd)
+            return "wasm";
+        else
+            return (thr ? "thr" : "") + (simd ? "simd" : "");
+    }
+    libav.target = target;
+
     // Now start making our instance generating function
     libav.LibAV = function(opts) {
         opts = opts || {};
-        var wasm = !opts.nowasm && isWebAssemblySupported();
-        var simd = wasm && !opts.nosimd && isSIMDSupported();
-        if (!simd) throw new Error("SIMD ONLY!");
+        var toImport = base + "/libav-@VER-@CONFIG." + target(opts) + ".js";
         var ret;
 
         return Promise.all([]).then(function() {
             // Step one: Get LibAV loaded
             if (!libav.LibAVFactory) {
-                var toImport = base + "/libav-@VER-@CONFIG." +
-                    (simd ? "simd" : (wasm?"w":"") + "asm") + ".js";
                 if (nodejs) {
                     // Node.js: Load LibAV now
                     libav.LibAVFactory = require(toImport);
@@ -96,8 +119,7 @@
                 ret = {};
 
                 // Load the worker
-                ret.worker = new Worker(base + "/libav-@VER-@CONFIG." +
-                    (simd ? "simd" : (wasm?"w":"") + "asm") + ".js");
+                ret.worker = new Worker(toImport);
 
                 // Report our readiness
                 return new Promise(function(res, rej) {
