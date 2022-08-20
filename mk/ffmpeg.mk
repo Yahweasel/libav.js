@@ -27,6 +27,7 @@ ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak: tmp-inst-base/cflags.txt \
 		--extra-cflags="-I$(PWD)/tmp-inst-base/include" \
 		--extra-ldflags="-L$(PWD)/tmp-inst-base/lib" \
 		`cat ../../configs/$*/ffmpeg-config.txt`
+	touch $@
 
 # ffmpeg WITH simd
 ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: tmp-inst-base/cflags.txt \
@@ -40,16 +41,25 @@ ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: tmp-inst-base/cflags.t
 		--extra-cflags="-I$(PWD)/tmp-inst-simd/include -msimd128" \
 		--extra-ldflags="-L$(PWD)/tmp-inst-simd/lib -msimd128" \
 		`cat ../../configs/$*/ffmpeg-config.txt`
+	touch $@
 
 ffmpeg-$(FFMPEG_VERSION)/PATCHED: ffmpeg-$(FFMPEG_VERSION)/configure
 	cd ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../patches/ffmpeg.diff
+	touch $@
 
 ffmpeg-$(FFMPEG_VERSION)/configure: ffmpeg-$(FFMPEG_VERSION).tar.xz
 	tar Jxf ffmpeg-$(FFMPEG_VERSION).tar.xz
-	touch ffmpeg-$(FFMPEG_VERSION)/configure
+	touch $@
 
 ffmpeg-$(FFMPEG_VERSION).tar.xz:
 	curl https://ffmpeg.org/releases/ffmpeg-$(FFMPEG_VERSION).tar.xz -o $@
 
 ffmpeg-release:
 	cp ffmpeg-$(FFMPEG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
+
+.PRECIOUS: \
+	ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a \
+	ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak \
+	ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak \
+	ffmpeg-$(FFMPEG_VERSION)/PATCHED \
+	ffmpeg-$(FFMPEG_VERSION)/configure

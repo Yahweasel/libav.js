@@ -20,14 +20,19 @@ libvpx-$(LIBVPX_VERSION)/build%/Makefile: tmp-inst%/cflags.txt libvpx-$(LIBVPX_V
 			--enable-static --disable-shared \
 			--disable-webm-io \
 			--disable-examples --disable-tools --disable-docs
-	sed 's/^.* cfg = ".*/static const char* const cfg = "";/' -i libvpx-$(LIBVPX_VERSION)/vpx_config.c
+	sed 's/^.* cfg = ".*/static const char* const cfg = "";/' -i libvpx-$(LIBVPX_VERSION)/build$*/vpx_config.c
 
 libvpx-$(LIBVPX_VERSION)/configure: libvpx-$(LIBVPX_VERSION).tar.gz
 	tar zxf libvpx-$(LIBVPX_VERSION).tar.gz
-	touch libvpx-$(LIBVPX_VERSION)/configure
+	touch $@
 
 libvpx-$(LIBVPX_VERSION).tar.gz:
 	curl https://github.com/webmproject/libvpx/archive/refs/tags/v$(LIBVPX_VERSION).tar.gz -L -o $@
 
 libvpx-release:
 	cp libvpx-$(LIBVPX_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
+
+.PRECIOUS: \
+	tmp-inst%/lib/pkgconfig/vpx.pc \
+	libvpx-$(LIBVPX_VERSION)/build%/Makefile \
+	libvpx-$(LIBVPX_VERSION)/configure

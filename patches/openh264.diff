@@ -1,6 +1,11 @@
---- a/codec/api/svc/codec_api.h	2022-01-28 10:27:33.000000000 +0530
-+++ b/codec/api/svc/codec_api.h	2022-06-21 18:32:08.000000000 +0530
-@@ -486,7 +486,7 @@
+diff --git a/PATCHED b/PATCHED
+new file mode 100644
+index 0000000..e69de29
+diff --git a/codec/api/svc/codec_api.h b/codec/api/svc/codec_api.h
+index a1326c8..7d57e0f 100644
+--- a/codec/api/svc/codec_api.h
++++ b/codec/api/svc/codec_api.h
+@@ -486,7 +486,7 @@ int (*Uninitialize) (ISVCEncoder*);
  int (*EncodeFrame) (ISVCEncoder*, const SSourcePicture* kpSrcPic, SFrameBSInfo* pBsInfo);
  int (*EncodeParameterSets) (ISVCEncoder*, SFrameBSInfo* pBsInfo);
  

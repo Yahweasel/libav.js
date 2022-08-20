@@ -155,7 +155,4 @@ distclean: clean
 	libav-$(LIBAVJS_VERSION)-%.js \
 	libav-$(LIBAVJS_VERSION)-%.wasm.js \
 	libav-$(LIBAVJS_VERSION)-%.simd.js \
-	libav-$(LIBAVJS_VERSION)-%.asm.js \
-	ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a \
-	ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak \
-	ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak
+	libav-$(LIBAVJS_VERSION)-%.asm.js
