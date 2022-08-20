@@ -1,3 +1,3 @@
-tmp-inst-@TARGET/lib/pkgconfig/opus.pc
-tmp-inst-@TARGET/lib/pkgconfig/vpx.pc
-tmp-inst-@TARGET/lib/pkgconfig/openh264.pc
+tmp-inst/@TARGET/lib/pkgconfig/opus.pc
+tmp-inst/@TARGET/lib/pkgconfig/vpx.pc
+tmp-inst/@TARGET/lib/pkgconfig/openh264.pc

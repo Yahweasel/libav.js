@@ -1,16 +1,18 @@
 LIBOGG_VERSION=1.3.5
 
-tmp-inst%/lib/pkgconfig/ogg.pc: libogg-$(LIBOGG_VERSION)/build%/config.h
-	cd libogg-$(LIBOGG_VERSION)/build$* ; \
+tmp-inst/%/lib/pkgconfig/ogg.pc: libogg-$(LIBOGG_VERSION)/build-%/config.h
+	cd libogg-$(LIBOGG_VERSION)/build-$* ; \
 		emmake $(MAKE) install
 
-libogg-$(LIBOGG_VERSION)/build%/config.h: tmp-inst%/cflags.txt libogg-$(LIBOGG_VERSION)/configure
-	mkdir -p libogg-$(LIBOGG_VERSION)/build$*
-	cd libogg-$(LIBOGG_VERSION)/build$* ; \
-		emconfigure ../configure --prefix="$(PWD)/tmp-inst$*" --host=mipsel-sysv \
+libogg-$(LIBOGG_VERSION)/build-%/config.h: tmp-inst/%/cflags.txt libogg-$(LIBOGG_VERSION)/configure
+	mkdir -p libogg-$(LIBOGG_VERSION)/build-$*
+	cd libogg-$(LIBOGG_VERSION)/build-$* ; \
+		emconfigure ../configure --prefix="$(PWD)/tmp-inst/$*" --host=mipsel-sysv \
 			--disable-shared \
-			CFLAGS="-Oz `cat $(PWD)/tmp-inst$*/cflags.txt`"
+			CFLAGS="-Oz `cat $(PWD)/tmp-inst/$*/cflags.txt`"
 	touch $@
+
+extract: libogg-$(LIBOGG_VERSION)/configure
 
 libogg-$(LIBOGG_VERSION)/configure: libogg-$(LIBOGG_VERSION).tar.xz
 	tar Jxf libogg-$(LIBOGG_VERSION).tar.xz
@@ -23,6 +25,6 @@ libogg-release:
 	cp libogg-$(LIBOGG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
-	tmp-inst%/lib/pkgconfig/ogg.pc \
-	libogg-$(LIBOGG_VERSION)/build%/config.h \
+	tmp-inst/%/lib/pkgconfig/ogg.pc \
+	libogg-$(LIBOGG_VERSION)/build-%/config.h \
 	libogg-$(LIBOGG_VERSION)/configure

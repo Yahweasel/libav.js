@@ -11,9 +11,6 @@
 --enable-filter=bandpass --enable-filter=bandreject --enable-filter=dynaudnorm
 --enable-filter=equalizer --enable-filter=loudnorm --enable-filter=pan
 --enable-filter=amix --enable-filter=volume
---enable-libaom
---enable-decoder=libaom_av1
---enable-encoder=libaom_av1
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-demuxer=flac

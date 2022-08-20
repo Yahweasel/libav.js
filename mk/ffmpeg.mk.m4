@@ -23,16 +23,16 @@ ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 # General build rule for any target
 # Use: buildrule(target name, configure flags, CFLAGS)
 define([[[buildrule]]], [[[
-ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: tmp-inst-$1/cflags.txt \
+ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: tmp-inst/$1/cflags.txt \
 	ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/$1/g' configs/$(*)/deps.txt`
 	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
 	cd ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
-	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst-$1/lib/pkgconfig" \
+	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst/$1/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
 		$2 \
-		--extra-cflags="-I$(PWD)/tmp-inst-$1/include $3" \
-		--extra-ldflags="-L$(PWD)/tmp-inst-$1/lib $3" \
+		--extra-cflags="-I$(PWD)/tmp-inst/$1/include $3" \
+		--extra-ldflags="-L$(PWD)/tmp-inst/$1/lib $3" \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 ]]])
@@ -45,6 +45,8 @@ buildrule(thr, [[[--arch=emscripten --enable-cross-compile]]], [[[-pthread]]])
 buildrule(simd, [[[--disable-pthreads --arch=x86 --disable-inline-asm --disable-x86asm]]], [[[-msimd128]]])
 # wasm + threads + simd
 buildrule(thrsimd, [[[--arch=x86 --disable-inline-asm --disable-x86asm --enable-cross-compile]]], [[[-pthread -msimd128]]])
+
+extract: ffmpeg-$(FFMPEG_VERSION)/PATCHED
 
 ffmpeg-$(FFMPEG_VERSION)/PATCHED: ffmpeg-$(FFMPEG_VERSION)/configure
 	cd ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../patches/ffmpeg.diff

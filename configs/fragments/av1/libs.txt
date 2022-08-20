@@ -1,1 +1,1 @@
-tmp-inst-@TARGET/lib/libaom.a
+tmp-inst/@TARGET/lib/libaom.a

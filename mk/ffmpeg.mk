@@ -26,64 +26,66 @@ ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 
 # Base (asm.js and wasm)
 
-ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: tmp-inst-base/cflags.txt \
+ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: tmp-inst/base/cflags.txt \
 	ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/base/g' configs/$(*)/deps.txt`
 	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) ; \
 	cd ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) ; \
-	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst-base/lib/pkgconfig" \
+	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst/base/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
 		--disable-pthreads --arch=emscripten \
-		--extra-cflags="-I$(PWD)/tmp-inst-base/include " \
-		--extra-ldflags="-L$(PWD)/tmp-inst-base/lib " \
+		--extra-cflags="-I$(PWD)/tmp-inst/base/include " \
+		--extra-ldflags="-L$(PWD)/tmp-inst/base/lib " \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
 # wasm + threads
 
-ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: tmp-inst-thr/cflags.txt \
+ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: tmp-inst/thr/cflags.txt \
 	ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/thr/g' configs/$(*)/deps.txt`
 	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) ; \
 	cd ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) ; \
-	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst-thr/lib/pkgconfig" \
+	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst/thr/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
 		--arch=emscripten --enable-cross-compile \
-		--extra-cflags="-I$(PWD)/tmp-inst-thr/include -pthread" \
-		--extra-ldflags="-L$(PWD)/tmp-inst-thr/lib -pthread" \
+		--extra-cflags="-I$(PWD)/tmp-inst/thr/include -pthread" \
+		--extra-ldflags="-L$(PWD)/tmp-inst/thr/lib -pthread" \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
 # wasm + simd
 
-ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: tmp-inst-simd/cflags.txt \
+ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: tmp-inst/simd/cflags.txt \
 	ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/simd/g' configs/$(*)/deps.txt`
 	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) ; \
 	cd ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) ; \
-	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst-simd/lib/pkgconfig" \
+	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst/simd/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
 		--disable-pthreads --arch=x86 --disable-inline-asm --disable-x86asm \
-		--extra-cflags="-I$(PWD)/tmp-inst-simd/include -msimd128" \
-		--extra-ldflags="-L$(PWD)/tmp-inst-simd/lib -msimd128" \
+		--extra-cflags="-I$(PWD)/tmp-inst/simd/include -msimd128" \
+		--extra-ldflags="-L$(PWD)/tmp-inst/simd/lib -msimd128" \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
 # wasm + threads + simd
 
-ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: tmp-inst-thrsimd/cflags.txt \
+ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: tmp-inst/thrsimd/cflags.txt \
 	ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/thrsimd/g' configs/$(*)/deps.txt`
 	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) ; \
 	cd ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) ; \
-	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst-thrsimd/lib/pkgconfig" \
+	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst/thrsimd/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
 		--arch=x86 --disable-inline-asm --disable-x86asm --enable-cross-compile \
-		--extra-cflags="-I$(PWD)/tmp-inst-thrsimd/include -pthread -msimd128" \
-		--extra-ldflags="-L$(PWD)/tmp-inst-thrsimd/lib -pthread -msimd128" \
+		--extra-cflags="-I$(PWD)/tmp-inst/thrsimd/include -pthread -msimd128" \
+		--extra-ldflags="-L$(PWD)/tmp-inst/thrsimd/lib -pthread -msimd128" \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
+
+extract: ffmpeg-$(FFMPEG_VERSION)/PATCHED
 
 ffmpeg-$(FFMPEG_VERSION)/PATCHED: ffmpeg-$(FFMPEG_VERSION)/configure
 	cd ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../patches/ffmpeg.diff

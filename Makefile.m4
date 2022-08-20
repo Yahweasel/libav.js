@@ -77,20 +77,20 @@ node_modules/.bin/uglifyjs:
 	npm install
 
 # Targets
-tmp-inst-base/cflags.txt:
-	mkdir -p tmp-inst-base
+tmp-inst/base/cflags.txt:
+	mkdir -p tmp-inst/base
 	touch $@
 
-tmp-inst-thr/cflags.txt:
-	mkdir -p tmp-inst-thr
+tmp-inst/thr/cflags.txt:
+	mkdir -p tmp-inst/thr
 	echo '-pthread' > $@
 
-tmp-inst-simd/cflags.txt:
-	mkdir -p tmp-inst-simd
+tmp-inst/simd/cflags.txt:
+	mkdir -p tmp-inst/simd
 	echo '-msimd128' > $@
 
-tmp-inst-thrsimd/cflags.txt:
-	mkdir -p tmp-inst-thrsimd
+tmp-inst/thrsimd/cflags.txt:
+	mkdir -p tmp-inst/thrsimd
 	echo '-pthread -msimd128' > $@
 
 release:
@@ -135,7 +135,7 @@ halfclean:
 	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js libav.types.d.ts
 
 clean: halfclean
-	-rm -rf tmp-inst tmp-inst-base tmp-inst-thr tmp-inst-simd tmp-inst-thrsimd
+	-rm -rf tmp-inst
 	-rm -rf opus-$(OPUS_VERSION)
 	-rm -rf libaom-$(LIBAOM_VERSION)
 	-rm -rf libvorbis-$(LIBVORBIS_VERSION)

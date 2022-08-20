@@ -1,4 +1,4 @@
-tmp-inst-@TARGET/lib/libopus.a
-tmp-inst-@TARGET/lib/libvorbis.a
-tmp-inst-@TARGET/lib/libvorbisenc.a
-tmp-inst-@TARGET/lib/libogg.a
+tmp-inst/@TARGET/lib/libopus.a
+tmp-inst/@TARGET/lib/libvorbis.a
+tmp-inst/@TARGET/lib/libvorbisenc.a
+tmp-inst/@TARGET/lib/libogg.a
