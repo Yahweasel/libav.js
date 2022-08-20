@@ -9,7 +9,7 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 	--target-os=linux \
 	--cc=emcc --ranlib=emranlib \
 	--enable-small --disable-doc \
-	--disable-stripping --disable-pthreads \
+	--disable-stripping \
 	--disable-programs \
 	--disable-ffplay --disable-ffprobe --disable-network --disable-iconv --disable-xlib \
 	--disable-sdl2 \
@@ -33,7 +33,7 @@ ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: tmp-inst-base/cflags.t
 	cd ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst-base/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-		--arch=emscripten \
+		--disable-pthreads --arch=emscripten \
 		--extra-cflags="-I$(PWD)/tmp-inst-base/include " \
 		--extra-ldflags="-L$(PWD)/tmp-inst-base/lib " \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`
@@ -63,7 +63,7 @@ ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: tmp-inst-simd/cflags.t
 	cd ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst-simd/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-		--arch=x86 --disable-inline-asm --disable-x86asm \
+		--disable-pthreads --arch=x86 --disable-inline-asm --disable-x86asm \
 		--extra-cflags="-I$(PWD)/tmp-inst-simd/include -msimd128" \
 		--extra-ldflags="-L$(PWD)/tmp-inst-simd/lib -msimd128" \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`

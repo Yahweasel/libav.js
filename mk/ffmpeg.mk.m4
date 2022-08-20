@@ -9,7 +9,7 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 	--target-os=linux \
 	--cc=emcc --ranlib=emranlib \
 	--enable-small --disable-doc \
-	--disable-stripping --disable-pthreads \
+	--disable-stripping \
 	--disable-programs \
 	--disable-ffplay --disable-ffprobe --disable-network --disable-iconv --disable-xlib \
 	--disable-sdl2 \
@@ -38,11 +38,11 @@ ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: tmp-inst-$1/cflags.txt \
 ]]])
 
 # Base (asm.js and wasm)
-buildrule(base, [[[--arch=emscripten]]], [[[]]])
+buildrule(base, [[[--disable-pthreads --arch=emscripten]]], [[[]]])
 # wasm + threads
 buildrule(thr, [[[--arch=emscripten --enable-cross-compile]]], [[[-pthread]]])
 # wasm + simd
-buildrule(simd, [[[--arch=x86 --disable-inline-asm --disable-x86asm]]], [[[-msimd128]]])
+buildrule(simd, [[[--disable-pthreads --arch=x86 --disable-inline-asm --disable-x86asm]]], [[[-msimd128]]])
 # wasm + threads + simd
 buildrule(thrsimd, [[[--arch=x86 --disable-inline-asm --disable-x86asm --enable-cross-compile]]], [[[-pthread -msimd128]]])
 
