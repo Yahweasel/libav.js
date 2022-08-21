@@ -3,8 +3,8 @@
  *
  * emscripten and musl:
  *
- * Copyright (c) 2010-2014 Emscripten authors, see AUTHORS file.
- * Copyright © 2005-2014 Rich Felker, et al.
+ * Copyright (c) 2010-2022 Emscripten authors, see AUTHORS file.
+ * Copyright © 2005-2022 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
