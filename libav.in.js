@@ -28,7 +28,7 @@
 
     function isThreadingSupported() {
         try {
-            var mem = new WebAssembly.Memory({initial: 1, shared: true});
+            var mem = new WebAssembly.Memory({initial: 1, maximum: 1, shared: true});
             if (!(mem.buffer instanceof SharedArrayBuffer))
                 return false;
             return true;
