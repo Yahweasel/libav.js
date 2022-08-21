@@ -63,7 +63,7 @@
     function target(opts) {
         opts = opts || {};
         var wasm = !opts.nowasm && isWebAssemblySupported();
-        var thr = wasm && !opts.nothreads && isThreadingSupported();
+        var thr = opts.yesthreads && wasm && !opts.nothreads && isThreadingSupported();
         var simd = wasm && !opts.nosimd && isSIMDSupported();
         if (!wasm)
             return "asm";
