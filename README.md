@@ -96,11 +96,13 @@ loading options may be provided, but they're rarely useful. The loading options 
 ```
 If `noworker` is set, Web Workers will be disabled, so libav.js runs in the
 main thread. If `nowasm` is set, WebAssembly will be disabled. WebAssembly
-threads are disabled by default, as most browsers have a limit to the number of
-worker threads an entire page is allowed to have, so instead, `yesthreads` must
-be set to enable threads (note that separate instances of libav.js, created by
-separate calls to `LibAV.LibAV`, will be in separate threads as long as workers
-are used, regardless of the value of `yesthreads`). If `nothreads` is set then
+threads are disabled by default *and not built by default*, as most browsers
+have a limit to the number of worker threads an entire page is allowed to
+have, so instead, `yesthreads` must be set to enable threads, and you'll have
+to build the threaded versions manually. Note that separate instances of
+libav.js, created by separate calls to `LibAV.LibAV`, will be in separate
+threads as long as workers are used, regardless of the value of `yesthreads`,
+and this is how you're intended to thread libav.js. If `nothreads` is set then
 threads will be disabled even if `yesthreads` is set (this is so that the
 default setting of threads can be changed in the future). If `nosimd` is set,
 WebAssembly's SIMD extension won't be used.

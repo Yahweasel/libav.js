@@ -28,9 +28,7 @@ build-%: libav-$(LIBAVJS_VERSION)-%.js
 libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
 	libav-$(LIBAVJS_VERSION)-%.asm.js \
 	libav-$(LIBAVJS_VERSION)-%.wasm.js \
-        libav-$(LIBAVJS_VERSION)-%.thr.js \
 	libav-$(LIBAVJS_VERSION)-%.simd.js \
-        libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
 	node_modules/.bin/uglifyjs
 	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) > $@
 	chmod a-x *.wasm
@@ -102,14 +100,8 @@ release:
 	       libav-$(LIBAVJS_VERSION)-$$v.asm.js \
 	       libav-$(LIBAVJS_VERSION)-$$v.wasm.js \
 	       libav-$(LIBAVJS_VERSION)-$$v.wasm.wasm \
-	       libav-$(LIBAVJS_VERSION)-$$v.thr.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.thr.worker.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.thr.wasm \
 	       libav-$(LIBAVJS_VERSION)-$$v.simd.js \
 	       libav-$(LIBAVJS_VERSION)-$$v.simd.wasm \
-	       libav-$(LIBAVJS_VERSION)-$$v.thrsimd.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.thrsimd.worker.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.thrsimd.wasm \
 	       libav.js-$(LIBAVJS_VERSION)/; \
 	done
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
