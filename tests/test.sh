@@ -5,9 +5,12 @@ do
     if [ -e correct/$b.txt ]
     then
         printf '%s\n' "$t" >&2
-        node $t > tmp.txt 2> /dev/null
-        diff -u tmp.txt correct/$b.txt
-        rm tmp.txt
+        for target in asm wasm threads simd "threads simd"
+        do
+            node --experimental-wasm-threads $t $target > tmp.txt 2> /dev/null
+            diff -u tmp.txt correct/$b.txt
+            rm tmp.txt
+        done
 
     else
         node $t > correct/$b.txt 2> /dev/null

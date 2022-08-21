@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-3.7.5.0.1-mediarecorder-openh264.js");
+    LibAV = require("./libav.js")("mediarecorder-openh264");
     fs = require("fs");
 }
 

@@ -1,6 +1,6 @@
 if (typeof process !== "undefined") {
     // Node.js
-    LibAV = require("../libav-3.7.5.0.1-default.js");
+    LibAV = require("./libav.js")();
     fs = require("fs");
     OpusExa = Function(fs.readFileSync("exa.opus.js", "utf8")+"return OpusExa;")();
 }
