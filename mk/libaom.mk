@@ -20,8 +20,8 @@ libaom-$(LIBAOM_VERSION)/build-base/Makefile: tmp-inst/base/cflags.txt libaom-$(
 	mkdir -p libaom-$(LIBAOM_VERSION)/build-base
 	cd libaom-$(LIBAOM_VERSION)/build-base ; \
 		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst/base" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)tmp-inst/base/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)tmp-inst/base/cflags.txt`" \
+		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/tmp-inst/base/cflags.txt`" \
+		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/tmp-inst/base/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \
@@ -37,8 +37,8 @@ libaom-$(LIBAOM_VERSION)/build-simd/Makefile: tmp-inst/simd/cflags.txt libaom-$(
 	mkdir -p libaom-$(LIBAOM_VERSION)/build-simd
 	cd libaom-$(LIBAOM_VERSION)/build-simd ; \
 		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst/simd" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)tmp-inst/simd/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)tmp-inst/simd/cflags.txt`" \
+		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/tmp-inst/simd/cflags.txt`" \
+		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/tmp-inst/simd/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \
@@ -55,8 +55,8 @@ libaom-$(LIBAOM_VERSION)/build-thr/Makefile: tmp-inst/thr/cflags.txt libaom-$(LI
 	mkdir -p libaom-$(LIBAOM_VERSION)/build-thr
 	cd libaom-$(LIBAOM_VERSION)/build-thr ; \
 		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst/thr" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)tmp-inst/thr/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)tmp-inst/thr/cflags.txt`" \
+		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/tmp-inst/thr/cflags.txt`" \
+		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/tmp-inst/thr/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \
@@ -72,8 +72,8 @@ libaom-$(LIBAOM_VERSION)/build-thrsimd/Makefile: tmp-inst/thrsimd/cflags.txt lib
 	mkdir -p libaom-$(LIBAOM_VERSION)/build-thrsimd
 	cd libaom-$(LIBAOM_VERSION)/build-thrsimd ; \
 		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst/thrsimd" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)tmp-inst/thrsimd/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)tmp-inst/thrsimd/cflags.txt`" \
+		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/tmp-inst/thrsimd/cflags.txt`" \
+		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/tmp-inst/thrsimd/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \

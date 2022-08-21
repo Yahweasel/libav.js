@@ -17,8 +17,8 @@ libaom-$(LIBAOM_VERSION)/build-$1/Makefile: tmp-inst/$1/cflags.txt libaom-$(LIBA
 	mkdir -p libaom-$(LIBAOM_VERSION)/build-$1
 	cd libaom-$(LIBAOM_VERSION)/build-$1 ; \
 		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst/$1" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)tmp-inst/$1/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)tmp-inst/$1/cflags.txt`" \
+		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/tmp-inst/$1/cflags.txt`" \
+		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/tmp-inst/$1/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \

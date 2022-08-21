@@ -1,3 +1,4 @@
+tmp-inst/@TARGET/lib/libaom.a
 tmp-inst/@TARGET/lib/libmp3lame.a
 tmp-inst/@TARGET/lib/libopenh264.a
 tmp-inst/@TARGET/lib/libopus.a

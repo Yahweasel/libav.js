@@ -1,3 +1,4 @@
+tmp-inst/@TARGET/lib/pkgconfig/aom.pc
 tmp-inst/@TARGET/lib/libmp3lame.a
 tmp-inst/@TARGET/lib/pkgconfig/openh264.pc
 tmp-inst/@TARGET/lib/pkgconfig/opus.pc
