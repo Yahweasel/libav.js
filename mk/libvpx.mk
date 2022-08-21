@@ -1,10 +1,10 @@
-LIBVPX_VERSION=1.11.0
+LIBVPX_VERSION=1.12.0
 
 tmp-inst/%/lib/pkgconfig/vpx.pc: libvpx-$(LIBVPX_VERSION)/build-%/Makefile
 	-cd libvpx-$(LIBVPX_VERSION)/build-$* ; \
 		emmake $(MAKE)
 	cd libvpx-$(LIBVPX_VERSION)/build-$* ; \
-		for i in gtest vp9rc vpx ; do \
+		for i in gtest vp9rc vpx vpxrc ; do \
 			emranlib lib$${i}_g.a ; \
 			cp lib$${i}_g.a lib$${i}.a ; \
 		done
