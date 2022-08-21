@@ -24,6 +24,7 @@ function load(variant = "default") {
         )
     );
     const LibAV = require(`../libav-${version}-${variant}.js`);
+    LibAV.opts = opts;
     const actual = LibAV.target(opts);
     if (target !== actual)
         console.log(`Failed to load target ${target} (got ${actual})`);

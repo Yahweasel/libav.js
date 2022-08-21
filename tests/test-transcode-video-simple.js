@@ -20,7 +20,7 @@ function main() {
     var oc, fmt, pb, st;
     var frames;
 
-    LibAV.LibAV().then(function(ret) {
+    LibAV.LibAV(LibAV.opts).then(function(ret) {
         libav = ret;
         return new Promise(function(res, rej) {
             if (typeof XMLHttpRequest !== "undefined") {

@@ -55,7 +55,7 @@ function main() {
     var libav;
     var codec, c, pkt, frame, frame_size;
 
-    LibAV.LibAV().then(function(ret) {
+    LibAV.LibAV(LibAV.opts).then(function(ret) {
         libav = ret;
         return libav.avcodec_find_encoder_by_name("libopus");
 

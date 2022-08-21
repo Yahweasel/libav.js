@@ -68,7 +68,7 @@ function main() {
     var fmt_ctx, audio_stream_idx, pkt, frame, codec, c;
     var inPackets;
 
-    LibAV.LibAV().then(function(ret) {
+    LibAV.LibAV(LibAV.opts).then(function(ret) {
         libav = ret;
         return new Promise(function(res, rej) {
             if (typeof XMLHttpRequest !== "undefined") {

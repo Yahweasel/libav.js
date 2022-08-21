@@ -20,7 +20,7 @@ function main() {
     var oc, fmt, codec, c, frame, pkt, st, pb, frame_size;
     var output = new Uint8Array(1);
 
-    LibAV.LibAV().then(function(ret) {
+    LibAV.LibAV(LibAV.opts).then(function(ret) {
         libav = ret;
 
         libav.onwrite = function(name, pos, buf) {

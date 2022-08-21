@@ -19,7 +19,7 @@ function main() {
     var libav;
     var oc, fmt, codec, c, frame, pkt, st, pb, frame_size;
 
-    LibAV.LibAV().then(function(ret) {
+    LibAV.LibAV(LibAV.opts).then(function(ret) {
         libav = ret;
 
         return libav.ff_init_encoder("libopus", {

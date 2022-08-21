@@ -20,7 +20,7 @@ function main() {
     var buf, rd = 0;
     var packets = [];
 
-    LibAV.LibAV().then(function(ret) {
+    LibAV.LibAV(LibAV.opts).then(function(ret) {
         libav = ret;
         return new Promise(function(res, rej) {
             if (typeof XMLHttpRequest !== "undefined") {

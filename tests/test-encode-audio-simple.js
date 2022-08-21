@@ -21,7 +21,7 @@ function main() {
     var libav;
     var codec, c, pkt, frame, frame_size;
 
-    LibAV.LibAV().then(function(ret) {
+    LibAV.LibAV(LibAV.opts).then(function(ret) {
         libav = ret;
 
         return libav.ff_init_encoder("libopus", {
