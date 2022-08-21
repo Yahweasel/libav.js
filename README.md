@@ -84,9 +84,39 @@ URL, but should be if loading from another origin.
 
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
 ready instance of libav. `LibAV.LibAV` takes an optional argument in which
-loading options may be provided, but they're rarely useful. The only loading
-options are `noworker` and `nowasm`, to disable using Web Workers and
-WebAssembly, respectively.
+loading options may be provided, but they're rarely useful. The loading options and their default values are:
+```
+{
+    "noworker": false,
+    "nowasm": false,
+    "yesthreads": false,
+    "nothreads": false,
+    "nosimd": false
+}
+```
+If `noworker` is set, Web Workers will be disabled, so libav.js runs in the
+main thread. If `nowasm` is set, WebAssembly will be disabled. WebAssembly
+threads are disabled by default, as most browsers have a limit to the number of
+worker threads an entire page is allowed to have, so instead, `yesthreads` must
+be set to enable threads (note that separate instances of libav.js, created by
+separate calls to `LibAV.LibAV`, will be in separate threads as long as workers
+are used, regardless of the value of `yesthreads`). If `nothreads` is set then
+threads will be disabled even if `yesthreads` is set (this is so that the
+default setting of threads can be changed in the future). If `nosimd` is set,
+WebAssembly's SIMD extension won't be used.
+
+libav.js automatically detects which WebAssembly features are available, so
+even if you set `yesthreads` to `true` and don't set `nosimd`, a version with
+neither feature may be loaded. To know which version will be loaded, call
+`LibAV.target`. It will return `"asm"` if only asm.js is used, `"wasm"` for
+baseline, or `"thr"`, `"simd"`, or `"thrsimd"` for versions with extensions
+activated. These strings correspond to the filenames to be loaded, so you can
+use them to preload and cache the large WebAssembly files. `LibAV.target` takes
+the same optional argument as `LibAV.LibAV`.
+
+The tests used to determine which features are available are also exported, as
+`LibAV.isWebAssemblySupported`, `LibAV.isThreadingSupported`, and
+`LibAV.isSIMDSupported`.
 
 
 ## API
