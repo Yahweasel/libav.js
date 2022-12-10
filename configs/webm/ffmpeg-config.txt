@@ -28,4 +28,4 @@
 --enable-filter=apad --enable-filter=atempo --enable-filter=atrim
 --enable-filter=bandpass --enable-filter=bandreject --enable-filter=dynaudnorm
 --enable-filter=equalizer --enable-filter=loudnorm --enable-filter=pan
---enable-filter=amix --enable-filter=volume
+--enable-filter=amix --enable-filter=volume --enable-filter=anull
