@@ -146,6 +146,11 @@ Some common sequences of functions are combined into `ff_` metafunctions. See
 the documentation in `libav.types.d.ts` for how to use them, or the tests in
 `tests` for examples.
 
+Further examples are available in the `samples` directory of
+https://github.com/ennuicastr/libavjs-webcodecs-polyfill , which uses libav.js
+along with WebCodecs (or its own polyfill of WebCodecs), so shows how to marry
+these two technologies.
+
 In order to reduce license-header Hell, the small amount of wrapper functions
 provided by libav.js are all released under the so-called “0-clause BSD”
 license, which does not require that the license text itself appear in
