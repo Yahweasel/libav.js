@@ -265,35 +265,36 @@ usually between 1.5 and 3 MiB for fairly complete builds, and the asm.js is abou
 double that.
 
 You can estimate the size of variants based on the size of the constituent
-fragments. As of version 3.7.5.0.1, an empty build is approximately 520KiB
+fragments. As of version 3.9.5.1.2, an empty build is approximately 540KiB
 (WebAssembly), and the fragments add the following:
 
 | Fragment      | Size (KiB)    |
 | ------------: | :------------ |
-| ogg           | 64            |
-| webm          | 156           |
-| ipod          | 352           |
+| ogg           | 68            |
+| webm          | 164           |
+| ipod          | 376           |
 |               |               |
-| opus          | 280           |
-| aac           | 268           |
-| vorbis        | 448           |
-| lame          | 272           |
-| flac          | 80            |
-| wav           | 48            |
-| wavpack       | 104           |
-| alac          | 24            |
+| opus          | 284           |
+| aac           | 272           |
+| vorbis        | 452           |
+| lame          | 276           |
+| flac          | 84            |
+| wav           | 52            |
+| wavpack       | 108           |
+| alac          | 28            |
 |               |               |
-| vpx+vp8       | 340           |
-| vpx+vp9       | 811           |
-| av1           | 3474          |
-| h263p         | 412           |
-| h264          | 492           |
-| openh264      | 1118          |
+| vpx+vp8       | 344           |
+| vpx+vp9       | 748           |
+| vpx+vp8+vp9   | 1044          |
+| av1           | 3500          |
+| h263p         | 660           |
+| h264          | 500           |
+| openh264      | 832           |
 |               |               |
-| audio-filters | 136           |
-| swscale       | 416           |
+| audio-filters | 260           |
+| swscale       | 412           |
 
 The asm.js versions are much bigger, but will not be loaded on
 WebAssembly-capable clients.
 
-The wrapper (“glue”) code is about 232KiB, but is highly compressible.
+The wrapper (“glue”) code is about 292KiB, but is highly compressible.
