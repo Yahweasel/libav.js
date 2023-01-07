@@ -1,4 +1,4 @@
-OPENH264_VERSION=2.3.0
+OPENH264_VERSION=2.3.1
 
 tmp-inst/%/lib/pkgconfig/openh264.pc: tmp-inst/%/cflags.txt openh264-$(OPENH264_VERSION)/PATCHED
 	mkdir -p openh264-$(OPENH264_VERSION)/build-$*
