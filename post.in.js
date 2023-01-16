@@ -612,8 +612,9 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  * Read many packets at once. If you don't set any limits, this function will
  * block (asynchronously) until the whole file is read, so make sure you set
  * some limits if you want to read a bit at a time. Returns a pair [result,
- * Packet[]], where the result indicates whether an error was encountered, an
- * EOF, or simply limits (EAGAIN).
+ * packets], where the result indicates whether an error was encountered, an
+ * EOF, or simply limits (EAGAIN), and packets is a dictionary indexed by the
+ * stream number in which each element is an array of packets from that stream.
  * @param fmt_ctx  AVFormatContext
  * @param pkt  AVPacket
  * @param devfile  Name of the device file being read from, if applicable. Used
@@ -626,7 +627,7 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  *         limit?: number, // OUTPUT limit, in bytes
  *         devLimit?: number // INPUT limit, in bytes (don't read if less than this much data is available)
  *     }
- * ): Promise<[number, Packet[]]>
+ * ): Promise<[number, Record<number, Packet[]>]>
  */
 var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts) {
     var sz = 0;
