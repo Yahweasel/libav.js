@@ -190,6 +190,12 @@ B(int, channels)
 B(int, sample_rate)
 #undef B
 
+struct AVCodecParameters *ff_calloc_AVCodecParameters()
+{
+    return (struct AVCodecParameters *)
+        calloc(1, sizeof(struct AVCodecParameters));
+}
+
 /* AVPacket */
 #define B(type, field) A(AVPacket, type, field)
 #define BL(type, field) AL(AVPacket, type, field)

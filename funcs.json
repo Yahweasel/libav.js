@@ -36,6 +36,7 @@
         ["avcodec_free_context", null, ["number"]],
         ["avcodec_get_name", "string", ["number"]],
         ["avcodec_open2", "number", ["number", "number", "number"]],
+        ["ff_calloc_AVCodecParameters", "number", []],
         ["avcodec_parameters_from_context" ,"number", ["number", "number"]],
         ["avcodec_parameters_to_context" ,"number", ["number", "number"]],
         ["avcodec_receive_frame", "number", ["number", "number"]],
