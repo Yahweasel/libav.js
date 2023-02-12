@@ -47,12 +47,10 @@ async function main() {
         await libav.mkreaderdev("tmp.opus");
 
         let initPromise = libav.ff_init_demuxer_file("tmp.opus");
-        await libav.ff_nothing();
         while (await libav.ff_reader_dev_waiting()) {
             let rdp = rd;
             rd += 1024;
             await libav.ff_reader_dev_send("tmp.opus", buf.slice(rdp, rd));
-            await libav.ff_nothing();
         }
 
         const [fmt_ctx, streams] = await initPromise;

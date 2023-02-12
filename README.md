@@ -170,10 +170,9 @@ through devices.
 The `mkreaderdev` function creates a reader device, which simply acts as a pipe.
 That device can be used as a file for reading.
 
-Initializing a demuxer is particularly troublesome, so requires a bit of a
-dance, including a step of `ff_nothing` (a function that does nothing, but is
-implemented in C, so that C's own synchrony is flushed). See
-`tests/test-demuxing-device.js` for an example of its use.
+Initializing a demuxer is particularly troublesome: you must start initializing
+and save the promise aside, then so long as something is waiting on the device,
+feed it data. See `tests/test-demuxing-device.js` for an example.
 
 Output through writer devices is also possible. See
 `tests/test-muxing-device.js` for an example.

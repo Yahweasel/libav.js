@@ -198,7 +198,9 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
  */
 /// @types ff_reader_dev_waiting(): Promise<boolean>
 var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function() {
-    return !!Module.ff_reader_dev_waiters.length;
+    return ff_nothing().then(function() {
+        return !!Module.ff_reader_dev_waiters.length;
+    });
 };
 
 /**

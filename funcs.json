@@ -98,7 +98,7 @@
         ["AVPacketSideData_type", "number", ["number", "number"]],
 
         ["ff_error", "string", ["number"]],
-        ["ff_nothing", null, []],
+        ["ff_nothing", null, [], {"async": true}],
 
         ["calloc", "number", ["number", "number"]],
         ["free", null, ["number"]],
@@ -115,6 +115,7 @@
         "mkreaderdev",
         "mkwriterdev",
         "ff_reader_dev_send",
+        "ff_reader_dev_waiting",
         "ff_init_encoder",
         "ff_init_decoder",
         "ff_free_encoder",
