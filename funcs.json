@@ -98,6 +98,7 @@
         ["AVPacketSideData_type", "number", ["number", "number"]],
 
         ["ff_error", "string", ["number"]],
+        ["ff_nothing", null, []],
 
         ["calloc", "number", ["number", "number"]],
         ["free", null, ["number"]],

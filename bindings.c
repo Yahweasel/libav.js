@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Yahweasel
+ * Copyright (C) 2019-2023 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -38,6 +38,10 @@
 #define AA(struc, type, field) \
     type struc ## _ ## field ## _a(struc *a, size_t c) { return a->field[c]; } \
     void struc ## _ ## field ## _a_s(struc *a, size_t c, type b) { a->field[c] = b; }
+
+
+/* Not part of libav, just used to ensure a round trip to C for async purposes */
+void ff_nothing() {}
 
 
 /****************************************************************

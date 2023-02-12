@@ -192,6 +192,16 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
 };
 
 /**
+ * Metafunction to determine whether any device has any waiters. This can be
+ * used to determine whether more data needs to be sent before a previous step
+ * will be fully resolved.
+ */
+/// @types ff_reader_dev_waiting(): Promise<boolean>
+var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function() {
+    return !!Module.ff_reader_dev_waiters.length;
+};
+
+/**
  * Metafunction to initialize an encoder with all the bells and whistles.
  * Returns [AVCodec, AVCodecContext, AVFrame, AVPacket, frame_size]
  * @param name  libav name of the codec
