@@ -17,14 +17,12 @@ function print(txt) {
 /* This is a port of doc/examples/encode_audio.c, simplified with
  * some metafunctions. Note that this version isn't just easier on
  * the eyes, it's faster. */
-function main() {
-    var libav;
-    var codec, c, pkt, frame, frame_size;
+async function main() {
+    try {
+        const libav = await LibAV.LibAV(LibAV.opts);
 
-    LibAV.LibAV(LibAV.opts).then(function(ret) {
-        libav = ret;
-
-        return libav.ff_init_encoder("libopus", {
+        const [codec, c, frame, pkt, frame_size] =
+        await libav.ff_init_encoder("libopus", {
             ctx: {
                 bit_rate: 128000,
                 sample_fmt: libav.AV_SAMPLE_FMT_FLT,
@@ -35,22 +33,15 @@ function main() {
             time_base: [1, 48000]
         });
 
-    }).then(function(ret) {
-        codec = ret[0];
-        c = ret[1];
-        frame = ret[2];
-        pkt = ret[3];
-        frame_size = ret[4];
+        let t = 0;
+        let tincr = 2 * Math.PI * 440 / 48000;
+        let pts = 0;
+        let frames = [];
 
-        var t = 0;
-        var tincr = 2 * Math.PI * 440 / 48000;
-        var pts = 0;
-        var frames = [];
+        for (let i = 0; i < 200; i++) {
+            let samples = [];
 
-        for (var i = 0; i < 200; i++) {
-            var samples = [];
-
-            for (var j = 0; j < frame_size; j++) {
+            for (let j = 0; j < frame_size; j++) {
                 samples[j] = Math.sin(t);
                 t += tincr;
             }
@@ -65,23 +56,22 @@ function main() {
             pts += frame_size;
         }
 
-        return libav.ff_encode_multi(c, frame, pkt, frames, true);
+        const packets =
+            await libav.ff_encode_multi(c, frame, pkt, frames, true);
 
-    }).then(function(ret) {
         /*print("[\n" +
-            ret.map(function(pkt) {
+            packets.map(function(pkt) {
                 return "new Uint8Array([" + Array.prototype.join.call(pkt.data, ", ") + "])";
             }).join(",\n") +
             "\n]");*/
 
-        return libav.ff_free_encoder(c, frame, pkt);
+        await libav.ff_free_encoder(c, frame, pkt);
 
-    }).then(function() {
         print("Done");
 
-    }).catch(function(err) {
+    } catch(err) {
         print(err + "");
-    });
+    }
 }
 
 main();

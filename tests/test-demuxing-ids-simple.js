@@ -14,18 +14,17 @@ function print(txt) {
     }
 }
 
-function main() {
-    var libav;
-    var fmt_ctx, streams, video_stream_idx, pkt, frame, codec, c;
+async function main() {
+    try {
+        const libav = await LibAV.LibAV(LibAV.opts);
 
-    LibAV.LibAV(LibAV.opts).then(function(ret) {
-        libav = ret;
-        return new Promise(function(res, rej) {
-            if (typeof XMLHttpRequest !== "undefined") {
-                var xhr = new XMLHttpRequest();
-                xhr.responseType = "arraybuffer";
-                xhr.open("GET", "exa.webm", true);
+        let buf;
+        if (typeof XMLHttpRequest !== "undefined") {
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = "arraybuffer";
+            xhr.open("GET", "exa.webm", true);
 
+            buf = await new Promise((res, rej) => {
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200)
@@ -36,43 +35,35 @@ function main() {
                 };
 
                 xhr.send();
+            });
 
-            } else {
-                res(fs.readFileSync("exa.webm").buffer);
+        } else {
+            buf = fs.readFileSync("exa.webm").buffer;
 
-            }
+        }
 
-        });
+        await libav.writeFile("tmp.webm", new Uint8Array(buf));
 
-    }).then(function(ret) {
-        return libav.writeFile("tmp.webm", new Uint8Array(ret));
+        const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("tmp.webm");
 
-    }).then(function() {
-        return libav.ff_init_demuxer_file("tmp.webm");
+        let codecs = [];
 
-    }).then(function(ret) {
-        fmt_ctx = ret[0];
-        streams = ret[1];
-        var codecs = [];
-
-        var si, stream;
+        let si, stream;
         for (si = 0; si < streams.length; si++)
             codecs.push(libav.avcodec_get_name(streams[si].codec_id));
 
-        return Promise.all(codecs);
+        codecs = await Promise.all(codecs);
 
-    }).then(function(ret) {
-        for (var si = 0; si < ret.length; si++)
-            print("Stream " + si + ": " + ret[si]);
+        for (si = 0; si < codecs.length; si++)
+            print("Stream " + si + ": " + codecs[si]);
 
-        libav.avformat_close_input_js(fmt_ctx)
+        await libav.avformat_close_input_js(fmt_ctx)
 
-    }).then(function() {
         print("Done");
 
-    }).catch(function(err) {
+    } catch(err) {
         print(err + "");
-    });
+    }
 }
 
 main();

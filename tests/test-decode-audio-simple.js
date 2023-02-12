@@ -17,43 +17,33 @@ function print(txt) {
 
 /* This is sort of a port of doc/examples/decode_audio.c, but with
  * no demuxing, and with Opus */
-function main() {
-    var libav;
-    var pkt, frame, codec, c;
-
-    LibAV.LibAV(LibAV.opts).then(function(ret) {
-        libav = ret;
-        return libav.ff_init_decoder("libopus");
-
-    }).then(function(ret) {
-        codec = ret[0];
-        c = ret[1];
-        pkt = ret[2];
-        frame = ret[3];
+async function main() {
+    try {
+        const libav = await LibAV.LibAV(LibAV.opts);
+        const [codec, c, pkt, frame] = await libav.ff_init_decoder("libopus");
 
         // Reformat the packets
-        var tmpPackets = OpusExa.map(function(p) {
+        const tmpPackets = OpusExa.map(function(p) {
             return {data: p};
         });
 
         // Decode them
-        return libav.ff_decode_multi(c, pkt, frame, tmpPackets, true);
+        const packets = libav.ff_decode_multi(c, pkt, frame, tmpPackets, true);
 
-    }).then(function(ret) {
         /*print("[\n" +
-            ret.map(function(pkt) {
+            packets.map(function(pkt) {
                 return "new Uint8Array([" + Array.prototype.join.call(pkt.data, ", ") + "])";
             }).join(",\n") +
             "\n]");*/
 
-        return libav.ff_free_decoder(c, pkt, frame);
+        await libav.ff_free_decoder(c, pkt, frame);
 
-    }).then(function() {
         print("Done");
 
-    }).catch(function(err) {
+    } catch (err) {
         print(err + "");
-    });
+
+    }
 }
 
 main();

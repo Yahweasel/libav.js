@@ -15,25 +15,23 @@ function print(txt) {
 }
 
 /* This is a port of doc/examples/muxing.c, simplified */
-function main() {
-    var libav;
-    var oc, fmt, codec, c, frame, pkt, st, pb, frame_size;
-    var output = new Uint8Array(1);
-
-    LibAV.LibAV(LibAV.opts).then(function(ret) {
-        libav = ret;
+async function main() {
+    try {
+        const libav = await LibAV.LibAV(LibAV.opts);
+        let output = new Uint8Array(0);
 
         libav.onwrite = function(name, pos, buf) {
-            var newLen = pos + buf.length;
+            let newLen = pos + buf.length;
             if (output.length < newLen) {
-                var newOutput = new Uint8Array(newLen);
+                let newOutput = new Uint8Array(newLen);
                 newOutput.set(output);
                 output = newOutput;
             }
             output.set(buf, pos);
         };
 
-        return libav.ff_init_encoder("libopus", {
+        const [codec, c, frame, pkt, frame_size] =
+        await libav.ff_init_encoder("libopus", {
             ctx: {
                 bit_rate: 128000,
                 sample_fmt: libav.AV_SAMPLE_FMT_FLT,
@@ -44,33 +42,20 @@ function main() {
             time_base: [1, 48000]
         });
 
-    }).then(function(ret) {
-        codec = ret[0];
-        c = ret[1];
-        frame = ret[2];
-        pkt = ret[3];
-        frame_size = ret[4];
+        const [oc, fmt, pb, [st]] = await libav.ff_init_muxer(
+            {filename: "tmp.ogg", open: true, device: true}, [[c, 1, 48000]]);
 
-        return libav.ff_init_muxer({filename: "tmp.ogg", open: true, device: true}, [[c, 1, 48000]]);
+        await libav.avformat_write_header(oc, 0)
 
-    }).then(function(ret) {
-        oc = ret[0];
-        fmt = ret[1];
-        pb = ret[2];
-        st = ret[3][0];
+        let t = 0;
+        let tincr = 2 * Math.PI * 440 / 48000;
+        let pts = 0;
+        let frames = [];
 
-        return libav.avformat_write_header(oc, 0)
+        for (let i = 0; i < 200; i++) {
+            let samples = [];
 
-    }).then(function(ret) {
-        var t = 0;
-        var tincr = 2 * Math.PI * 440 / 48000;
-        var pts = 0;
-        var frames = [];
-
-        for (var i = 0; i < 200; i++) {
-            var samples = [];
-
-            for (var j = 0; j < frame_size; j++) {
+            for (let j = 0; j < frame_size; j++) {
                 samples[j] = Math.sin(t);
                 t += tincr;
             }
@@ -85,21 +70,15 @@ function main() {
             pts += frame_size;
         }
 
-        return libav.ff_encode_multi(c, frame, pkt, frames, true);
+        const packets = await libav.ff_encode_multi(c, frame, pkt, frames, true);
 
-    }).then(function(packets) {
-        return libav.ff_write_multi(oc, pkt, packets);
+        await libav.ff_write_multi(oc, pkt, packets);
 
-    }).then(function() {
-        return libav.av_write_trailer(oc);
+        await libav.av_write_trailer(oc);
 
-    }).then(function() {
-        return libav.ff_free_muxer(oc, pb);
+        await libav.ff_free_muxer(oc, pb);
+        await libav.ff_free_encoder(c, frame, pkt);
 
-    }).then(function() {
-        return libav.ff_free_encoder(c, frame, pkt);
-
-    }).then(function(ret) {
         if (typeof document !== "undefined") {
             var blob = new Blob([output.buffer]);
             var a = document.createElement("a");
@@ -114,9 +93,9 @@ function main() {
 
         print("Done");
 
-    }).catch(function(err) {
+    } catch(err) {
         print(err + "");
-    });
+    }
 }
 
 main();
