@@ -157,6 +157,28 @@ license, which does not require that the license text itself appear in
 derivative works. Built libraries have their correct license headers.
 
 
+## Devices and asynchrony
+
+Emscripten's implementation of an in-memory filesystem has severe limitations.
+You're recommended to use virtual devices, implemented by `libav.js`, for most
+I/O.
+
+ffmpeg was never designed to work asynchronously, and was only designed to work
+with blocking I/O. Still, it's possible to use libav.js with asynchronous input
+through devices.
+
+The `mkreaderdev` function creates a reader device, which simply acts as a pipe.
+That device can be used as a file for reading.
+
+Initializing a demuxer is particularly troublesome, so requires a bit of a
+dance, including a step of `ff_nothing` (a function that does nothing, but is
+implemented in C, so that C's own synchrony is flushed). See
+`tests/test-demuxing-device.js` for an example of its use.
+
+Output through writer devices is also possible. See
+`tests/test-muxing-device.js` for an example.
+
+
 ## TypeScript
 
 Type definitions for libav.js are provided by `libav.types.d.ts`. You can
