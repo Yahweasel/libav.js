@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>LibAV.JS demo</title>
+    </head>
+    <body>
+        <script type="text/javascript">(async function() {
+            const version = "3.11.5.1.2";
+
+            const dce = document.createElement.bind(document);
+            const main = dce("div");
+            document.body.appendChild(main);
+
+            const variant = await new Promise(res => {
+                const label = dce("label");
+                label.innerHTML = "Variant:&nbsp;";
+                label.htmlFor = "variant";
+                main.appendChild(label);
+                const vbox = dce("input");
+                vbox.type = "text";
+                vbox.id = "variant";
+                vbox.value = "webm";
+                main.appendChild(vbox);
+                const ok = dce("button");
+                ok.innerHTML = "Load";
+                main.appendChild(ok);
+
+                vbox.focus();
+                vbox.select();
+
+                vbox.onkeypress = ev => {
+                    if (ev.key === "Enter")
+                        res(vbox.value);
+                };
+                ok.onclick = ev => {
+                    res(vbox.value);
+                };
+            });
+            main.innerHTML = "Loading...";
+
+            // Load libav.js
+            LibAV = {base: ".."};
+            await new Promise(res => {
+                const scr = dce("script");
+                scr.src = `../libav-${version}-${variant}.js`;
+                scr.onload = res;
+                scr.onerror = () => {
+                    alert("Failed to load variant!");
+                };
+                document.body.appendChild(scr);
+            });
+            const libav = await LibAV.LibAV();
+
+            // Load the file
+            const file = await new Promise(res => {
+                main.innerHTML = "";
+                const label = dce("label");
+                label.innerHTML = "File:&nbsp;";
+                label.htmlFor = "load-file";
+                main.appendChild(label);
+                const picker = dce("input");
+                picker.type = "file";
+                picker.id = "load-file";
+                main.appendChild(picker);
+
+                picker.focus();
+
+                picker.onchange = () => {
+                    if (picker.files.length > 0)
+                        res(picker.files[0]);
+                };
+            });
+            main.innerHTML = "Loading...";
+
+            // Initial read
+            await libav.mkreaderdev("input");
+            let rd = 0;
+            let initPromise = libav.ff_init_demuxer_file("input");
+            while (await libav.ff_reader_dev_waiting()) {
+                const rde = rd + 1024 * 1024;
+                const blob = file.slice(rd, rde);
+                const u8 = new Uint8Array(await blob.arrayBuffer());
+                rd = rde;
+                await libav.ff_reader_dev_send("input", u8.length ? u8 : null);
+            }
+            const [fmt_ctx, streams] = await initPromise;
+
+            // Find the video stream (FIXME: eventually audio stream too?)
+            let videoIdx = -1;
+            for (let i = 0; i < streams.length; i++) {
+                if (streams[i].codec_type === libav.AVMEDIA_TYPE_VIDEO) {
+                    videoIdx = i;
+                    break;
+                }
+            }
+            if (videoIdx < 0) {
+                main.innerHTML = "Error! Couldn't find video stream!";
+                return;
+            }
+            const videoStream = streams[videoIdx];
+
+            // Initialize the decoder
+            const [, c, pkt, frame] =
+                await libav.ff_init_decoder(videoStream.codec_id, videoStream.codecpar);
+
+            // Prepare to initialize the scaler (for pixel format)
+            let inW = -1, inH = -1, inF = -1;
+            let sctx = null;
+            const sinFrame = await libav.av_frame_alloc();
+            const soutFrame = await libav.av_frame_alloc();
+
+            // Prepare a canvas to display it on
+            main.innerHTML = "";
+            const canvas = dce("canvas");
+            canvas.width = 640;
+            canvas.height = 360;
+            main.appendChild(canvas);
+            const cctx = canvas.getContext("2d");
+
+            // And read
+            let rdv = 0;
+            while (true) {
+                const rdPromise = libav.ff_read_multi(fmt_ctx, pkt);
+                while (await libav.ff_reader_dev_waiting()) {
+                    // send more data
+                    const rde = rd + 1024 * 1024;
+                    const blob = file.slice(rd, rde);
+                    const u8 = new Uint8Array(await blob.arrayBuffer());
+                    rd = rde;
+                    await libav.ff_reader_dev_send("input", u8.length ? u8 : null);
+                }
+
+                const [res, packets] = await rdPromise;
+
+                const vPackets = packets[videoIdx];
+                for (let vIdx = 0; vPackets && vIdx < vPackets.length; vIdx++) {
+                    const vPacket = vPackets[vIdx];
+
+                    // Decode it
+                    const frames = await libav.ff_decode_multi(
+                        c, pkt, frame, [vPacket],
+                        res === libav.AVERROR_EOF && vIdx === vPackets.length - 1
+                    );
+
+                    // Display them
+                    for (let frame of frames) {
+                        // Maybe initialize the scaler
+                        if (inW !== frame.width || inH !== frame.height ||
+                            inF !== frame.format) {
+                            if (sctx !== null)
+                                await libav.sws_freeContext(sctx);
+
+                            inW = frame.width;
+                            inH = frame.height;
+                            inF = frame.format;
+                            sctx = await libav.sws_getContext(
+                                inW, inH, inF,
+                                640, 360, libav.AV_PIX_FMT_RGBA,
+                                2, 0, 0, 0
+                            );
+                        }
+
+                        // Scale
+                        await libav.ff_copyin_frame(sinFrame, frame);
+                        await libav.sws_scale_frame(sctx, soutFrame, sinFrame);
+                        frame = await libav.ff_copyout_frame(soutFrame);
+
+                        // Convert from libav planes to ImageData
+                        const id = cctx.createImageData(frame.width, frame.height);
+                        {
+                            let idx = 0;
+                            const plane = frame.data[0];
+                            for (const line of plane) {
+                                id.data.set(line, idx);
+                                idx += frame.width * 4;
+                            }
+                        }
+                        id.data.set(frame.data[0]);
+                        const ib = await createImageBitmap(id);
+                        cctx.drawImage(ib, 0, 0, 640, 360);
+                    }
+                }
+
+                if (res === libav.AVERROR_EOF)
+                    break;
+            }
+        })();
+        </script>
+    </body>
+</html>
