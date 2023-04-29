@@ -74,17 +74,9 @@
             main.innerHTML = "Loading...";
 
             // Initial read
-            await libav.mkreaderdev("input");
-            let rd = 0;
-            let initPromise = libav.ff_init_demuxer_file("input");
-            while (await libav.ff_reader_dev_waiting()) {
-                const rde = rd + 1024 * 1024;
-                const blob = file.slice(rd, rde);
-                const u8 = new Uint8Array(await blob.arrayBuffer());
-                rd = rde;
-                await libav.ff_reader_dev_send("input", u8.length ? u8 : null);
-            }
-            const [fmt_ctx, streams] = await initPromise;
+            const fname = await libav.mkworkerfsfile("input", file);
+            const [fmt_ctx, streams] =
+                await libav.ff_init_demuxer_file(fname);
 
             // Find the video stream (FIXME: eventually audio stream too?)
             let videoIdx = -1;
@@ -100,6 +92,36 @@
             }
             const videoStream = streams[videoIdx];
 
+            // Set up the "player"
+            main.innerHTML = "";
+            const durationBox = dce("div");
+            durationBox.innerHTML = `0/${videoStream.duration}`;
+            main.appendChild(durationBox);
+            const canvas = dce("canvas");
+            canvas.style.display = "block";
+            canvas.width = 640;
+            canvas.height = 360;
+            main.appendChild(canvas);
+            const cctx = canvas.getContext("2d");
+            const seeker = dce("input");
+            seeker.type = "range";
+            seeker.min = 0;
+            seeker.max = Math.ceil(videoStream.duration * 10);
+            main.appendChild(seeker);
+            let seekerWakeup = null;
+
+            // Prepare to seek
+            seeker.onchange = async () => {
+                const ts = seeker.value / 10 *
+                    videoStream.time_base_den / videoStream.time_base_num;
+                await libav.avformat_seek_file_max(fmt_ctx, videoIdx, ts, 0);
+                if (seekerWakeup) {
+                    const w = seekerWakeup;
+                    seekerWakeup = null;
+                    w();
+                }
+            };
+
             // Initialize the decoder
             const [, c, pkt, frame] =
                 await libav.ff_init_decoder(videoStream.codec_id, videoStream.codecpar);
@@ -110,28 +132,12 @@
             const sinFrame = await libav.av_frame_alloc();
             const soutFrame = await libav.av_frame_alloc();
 
-            // Prepare a canvas to display it on
-            main.innerHTML = "";
-            const canvas = dce("canvas");
-            canvas.width = 640;
-            canvas.height = 360;
-            main.appendChild(canvas);
-            const cctx = canvas.getContext("2d");
-
             // And read
             let rdv = 0;
             while (true) {
-                const rdPromise = libav.ff_read_multi(fmt_ctx, pkt);
-                while (await libav.ff_reader_dev_waiting()) {
-                    // send more data
-                    const rde = rd + 1024 * 1024;
-                    const blob = file.slice(rd, rde);
-                    const u8 = new Uint8Array(await blob.arrayBuffer());
-                    rd = rde;
-                    await libav.ff_reader_dev_send("input", u8.length ? u8 : null);
-                }
-
-                const [res, packets] = await rdPromise;
+                const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt, null, {
+                    limit: 1024 * 1024
+                });
 
                 const vPackets = packets[videoIdx];
                 for (let vIdx = 0; vPackets && vIdx < vPackets.length; vIdx++) {
@@ -145,6 +151,8 @@
 
                     // Display them
                     for (let frame of frames) {
+                        const pts = frame.pts;
+
                         // Maybe initialize the scaler
                         if (inW !== frame.width || inH !== frame.height ||
                             inF !== frame.format) {
@@ -177,13 +185,25 @@
                             }
                         }
                         id.data.set(frame.data[0]);
+
+                        // Display it
                         const ib = await createImageBitmap(id);
                         cctx.drawImage(ib, 0, 0, 640, 360);
+
+                        // And show it
+                        const t = pts *
+                            videoStream.time_base_num / videoStream.time_base_den;
+                        durationBox.innerText = `${t.toFixed(2)}/${videoStream.duration}`;
+                        seeker.value = t * 10;
                     }
                 }
 
-                if (res === libav.AVERROR_EOF)
-                    break;
+                if (res === libav.AVERROR_EOF) {
+                    // Await seeking elsewhere
+                    await new Promise(res => {
+                        seekerWakeup = res;
+                    });
+                }
             }
         })();
         </script>
