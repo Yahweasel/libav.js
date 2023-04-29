@@ -114,6 +114,7 @@
         "mkdev",
         "mkreaderdev",
         "mkwriterdev",
+        "mkworkerfsfile",
         "ff_reader_dev_send",
         "ff_reader_dev_waiting",
         "ff_init_encoder",

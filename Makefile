@@ -15,7 +15,8 @@ EFLAGS=\
 	-s MODULARIZE=1 \
 	-s ASYNCIFY \
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
-	-s ALLOW_MEMORY_GROWTH=1
+	-s ALLOW_MEMORY_GROWTH=1 \
+	-lworkerfs.js
 
 all: build-default
 

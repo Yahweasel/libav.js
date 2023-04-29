@@ -161,9 +161,23 @@ Module.mkwriterdev = function(loc, mode) {
 Module.ff_reader_dev_waiters = [];
 
 /**
+ * Make a workerfs file. Returns the filename that it's mounted to.
+ * @param name  Filename to use.
+ * @param blob  Blob to load at that file.
+ */
+/// @types mkworkerfsfile(name: string, blob: Blob): Promise<string>
+Module.mkworkerfsfile = function(name, blob) {
+    FS.mkdir("/" + name + ".d");
+    FS.mount(WORKERFS, {
+        blobs: [{name: name, data: blob}]
+    }, "/" + name + ".d");
+    return "/" + name + ".d/" + name;
+};
+
+/**
  * Send some data to a reader device
  * @param name  Filename of the reader device
- * @param data  Data to sending
+ * @param data  Data to send
  */
 /// @types ff_reader_dev_send(name: string, data: Uint8Array): Promise<void>
 var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
