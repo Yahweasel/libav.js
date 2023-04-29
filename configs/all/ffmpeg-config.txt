@@ -26,6 +26,8 @@
 --enable-encoder=h263p
 --enable-decoder=h264
 --enable-bsf=extract_extradata
+--enable-decoder=hevc
+--enable-bsf=extract_extradata
 --enable-demuxer=mov
 --enable-muxer=ipod
 --enable-libmp3lame
@@ -43,6 +45,8 @@
 --enable-libopus
 --enable-decoder=libopus
 --enable-encoder=libopus
+--enable-decoder=prores
+--enable-encoder=prores
 --enable-libvorbis
 --enable-decoder=libvorbis
 --enable-encoder=libvorbis
@@ -62,3 +66,6 @@
 --enable-muxer=wv
 --enable-demuxer=matroska
 --enable-muxer=matroska --enable-muxer=webm
+--enable-gpl
+--enable-libx265
+--enable-encoder=libx265
