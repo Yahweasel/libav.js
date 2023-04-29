@@ -100,6 +100,11 @@
             const statsBox = dce("div");
             statsBox.innerHTML = "&nbsp;";
             main.appendChild(statsBox);
+            const renderChk = dce("input");
+            renderChk.style.display = "block";
+            renderChk.type = "checkbox";
+            renderChk.checked = true;
+            main.appendChild(renderChk);
             const canvas = dce("canvas");
             canvas.style.display = "block";
             canvas.width = 640;
@@ -170,6 +175,7 @@
                     );
 
                     // Display any frames here
+                    if (renderChk.checked) {
                     for (let frame of frames) {
                         const pts = frame.pts;
 
@@ -215,6 +221,7 @@
                             videoStream.time_base_num / videoStream.time_base_den;
                         durationBox.innerText = `${t.toFixed(2)}/${videoStream.duration}`;
                         seeker.value = t * 10;
+                    }
                     }
 
                     // And figure out stats
