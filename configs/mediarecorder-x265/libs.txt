@@ -1,0 +1,3 @@
+tmp-inst/@TARGET/lib/libopus.a
+tmp-inst/@TARGET/lib/libvpx.a
+tmp-inst/@TARGET/lib/libx265.a

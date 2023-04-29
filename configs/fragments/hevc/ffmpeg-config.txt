@@ -1,0 +1,2 @@
+--enable-decoder=hevc
+--enable-bsf=extract_extradata
