@@ -265,6 +265,24 @@ void AVStream_time_base_s(AVStream *a, int n, int d) {
     a->time_base.den = d;
 }
 
+int avformat_seek_file_min(
+    AVFormatContext *s, int stream_index, int64_t ts, int flags
+) {
+    return avformat_seek_file(s, stream_index, ts, ts, INT64_MAX, flags);
+}
+
+int avformat_seek_file_max(
+    AVFormatContext *s, int stream_index, int64_t ts, int flags
+) {
+    return avformat_seek_file(s, stream_index, INT64_MIN, ts, ts, flags);
+}
+
+int avformat_seek_file_approx(
+    AVFormatContext *s, int stream_index, int64_t ts, int flags
+) {
+    return avformat_seek_file(s, stream_index, INT64_MIN, ts, INT64_MAX, flags);
+}
+
 
 /****************************************************************
  * avfilter
