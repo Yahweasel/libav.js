@@ -97,6 +97,9 @@
             const durationBox = dce("div");
             durationBox.innerHTML = `0/${videoStream.duration}`;
             main.appendChild(durationBox);
+            const statsBox = dce("div");
+            statsBox.innerHTML = "&nbsp;";
+            main.appendChild(statsBox);
             const canvas = dce("canvas");
             canvas.style.display = "block";
             canvas.width = 640;
@@ -111,7 +114,7 @@
             let seekerWakeup = null;
 
             // Prepare to seek
-            seeker.onchange = async () => {
+            seeker.oninput = async () => {
                 const ts = seeker.value / 10 *
                     videoStream.time_base_den / videoStream.time_base_num;
                 await libav.avformat_seek_file_max(fmt_ctx, videoIdx, ts, 0);
@@ -132,16 +135,33 @@
             const sinFrame = await libav.av_frame_alloc();
             const soutFrame = await libav.av_frame_alloc();
 
+            // Prepare for stats
+            const stats = [];
+
             // And read
-            let rdv = 0;
             while (true) {
+                // Read some packets
                 const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt, null, {
                     limit: 1024 * 1024
                 });
 
+                /* And decode them. We decode them one-by-one for stats
+                 * purposes, but obviously would do several at a time for
+                 * better performance. */
                 const vPackets = packets[videoIdx];
                 for (let vIdx = 0; vPackets && vIdx < vPackets.length; vIdx++) {
                     const vPacket = vPackets[vIdx];
+
+                    const stat = {
+                        start: performance.now() / 1000,
+                        frames: 0,
+                        pts: 0,
+                        end: 0
+                    };
+                    stats.push(stat);
+                    const early = stat.start - 2;
+                    while (stats[0].start < early)
+                        stats.shift();
 
                     // Decode it
                     const frames = await libav.ff_decode_multi(
@@ -149,7 +169,7 @@
                         res === libav.AVERROR_EOF && vIdx === vPackets.length - 1
                     );
 
-                    // Display them
+                    // Display any frames here
                     for (let frame of frames) {
                         const pts = frame.pts;
 
@@ -195,6 +215,30 @@
                             videoStream.time_base_num / videoStream.time_base_den;
                         durationBox.innerText = `${t.toFixed(2)}/${videoStream.duration}`;
                         seeker.value = t * 10;
+                    }
+
+                    // And figure out stats
+                    stat.end = performance.now() / 1000;
+                    stat.frames = frames.length;
+                    if (frames.length) {
+                        stat.pts = frames[frames.length-1].pts;
+                    } else {
+                        stats.pop();
+                    }
+
+                    if (stats.length) {
+                        const first = stats[0];
+                        const last = stats[stats.length - 1];
+                        const fps =
+                            stats.map(x => x.frames).reduce((x, y) => x + y, 0) /
+                            (last.end - first.start);
+                        const xrt =
+                            ((last.pts - first.pts) *
+                             videoStream.time_base_num / videoStream.time_base_den) /
+                            (last.end - first.start);
+
+                        statsBox.innerText =
+                            `${fps.toFixed(2)} FPS, ${xrt.toFixed(2)}x RT`;
                     }
                 }
 
