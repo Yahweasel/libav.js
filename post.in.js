@@ -175,6 +175,17 @@ Module.mkworkerfsfile = function(name, blob) {
 };
 
 /**
+ * Unmount (unmake) a workerfs file. Give the *original name you provided*, not
+ * the name mkworkerfsfile returned.
+ * @param name  Filename to unmount.
+ */
+/// @types unlinkworkerfsfile(name: string): Promise<void>
+Module.unlinkworkerfsfile = function(name) {
+    FS.unmount("/" + name + ".d");
+    FS.rmdir("/" + name + ".d");
+};
+
+/**
  * Send some data to a reader device
  * @param name  Filename of the reader device
  * @param data  Data to send
