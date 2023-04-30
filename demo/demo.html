@@ -51,7 +51,7 @@
                     };
                     document.body.appendChild(scr);
                 });
-                const libav = await LibAV.LibAV({noworker: true});
+                const libav = await LibAV.LibAV();
 
                 // Load the file
                 const file = await new Promise(res => {
