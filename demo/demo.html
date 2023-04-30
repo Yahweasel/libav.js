@@ -6,255 +6,269 @@
     </head>
     <body>
         <script type="text/javascript">(async function() {
-            const version = "3.11.5.1.2";
+            try {
+                const version = "3.11.5.1.2";
 
-            const dce = document.createElement.bind(document);
-            const main = dce("div");
-            document.body.appendChild(main);
+                const dce = document.createElement.bind(document);
+                const main = dce("div");
+                document.body.appendChild(main);
 
-            const variant = await new Promise(res => {
-                const label = dce("label");
-                label.innerHTML = "Variant:&nbsp;";
-                label.htmlFor = "variant";
-                main.appendChild(label);
-                const vbox = dce("input");
-                vbox.type = "text";
-                vbox.id = "variant";
-                vbox.value = "webm";
-                main.appendChild(vbox);
-                const ok = dce("button");
-                ok.innerHTML = "Load";
-                main.appendChild(ok);
+                const variant = await new Promise(res => {
+                    const label = dce("label");
+                    label.innerHTML = "Variant:&nbsp;";
+                    label.htmlFor = "variant";
+                    main.appendChild(label);
+                    const vbox = dce("input");
+                    vbox.type = "text";
+                    vbox.id = "variant";
+                    vbox.value = "webm";
+                    main.appendChild(vbox);
+                    const ok = dce("button");
+                    ok.innerHTML = "Load";
+                    main.appendChild(ok);
 
-                vbox.focus();
-                vbox.select();
+                    vbox.focus();
+                    vbox.select();
 
-                vbox.onkeypress = ev => {
-                    if (ev.key === "Enter")
-                        res(vbox.value);
-                };
-                ok.onclick = ev => {
-                    res(vbox.value);
-                };
-            });
-            main.innerHTML = "Loading...";
-
-            // Load libav.js
-            LibAV = {base: ".."};
-            await new Promise(res => {
-                const scr = dce("script");
-                scr.src = `../libav-${version}-${variant}.js`;
-                scr.onload = res;
-                scr.onerror = () => {
-                    alert("Failed to load variant!");
-                };
-                document.body.appendChild(scr);
-            });
-            const libav = await LibAV.LibAV();
-
-            // Load the file
-            const file = await new Promise(res => {
-                main.innerHTML = "";
-                const label = dce("label");
-                label.innerHTML = "File:&nbsp;";
-                label.htmlFor = "load-file";
-                main.appendChild(label);
-                const picker = dce("input");
-                picker.type = "file";
-                picker.id = "load-file";
-                main.appendChild(picker);
-
-                picker.focus();
-
-                picker.onchange = () => {
-                    if (picker.files.length > 0)
-                        res(picker.files[0]);
-                };
-            });
-            main.innerHTML = "Loading...";
-
-            // Initial read
-            const fname = await libav.mkworkerfsfile("input", file);
-            const [fmt_ctx, streams] =
-                await libav.ff_init_demuxer_file(fname);
-
-            // Find the video stream (FIXME: eventually audio stream too?)
-            let videoIdx = -1;
-            for (let i = 0; i < streams.length; i++) {
-                if (streams[i].codec_type === libav.AVMEDIA_TYPE_VIDEO) {
-                    videoIdx = i;
-                    break;
-                }
-            }
-            if (videoIdx < 0) {
-                main.innerHTML = "Error! Couldn't find video stream!";
-                return;
-            }
-            const videoStream = streams[videoIdx];
-
-            // Set up the "player"
-            main.innerHTML = "";
-            const durationBox = dce("div");
-            durationBox.innerHTML = `0/${videoStream.duration}`;
-            main.appendChild(durationBox);
-            const statsBox = dce("div");
-            statsBox.innerHTML = "&nbsp;";
-            main.appendChild(statsBox);
-            const renderChk = dce("input");
-            renderChk.style.display = "block";
-            renderChk.type = "checkbox";
-            renderChk.checked = true;
-            main.appendChild(renderChk);
-            const canvas = dce("canvas");
-            canvas.style.display = "block";
-            canvas.width = 640;
-            canvas.height = 360;
-            main.appendChild(canvas);
-            const cctx = canvas.getContext("2d");
-            const seeker = dce("input");
-            seeker.type = "range";
-            seeker.min = 0;
-            seeker.max = Math.ceil(videoStream.duration * 10);
-            main.appendChild(seeker);
-            let seekerWakeup = null;
-
-            // Prepare to seek
-            seeker.oninput = async () => {
-                const ts = seeker.value / 10 *
-                    videoStream.time_base_den / videoStream.time_base_num;
-                await libav.avformat_seek_file_max(fmt_ctx, videoIdx, ts, 0);
-                if (seekerWakeup) {
-                    const w = seekerWakeup;
-                    seekerWakeup = null;
-                    w();
-                }
-            };
-
-            // Initialize the decoder
-            const [, c, pkt, frame] =
-                await libav.ff_init_decoder(videoStream.codec_id, videoStream.codecpar);
-
-            // Prepare to initialize the scaler (for pixel format)
-            let inW = -1, inH = -1, inF = -1;
-            let sctx = null;
-            const sinFrame = await libav.av_frame_alloc();
-            const soutFrame = await libav.av_frame_alloc();
-
-            // Prepare for stats
-            const stats = [];
-
-            // And read
-            while (true) {
-                // Read some packets
-                const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt, null, {
-                    limit: 1024 * 1024
-                });
-
-                /* And decode them. We decode them one-by-one for stats
-                 * purposes, but obviously would do several at a time for
-                 * better performance. */
-                const vPackets = packets[videoIdx];
-                for (let vIdx = 0; vPackets && vIdx < vPackets.length; vIdx++) {
-                    const vPacket = vPackets[vIdx];
-
-                    const stat = {
-                        start: performance.now() / 1000,
-                        frames: 0,
-                        pts: 0,
-                        end: 0
+                    vbox.onkeypress = ev => {
+                        if (ev.key === "Enter")
+                            res(vbox.value);
                     };
-                    stats.push(stat);
-                    const early = stat.start - 2;
-                    while (stats[0].start < early)
-                        stats.shift();
+                    ok.onclick = ev => {
+                        res(vbox.value);
+                    };
+                });
+                main.innerHTML = "Loading...";
 
-                    // Decode it
-                    const frames = await libav.ff_decode_multi(
-                        c, pkt, frame, [vPacket],
-                        res === libav.AVERROR_EOF && vIdx === vPackets.length - 1
-                    );
+                // Load libav.js
+                LibAV = {base: ".."};
+                await new Promise(res => {
+                    const scr = dce("script");
+                    scr.src = `../libav-${version}-${variant}.js?${Math.random()}`;
+                    scr.onload = res;
+                    scr.onerror = () => {
+                        alert("Failed to load variant!");
+                    };
+                    document.body.appendChild(scr);
+                });
+                const libav = await LibAV.LibAV({noworker: true});
 
-                    // Display any frames here
-                    if (renderChk.checked) {
-                    for (let frame of frames) {
-                        const pts = frame.pts;
+                // Load the file
+                const file = await new Promise(res => {
+                    main.innerHTML = "";
+                    const label = dce("label");
+                    label.innerHTML = "File:&nbsp;";
+                    label.htmlFor = "load-file";
+                    main.appendChild(label);
+                    const picker = dce("input");
+                    picker.type = "file";
+                    picker.id = "load-file";
+                    main.appendChild(picker);
 
-                        // Maybe initialize the scaler
-                        if (inW !== frame.width || inH !== frame.height ||
-                            inF !== frame.format) {
-                            if (sctx !== null)
-                                await libav.sws_freeContext(sctx);
+                    picker.focus();
 
-                            inW = frame.width;
-                            inH = frame.height;
-                            inF = frame.format;
-                            sctx = await libav.sws_getContext(
-                                inW, inH, inF,
-                                640, 360, libav.AV_PIX_FMT_RGBA,
-                                2, 0, 0, 0
-                            );
-                        }
+                    picker.onchange = () => {
+                        if (picker.files.length > 0)
+                            res(picker.files[0]);
+                    };
+                });
+                main.innerHTML = "Loading...";
 
-                        // Scale
-                        await libav.ff_copyin_frame(sinFrame, frame);
-                        await libav.sws_scale_frame(sctx, soutFrame, sinFrame);
-                        frame = await libav.ff_copyout_frame(soutFrame);
+                // Initial read
+                const fname = await libav.mkworkerfsfile("input", file);
+                const [fmt_ctx, streams] =
+                    await libav.ff_init_demuxer_file(fname);
 
-                        // Convert from libav planes to ImageData
-                        const id = cctx.createImageData(frame.width, frame.height);
-                        {
-                            let idx = 0;
-                            const plane = frame.data[0];
-                            for (const line of plane) {
-                                id.data.set(line, idx);
-                                idx += frame.width * 4;
+                // Find the video stream (FIXME: eventually audio stream too?)
+                let videoIdx = -1;
+                for (let i = 0; i < streams.length; i++) {
+                    if (streams[i].codec_type === libav.AVMEDIA_TYPE_VIDEO) {
+                        videoIdx = i;
+                        break;
+                    }
+                }
+                if (videoIdx < 0) {
+                    main.innerHTML = "Error! Couldn't find video stream!";
+                    return;
+                }
+                const videoStream = streams[videoIdx];
+
+                // Set up the "player"
+                main.innerHTML = "";
+                const durationBox = dce("div");
+                durationBox.innerHTML = `0/${videoStream.duration}`;
+                main.appendChild(durationBox);
+                const statsBox = dce("div");
+                statsBox.innerHTML = "&nbsp;";
+                main.appendChild(statsBox);
+                const renderChk = dce("input");
+                renderChk.style.display = "block";
+                renderChk.type = "checkbox";
+                renderChk.checked = true;
+                main.appendChild(renderChk);
+                const canvas = dce("canvas");
+                canvas.style.display = "block";
+                canvas.width = 640;
+                canvas.height = 360;
+                main.appendChild(canvas);
+                const cctx = canvas.getContext("2d");
+                const seeker = dce("input");
+                seeker.type = "range";
+                seeker.min = 0;
+                seeker.max = Math.ceil(videoStream.duration * 10);
+                main.appendChild(seeker);
+                let seekerWakeup = null;
+
+                // Prepare to seek
+                let seeked = false;
+                seeker.oninput = async () => {
+                    const ts = seeker.value / 10 *
+                        videoStream.time_base_den / videoStream.time_base_num;
+                    const ret =
+                        await libav.avformat_seek_file_max(fmt_ctx, videoIdx, ts, 0);
+                    seeked = true;
+                    if (seekerWakeup) {
+                        const w = seekerWakeup;
+                        seekerWakeup = null;
+                        w();
+                    }
+                };
+
+                // Initialize the decoder
+                const [, c, pkt, frame] =
+                    await libav.ff_init_decoder(videoStream.codec_id, videoStream.codecpar);
+
+                // Prepare to initialize the scaler (for pixel format)
+                let inW = -1, inH = -1, inF = -1;
+                let sctx = null;
+                const sinFrame = await libav.av_frame_alloc();
+                const soutFrame = await libav.av_frame_alloc();
+
+                // Prepare for stats
+                const stats = [];
+
+                // And read
+                while (true) {
+                    // Read some packets
+                    const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt, null, {
+                        limit: 1024 * 1024
+                    });
+
+                    /* And decode them. We decode them one-by-one for stats
+                     * purposes, but obviously would do several at a time for
+                     * better performance. */
+                    const vPackets = packets[videoIdx];
+                    for (let vIdx = 0; vPackets && vIdx < vPackets.length; vIdx++) {
+                        const vPacket = vPackets[vIdx];
+                        if (seeked)
+                            break;
+
+                        const stat = {
+                            start: performance.now() / 1000,
+                            frames: 0,
+                            pts: 0,
+                            end: 0
+                        };
+                        stats.push(stat);
+                        const early = stat.start - 2;
+                        while (stats[0].start < early)
+                            stats.shift();
+
+                        // Decode it
+                        const frames = await libav.ff_decode_multi(
+                            c, pkt, frame, [vPacket],
+                            res === libav.AVERROR_EOF && vIdx === vPackets.length - 1
+                        );
+
+                        // Display any frames here
+                        if (renderChk.checked) {
+                            for (let frame of frames) {
+                                const pts = frame.pts;
+
+                                // Maybe initialize the scaler
+                                if (inW !== frame.width || inH !== frame.height ||
+                                    inF !== frame.format) {
+                                    if (sctx !== null)
+                                        await libav.sws_freeContext(sctx);
+
+                                    inW = frame.width;
+                                    inH = frame.height;
+                                    inF = frame.format;
+                                    sctx = await libav.sws_getContext(
+                                        inW, inH, inF,
+                                        640, 360, libav.AV_PIX_FMT_RGBA,
+                                        2, 0, 0, 0
+                                    );
+                                }
+
+                                // Scale
+                                await libav.ff_copyin_frame(sinFrame, frame);
+                                await libav.sws_scale_frame(sctx, soutFrame, sinFrame);
+                                frame = await libav.ff_copyout_frame(soutFrame);
+
+                                // Convert from libav planes to ImageData
+                                const id = cctx.createImageData(frame.width, frame.height);
+                                {
+                                    let idx = 0;
+                                    const plane = frame.data[0];
+                                    for (const line of plane) {
+                                        id.data.set(line, idx);
+                                        idx += frame.width * 4;
+                                    }
+                                }
+                                id.data.set(frame.data[0]);
+
+                                // Display it
+                                const ib = await createImageBitmap(id);
+                                cctx.drawImage(ib, 0, 0, 640, 360);
+
+                                // And show it
+                                const t = pts *
+                                    videoStream.time_base_num / videoStream.time_base_den;
+                                durationBox.innerText = `${t.toFixed(2)}/${videoStream.duration}`;
+                                seeker.value = t * 10;
                             }
                         }
-                        id.data.set(frame.data[0]);
 
-                        // Display it
-                        const ib = await createImageBitmap(id);
-                        cctx.drawImage(ib, 0, 0, 640, 360);
+                        // And figure out stats
+                        stat.end = performance.now() / 1000;
+                        stat.frames = frames.length;
+                        if (frames.length) {
+                            stat.pts = frames[frames.length-1].pts;
+                        } else {
+                            stats.pop();
+                        }
 
-                        // And show it
-                        const t = pts *
-                            videoStream.time_base_num / videoStream.time_base_den;
-                        durationBox.innerText = `${t.toFixed(2)}/${videoStream.duration}`;
-                        seeker.value = t * 10;
+                        if (stats.length) {
+                            const first = stats[0];
+                            const last = stats[stats.length - 1];
+                            const fps =
+                                stats.map(x => x.frames).reduce((x, y) => x + y, 0) /
+                                (last.end - first.start);
+                            const xrt =
+                                ((last.pts - first.pts) *
+                                 videoStream.time_base_num / videoStream.time_base_den) /
+                                (last.end - first.start);
+
+                            statsBox.innerText =
+                                `${fps.toFixed(2)} FPS, ${xrt.toFixed(2)}x RT`;
+                        }
                     }
+
+                    if (seeked) {
+                        seeked = false;
+                        continue;
                     }
 
-                    // And figure out stats
-                    stat.end = performance.now() / 1000;
-                    stat.frames = frames.length;
-                    if (frames.length) {
-                        stat.pts = frames[frames.length-1].pts;
-                    } else {
-                        stats.pop();
-                    }
-
-                    if (stats.length) {
-                        const first = stats[0];
-                        const last = stats[stats.length - 1];
-                        const fps =
-                            stats.map(x => x.frames).reduce((x, y) => x + y, 0) /
-                            (last.end - first.start);
-                        const xrt =
-                            ((last.pts - first.pts) *
-                             videoStream.time_base_num / videoStream.time_base_den) /
-                            (last.end - first.start);
-
-                        statsBox.innerText =
-                            `${fps.toFixed(2)} FPS, ${xrt.toFixed(2)}x RT`;
+                    if (res === libav.AVERROR_EOF) {
+                        // Await seeking elsewhere
+                        await new Promise(res => {
+                            seekerWakeup = res;
+                        });
                     }
                 }
-
-                if (res === libav.AVERROR_EOF) {
-                    // Await seeking elsewhere
-                    await new Promise(res => {
-                        seekerWakeup = res;
-                    });
-                }
+            } catch (ex) {
+                alert(ex + "");
             }
         })();
         </script>
