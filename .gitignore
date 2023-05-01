@@ -11,6 +11,7 @@ libvorbis-*/
 libvpx-*/
 opus-*/
 openh264-*/
+x265_*/
 
 tests/out.ogg
 tests/out.opus
