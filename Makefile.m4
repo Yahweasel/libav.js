@@ -43,6 +43,17 @@ libav-$(LIBAVJS_VERSION)-%.$1: ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/l
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-$2-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
+                `grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_filter.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_hw.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_mux.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_opt.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffprobe.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/cmdutils.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/opt_common.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavdevice/libavdevice.a \
+		'` \
 		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavformat/libavformat.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavfilter/libavfilter.a \
 		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavcodec/libavcodec.a \

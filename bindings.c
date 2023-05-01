@@ -317,6 +317,23 @@ void sws_scale_frame() {}
 
 
 /****************************************************************
+ * CLI
+ ***************************************************************/
+int libavjs_with_cli() {
+#ifdef LIBAVJS_WITH_CLI
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+#ifndef LIBAVJS_WITH_CLI
+int ffmpeg_main() { return 0; }
+int ffprobe_main() { return 0; }
+#endif
+
+
+/****************************************************************
  * Other bindings
  ***************************************************************/
 

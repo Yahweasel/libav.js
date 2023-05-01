@@ -108,7 +108,10 @@
         ["free", null, ["number"]],
         ["malloc", "number", ["number"]],
         ["mallinfo_uordblks", "number", []],
-        ["libavjs_with_swscale", "number", []]
+        ["libavjs_with_swscale", "number", []],
+
+        ["ffmpeg_main", "number", ["number", "number"]],
+        ["ffprobe_main", "number", ["number", "number"]]
     ],
 
     "meta": [
@@ -140,7 +143,9 @@
         "ff_copyout_packet",
         "ff_copyin_packet",
         "ff_malloc_int32_list",
-        "ff_malloc_int64_list"
+        "ff_malloc_int64_list",
+        "ffmpeg",
+        "ffprobe"
     ],
 
     "accessors": [

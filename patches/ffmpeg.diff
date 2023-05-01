@@ -5,11 +5,81 @@ index 0000000..416a6d1
 +++ b/PATCHED
 @@ -0,0 +1 @@
 +PATCHED
+diff --git a/fftools/ffmpeg.c b/fftools/ffmpeg.c
+index e7384f0..36c4239 100644
+--- a/fftools/ffmpeg.c
++++ b/fftools/ffmpeg.c
+@@ -4513,7 +4513,8 @@ static int64_t getmaxrss(void)
+ #endif
+ }
+ 
+-int main(int argc, char **argv)
++int ffmpeg_main(int argc, char **argv);
++int ffmpeg_main(int argc, char **argv)
+ {
+     int i, ret;
+     BenchmarkTimeStamps ti;
+diff --git a/fftools/ffprobe.c b/fftools/ffprobe.c
+index 608d905..f7d468a 100644
+--- a/fftools/ffprobe.c
++++ b/fftools/ffprobe.c
+@@ -90,8 +90,11 @@ typedef struct InputFile {
+     int       nb_streams;
+ } InputFile;
+ 
++#if 0
++/* Disabled so that we can have both mains in one program */
+ const char program_name[] = "ffprobe";
+ const int program_birth_year = 2007;
++#endif
+ 
+ static int do_bitexact = 0;
+ static int do_count_frames = 0;
+@@ -3740,6 +3743,8 @@ static int opt_print_filename(void *optctx, const char *opt, const char *arg)
+     return 0;
+ }
+ 
++#if 0
++/* Disabled so that we can have both mains in one program */
+ void show_help_default(const char *opt, const char *arg)
+ {
+     av_log_set_callback(log_callback_help);
+@@ -3750,6 +3755,7 @@ void show_help_default(const char *opt, const char *arg)
+     show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+     show_help_children(avcodec_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+ }
++#endif
+ 
+ /**
+  * Parse interval specification, according to the format:
+@@ -4020,7 +4026,8 @@ static inline int check_section_show_entries(int section_id)
+             do_show_##varname = 1;                                      \
+     } while (0)
+ 
+-int main(int argc, char **argv)
++int ffprobe_main(int argc, char **argv);
++int ffprobe_main(int argc, char **argv)
+ {
+     const Writer *w;
+     WriterContext *wctx;
+diff --git a/libavcodec/libopenh264enc.c b/libavcodec/libopenh264enc.c
+index db252aa..86c9c92 100644
+--- a/libavcodec/libopenh264enc.c
++++ b/libavcodec/libopenh264enc.c
+@@ -400,7 +400,7 @@ static int svc_encode_frame(AVCodecContext *avctx, AVPacket *avpkt,
+     sp.iPicHeight = avctx->height;
+ 
+     if (frame->pict_type == AV_PICTURE_TYPE_I) {
+-        (*s->encoder)->ForceIntraFrame(s->encoder, true);
++        (*s->encoder)->ForceIntraFrame(s->encoder, true, -1);
+     }
+ 
+     encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);
 diff --git a/libavformat/file.c b/libavformat/file.c
-index 8303436..7ce6768 100644
+index 98c9e81..f232791 100644
 --- a/libavformat/file.c
 +++ b/libavformat/file.c
-@@ -38,6 +38,8 @@
+@@ -40,6 +40,8 @@
  #include "os_support.h"
  #include "url.h"
  
@@ -18,7 +88,7 @@ index 8303436..7ce6768 100644
  /* Some systems may not have S_ISFIFO */
  #ifndef S_ISFIFO
  #  ifdef S_IFIFO
-@@ -106,12 +108,31 @@ static const AVClass pipe_class = {
+@@ -108,12 +110,31 @@ static const AVClass pipe_class = {
      .version    = LIBAVUTIL_VERSION_INT,
  };
  
@@ -51,10 +121,10 @@ index 8303436..7ce6768 100644
          return AVERROR(EAGAIN);
      if (ret == 0)
 diff --git a/libavformat/oggdec.c b/libavformat/oggdec.c
-index a456c3d..a604699 100644
+index 3b19e0b..474d82d 100644
 --- a/libavformat/oggdec.c
 +++ b/libavformat/oggdec.c
-@@ -320,10 +320,12 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+@@ -319,10 +319,12 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
      int flags, nsegs;
      uint64_t gp;
      uint32_t serial;
@@ -68,7 +138,7 @@ index a456c3d..a604699 100644
      uint8_t sync[4];
      uint8_t segments[255];
      uint8_t *readout_buf;
-@@ -360,12 +362,14 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+@@ -359,12 +361,14 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
          return AVERROR_INVALIDDATA;
      }
  
@@ -83,7 +153,7 @@ index a456c3d..a604699 100644
  
      version = avio_r8(bc);
      flags   = avio_r8(bc);
-@@ -373,10 +377,14 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+@@ -372,10 +376,14 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
      serial  = avio_rl32(bc);
      avio_skip(bc, 4); /* seq */
  
@@ -98,7 +168,7 @@ index a456c3d..a604699 100644
  
      nsegs    = avio_r8(bc);
      page_pos = avio_tell(bc) - 27;
-@@ -408,6 +416,7 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+@@ -407,6 +415,7 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
          return ret < 0 ? ret : AVERROR_EOF;
      }
  
@@ -106,7 +176,7 @@ index a456c3d..a604699 100644
      if (crc ^ ffio_get_checksum(bc)) {
          av_log(s, AV_LOG_ERROR, "CRC mismatch!\n");
          if (idx < 0)
-@@ -427,6 +436,7 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+@@ -426,6 +435,7 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
          *sid = -1;
          return 0;
      }
@@ -114,14 +184,3 @@ index a456c3d..a604699 100644
  
      /* CRC is correct so we can be 99% sure there's an actual change here */
      if (idx < 0) {
---- a/libavcodec/libopenh264enc.c	2021-10-04 00:08:29.000000000 +0530
-+++ b/libavcodec/libopenh264enc.c	2022-06-21 18:34:22.000000000 +0530
-@@ -377,7 +377,7 @@
-     sp.iPicHeight = avctx->height;
- 
-     if (frame->pict_type == AV_PICTURE_TYPE_I) {
--        (*s->encoder)->ForceIntraFrame(s->encoder, true);
-+        (*s->encoder)->ForceIntraFrame(s->encoder, true, -1);
-     }
- 
-     encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);

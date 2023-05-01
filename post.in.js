@@ -1305,3 +1305,59 @@ var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
     }
     return ptr;
 };
+
+/**
+ * Allocate and copy in a string array. The resulting array will be
+ * NULL-terminated.
+ * @param arr  Array of strings to copy in.
+ */
+var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
+    var ptr = malloc((arr.length + 1) * 4);
+    if (ptr === 0)
+        throw new Error("Failed to malloc");
+    var inArr = new Uint32Array(Module.HEAPU8.buffer, ptr, arr.length + 1);
+    var i;
+    for (i = 0; i < arr.length; i++) {
+        console.error(arr[i]);
+        inArr[i] = av_strdup(arr[i]);
+    }
+    inArr[i] = 0;
+    return ptr;
+};
+
+/**
+ * Free a string array allocated by ff_malloc_string_array.
+ * @param ptr  Pointer to the array to free.
+ */
+var ff_free_string_array = Module.ff_free_string_array = function(ptr) {
+    var iPtr = ptr / 4;
+    for (;; iPtr++) {
+        var elPtr = Module.HEAPU32[ptr/4];
+        if (!elPtr)
+            break;
+        free(elPtr);
+    }
+    free(ptr);
+};
+
+/**
+ * Frontend to the ffmpeg CLI (if it's compiled in).
+ */
+var ffmpeg = Module.ffmpeg = function() {
+    var args = ["ffmpeg"].concat(Array.prototype.slice.call(arguments, 0));
+    var argv = ff_malloc_string_array(args);
+    var ret = ffmpeg_main(args.length, argv);
+    ff_free_string_array(argv);
+    return ret;
+};
+
+/**
+ * Frontend to the ffprobe CLI (if it's compiled in).
+ */
+var ffprobe = Module.ffprobe = function() {
+    var args = ["ffprobe"].concat(Array.prototype.slice.call(arguments, 0));
+    var argv = ff_malloc_string_array(args);
+    var ret = ffprobe_main(args.length, argv);
+    ff_free_string_array(argv);
+    return ret;
+};

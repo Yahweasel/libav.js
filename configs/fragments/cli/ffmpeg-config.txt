@@ -1,0 +1,1 @@
+--enable-ffmpeg --enable-ffprobe
