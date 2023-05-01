@@ -75,7 +75,7 @@ since you can presumably use a native version of FFmpeg's libraries. The Node
 interface is only provided for internal testing.
 
 libav.js exposes a global variable, LibAV, for all API access. If LibAV is set
-before loading the library, libav.js does *not* replace it, but extends it:
+before loading the library, libav.js does *not* replace it, but extends it.
 This gives you an opportunity to pass in values critical for loading. In
 particular, if the base directory (directory in which libav's files are
 located) isn't ".", then you must set `LibAV.base` to the correct base
@@ -133,7 +133,8 @@ Most structs are exposed as raw pointers (numbers), and their parts can be
 accessed using accessor functions named `Struct_member` and `Struct_member_s`.
 For instance, to read `frame_size` from an `AVCodecContext`, use `await
 AVCodecContext_frame_size(ctx)`, and to write it, use `await
-AVCodecContext_frame_size_s(ctx, frame_size)`.
+AVCodecContext_frame_size_s(ctx, frame_size)`. There are also libav.js-specific
+JavaScript objects for many of them, documented in `libav.types.d.ts`.
 
 Some libav functions take double-pointers so that they can return both an
 allocated pointer value and (if applicable) an error code, and where possible
@@ -143,8 +144,7 @@ as its first argument, is exposed as `avfilter_graph_create_filter_js`, which
 elides the first argument and returns an `AVFilterContext *`.
 
 Some common sequences of functions are combined into `ff_` metafunctions. See
-the documentation in `libav.types.d.ts` for how to use them, or the tests in
-`tests` for examples.
+[API.md](docs/API.md) for how to use them.
 
 Further examples are available in the `samples` directory of
 https://github.com/ennuicastr/libavjs-webcodecs-polyfill , which uses libav.js
