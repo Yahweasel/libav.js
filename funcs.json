@@ -108,6 +108,9 @@
         ["free", null, ["number"]],
         ["malloc", "number", ["number"]],
         ["mallinfo_uordblks", "number", []],
+        ["open", "number", ["string", "number", "number"]],
+        ["close", "number", ["number"]],
+        ["dup2", "number", ["number", "number"]],
         ["libavjs_with_swscale", "number", []],
 
         ["ffmpeg_main", "number", ["number", "number"]],
