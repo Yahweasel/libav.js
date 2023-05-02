@@ -25,6 +25,7 @@ const configs = [
     ["opus", ["ogg", "opus"]],
     ["flac", ["flac"]],
     ["opus-flac", ["ogg", "opus", "flac"]],
+    ["all-audio-cli", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vorbis", "lame", "wav", "audio-filters", "cli", "workerfs"]],
 
     ["webm", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "wav", "audio-filters"]],
     ["webm-opus-flac", ["ogg", "webm", "opus", "flac", "swscale", "vpx", "vp8"]],

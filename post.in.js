@@ -1311,6 +1311,7 @@ var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
  * NULL-terminated.
  * @param arr  Array of strings to copy in.
  */
+/// @types ff_malloc_string_array(arr: string[]: Promise<number>
 var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
     var ptr = malloc((arr.length + 1) * 4);
     if (ptr === 0)
@@ -1329,6 +1330,7 @@ var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
  * Free a string array allocated by ff_malloc_string_array.
  * @param ptr  Pointer to the array to free.
  */
+/// @types ff_free_string_array(ptr: number): Promise<void>
 var ff_free_string_array = Module.ff_free_string_array = function(ptr) {
     var iPtr = ptr / 4;
     for (;; iPtr++) {
@@ -1340,11 +1342,32 @@ var ff_free_string_array = Module.ff_free_string_array = function(ptr) {
     free(ptr);
 };
 
+// Convert arguments to an array of string arguments (internal)
+function convertArgs(argv0, args) {
+    var ret = [argv0];
+    ret = ret.concat(Array.prototype.slice.call(args, 0));
+    for (var i = 0; i < ret.length; i++) {
+        var arg = ret[i];
+        if (typeof arg !== "string") {
+            if ("length" in arg) {
+                // Array of strings
+                ret.splice.apply(ret, [i, 1].concat(arg));
+            } else {
+                // Just stringify it
+                ret[i] = "" + arg;
+            }
+        }
+    }
+    return ret;
+}
+
 /**
- * Frontend to the ffmpeg CLI (if it's compiled in).
+ * Frontend to the ffmpeg CLI (if it's compiled in). Pass arguments as strings,
+ * or you may intermix arrays of strings for multiple arguments.
  */
+/// @types ffmpeg(...args: (string | string[])[]): Promise<number>
 var ffmpeg = Module.ffmpeg = function() {
-    var args = ["ffmpeg"].concat(Array.prototype.slice.call(arguments, 0));
+    var args = convertArgs("ffmpeg", arguments);
     var argv = ff_malloc_string_array(args);
     var ret = ffmpeg_main(args.length, argv);
     ff_free_string_array(argv);
@@ -1352,10 +1375,12 @@ var ffmpeg = Module.ffmpeg = function() {
 };
 
 /**
- * Frontend to the ffprobe CLI (if it's compiled in).
+ * Frontend to the ffprobe CLI (if it's compiled in). Pass arguments as strings,
+ * or you may intermix arrays of strings for multiple arguments.
  */
+/// @types ffprobe(...args: (string | string[])[]): Promise<number>
 var ffprobe = Module.ffprobe = function() {
-    var args = ["ffprobe"].concat(Array.prototype.slice.call(arguments, 0));
+    var args = convertArgs("ffprobe", arguments);
     var argv = ff_malloc_string_array(args);
     var ret = ffprobe_main(args.length, argv);
     ff_free_string_array(argv);

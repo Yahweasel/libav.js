@@ -1,0 +1,37 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=ogg
+--enable-muxer=ogg
+--enable-demuxer=matroska
+--enable-muxer=matroska --enable-muxer=webm
+--enable-libopus
+--enable-decoder=libopus
+--enable-encoder=libopus
+--enable-demuxer=mov
+--enable-muxer=ipod
+--enable-decoder=aac
+--enable-encoder=aac
+--enable-decoder=flac
+--enable-encoder=flac
+--enable-demuxer=flac
+--enable-muxer=flac
+--enable-libvorbis
+--enable-decoder=libvorbis
+--enable-encoder=libvorbis
+--enable-libmp3lame
+--enable-decoder=mp3
+--enable-encoder=libmp3lame
+--enable-demuxer=mp3
+--enable-muxer=mp3
+--enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
+--enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
+--enable-demuxer=wav
+--enable-muxer=wav
+--enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
+--enable-filter=aecho --enable-filter=afade --enable-filter=aformat
+--enable-filter=agate --enable-filter=alimiter --enable-filter=amix
+--enable-filter=apad --enable-filter=atempo --enable-filter=atrim
+--enable-filter=bandpass --enable-filter=bandreject --enable-filter=dynaudnorm
+--enable-filter=equalizer --enable-filter=loudnorm --enable-filter=pan
+--enable-filter=amix --enable-filter=volume --enable-filter=anull
+--enable-ffmpeg --enable-ffprobe
