@@ -1,8 +1,8 @@
 {
   "name": "@descript/libav.js",
-  "version": "3.9.12",
+  "version": "3.9.15",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
-  "main": "libav-3.9.12-descript.js",
+  "main": "libav-3.9.15-descript.js",
   "types": "libav.types.d.ts",
   "directories": {
     "test": "tests"
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Yahweasel/libav.js.git"
+    "url": "git+https://github.com/descript/libav.js.git"
   },
   "keywords": [
     "ffmpeg",
@@ -26,12 +26,18 @@
     "mux",
     "demux"
   ],
-  "author": "Yahweasel",
+  "files": [
+    "libav.types.d.ts",
+    "libav-3.9.15-descript.js",
+    "libav-3.9.15-descript.wasm.js",
+    "libav-3.9.15-descript.wasm.wasm"
+  ],
+  "author": "descript",
   "license": "LGPL-2.1",
   "bugs": {
-    "url": "https://github.com/Yahweasel/libav.js/issues"
+    "url": "https://github.com/descript/libav.js/issues"
   },
-  "homepage": "https://github.com/Yahweasel/libav.js#readme",
+  "homepage": "https://github.com/descript/libav.js#readme",
   "devDependencies": {
     "uglify-js": "^3.14.3"
   }

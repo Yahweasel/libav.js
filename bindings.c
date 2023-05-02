@@ -302,10 +302,28 @@ size_t av_get_codec_tag_string(char *buf, size_t buf_size, unsigned int codec_ta
      return ret;
  }
 
-char codec_string2[128];
-const char * AVStream_get_codec_tag_string(AVStream* avStream) {
-    av_get_codec_tag_string(codec_string2, sizeof(codec_string2), avStream->codecpar->codec_tag);
-    return codec_string2;
+int AVStream_width(AVStream* avStream) {
+    return avStream->codecpar->width;
+}
+
+int AVStream_height(AVStream* avStream) {
+    return avStream->codecpar->height;
+}
+
+int64_t toInt64(unsigned int lowBits, unsigned int highBits) {
+    return ((int64_t) highBits << 32) | lowBits;
+}
+
+int avformat_seek_frame(
+    AVFormatContext *pFormatContext, 
+    int stream_index, 
+    unsigned int timestampLowBits, 
+    unsigned int timestampHighBits, 
+    int flags) 
+{
+    int64_t timestamp = toInt64(timestampLowBits, timestampHighBits);
+    // printf("av_seek_frame_js timestamp: %" PRIi64 "\n", timestamp);
+    return av_seek_frame(pFormatContext, stream_index, timestamp, flags);
 }
 
 int avformat_seek_file_min(
@@ -402,7 +420,6 @@ AVFormatContext *avformat_open_input_js(const char *url, AVInputFormat *fmt,
 
 char videoSampleTimingJson2[1000000] = "";
 const char * avformat_get_video_sample_timing(const char *filename) {
-    filename = "/m0/f0";
     videoSampleTimingJson2[0] = 0;
 
     AVFormatContext *pFormatContext = NULL;

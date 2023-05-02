@@ -1311,7 +1311,7 @@ var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
  * NULL-terminated.
  * @param arr  Array of strings to copy in.
  */
-/// @types ff_malloc_string_array(arr: string[]: Promise<number>
+/// @types ff_malloc_string_array(arr: string[]): Promise<number>
 var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
     var ptr = malloc((arr.length + 1) * 4);
     if (ptr === 0)

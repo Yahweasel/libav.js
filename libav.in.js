@@ -44,7 +44,7 @@
 
     var libav;
     var base = ".";
-    var nodejs = (typeof process !== "undefined");
+    var nodejs = false;//(typeof process !== "undefined");
 
     // Make sure LibAV is defined for later loading
     if (typeof LibAV === "undefined")
