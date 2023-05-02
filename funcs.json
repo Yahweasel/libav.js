@@ -53,6 +53,8 @@
         ["avformat_new_stream", "number", ["number", "number"]],
         ["avformat_open_input", "number", ["number", "string", "number", "number"], {"async": true}],
         ["avformat_open_input_js", "number", ["string", "number", "number"], {"async": true}],
+        ["avformat_get_video_sample_timing", "string", ["string"]],
+        ["avformat_get_meta_data", "string", ["string"]],
         ["avformat_seek_file", "number", ["number", "number", "number", "number", "number", "number"]],
         ["avformat_seek_file_min", "number", ["number", "number", "number", "number"]],
         ["avformat_seek_file_max", "number", ["number", "number", "number", "number"]],

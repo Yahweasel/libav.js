@@ -39,6 +39,8 @@ const configs = [
     ["mediarecorder-openh264", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264", "openh264"]],
     ["mediarecorder-x265", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264", "hevc", "x265"]],
 
+    ["descript", ["ogg", "webm", "opus", "ipod", "aac", "flac", "lame", "wav", "swscale", "vpx", "vp8", "h264", "hevc", "audio-filters", "cli", "workerfs"]],
+
     ["empty", []],
     ["all", fs.readdirSync("fragments").filter(x => x !== "default")]
 ];
