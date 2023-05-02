@@ -1318,10 +1318,8 @@ var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
         throw new Error("Failed to malloc");
     var inArr = new Uint32Array(Module.HEAPU8.buffer, ptr, arr.length + 1);
     var i;
-    for (i = 0; i < arr.length; i++) {
-        console.error(arr[i]);
+    for (i = 0; i < arr.length; i++)
         inArr[i] = av_strdup(arr[i]);
-    }
     inArr[i] = 0;
     return ptr;
 };
@@ -1334,7 +1332,7 @@ var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
 var ff_free_string_array = Module.ff_free_string_array = function(ptr) {
     var iPtr = ptr / 4;
     for (;; iPtr++) {
-        var elPtr = Module.HEAPU32[ptr/4];
+        var elPtr = Module.HEAPU32[iPtr];
         if (!elPtr)
             break;
         free(elPtr);
@@ -1361,17 +1359,30 @@ function convertArgs(argv0, args) {
     return ret;
 }
 
+// Helper to run a main()
+function runMain(main, name, args) {
+    args = convertArgs(name, args);
+    var argv = ff_malloc_string_array(args);
+    var ret = null;
+    try {
+        ret = main(args.length, argv);
+    } catch (ex) {
+        if (ex && ex.name === "ExitStatus")
+            ret = ex.status;
+        else
+            throw ex;
+    }
+    ff_free_string_array(argv);
+    return ret;
+}
+
 /**
  * Frontend to the ffmpeg CLI (if it's compiled in). Pass arguments as strings,
  * or you may intermix arrays of strings for multiple arguments.
  */
 /// @types ffmpeg(...args: (string | string[])[]): Promise<number>
 var ffmpeg = Module.ffmpeg = function() {
-    var args = convertArgs("ffmpeg", arguments);
-    var argv = ff_malloc_string_array(args);
-    var ret = ffmpeg_main(args.length, argv);
-    ff_free_string_array(argv);
-    return ret;
+    return runMain(ffmpeg_main, "ffmpeg", arguments);
 };
 
 /**
@@ -1380,9 +1391,5 @@ var ffmpeg = Module.ffmpeg = function() {
  */
 /// @types ffprobe(...args: (string | string[])[]): Promise<number>
 var ffprobe = Module.ffprobe = function() {
-    var args = convertArgs("ffprobe", arguments);
-    var argv = ff_malloc_string_array(args);
-    var ret = ffprobe_main(args.length, argv);
-    ff_free_string_array(argv);
-    return ret;
+    return runMain(ffprobe_main, "ffprobe", arguments);
 };
