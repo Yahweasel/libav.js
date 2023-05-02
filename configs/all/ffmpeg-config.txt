@@ -19,6 +19,8 @@
 --enable-encoder=flac
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-demuxer=pcm_f32le
+--enable-muxer=pcm_f32le
 --enable-decoder=pcm_f32le
 --enable-encoder=pcm_f32le
 --enable-decoder=g726
