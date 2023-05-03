@@ -135,6 +135,17 @@ Module.unlink = FS.unlink.bind(FS);
 Module.mkdev = FS.mkdev.bind(FS);
 
 /**
+ * Make a lazy file. Direct link to createLazyFile.
+ */
+/* @types
+ * createLazyFile(
+ *     parent: string, name: string, url: string, canRead: boolean,
+ *     canWrite: boolean
+ * ): Promise<void>
+ */
+Module.createLazyFile = FS.createLazyFile.bind(FS);
+
+/**
  * Make a reader device.
  * @param name  Filename to create
  * @param mode  Unix permissions (pointless since this is an in-memory
