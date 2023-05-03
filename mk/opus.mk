@@ -2,7 +2,7 @@ OPUS_VERSION=1.3.1
 
 tmp-inst/%/lib/pkgconfig/opus.pc: opus-$(OPUS_VERSION)/build-%/config.h
 	cd opus-$(OPUS_VERSION)/build-$* ; \
-		emmake $(MAKE) install
+		$(MAKE) install
 
 opus-$(OPUS_VERSION)/build-%/config.h: tmp-inst/%/cflags.txt opus-$(OPUS_VERSION)/configure
 	mkdir -p opus-$(OPUS_VERSION)/build-$*

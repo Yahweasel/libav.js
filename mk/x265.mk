@@ -2,9 +2,9 @@ X265_VERSION=3.5
 
 tmp-inst/%/lib/pkgconfig/x265.pc: x265_$(X265_VERSION)/build-%/Makefile
 	cd x265_$(X265_VERSION)/build-$* ; \
-		emmake $(MAKE)
+		$(MAKE)
 	cd x265_$(X265_VERSION)/build-$* ; \
-		emmake $(MAKE) install
+		$(MAKE) install
 
 x265_$(X265_VERSION)/build-%/Makefile: tmp-inst/%/cflags.txt x265_$(X265_VERSION)/source/CMakeLists.txt
 	mkdir -p x265_$(X265_VERSION)/build-$*

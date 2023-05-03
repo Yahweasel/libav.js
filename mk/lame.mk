@@ -2,7 +2,7 @@ LAME_VERSION=3.100
 
 tmp-inst/%/lib/libmp3lame.a: lame-$(LAME_VERSION)/build-%/config.h
 	cd lame-$(LAME_VERSION)/build-$* ; \
-		emmake $(MAKE) install
+		$(MAKE) install
 
 lame-$(LAME_VERSION)/build-%/config.h: tmp-inst/%/cflags.txt lame-$(LAME_VERSION)/configure
 	mkdir -p lame-$(LAME_VERSION)/build-$*

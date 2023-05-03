@@ -8,7 +8,7 @@ LIBAOM_VERSION=bcfe6fbf
 
 tmp-inst/%/lib/pkgconfig/aom.pc: libaom-$(LIBAOM_VERSION)/build-%/Makefile
 	cd libaom-$(LIBAOM_VERSION)/build-$* ; \
-		emmake $(MAKE) install
+		$(MAKE) install
 
 # General build rule for any target
 # Use: buildrule(target name, cmake flags)

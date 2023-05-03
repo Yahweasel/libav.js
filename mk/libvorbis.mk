@@ -2,7 +2,7 @@ LIBVORBIS_VERSION=1.3.7
 
 tmp-inst/%/lib/pkgconfig/vorbis.pc: libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h
 	cd libvorbis-$(LIBVORBIS_VERSION)/build-$* ; \
-		emmake $(MAKE) install
+		$(MAKE) install
 	# This .pc file assumes .so semantics :(
 	sed 's/-lvorbisenc/-lvorbisenc -lvorbis -logg/g' -i tmp-inst/$*/lib/pkgconfig/vorbisenc.pc
 

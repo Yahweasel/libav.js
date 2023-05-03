@@ -2,7 +2,7 @@ LIBOGG_VERSION=1.3.5
 
 tmp-inst/%/lib/pkgconfig/ogg.pc: libogg-$(LIBOGG_VERSION)/build-%/config.h
 	cd libogg-$(LIBOGG_VERSION)/build-$* ; \
-		emmake $(MAKE) install
+		$(MAKE) install
 
 libogg-$(LIBOGG_VERSION)/build-%/config.h: tmp-inst/%/cflags.txt libogg-$(LIBOGG_VERSION)/configure
 	mkdir -p libogg-$(LIBOGG_VERSION)/build-$*
