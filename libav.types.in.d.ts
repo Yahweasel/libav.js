@@ -327,6 +327,9 @@ export interface LibAVWrapper {
      */
     LibAV(opts?: {
         noworker?: boolean,
-        nowasm?: boolean
+        nowasm?: boolean,
+        nosimd?: boolean,
+        yesthreads?: boolean,
+        nothreads?: boolean,
     }): Promise<LibAV>;
 }
