@@ -101,7 +101,7 @@
       ["AVStream_time_base_den", "number", ["number"]],
       ["AVStream_time_base_s", null, ["number", "number", "number"]],
       ["AVStream_width", "number", ["number"]],
-      ["AVStream_height", "number", ["number"]]
+      ["AVStream_height", "number", ["number"]],
       ["AVPacketSideData_data", "number", ["number", "number"]],
       ["AVPacketSideData_size", "number", ["number", "number"]],
       ["AVPacketSideData_type", "number", ["number", "number"]],

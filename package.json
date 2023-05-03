@@ -1,14 +1,15 @@
 {
   "name": "@descript/libav.js",
-  "version": "3.9.21",
+  "version": "3.9.22",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
-  "main": "libav-3.9.21-descript.js",
+  "main": "libav-3.9.22-descript.js",
   "types": "libav.types.d.ts",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "superclean": "git clean -f -d -x"
   },
   "repository": {
     "type": "git",
