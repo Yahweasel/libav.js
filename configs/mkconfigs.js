@@ -25,7 +25,7 @@ const configs = [
     ["opus", ["ogg", "opus"]],
     ["flac", ["flac"]],
     ["opus-flac", ["ogg", "opus", "flac"]],
-    ["all-audio-cli", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vorbis", "lame", "wav", "audio-filters", "cli", "workerfs"]],
+    ["all-audio-cli", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vorbis", "lame", "wav", "flt", "audio-filters", "cli", "workerfs"]],
 
     ["webm", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "wav", "audio-filters"]],
     ["webm-opus-flac", ["ogg", "webm", "opus", "flac", "swscale", "vpx", "vp8"]],
@@ -40,7 +40,6 @@ const configs = [
     ["mediarecorder-x265", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264", "hevc", "x265"]],
 
     ["descript",      ["ogg", "webm", "opus", "ipod", "aac", "flac",/*"vorbis",*/"lame", "wav", "flt", "swscale", "vpx", "vp8", "h264", "hevc", "audio-filters", "cli", "workerfs"]],
-    // ["all-audio-cli", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vorbis",   "lame", "wav", "flt",/*                                      */"audio-filters", "cli", "workerfs"]],
 
     ["empty", []],
     ["all", fs.readdirSync("fragments").filter(x => x !== "default")]

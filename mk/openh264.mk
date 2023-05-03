@@ -3,7 +3,7 @@ OPENH264_VERSION=2.3.1
 tmp-inst/%/lib/pkgconfig/openh264.pc: tmp-inst/%/cflags.txt openh264-$(OPENH264_VERSION)/PATCHED
 	mkdir -p openh264-$(OPENH264_VERSION)/build-$*
 	cd openh264-$(OPENH264_VERSION)/build-$* ; \
-		emmake $(MAKE) -f ../Makefile install-static OS=linux \
+		$(MAKE) -f ../Makefile install-static OS=linux \
 		ARCH=mips CFLAGS="-Oz -fno-stack-protector `cat $(PWD)/tmp-inst/$*/cflags.txt`" \
 		PREFIX="$(PWD)/tmp-inst/$*"
 

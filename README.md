@@ -1,6 +1,14 @@
 Using this workflow for pulling changes from upstream:
 https://chat.openai.com/c/7fcc2c28-7a4b-4394-ab2a-070a3557b076
 
+**Functions Added to API**
+
+- AVStream_width
+- AVStream_height
+- av_seek_frame
+- avformat_get_video_sample_timing
+- avformat_get_meta_data
+
 **Everything below this is the original README.md content.**
 
 # libav.js

@@ -1,0 +1,2 @@
+--enable-decoder=wmv2
+--enable-encoder=wmv2

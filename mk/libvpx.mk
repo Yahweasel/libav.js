@@ -2,14 +2,14 @@ LIBVPX_VERSION=1.12.0
 
 tmp-inst/%/lib/pkgconfig/vpx.pc: libvpx-$(LIBVPX_VERSION)/build-%/Makefile
 	-cd libvpx-$(LIBVPX_VERSION)/build-$* ; \
-		emmake $(MAKE)
+		$(MAKE)
 	cd libvpx-$(LIBVPX_VERSION)/build-$* ; \
 		for i in gtest vp9rc vpx vpxrc ; do \
 			emranlib lib$${i}_g.a ; \
 			cp lib$${i}_g.a lib$${i}.a ; \
 		done
 	cd libvpx-$(LIBVPX_VERSION)/build-$* ; \
-		emmake $(MAKE) install
+		$(MAKE) install
 
 libvpx-$(LIBVPX_VERSION)/build-%/Makefile: tmp-inst/%/cflags.txt libvpx-$(LIBVPX_VERSION)/configure
 	mkdir -p libvpx-$(LIBVPX_VERSION)/build-$*

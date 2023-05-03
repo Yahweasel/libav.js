@@ -1,0 +1,2 @@
+--enable-decoder=wmav2
+--enable-encoder=wmav2

@@ -18,7 +18,7 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 
 ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 	ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
-	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; emmake $(MAKE)
+	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; $(MAKE)
 
 # General build rule for any target
 # Use: buildrule(target name, configure flags, CFLAGS)
