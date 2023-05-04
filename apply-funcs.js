@@ -152,7 +152,7 @@ function decls(f, meta) {
     });
 
     funcs.freers.forEach((decl) => {
-        outp += `${decl}_js(ptr: number);\n`;
+        outp += `${decl}_js(ptr: number): Promise<void>;\n`;
     });
 
     funcs.copiers.forEach((type) => {

@@ -6,10 +6,45 @@ index 0000000..416a6d1
 @@ -0,0 +1 @@
 +PATCHED
 diff --git a/fftools/ffmpeg.c b/fftools/ffmpeg.c
-index e7384f0..36c4239 100644
+index e7384f0..70ef330 100644
 --- a/fftools/ffmpeg.c
 +++ b/fftools/ffmpeg.c
-@@ -4513,7 +4513,8 @@ static int64_t getmaxrss(void)
+@@ -653,6 +653,34 @@ static void ffmpeg_cleanup(int ret)
+     }
+     term_exit();
+     ffmpeg_exited = 1;
++
++vstats_file = NULL;
++
++nb_frames_dup = 0;
++dup_warning = 1000;
++nb_frames_drop = 0;
++decode_error_stat[0] = 0;
++decode_error_stat[1] = 0;
++nb_output_dumped = 0;
++
++want_sdp = 1;
++
++progress_avio = NULL;
++
++subtitle_out = NULL;
++
++input_streams = NULL;
++nb_input_streams = 0;
++input_files   = NULL;
++nb_input_files   = 0;
++
++output_streams = NULL;
++nb_output_streams = 0;
++output_files   = NULL;
++nb_output_files   = 0;
++
++filtergraphs = NULL;
++nb_filtergraphs = 0;
+ }
+ 
+ void remove_avoptions(AVDictionary **a, AVDictionary *b)
+@@ -4513,7 +4541,8 @@ static int64_t getmaxrss(void)
  #endif
  }
  
@@ -20,7 +55,7 @@ index e7384f0..36c4239 100644
      int i, ret;
      BenchmarkTimeStamps ti;
 diff --git a/fftools/ffprobe.c b/fftools/ffprobe.c
-index 608d905..f7d468a 100644
+index 608d905..aee5f65 100644
 --- a/fftools/ffprobe.c
 +++ b/fftools/ffprobe.c
 @@ -90,8 +90,11 @@ typedef struct InputFile {
@@ -35,7 +70,65 @@ index 608d905..f7d468a 100644
  
  static int do_bitexact = 0;
  static int do_count_frames = 0;
-@@ -3740,6 +3743,8 @@ static int opt_print_filename(void *optctx, const char *opt, const char *arg)
+@@ -382,6 +385,57 @@ static void ffprobe_cleanup(int ret)
+ #if HAVE_THREADS
+     pthread_mutex_destroy(&log_mutex);
+ #endif
++
++do_bitexact = 0;
++do_count_frames = 0;
++do_count_packets = 0;
++do_read_frames  = 0;
++do_read_packets = 0;
++do_show_chapters = 0;
++do_show_error   = 0;
++do_show_format  = 0;
++do_show_frames  = 0;
++do_show_packets = 0;
++do_show_programs = 0;
++do_show_streams = 0;
++do_show_stream_disposition = 0;
++do_show_data    = 0;
++do_show_program_version  = 0;
++do_show_library_versions = 0;
++do_show_pixel_formats = 0;
++do_show_pixel_format_flags = 0;
++do_show_pixel_format_components = 0;
++do_show_log = 0;
++do_show_chapter_tags = 0;
++do_show_format_tags = 0;
++do_show_frame_tags = 0;
++do_show_program_tags = 0;
++do_show_stream_tags = 0;
++do_show_packet_tags = 0;
++show_value_unit              = 0;
++use_value_prefix             = 0;
++use_byte_value_binary_prefix = 0;
++use_value_sexagesimal_format = 0;
++show_private_data            = 1;
++show_optional_fields = SHOW_OPTIONAL_FIELDS_AUTO;
++print_format = NULL;
++stream_specifier = NULL;
++show_data_hash = NULL;
++read_intervals = NULL;
++read_intervals_nb = 0;
++find_stream_info  = 1;
++options = NULL;
++input_filename = NULL;
++print_input_filename = NULL;
++iformat = NULL;
++output_filename = NULL;
++hash = NULL;
++nb_streams = 0;
++nb_streams_packets = NULL;
++nb_streams_frames = NULL;
++selected_streams = NULL;
++log_buffer = NULL;
++log_buffer_size = 0;
+ }
+ 
+ struct unit_value {
+@@ -3740,6 +3794,8 @@ static int opt_print_filename(void *optctx, const char *opt, const char *arg)
      return 0;
  }
  
@@ -44,7 +137,7 @@ index 608d905..f7d468a 100644
  void show_help_default(const char *opt, const char *arg)
  {
      av_log_set_callback(log_callback_help);
-@@ -3750,6 +3755,7 @@ void show_help_default(const char *opt, const char *arg)
+@@ -3750,6 +3806,7 @@ void show_help_default(const char *opt, const char *arg)
      show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
      show_help_children(avcodec_get_class(), AV_OPT_FLAG_DECODING_PARAM);
  }
@@ -52,7 +145,7 @@ index 608d905..f7d468a 100644
  
  /**
   * Parse interval specification, according to the format:
-@@ -4020,7 +4026,8 @@ static inline int check_section_show_entries(int section_id)
+@@ -4020,7 +4077,8 @@ static inline int check_section_show_entries(int section_id)
              do_show_##varname = 1;                                      \
      } while (0)
  
