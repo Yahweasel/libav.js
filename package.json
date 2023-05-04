@@ -29,7 +29,7 @@
   ],
   "files": [
     "libav.types.d.ts",
-    "libav-*-descript.+(js|wasm.js|wasm.wasm)"
+    "libav-*-descript.+(js|wasm.js|wasm.wasm|simd.wasm|simd.js)"
   ],
   "author": "descript",
   "license": "LGPL-2.1",

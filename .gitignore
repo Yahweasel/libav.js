@@ -28,3 +28,5 @@ exports.json
 
 libav-[0-9]*
 libav.js-[0-9]*.zip
+
+.DS_Store
