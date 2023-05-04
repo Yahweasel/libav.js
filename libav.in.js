@@ -77,7 +77,7 @@
     // Now start making our instance generating function
     libav.LibAV = function(opts) {
         opts = opts || {};
-        var toImport = base + "/libav-@VER-@CONFIG." + target(opts) + ".js";
+        var toImport = base + "/libav-@VER-@CONFIG@DBG." + target(opts) + ".js";
         var ret;
 
         return Promise.all([]).then(function() {

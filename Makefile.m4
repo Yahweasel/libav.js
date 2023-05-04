@@ -26,13 +26,19 @@ build-%: libav-$(LIBAVJS_VERSION)-%.js
 	true
 
 libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.js \
 	libav-$(LIBAVJS_VERSION)-%.asm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
 	libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
 	libav-$(LIBAVJS_VERSION)-%.simd.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
 	node_modules/.bin/uglifyjs
-	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) > $@
+	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
 	chmod a-x *.wasm
 
+libav-$(LIBAVJS_VERSION)-%.dbg.js: libav-$(LIBAVJS_VERSION).js
+	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
 # General build rule for any target
 # Use: buildrule(target file name, target inst name, CFLAGS, 
@@ -63,18 +69,25 @@ libav-$(LIBAVJS_VERSION)-%.$1: ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/l
 		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/$2/' configs/$(*)/libs.txt` -o $(@)
 	cat configs/$(*)/license.js $(@) > $(@).tmp
 	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a
 ]]])
 
 # asm.js version
 buildrule(asm.js, base, [[[-s WASM=0]]])
+buildrule(dbg.asm.js, base, [[[-g2 -s WASM=0]]])
 # wasm version with no added features
 buildrule(wasm.js, base, [[[]]])
+buildrule(dbg.wasm.js, base, [[[-g2]]])
 # wasm + threads
 buildrule(thr.js, thr, [[[-pthread]]])
+buildrule(dbg.thr.js, thr, [[[-g2 -pthread]]])
 # wasm + simd
 buildrule(simd.js, simd, [[[-msimd128]]])
+buildrule(dbg.simd.js, simd, [[[-g2 -msimd128]]])
 # wasm + threads + simd
 buildrule(thrsimd.js, thrsimd, [[[-pthread -msimd128]]])
+buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 -pthread -msimd128]]])
 
 exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 	./apply-funcs.js $(LIBAVJS_VERSION)
@@ -160,8 +173,14 @@ distclean: clean
 
 .PRECIOUS: \
 	libav-$(LIBAVJS_VERSION)-%.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.js \
 	libav-$(LIBAVJS_VERSION)-%.asm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
 	libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
 	libav-$(LIBAVJS_VERSION)-%.thr.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
 	libav-$(LIBAVJS_VERSION)-%.simd.js \
-	libav-$(LIBAVJS_VERSION)-%.thrsimd.js
+	libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
+	libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js

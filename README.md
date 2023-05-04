@@ -74,6 +74,8 @@ It's also possible to use libav.js from Node.js, though this isn't a good idea,
 since you can presumably use a native version of FFmpeg's libraries. The Node
 interface is only provided for internal testing.
 
+Use `.dbg.js` instead of `.js` for a non-minified, more debuggable version.
+
 libav.js exposes a global variable, LibAV, for all API access. If LibAV is set
 before loading the library, libav.js does *not* replace it, but extends it.
 This gives you an opportunity to pass in values critical for loading. In

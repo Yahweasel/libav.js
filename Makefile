@@ -26,13 +26,19 @@ build-%: libav-$(LIBAVJS_VERSION)-%.js
 	true
 
 libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.js \
 	libav-$(LIBAVJS_VERSION)-%.asm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
 	libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
 	libav-$(LIBAVJS_VERSION)-%.simd.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
 	node_modules/.bin/uglifyjs
-	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) > $@
+	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
 	chmod a-x *.wasm
 
+libav-$(LIBAVJS_VERSION)-%.dbg.js: libav-$(LIBAVJS_VERSION).js
+	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
 # General build rule for any target
 # Use: buildrule(target file name, target inst name, CFLAGS, 
@@ -67,6 +73,38 @@ libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavfo
 	cat configs/$(*)/license.js $(@) > $(@).tmp
 	mv $(@).tmp $(@)
 
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a
+
+
+libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
+	exports.json post.js extern-post.js bindings.c
+	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -s WASM=0 \
+		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
+		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
+		bindings.c \
+                `grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_filter.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_hw.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_mux.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_opt.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffprobe.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/cmdutils.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/opt_common.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice/libavdevice.a \
+		'` \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a'` \
+		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/$(*)/libs.txt` -o $(@)
+	cat configs/$(*)/license.js $(@) > $(@).tmp
+	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a
+
 # wasm version with no added features
 
 libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
@@ -95,6 +133,38 @@ libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavf
 		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/$(*)/libs.txt` -o $(@)
 	cat configs/$(*)/license.js $(@) > $(@).tmp
 	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a
+
+
+libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
+	exports.json post.js extern-post.js bindings.c
+	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 \
+		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
+		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
+		bindings.c \
+                `grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_filter.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_hw.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_mux.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffmpeg_opt.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/ffprobe.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/cmdutils.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/opt_common.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice/libavdevice.a \
+		'` \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a'` \
+		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/$(*)/libs.txt` -o $(@)
+	cat configs/$(*)/license.js $(@) > $(@).tmp
+	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a
 
 # wasm + threads
 
@@ -125,6 +195,38 @@ libav-$(LIBAVJS_VERSION)-%.thr.js: ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavfor
 	cat configs/$(*)/license.js $(@) > $(@).tmp
 	mv $(@).tmp $(@)
 
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a
+
+
+libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
+	exports.json post.js extern-post.js bindings.c
+	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -pthread \
+		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
+		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
+		bindings.c \
+                `grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/ffmpeg.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/ffmpeg_filter.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/ffmpeg_hw.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/ffmpeg_mux.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/ffmpeg_opt.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/ffprobe.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/cmdutils.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/opt_common.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice/libavdevice.a \
+		'` \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat/libavformat.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter/libavfilter.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec/libavcodec.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample/libswresample.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale/libswscale.a'` \
+		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/$(*)/libs.txt` -o $(@)
+	cat configs/$(*)/license.js $(@) > $(@).tmp
+	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a
+
 # wasm + simd
 
 libav-$(LIBAVJS_VERSION)-%.simd.js: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
@@ -154,6 +256,38 @@ libav-$(LIBAVJS_VERSION)-%.simd.js: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavf
 	cat configs/$(*)/license.js $(@) > $(@).tmp
 	mv $(@).tmp $(@)
 
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a
+
+
+libav-$(LIBAVJS_VERSION)-%.dbg.simd.js: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
+	exports.json post.js extern-post.js bindings.c
+	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -msimd128 \
+		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) \
+		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
+		bindings.c \
+                `grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/ffmpeg.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/ffmpeg_filter.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/ffmpeg_hw.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/ffmpeg_mux.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/ffmpeg_opt.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/ffprobe.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/cmdutils.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/fftools/opt_common.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/libavdevice/libavdevice.a \
+		'` \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/libavformat/libavformat.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/libavfilter/libavfilter.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/libavcodec/libavcodec.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/libswresample/libswresample.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/libswscale/libswscale.a'` \
+		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/simd/' configs/$(*)/libs.txt` -o $(@)
+	cat configs/$(*)/license.js $(@) > $(@).tmp
+	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a
+
 # wasm + threads + simd
 
 libav-$(LIBAVJS_VERSION)-%.thrsimd.js: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
@@ -182,6 +316,38 @@ libav-$(LIBAVJS_VERSION)-%.thrsimd.js: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/
 		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/thrsimd/' configs/$(*)/libs.txt` -o $(@)
 	cat configs/$(*)/license.js $(@) > $(@).tmp
 	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a
+
+
+libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
+	exports.json post.js extern-post.js bindings.c
+	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -pthread -msimd128 \
+		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) \
+		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
+		bindings.c \
+                `grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/ffmpeg.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/ffmpeg_filter.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/ffmpeg_hw.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/ffmpeg_mux.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/ffmpeg_opt.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/ffprobe.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/cmdutils.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/fftools/opt_common.o \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/libavdevice/libavdevice.a \
+		'` \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/libavformat/libavformat.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/libavfilter/libavfilter.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/libavcodec/libavcodec.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/libswresample/libswresample.a \
+		ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/libswscale/libswscale.a'` \
+		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/thrsimd/' configs/$(*)/libs.txt` -o $(@)
+	cat configs/$(*)/license.js $(@) > $(@).tmp
+	mv $(@).tmp $(@)
+
+.PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a
 
 
 exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
@@ -268,8 +434,14 @@ distclean: clean
 
 .PRECIOUS: \
 	libav-$(LIBAVJS_VERSION)-%.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.js \
 	libav-$(LIBAVJS_VERSION)-%.asm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
 	libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
 	libav-$(LIBAVJS_VERSION)-%.thr.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
 	libav-$(LIBAVJS_VERSION)-%.simd.js \
-	libav-$(LIBAVJS_VERSION)-%.thrsimd.js
+	libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
+	libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
+	libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js
