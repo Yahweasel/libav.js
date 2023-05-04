@@ -4,5 +4,6 @@
 --enable-muxer=ipod
 --enable-demuxer=matroska
 --enable-muxer=matroska --enable-muxer=webm
+--enable-filter=scale
 --enable-decoder=hevc
 --enable-bsf=extract_extradata

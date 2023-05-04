@@ -61,16 +61,7 @@
 
     // Get the target that will load, given these options
     function target(opts) {
-        opts = opts || {};
-        var wasm = !opts.nowasm && isWebAssemblySupported();
-        var thr = opts.yesthreads && wasm && !opts.nothreads && isThreadingSupported();
-        var simd = wasm && !opts.nosimd && isSIMDSupported();
-        if (!wasm)
-            return "asm";
-        else if (!thr && !simd)
-            return "wasm";
-        else
-            return (thr ? "thr" : "") + (simd ? "simd" : "");
+        return "wasm";
     }
     libav.target = target;
 

@@ -71,8 +71,13 @@
 --enable-encoder=libopus
 --enable-decoder=prores
 --enable-encoder=prores
+--enable-demuxer=rawvideo
+--enable-muxer=rawvideo
+--enable-decoder=rawvideo
+--enable-encoder=rawvideo
 --enable-decoder=pcm_s32le
 --enable-encoder=pcm_s32le
+--enable-filter=scale
 --enable-libvorbis
 --enable-decoder=libvorbis
 --enable-encoder=libvorbis

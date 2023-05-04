@@ -28,6 +28,7 @@
 --enable-muxer=pcm_f32le
 --enable-decoder=pcm_f32le
 --enable-encoder=pcm_f32le
+--enable-filter=scale
 --enable-libvpx
 --enable-decoder=libvpx_vp8
 --enable-encoder=libvpx_vp8
