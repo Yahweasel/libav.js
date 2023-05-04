@@ -14,6 +14,7 @@
 --enable-libvorbis
 --enable-decoder=libvorbis
 --enable-encoder=libvorbis
+--enable-filter=scale
 --enable-libvpx
 --enable-decoder=libvpx_vp8
 --enable-encoder=libvpx_vp8

@@ -2,8 +2,16 @@
 --enable-filter=aresample
 --enable-decoder=aac
 --enable-encoder=aac
+--enable-demuxer=aiff
+--enable-muxer=aiff
+--enable-decoder=pcm_s16be --enable-decoder=pcm_s24be
+--enable-decoder=pcm_f32be
+--enable-encoder=pcm_s16be --enable-encoder=pcm_s24be
+--enable-encoder=pcm_f32be
 --enable-decoder=alac
 --enable-encoder=alac
+--enable-demuxer=asf
+--enable-muxer=asf
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix
@@ -23,8 +31,14 @@
 --enable-muxer=pcm_f32le
 --enable-decoder=pcm_f32le
 --enable-encoder=pcm_f32le
+--enable-demuxer=aac
+--enable-muxer=adts
 --enable-decoder=g726
 --enable-encoder=g726
+--enable-demuxer=gif
+--enable-muxer=gif
+--enable-decoder=gif
+--enable-encoder=gif
 --enable-decoder=h263p
 --enable-encoder=h263p
 --enable-decoder=h264
@@ -38,6 +52,13 @@
 --enable-encoder=libmp3lame
 --enable-demuxer=mp3
 --enable-muxer=mp3
+--enable-decoder=mjpeg
+--enable-encoder=mjpeg
+--enable-decoder=mpeg4
+--enable-encoder=mpeg4
+--enable-demuxer=mpegps
+--enable-demuxer=mpegts
+--enable-muxer=mpegts
 --enable-demuxer=ogg
 --enable-muxer=ogg
 --enable-libopenh264
@@ -50,6 +71,13 @@
 --enable-encoder=libopus
 --enable-decoder=prores
 --enable-encoder=prores
+--enable-demuxer=rawvideo
+--enable-muxer=rawvideo
+--enable-decoder=rawvideo
+--enable-encoder=rawvideo
+--enable-decoder=pcm_s32le
+--enable-encoder=pcm_s32le
+--enable-filter=scale
 --enable-libvorbis
 --enable-decoder=libvorbis
 --enable-encoder=libvorbis
@@ -69,6 +97,12 @@
 --enable-muxer=wv
 --enable-demuxer=matroska
 --enable-muxer=matroska --enable-muxer=webm
+--enable-decoder=wmapro
+--enable-decoder=wmav2
+--enable-encoder=wmav2
+--enable-decoder=wmv2
+--enable-encoder=wmv2
+--enable-decoder=wmv3
 --enable-gpl
 --enable-libx265
 --enable-encoder=libx265
