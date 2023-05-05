@@ -160,6 +160,7 @@ clean: halfclean
 	-rm -rf lame-$(LAME_VERSION)
 	-rm -rf openh264-$(OPENH264_VERSION)
 	-rm -rf ffmpeg-$(FFMPEG_VERSION)
+	-rm -rf x265_$(X265_VERSION)
 
 distclean: clean
 	-rm -f opus-$(OPUS_VERSION).tar.gz
@@ -168,8 +169,9 @@ distclean: clean
 	-rm -f libogg-$(LIBOGG_VERSION).tar.xz
 	-rm -f libvpx-$(LIBVPX_VERSION).tar.gz
 	-rm -f lame-$(LAME_VERSION).tar.gz
-	-rm -rf openh264-$(OPENH264_VERSION).tar.gz
+	-rm -f openh264-$(OPENH264_VERSION).tar.gz
 	-rm -f ffmpeg-$(FFMPEG_VERSION).tar.xz
+	-rm -f x265_$(X265_VERSION).tar.gz
 
 .PRECIOUS: \
 	libav-$(LIBAVJS_VERSION)-%.js \
