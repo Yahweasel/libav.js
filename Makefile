@@ -375,11 +375,17 @@ release:
 	do \
 	    $(MAKE) build-$$v; \
 	    cp dist/libav-$(LIBAVJS_VERSION)-$$v.js \
+	    cp dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.js \
 	       dist/libav-$(LIBAVJS_VERSION)-$$v.asm.js \
+	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.asm.js \
 	       dist/libav-$(LIBAVJS_VERSION)-$$v.wasm.js \
+	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.wasm.js \
 	       dist/libav-$(LIBAVJS_VERSION)-$$v.wasm.wasm \
+	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.wasm.wasm \
 	       dist/libav-$(LIBAVJS_VERSION)-$$v.simd.js \
+	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.simd.js \
 	       dist/libav-$(LIBAVJS_VERSION)-$$v.simd.wasm \
+	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.simd.wasm \
 	       libav.js-$(LIBAVJS_VERSION)/; \
 	done
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
