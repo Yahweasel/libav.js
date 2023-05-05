@@ -40,7 +40,7 @@ buildrule(thrsimd, [[[]]])
 extract: build/libaom-$(LIBAOM_VERSION)/PATCHED
 
 build/libaom-$(LIBAOM_VERSION)/PATCHED: build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt
-	cd build/libaom-$(LIBAOM_VERSION) ; test -e PATCHED || patch -p1 -i ../../patches/libaom.diff
+	cd build/libaom-$(LIBAOM_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/libaom.diff )
 	touch $@
 
 build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt: build/libaom-$(LIBAOM_VERSION).tar.gz

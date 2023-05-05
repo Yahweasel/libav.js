@@ -88,7 +88,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: build/inst/th
 extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED
 
 build/ffmpeg-$(FFMPEG_VERSION)/PATCHED: build/ffmpeg-$(FFMPEG_VERSION)/configure
-	cd build/ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../../patches/ffmpeg.diff
+	cd build/ffmpeg-$(FFMPEG_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/ffmpeg.diff )
 	touch $@
 
 build/ffmpeg-$(FFMPEG_VERSION)/configure: build/ffmpeg-$(FFMPEG_VERSION).tar.xz

@@ -10,7 +10,7 @@ build/inst/%/lib/pkgconfig/openh264.pc: build/inst/%/cflags.txt build/openh264-$
 extract: build/openh264-$(OPENH264_VERSION)/PATCHED
 
 build/openh264-$(OPENH264_VERSION)/PATCHED: build/openh264-$(OPENH264_VERSION)/Makefile
-	cd build/openh264-$(OPENH264_VERSION) ; patch -p1 -i ../../patches/openh264.diff
+	cd build/openh264-$(OPENH264_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/openh264.diff )
 	touch $@
 
 build/openh264-$(OPENH264_VERSION)/Makefile: build/openh264-$(OPENH264_VERSION).tar.gz
