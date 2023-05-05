@@ -16,6 +16,7 @@
 
 const fs = require("fs");
 const funcs = JSON.parse(fs.readFileSync("funcs.json", "utf8"));
+const doxygen = JSON.parse(fs.readFileSync("mk/doxygen.json", "utf8"));
 
 function s(x) {
     return JSON.stringify(x);
@@ -129,15 +130,12 @@ function decls(f, meta) {
 (function() {
     var inp = fs.readFileSync("libav.types.in.d.ts", "utf8");
 
-    function args(x) {
-        return x.map((t, idx) => `a${idx}: ${t}`).join(",");
-    }
+    let outp = "", syncp = "";
 
     function ret(x) {
         return (x === null) ? "void" : x;
     }
 
-    var outp = "", syncp = "";
     function signature(name, args, ret, async) {
         outp += `${name}(${args}): Promise<${ret}>;\n`;
         if (async)
@@ -147,8 +145,42 @@ function decls(f, meta) {
     }
 
     funcs.functions.forEach((decl) => {
-        signature(decl[0], args(decl[2]), ret(decl[1]),
-            decl[3] && decl[3].async);
+        const nm = decl[0];
+        const noJSName = nm.replace(/_js$/, "");
+        const doc = doxygen[noJSName];
+        let args;
+        if (doc && doc.param) {
+            // Try to make the parameters names match the real names
+            let param = doc.param;
+            if (!(param instanceof Array))
+                param = [param];
+
+            args = decl[2].map((t, idx) => {
+                if (param[idx])
+                    return `${param[idx].declname}: ${t}`;
+                return `a${idx}: ${t}`;
+            }).join(",");
+
+        } else {
+            args = decl[2].map((t, idx) => `a${idx}: ${t}`).join(",");
+
+        }
+
+        // Give the function description
+        if (doc && doc.briefdescription && doc.briefdescription.para) {
+            let desc = doc.briefdescription.para;
+            if (typeof desc === "object") {
+                if (desc["#text"] && typeof desc["#text"] === "string")
+                    desc = desc["#text"];
+                else
+                    desc = JSON.stringify(desc);
+            } else if (typeof desc !== "string")
+                desc = JSON.stringify(desc);
+            outp += `/**\n * ${desc}\n */\n`;
+            syncp += `/**\n * ${desc}\n */\n`;
+        }
+
+        signature(decl[0], args, ret(decl[1]), decl[3] && decl[3].async);
     });
     accessors((decl, field) => {
         if (field && field.array) {

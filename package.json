@@ -34,5 +34,8 @@
   "homepage": "https://github.com/Yahweasel/libav.js#readme",
   "devDependencies": {
     "uglify-js": "^3.14.3"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.2.2"
   }
 }
