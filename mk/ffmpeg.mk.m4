@@ -16,23 +16,23 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 	--disable-everything
 
 
-ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
-	ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
-	cd ffmpeg-$(FFMPEG_VERSION)/build-$* ; $(MAKE)
+build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$* ; $(MAKE)
 
 # General build rule for any target
 # Use: buildrule(target name, configure flags, CFLAGS)
 define([[[buildrule]]], [[[
-ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: tmp-inst/$1/cflags.txt \
-	ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
+build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: build/inst/$1/cflags.txt \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/$1/g' configs/$(*)/deps.txt`
-	mkdir -p ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
-	cd ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
-	emconfigure env PKG_CONFIG_PATH="$(PWD)/tmp-inst/$1/lib/pkgconfig" \
+	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
+	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$1/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
 		$2 \
-		--extra-cflags="-I$(PWD)/tmp-inst/$1/include $3" \
-		--extra-ldflags="-L$(PWD)/tmp-inst/$1/lib $3" \
+		--extra-cflags="-I$(PWD)/build/inst/$1/include $3" \
+		--extra-ldflags="-L$(PWD)/build/inst/$1/lib $3" \
 		`cat ../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 ]]])
@@ -46,30 +46,31 @@ buildrule(simd, [[[--disable-pthreads --arch=x86 --disable-inline-asm --disable-
 # wasm + threads + simd
 buildrule(thrsimd, [[[--arch=x86 --disable-inline-asm --disable-x86asm --enable-cross-compile]]], [[[-pthread -msimd128]]])
 
-extract: ffmpeg-$(FFMPEG_VERSION)/PATCHED
+extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED
 
-ffmpeg-$(FFMPEG_VERSION)/PATCHED: ffmpeg-$(FFMPEG_VERSION)/configure
-	cd ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../patches/ffmpeg.diff
+build/ffmpeg-$(FFMPEG_VERSION)/PATCHED: build/ffmpeg-$(FFMPEG_VERSION)/configure
+	cd build/ffmpeg-$(FFMPEG_VERSION) ; patch -p1 -i ../../patches/ffmpeg.diff
 	touch $@
 
-ffmpeg-$(FFMPEG_VERSION)/configure: ffmpeg-$(FFMPEG_VERSION).tar.xz
-	tar Jxf ffmpeg-$(FFMPEG_VERSION).tar.xz
+build/ffmpeg-$(FFMPEG_VERSION)/configure: build/ffmpeg-$(FFMPEG_VERSION).tar.xz
+	cd build ; tar Jxf ffmpeg-$(FFMPEG_VERSION).tar.xz
 	touch $@
 
-ffmpeg-$(FFMPEG_VERSION).tar.xz:
+build/ffmpeg-$(FFMPEG_VERSION).tar.xz:
+	mkdir -p build
 	curl https://ffmpeg.org/releases/ffmpeg-$(FFMPEG_VERSION).tar.xz -o $@
 
 ffmpeg-release:
-	cp ffmpeg-$(FFMPEG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/ffmpeg-$(FFMPEG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
-	ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak \
-	ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak \
-	ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
-	ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak \
-	ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
-	ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak \
-	ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	ffmpeg-$(FFMPEG_VERSION)/configure
+	build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
+	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
+	build/ffmpeg-$(FFMPEG_VERSION)/configure

@@ -1,1 +1,1 @@
-tmp-inst/@TARGET/lib/libopenh264.a
+build/inst/@TARGET/lib/libopenh264.a

@@ -1,29 +1,30 @@
 OPENH264_VERSION=2.3.1
 
-tmp-inst/%/lib/pkgconfig/openh264.pc: tmp-inst/%/cflags.txt openh264-$(OPENH264_VERSION)/PATCHED
-	mkdir -p openh264-$(OPENH264_VERSION)/build-$*
-	cd openh264-$(OPENH264_VERSION)/build-$* ; \
-		$(MAKE) -f ../Makefile install-static OS=linux \
-		ARCH=mips CFLAGS="-Oz -fno-stack-protector `cat $(PWD)/tmp-inst/$*/cflags.txt`" \
-		PREFIX="$(PWD)/tmp-inst/$*"
+build/inst/%/lib/pkgconfig/openh264.pc: build/inst/%/cflags.txt build/openh264-$(OPENH264_VERSION)/PATCHED
+	mkdir -p build/openh264-$(OPENH264_VERSION)/build-$*
+	cd build/openh264-$(OPENH264_VERSION)/build-$* ; \
+		emmake $(MAKE) -j9 -f ../Makefile install-static OS=linux \
+		ARCH=mips CFLAGS="-Oz -fno-stack-protector `cat $(PWD)/build/inst/$*/cflags.txt`" \
+		PREFIX="$(PWD)/build/inst/$*"
 
-extract: openh264-$(OPENH264_VERSION)/PATCHED
+extract: build/openh264-$(OPENH264_VERSION)/PATCHED
 
-openh264-$(OPENH264_VERSION)/PATCHED: openh264-$(OPENH264_VERSION)/Makefile
-	cd openh264-$(OPENH264_VERSION) ; test -e PATCHED || patch -p1 -i ../patches/openh264.diff
+build/openh264-$(OPENH264_VERSION)/PATCHED: build/openh264-$(OPENH264_VERSION)/Makefile
+	cd build/openh264-$(OPENH264_VERSION) ; patch -p1 -i ../../patches/openh264.diff
 	touch $@
 
-openh264-$(OPENH264_VERSION)/Makefile: openh264-$(OPENH264_VERSION).tar.gz
-	tar zxf openh264-$(OPENH264_VERSION).tar.gz
+build/openh264-$(OPENH264_VERSION)/Makefile: build/openh264-$(OPENH264_VERSION).tar.gz
+	cd build ; tar zxf openh264-$(OPENH264_VERSION).tar.gz
 	touch $@
 
-openh264-$(OPENH264_VERSION).tar.gz:
+build/openh264-$(OPENH264_VERSION).tar.gz:
+	mkdir -p build
 	curl https://github.com/cisco/openh264/archive/refs/tags/v$(OPENH264_VERSION).tar.gz -L -o $@
 
 openh264-release:
-	cp openh264-$(OPENH264_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/openh264-$(OPENH264_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
-	tmp-inst/%/lib/pkgconfig/openh264.pc \
-	openh264-$(OPENH264_VERSION)/PATCHED \
-	openh264-$(OPENH264_VERSION)/Makefile
+	build/inst/%/lib/pkgconfig/openh264.pc \
+	build/openh264-$(OPENH264_VERSION)/PATCHED \
+	build/openh264-$(OPENH264_VERSION)/Makefile

@@ -1,1 +1,1 @@
-tmp-inst/@TARGET/lib/libx265.a
+build/inst/@TARGET/lib/libx265.a

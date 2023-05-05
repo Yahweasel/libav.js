@@ -1,1 +1,1 @@
-tmp-inst/@TARGET/lib/libvpx.a
+build/inst/@TARGET/lib/libvpx.a

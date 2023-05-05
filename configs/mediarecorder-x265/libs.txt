@@ -1,3 +1,3 @@
-tmp-inst/@TARGET/lib/libopus.a
-tmp-inst/@TARGET/lib/libvpx.a
-tmp-inst/@TARGET/lib/libx265.a
+build/inst/@TARGET/lib/libopus.a
+build/inst/@TARGET/lib/libvpx.a
+build/inst/@TARGET/lib/libx265.a

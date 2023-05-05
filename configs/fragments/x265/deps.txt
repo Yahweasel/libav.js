@@ -1,1 +1,1 @@
-tmp-inst/@TARGET/lib/pkgconfig/x265.pc
+build/inst/@TARGET/lib/pkgconfig/x265.pc

@@ -1,1 +1,1 @@
-tmp-inst/@TARGET/lib/pkgconfig/vpx.pc
+build/inst/@TARGET/lib/pkgconfig/vpx.pc
