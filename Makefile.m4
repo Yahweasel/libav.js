@@ -8,9 +8,9 @@ EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
 EFLAGS=\
-	--memory-init-file 0 --post-js post.js --extern-post-js extern-post.js \
+	--memory-init-file 0 --post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
-	-s "EXPORTED_FUNCTIONS=@exports.json" \
+	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
 	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
 	-s MODULARIZE=1 \
 	-s ASYNCIFY \
@@ -25,7 +25,7 @@ include mk/*.mk
 build-%: dist/libav-$(LIBAVJS_VERSION)-%.js
 	true
 
-dist/libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
+dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
@@ -38,7 +38,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
 	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
 	-chmod a-x dist/*.wasm
 
-dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: libav-$(LIBAVJS_VERSION).js
+dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
 	mkdir -p dist
 	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
@@ -46,7 +46,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: libav-$(LIBAVJS_VERSION).js
 # Use: buildrule(target file name, target inst name, CFLAGS, 
 define([[[buildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%.$1: ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) $3 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-$2-$(*) \
@@ -92,10 +92,11 @@ buildrule(dbg.simd.js, simd, [[[-g2 -msimd128]]])
 buildrule(thrsimd.js, thrsimd, [[[-pthread -msimd128]]])
 buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 -pthread -msimd128]]])
 
-exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+	mkdir -p build dist
 	./apply-funcs.js $(LIBAVJS_VERSION)
 
-libav-$(LIBAVJS_VERSION).js post.js: exports.json
+build/libav-$(LIBAVJS_VERSION).js build/post.js: build/exports.json
 	touch $@
 
 node_modules/.bin/uglifyjs:
@@ -136,7 +137,7 @@ release:
 	do \
 	    $(MAKE) $$t-release; \
 	done
-	cp libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/
+	cp dist/libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/
 	git archive HEAD -o libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
@@ -151,7 +152,7 @@ publish:
 
 halfclean:
 	-rm -rf dist/
-	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js libav.types.d.ts
+	-rm -f build/exports.json build/libav-$(LIBAVJS_VERSION).js build/post.js
 
 clean: halfclean
 	-rm -rf tmp-inst

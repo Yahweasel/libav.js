@@ -8,9 +8,9 @@ EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
 EFLAGS=\
-	--memory-init-file 0 --post-js post.js --extern-post-js extern-post.js \
+	--memory-init-file 0 --post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
-	-s "EXPORTED_FUNCTIONS=@exports.json" \
+	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
 	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
 	-s MODULARIZE=1 \
 	-s ASYNCIFY \
@@ -25,7 +25,7 @@ include mk/*.mk
 build-%: dist/libav-$(LIBAVJS_VERSION)-%.js
 	true
 
-dist/libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
+dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
@@ -38,7 +38,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
 	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
 	-chmod a-x dist/*.wasm
 
-dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: libav-$(LIBAVJS_VERSION).js
+dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
 	mkdir -p dist
 	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
@@ -49,7 +49,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: libav-$(LIBAVJS_VERSION).js
 # asm.js version
 
 dist/libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -s WASM=0 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -80,7 +80,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/li
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -s WASM=0 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -112,7 +112,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-
 # wasm version with no added features
 
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS)  \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -143,7 +143,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/l
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -175,7 +175,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: ffmpeg-$(FFMPEG_VERSION)/build-base
 # wasm + threads
 
 dist/libav-$(LIBAVJS_VERSION)-%.thr.js: ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -pthread \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
@@ -206,7 +206,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: ffmpeg-$(FFMPEG_VERSION)/build-thr-%/lib
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -pthread \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
@@ -238,7 +238,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: ffmpeg-$(FFMPEG_VERSION)/build-thr-%
 # wasm + simd
 
 dist/libav-$(LIBAVJS_VERSION)-%.simd.js: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -msimd128 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) \
@@ -269,7 +269,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.simd.js: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/l
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js: ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -msimd128 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) \
@@ -301,7 +301,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js: ffmpeg-$(FFMPEG_VERSION)/build-simd
 # wasm + threads + simd
 
 dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -pthread -msimd128 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) \
@@ -332,7 +332,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js: ffmpeg-$(FFMPEG_VERSION)/build-thrsi
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+	build/exports.json build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -pthread -msimd128 \
 		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) \
@@ -362,10 +362,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js: ffmpeg-$(FFMPEG_VERSION)/build-t
 .PRECIOUS: ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a
 
 
-exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+	mkdir -p build dist
 	./apply-funcs.js $(LIBAVJS_VERSION)
 
-libav-$(LIBAVJS_VERSION).js post.js: exports.json
+build/libav-$(LIBAVJS_VERSION).js build/post.js: build/exports.json
 	touch $@
 
 node_modules/.bin/uglifyjs:
@@ -406,7 +407,7 @@ release:
 	do \
 	    $(MAKE) $$t-release; \
 	done
-	cp libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/
+	cp dist/libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/
 	git archive HEAD -o libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
@@ -421,7 +422,7 @@ publish:
 
 halfclean:
 	-rm -rf dist/
-	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js libav.types.d.ts
+	-rm -f build/exports.json build/libav-$(LIBAVJS_VERSION).js build/post.js
 
 clean: halfclean
 	-rm -rf tmp-inst

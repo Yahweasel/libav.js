@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Copyright (C) 2019-2022 Yahweasel
+ * Copyright (C) 2019-2023 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -122,7 +122,7 @@ function decls(f, meta) {
 
     outp = inp.replace("@FUNCS", outp);
 
-    fs.writeFileSync("post.js", outp);
+    fs.writeFileSync("build/post.js", outp);
 })();
 
 // libav.types.d.ts
@@ -193,7 +193,7 @@ function decls(f, meta) {
     }
     outp = inp.replace("@DECLS", outp);
 
-    fs.writeFileSync("libav.types.d.ts", outp);
+    fs.writeFileSync("dist/libav.types.d.ts", outp);
 })();
 
 // libav.js
@@ -208,7 +208,7 @@ function decls(f, meta) {
 
     outp = inp.replace("@FUNCS", s(outp)).replace(/@VER/g, ver);
 
-    fs.writeFileSync("libav-" + ver + ".js", outp);
+    fs.writeFileSync("build/libav-" + ver + ".js", outp);
 })();
 
 // exports.json
@@ -218,5 +218,5 @@ function decls(f, meta) {
         outp.push("_" + decl);
     });
 
-    fs.writeFileSync("exports.json", s(outp));
+    fs.writeFileSync("build/exports.json", s(outp));
 })();
