@@ -33,7 +33,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: build/inst/$1/cfla
 		$2 \
 		--extra-cflags="-I$(PWD)/build/inst/$1/include $3" \
 		--extra-ldflags="-L$(PWD)/build/inst/$1/lib $3" \
-		`cat ../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 ]]])
 

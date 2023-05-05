@@ -36,7 +36,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/
 		--disable-pthreads --arch=emscripten \
 		--extra-cflags="-I$(PWD)/build/inst/base/include " \
 		--extra-ldflags="-L$(PWD)/build/inst/base/lib " \
-		`cat ../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
 # wasm + threads
@@ -51,7 +51,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: build/inst/thr/cf
 		--arch=emscripten --enable-cross-compile \
 		--extra-cflags="-I$(PWD)/build/inst/thr/include -pthread" \
 		--extra-ldflags="-L$(PWD)/build/inst/thr/lib -pthread" \
-		`cat ../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
 # wasm + simd
@@ -66,7 +66,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: build/inst/simd/
 		--disable-pthreads --arch=x86 --disable-inline-asm --disable-x86asm \
 		--extra-cflags="-I$(PWD)/build/inst/simd/include -msimd128" \
 		--extra-ldflags="-L$(PWD)/build/inst/simd/lib -msimd128" \
-		`cat ../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
 # wasm + threads + simd
@@ -81,7 +81,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: build/inst/th
 		--arch=x86 --disable-inline-asm --disable-x86asm --enable-cross-compile \
 		--extra-cflags="-I$(PWD)/build/inst/thrsimd/include -pthread -msimd128" \
 		--extra-ldflags="-L$(PWD)/build/inst/thrsimd/lib -pthread -msimd128" \
-		`cat ../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/$(*)/ffmpeg-config.txt`
 	touch $(@)
 
 
