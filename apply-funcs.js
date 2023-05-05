@@ -137,38 +137,62 @@ function decls(f, meta) {
         return (x === null) ? "void" : x;
     }
 
-    var outp = "";
+    var outp = "", syncp = "";
+    function signature(name, args, ret, async) {
+        outp += `${name}(${args}): Promise<${ret}>;\n`;
+        if (async)
+            syncp += `${name}_sync(${args}): ${ret} | Promise<${ret}>;\n`;
+        else
+            syncp += `${name}_sync(${args}): ${ret};\n`;
+    }
+
     funcs.functions.forEach((decl) => {
-        outp += `${decl[0]}(${args(decl[2])}): Promise<${ret(decl[1])}>;\n`;
+        signature(decl[0], args(decl[2]), ret(decl[1]),
+            decl[3] && decl[3].async);
     });
     accessors((decl, field) => {
         if (field && field.array) {
-            outp += `${decl}(ptr: number, idx: number): Promise<number>;\n`;
-            outp += `${decl}_s(ptr: number, idx: number, val: number): Promise<void>;\n`;
+            signature(decl, "ptr: number, idx: number", "number");
+            signature(`${decl}_s`, "ptr: number, idx: number, val: number",
+                "void");
         } else {
-            outp += `${decl}(ptr: number): Promise<number>;\n`;
-            outp += `${decl}_s(ptr: number, val: number): Promise<void>;\n`;
+            signature(decl, "ptr: number", "number");
+            signature(`${decl}_s`, "ptr: number, val: number", "void");
         }
     });
 
     funcs.freers.forEach((decl) => {
-        outp += `${decl}_js(ptr: number): Promise<void>;\n`;
+        signature(`${decl}_js`, "ptr: number", "void");
     });
 
     funcs.copiers.forEach((type) => {
-        outp += `copyin_${type[0]}(ptr: number, arr: ${type[1]}): Promise<void>;\n`;
-        outp += `copyout_${type[0]}(ptr: number, len: number): Promise<${type[1]}>;\n`;
+        signature(`copyin_${type[0]}`, `ptr: number, arr: ${type[1]}`, "void");
+        signature(`copyout_${type[0]}`, "ptr: number, len: number", type[1]);
     });
 
-    inp = inp.replace("@FUNCS", outp);
+    inp = inp.replace("@FUNCS", outp).replace("@SYNCFUNCS", syncp);
 
     /* We also read type declarations out of post.in.js, to keep all the decls
      * in one place */
     outp = "";
+    syncp = "";
     let lastComment = "";
     let inComment = false;
     let lastTypes = "";
     let inTypes = false;
+
+    function commentType(decl) {
+        let async = decl.replace(/@sync/g, "")
+            .replace(/@promise@([^@]*)@/g, "Promise<$1>")
+            .replace(/@promsync@([^@]*)@/g, "Promise<$1>");
+        let syncy = decl
+            .replace(/@sync/g, "_sync")
+            .replace(/@promise@([^@]*)@/g, "$1")
+            .replace(/@promsync@([^@]*)@/g, "$1 | Promise<$1>");
+        outp += async + ";\n";
+        syncp += syncy + ";\n";
+    }
+
     for (const line of fs.readFileSync("post.in.js", "utf8").split("\n")) {
         if (line === "/**") {
             inComment = true;
@@ -183,15 +207,15 @@ function decls(f, meta) {
         } else if (inTypes) {
             if (line === " */") {
                 inTypes = false;
-                outp += lastComment + lastTypes.trim() + ";\n";
+                commentType(lastComment + lastTypes.trim());
             } else {
                 lastTypes += line.slice(3) + "\n";
             }
         } else if (line.slice(0, 10) === "/// @types") {
-            outp += lastComment + line.slice(11) + ";\n";
+            commentType(lastComment + line.slice(11));
         }
     }
-    outp = inp.replace("@DECLS", outp);
+    outp = inp.replace("@DECLS", outp).replace("@SYNCDECLS", syncp);
 
     fs.writeFileSync("dist/libav.types.d.ts", outp);
 })();

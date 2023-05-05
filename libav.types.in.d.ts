@@ -315,6 +315,39 @@ export interface LibAV {
     AVERROR_EOF: number;
 }
 
+export interface LibAVSync {
+@SYNCFUNCS
+@SYNCDECLS
+}
+
+export interface LibAVOpts {
+    /**
+     * Don't create a worker.
+     */
+    noworker?: boolean;
+
+    /**
+     * Don't use WebAssembly.
+     */
+    nowasm?: boolean;
+
+    /**
+     * Don't use WebAssembly SIMD.
+     */
+    nosimd?: boolean;
+
+    /**
+     * Use threads. If threads ever become reliable, this flag will disappear,
+     * and you will need to use nothreads.
+     */
+    yesthreads?: boolean;
+
+    /**
+     * Don't use threads. The default.
+     */
+    nothreads?: boolean;
+}
+
 export interface LibAVWrapper {
     /**
      * URL base from which load workers and modules.
@@ -325,11 +358,6 @@ export interface LibAVWrapper {
      * Create a LibAV instance.
      * @param opts  Options
      */
-    LibAV(opts?: {
-        noworker?: boolean,
-        nowasm?: boolean,
-        nosimd?: boolean,
-        yesthreads?: boolean,
-        nothreads?: boolean,
-    }): Promise<LibAV>;
+    LibAV(opts?: LibAVOpts & {noworker?: false}): Promise<LibAV>;
+    LibAV(opts: LibAVOpts & {noworker: true}): Promise<LibAV & LibAVSync>;
 }
