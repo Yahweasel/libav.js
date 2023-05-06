@@ -11,7 +11,7 @@ EFLAGS=\
 	--memory-init-file 0 --post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
-	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
+	-s "EXPORTED_RUNTIME_METHODS=['cwrap']" \
 	-s MODULARIZE=1 \
 	-s ASYNCIFY \
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
