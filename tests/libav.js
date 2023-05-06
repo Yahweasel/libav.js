@@ -23,7 +23,7 @@ function load(variant = "default") {
             opts.nosimd ? "thr" : "thrsimd"
         )
     );
-    const LibAV = require(`../libav-${version}-${variant}.js`);
+    const LibAV = require(`../dist/libav-${version}-${variant}.js`);
     LibAV.opts = opts;
     const actual = LibAV.target(opts);
     if (target !== actual)

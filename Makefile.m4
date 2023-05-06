@@ -117,31 +117,16 @@ build/inst/thrsimd/cflags.txt:
 	mkdir -p build/inst/thrsimd
 	echo '-pthread -msimd128' > $@
 
-release:
+release: build-default build-lite build-fat build-obsolete build-opus build-flac \
+        build-opus-flac build-webm build-webm-opus-flac \
+	build-mediarecorder-transcoder build-open-media
 	mkdir libav.js-$(LIBAVJS_VERSION)
-	for v in default lite fat obsolete opus flac opus-flac webm webm-opus-flac mediarecorder-transcoder open-media; \
-	do \
-	    $(MAKE) build-$$v; \
-	    cp dist/libav-$(LIBAVJS_VERSION)-$$v.js \
-	    cp dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.js \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.asm.js \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.asm.js \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.wasm.js \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.wasm.js \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.wasm.wasm \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.wasm.wasm \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.simd.js \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.simd.js \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.simd.wasm \
-	       dist/libav-$(LIBAVJS_VERSION)-$$v.dbg.simd.wasm \
-	       libav.js-$(LIBAVJS_VERSION)/; \
-	done
+	cp -a dist/ libav.js-$(LIBAVJS_VERSION)/
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
 	for t in ffmpeg lame libaom libogg libvorbis libvpx opus; \
 	do \
-	    $(MAKE) $$t-release; \
+		$(MAKE) $$t-release; \
 	done
-	cp dist/libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/
 	git archive HEAD -o libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
@@ -150,7 +135,7 @@ release:
 publish:
 	unzip libav.js-$(LIBAVJS_VERSION).zip
 	( cd libav.js-$(LIBAVJS_VERSION) && \
-	  cp ../package.json ../README.md . && \
+	  cp -a ../package.json ../README.md ../docs . && \
 	  npm publish )
 	rm -rf libav.js-$(LIBAVJS_VERSION)
 
