@@ -341,3 +341,25 @@ aren't streamable, so this acts a bit more like a Unix *block* device.
 
 To receive data from the writer device(s), you must set `libav.onwrite` to a
 function `(name: string, position: number, buffer: Uint8Array) => void`.
+
+
+# CLI
+
+If a variant is used that employs the `cli` fragment, then the entire `ffmpeg`
+and `ffprobe` CLIs are exposed, as well as the various libav interfaces.
+
+### `ffmpeg`
+```
+ffmpeg(...args: (string | string[])[]): Promise<number>
+```
+
+Runs the `ffmpeg` CLI tool. `args` can be each string argument to `ffmpeg`, or
+an array of strings, or any combination thereof. Returns `ffmpeg`'s exit code.
+
+
+### `ffprobe`
+```
+ffprobe(...args: (string | string[])[]): Promise<number>
+```
+
+Like `ffmpeg`, but for the `ffprobe` tool.
