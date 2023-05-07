@@ -1,7 +1,6 @@
-build/inst/@TARGET/lib/pkgconfig/aom.pc
-build/inst/@TARGET/lib/libmp3lame.a
-build/inst/@TARGET/lib/pkgconfig/openh264.pc
 build/inst/@TARGET/lib/pkgconfig/opus.pc
 build/inst/@TARGET/lib/pkgconfig/vorbis.pc
+build/inst/@TARGET/lib/libmp3lame.a
 build/inst/@TARGET/lib/pkgconfig/vpx.pc
-build/inst/@TARGET/lib/pkgconfig/x265.pc
+build/inst/@TARGET/lib/pkgconfig/aom.pc
+build/inst/@TARGET/lib/pkgconfig/openh264.pc

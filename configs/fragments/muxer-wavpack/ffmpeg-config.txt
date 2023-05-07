@@ -1,0 +1,2 @@
+--enable-encoder=wavpack
+--enable-muxer=wv

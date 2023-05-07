@@ -5,7 +5,7 @@
 --enable-libopus
 --enable-decoder=libopus
 --enable-encoder=libopus
---enable-decoder=flac
---enable-encoder=flac
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-decoder=flac
+--enable-encoder=flac

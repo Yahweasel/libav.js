@@ -11,21 +11,21 @@
 --enable-muxer=ipod
 --enable-decoder=aac
 --enable-encoder=aac
---enable-decoder=flac
---enable-encoder=flac
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-decoder=flac
+--enable-encoder=flac
 --enable-libvorbis
 --enable-decoder=libvorbis
 --enable-encoder=libvorbis
---enable-libmp3lame
---enable-decoder=mp3
---enable-encoder=libmp3lame
 --enable-demuxer=mp3
 --enable-muxer=mp3
+--enable-decoder=mp3
+--enable-libmp3lame
+--enable-encoder=libmp3lame
 --enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
---enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
 --enable-demuxer=wav
+--enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
 --enable-muxer=wav
 --enable-demuxer=pcm_f32le
 --enable-muxer=pcm_f32le

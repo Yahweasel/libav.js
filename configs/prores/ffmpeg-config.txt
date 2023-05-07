@@ -6,4 +6,5 @@
 --enable-muxer=matroska --enable-muxer=webm
 --enable-filter=scale
 --enable-decoder=prores
+--enable-bsf=prores_metadata
 --enable-encoder=prores

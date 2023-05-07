@@ -346,6 +346,11 @@ export interface LibAVOpts {
      * Don't use threads. The default.
      */
     nothreads?: boolean;
+
+    /**
+     * URL base from which to load workers and modules.
+     */
+    base?: string;
 }
 
 export interface LibAVWrapper {

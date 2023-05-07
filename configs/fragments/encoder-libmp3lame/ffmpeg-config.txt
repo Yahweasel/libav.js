@@ -1,0 +1,2 @@
+--enable-libmp3lame
+--enable-encoder=libmp3lame

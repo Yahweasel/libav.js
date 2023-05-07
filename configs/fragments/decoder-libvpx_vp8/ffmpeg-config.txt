@@ -1,0 +1,2 @@
+--enable-libvpx
+--enable-decoder=libvpx_vp8

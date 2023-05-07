@@ -1,2 +1,0 @@
---enable-decoder=alac
---enable-encoder=alac

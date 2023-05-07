@@ -17,7 +17,7 @@ of the compiled version of libav.js.
 
 ## Using libav.js
 
-Include libav-`version`-`variant`.js to use libav.js. The variants are
+Include dist/libav-`version`-`variant`.js to use libav.js. The variants are
 discussed below.
 
 The simplest way to use libav.js is to include it from a CDN, but this is not
@@ -29,8 +29,8 @@ of using libav.js from a CDN:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.5"};</script>
-        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.5/libav-3.11.5.1.2-default.js"></script>
+        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.5/dist"};</script>
+        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.5/dist/libav-3.11.5.1.2-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -82,18 +82,22 @@ This gives you an opportunity to pass in values critical for loading. In
 particular, if the base directory (directory in which libav's files are
 located) isn't ".", then you must set `LibAV.base` to the correct base
 directory, as in the CDN example above. `LibAV.base` does not need to be a full
-URL, but should be if loading from another origin.
+URL, but should be if loading from another origin. You can set `LibAV.base`
+after loading libav.js; it's set up so that you can do it before to make it
+easier to avoid race conditions.
 
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
 ready instance of libav. `LibAV.LibAV` takes an optional argument in which
-loading options may be provided, but they're rarely useful. The loading options and their default values are:
+loading options may be provided, but they're rarely useful. The loading options
+and their default values are:
 ```
 {
     "noworker": false,
     "nowasm": false,
     "yesthreads": false,
     "nothreads": false,
-    "nosimd": false
+    "nosimd": false,
+    "base": LibAV.base
 }
 ```
 If `noworker` is set, Web Workers will be disabled, so libav.js runs in the
@@ -117,6 +121,9 @@ baseline, or `"thr"`, `"simd"`, or `"thrsimd"` for versions with extensions
 activated. These strings correspond to the filenames to be loaded, so you can
 use them to preload and cache the large WebAssembly files. `LibAV.target` takes
 the same optional argument as `LibAV.LibAV`.
+
+The `base` option can be used in these options in place of `LibAV.base`, and
+will override `LibAV.base` if set.
 
 The tests used to determine which features are available are also exported, as
 `LibAV.isWebAssemblySupported`, `LibAV.isThreadingSupported`, and
@@ -211,9 +218,9 @@ containers. Also supported are all valid combinations of those formats and
 containers, e.g. any codec in Matroska (since WebM is Matroska), FLAC in ogg,
 etc.
 
-Built-in variants are created by combining “configuration fragments”, but
-variants may be created manually as well. The fragments for the default variant
-are `["ogg", "webm", "opus", "ipod", "aac", "flac", "wav", "audio-filters"]`.
+Built-in variants are created by combining “configuration fragments”. You can
+find more on configuration fragments or making your own variants in
+[CONFIG.md](docs/CONFIG.md).
 
 Use `make build-variant`, replacing `variant` with the variant name, to build
 another variant.
@@ -221,12 +228,10 @@ another variant.
 libav.js includes several other variants:
 
 The “lite” variant removes, relative to the default variant, AAC, and the M4A
-and WebM/Matroska containers. (`["ogg", "opus", "flac", "wav",
-"audio-filters"]`)
+and WebM/Matroska containers.
 
 The “fat” variant adds, relative to the default variant, Vorbis, wavpack and
-its container, and ALAC. (`["ogg", "webm", "opus", "ipod", "aac", "flac",
-"vorbis", "wavpack", "alac", "wav", "audio-filters"]`)
+its container, and ALAC.
 
 The “obsolete” variant adds, relative to the default variant, two obsolete but
 still commonly found audio formats, namely Vorbis in the ogg container and MP3
@@ -234,8 +239,7 @@ in its own container. Note that while Vorbis has been formally replaced by
 Opus, at the time of this writing, Opus still has lackluster support in audio
 software, so Vorbis is still useful. MP3, on the other hand, is completely
 worthless, and is only supplied in case your end users are idiots. Friends
-don't let friends use MP3. (`["ogg", "webm", "opus", "ipod", "aac", "flac",
-"vorbis", "lame", "audio-filters"]`)
+don't let friends use MP3.
 
 The “opus”, “flac”, and “opus-flac” variants are intended just for encoding or
 decoding Opus and/or FLAC. They include only their named format(s), the
@@ -243,7 +247,6 @@ appropriate container(s), and the `aresample` filter; in particular, no other
 filters are provided whatsoever. With Opus in particular, this is a better
 option than a simple conversion of libopus to JavaScript, because Opus mandates
 a limited range of audio sample rates, so having a resampler is beneficial.
-(`["ogg", "opus"]`, `["flac"]`, `["ogg", "opus", "flac"]`)
 
 The “webm” variant, relative to the default variant, includes support for VP8
 video. The “webm-opus-flac” variant, relative to “opus-flac”, includes support
@@ -251,10 +254,7 @@ for VP8 video, as “webm”, but excludes all filters except aresample. The
 “mediarecorder-transcoder” variant, relative to “webm-opus-flac”, adds MPEG-4
 AAC and H.264, making it sufficient for transcoding formats that MediaRecorder
 can produce on all platforms. Note that support is not included for *encoding*
-MPEG-4 video, only decoding. (`["ogg", "webm", "opus", "ipod", "aac", "flac",
-"vpx", "vp8", "wav", "audio-filters"]`, `["ogg", "webm", "opus", "flac", "vpx",
-"vp8"]`, `["ogg", "webm", "opus", "ipod", "aac", "flac", "vpx", "vp8",
-"h264"]`)
+MPEG-4 video, only decoding.
 
 Finally, the “mediarecorder-openh264” variant, relative to
 “mediarecorder-transcoder”, adds H.264 *encoding* support, through libopenh264.
@@ -265,8 +265,7 @@ reason, this variant is not provided pre-built in releases, and you must build
 it yourself if you want it. Cisco, who authors libopenh264, grants a patent
 license to its users, but this license applies only to users of the precompiled
 version compiled by Cisco, and no such version is provided in WebAssembly, so
-it does not apply to use in libav.js. (`["ogg", "webm", "opus", "ipod", "aac",
-"flac", "swscale", "vpx", "vp8", "h264", "openh264"]`)
+it does not apply to use in libav.js.
 
 To create a variant from configuration fragments, run `./mkconfig.js` in the
 `configs` directory. The first argument is the name of the variant to make, and

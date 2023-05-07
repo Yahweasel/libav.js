@@ -1,0 +1,2 @@
+--enable-decoder=wavpack
+--enable-demuxer=wv

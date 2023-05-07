@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021 Yahweasel
+ * Copyright (C) 2019-2023 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -43,7 +43,6 @@
     }
 
     var libav;
-    var base = ".";
     var nodejs = (typeof process !== "undefined");
 
     // Make sure LibAV is defined for later loading
@@ -51,8 +50,8 @@
         LibAV = {};
     libav = LibAV;
 
-    if (libav.base)
-        base = libav.base;
+    if (!libav.base)
+        libav.base = ".";
 
     // Proxy our detection functions
     libav.isWebAssemblySupported = isWebAssemblySupported;
@@ -77,6 +76,7 @@
     // Now start making our instance generating function
     libav.LibAV = function(opts) {
         opts = opts || {};
+        var base = opts.base || libav.base;
         var toImport = base + "/libav-@VER-@CONFIG@DBG." + target(opts) + ".js";
         var ret;
 

@@ -1,2 +1,0 @@
---enable-decoder=h263p
---enable-encoder=h263p
