@@ -37,8 +37,8 @@ named `format-*`, `demuxer-*`, `muxer-*`, `codec-*`, `decoder-*`, `encoder-*`,
 For formats, demuxers, muxers, codecs, decoders, encoders, filters, or bsfs
 (bitstream filters) that can be enabled with only the relevant FFmpeg
 configuration flag (most of them), no actual fragment is needed. For instance,
-if you enable the fragment `codec-prores`, then the `prores` decoder and encoder
-will be included, even though `configs/fragments/codec-prores` does not exist.
+if you enable the fragment `codec-h263p`, then the `h263p` decoder and encoder
+will be included, even though `configs/fragments/codec-h263p` does not exist.
 These names are all FFmpeg-specific, so make sure to run FFmpeg's configure's
 various `--list` flags to know what you're requesting.
 
