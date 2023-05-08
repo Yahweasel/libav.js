@@ -310,7 +310,7 @@ character device. The mode is usually unnecessary.
 
 ### `mkblockreaderdev`
 ```
-mkblockreaderdev(name: string): Promise<void>
+mkblockreaderdev(name: string, size: number): Promise<void>
 ```
 
 Similar to `mkreaderdev`, but `mkreaderdev` creates a character device
