@@ -13,7 +13,6 @@ FRAGS="$FRAGS"',
 "libvpx", "decoder-libvpx_vp8", "decoder-libvpx_vp9"'
 ./mkconfig.js 'descript-p2' "$FRAGS]"
 FRAGS="$FRAGS"',
-"format-mpegts", "demuxer-mpegps", "demuxer-asf",
-"codec-libvorbis", "decoder-wmav2",
-"decoder-mpeg4", "decoder-wmv2", "codec-libaom_av1", "decoder-wmv3"]'
+"format-mpegts", "demuxer-mpegps", "demuxer-asf", "decoder-wmav2",
+"decoder-mpeg4", "decoder-wmv2", "decoder-wmv3"]'
 ./mkconfig.js 'descript-p3' "$FRAGS"
