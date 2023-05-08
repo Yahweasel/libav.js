@@ -1,3 +1,2 @@
 --enable-libopus
 --enable-decoder=libopus
---enable-encoder=libopus
