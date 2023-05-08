@@ -1,0 +1,2 @@
+--enable-muxer=gif
+--enable-encoder=gif

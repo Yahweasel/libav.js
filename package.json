@@ -3,7 +3,7 @@
   "version": "3.9.23",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
   "main": "libav-3.9.23-descript.js",
-  "types": "libav.types.d.ts",
+  "types": "dist/libav.types.d.ts",
   "directories": {
     "test": "tests"
   },
@@ -40,5 +40,8 @@
   "homepage": "https://github.com/descript/libav.js#readme",
   "devDependencies": {
     "uglify-js": "^3.14.3"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.2.2"
   }
 }

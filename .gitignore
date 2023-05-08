@@ -3,15 +3,8 @@
 .*.swp
 .vscode/
 
-ffmpeg-*/
-lame-*/
-libaom-*/
-libogg-*/
-libvorbis-*/
-libvpx-*/
-opus-*/
-openh264-*/
-x265_*/
+dist/
+build/
 
 tests/out.ogg
 tests/out.opus
@@ -20,13 +13,5 @@ tests/out.mp4
 
 node_modules/
 package-lock.json
-tmp-inst/
-
-libav.types.d.ts
-post.js
-exports.json
-
-libav-[0-9]*
-libav.js-[0-9]*.zip
 
 .DS_Store

@@ -1,4 +1,0 @@
---enable-decoder=flac
---enable-encoder=flac
---enable-demuxer=flac
---enable-muxer=flac

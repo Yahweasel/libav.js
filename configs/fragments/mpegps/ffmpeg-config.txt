@@ -1,3 +1,0 @@
---enable-demuxer=mpegps
---enable-demuxer=mpegts
---enable-muxer=mpegts

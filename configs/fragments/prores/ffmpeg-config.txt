@@ -1,2 +1,0 @@
---enable-decoder=prores
---enable-encoder=prores

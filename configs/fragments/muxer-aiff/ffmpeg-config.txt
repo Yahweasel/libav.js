@@ -1,0 +1,3 @@
+--enable-muxer=aiff
+--enable-encoder=pcm_s16be --enable-encoder=pcm_s24be
+--enable-encoder=pcm_f32be

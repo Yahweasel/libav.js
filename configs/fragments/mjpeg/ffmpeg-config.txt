@@ -1,2 +1,0 @@
---enable-decoder=mjpeg
---enable-encoder=mjpeg

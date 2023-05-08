@@ -1,4 +1,0 @@
---enable-demuxer=rawvideo
---enable-muxer=rawvideo
---enable-decoder=rawvideo
---enable-encoder=rawvideo

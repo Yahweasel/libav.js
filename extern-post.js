@@ -48,7 +48,12 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" || !Li
         libav.onwrite = function(name, pos, buf) {
             /* We have to buf.slice(0) so we don't duplicate the entire heap just
              * to get one part of it in postMessage */
-            postMessage(["onwrite", "onwrite", true, [name, pos, buf.slice(0)]]);
+            buf = buf.slice(0);
+            postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
+        };
+
+        libav.onblockread = function(name, pos) {
+            postMessage(["onblockread", "onblockread", true, [name, pos]]);
         };
 
         postMessage(["onready", "onready", true, null]);

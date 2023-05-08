@@ -1,1 +1,0 @@
-tmp-inst/@TARGET/lib/libx265.a

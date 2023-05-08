@@ -8,10 +8,10 @@ EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
 EFLAGS=\
-	--memory-init-file 0 --post-js post.js --extern-post-js extern-post.js \
+	--memory-init-file 0 --post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
-	-s "EXPORTED_FUNCTIONS=@exports.json" \
-	-s "EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']" \
+	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
+	-s "EXPORTED_RUNTIME_METHODS=['cwrap']" \
 	-s MODULARIZE=1 \
 	-s ASYNCIFY \
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
@@ -22,44 +22,53 @@ all: build-default
 include mk/*.mk
 
 
-build-%: libav-$(LIBAVJS_VERSION)-%.js
+build-%: dist/libav-$(LIBAVJS_VERSION)-%.js
 	true
 
-libav-$(LIBAVJS_VERSION)-%.js: libav-$(LIBAVJS_VERSION).js \
-	libav-$(LIBAVJS_VERSION)-%.asm.js \
-	libav-$(LIBAVJS_VERSION)-%.wasm.js \
-	libav-$(LIBAVJS_VERSION)-%.simd.js \
+dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.simd.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
 	node_modules/.bin/uglifyjs
-	sed "s/@CONFIG/$*/g" < $< | $(MINIFIER) > $@
-	chmod a-x *.wasm
+	mkdir -p dist
+	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
+	-chmod a-x dist/*.wasm
 
+dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
+	mkdir -p dist
+	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
 # General build rule for any target
 # Use: buildrule(target file name, target inst name, CFLAGS, 
 define([[[buildrule]]], [[[
-libav-$(LIBAVJS_VERSION)-%.$1: ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a \
-	exports.json post.js extern-post.js bindings.c
+dist/libav-$(LIBAVJS_VERSION)-%.$1: build/ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a \
+	build/exports.json build/post.js extern-post.js bindings.c
+	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) $3 \
-		-Iffmpeg-$(FFMPEG_VERSION) -Iffmpeg-$(FFMPEG_VERSION)/build-$2-$(*) \
+		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
                 `grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_filter.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_hw.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_mux.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_opt.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffprobe.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/cmdutils.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/opt_common.o \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavdevice/libavdevice.a \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_filter.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_hw.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_mux.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffmpeg_opt.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/ffprobe.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/cmdutils.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/opt_common.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavdevice/libavdevice.a \
 		'` \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavformat/libavformat.a \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavfilter/libavfilter.a \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavcodec/libavcodec.a \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libswresample/libswresample.a \
-		ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavutil/libavutil.a \
-		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libswscale/libswscale.a'` \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavformat/libavformat.a \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavfilter/libavfilter.a \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavcodec/libavcodec.a \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libswresample/libswresample.a \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavutil/libavutil.a \
+		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libswscale/libswscale.a'` \
 		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/$2/' configs/$(*)/libs.txt` -o $(@)
 	cat configs/$(*)/license.js $(@) > $(@).tmp
 	mv $(@).tmp $(@)
@@ -67,60 +76,57 @@ libav-$(LIBAVJS_VERSION)-%.$1: ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/l
 
 # asm.js version
 buildrule(asm.js, base, [[[-s WASM=0]]])
+buildrule(dbg.asm.js, base, [[[-g2 -s WASM=0]]])
 # wasm version with no added features
 buildrule(wasm.js, base, [[[]]])
+buildrule(dbg.wasm.js, base, [[[-g2]]])
 # wasm + threads
 buildrule(thr.js, thr, [[[-pthread]]])
+buildrule(dbg.thr.js, thr, [[[-g2 -pthread]]])
 # wasm + simd
 buildrule(simd.js, simd, [[[-msimd128]]])
+buildrule(dbg.simd.js, simd, [[[-g2 -msimd128]]])
 # wasm + threads + simd
 buildrule(thrsimd.js, thrsimd, [[[-pthread -msimd128]]])
+buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 -pthread -msimd128]]])
 
-exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+	mkdir -p build dist
 	./apply-funcs.js $(LIBAVJS_VERSION)
 
-libav-$(LIBAVJS_VERSION).js post.js: exports.json
+build/libav-$(LIBAVJS_VERSION).js build/post.js: build/exports.json
 	touch $@
 
 node_modules/.bin/uglifyjs:
 	npm install
 
 # Targets
-tmp-inst/base/cflags.txt:
-	mkdir -p tmp-inst/base
+build/inst/base/cflags.txt:
+	mkdir -p build/inst/base
 	touch $@
 
-tmp-inst/thr/cflags.txt:
-	mkdir -p tmp-inst/thr
+build/inst/thr/cflags.txt:
+	mkdir -p build/inst/thr
 	echo '-pthread' > $@
 
-tmp-inst/simd/cflags.txt:
-	mkdir -p tmp-inst/simd
+build/inst/simd/cflags.txt:
+	mkdir -p build/inst/simd
 	echo '-msimd128' > $@
 
-tmp-inst/thrsimd/cflags.txt:
-	mkdir -p tmp-inst/thrsimd
+build/inst/thrsimd/cflags.txt:
+	mkdir -p build/inst/thrsimd
 	echo '-pthread -msimd128' > $@
 
-release:
+release: build-default build-lite build-fat build-obsolete build-opus build-flac \
+        build-opus-flac build-webm build-webm-opus-flac \
+	build-mediarecorder-transcoder build-open-media
 	mkdir libav.js-$(LIBAVJS_VERSION)
-	for v in default lite fat obsolete opus flac opus-flac webm webm-opus-flac mediarecorder-transcoder open-media; \
-	do \
-	    $(MAKE) build-$$v; \
-	    cp libav-$(LIBAVJS_VERSION)-$$v.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.asm.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.wasm.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.wasm.wasm \
-	       libav-$(LIBAVJS_VERSION)-$$v.simd.js \
-	       libav-$(LIBAVJS_VERSION)-$$v.simd.wasm \
-	       libav.js-$(LIBAVJS_VERSION)/; \
-	done
+	cp -a dist/ libav.js-$(LIBAVJS_VERSION)/
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
 	for t in ffmpeg lame libaom libogg libvorbis libvpx opus; \
 	do \
-	    $(MAKE) $$t-release; \
+		$(MAKE) $$t-release; \
 	done
-	cp libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/
 	git archive HEAD -o libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
@@ -129,39 +135,40 @@ release:
 publish:
 	unzip libav.js-$(LIBAVJS_VERSION).zip
 	( cd libav.js-$(LIBAVJS_VERSION) && \
-	  cp ../package.json ../README.md . && \
+	  cp -a ../package.json ../README.md ../docs . && \
 	  npm publish )
 	rm -rf libav.js-$(LIBAVJS_VERSION)
 
 halfclean:
-	-rm -f libav-$(LIBAVJS_VERSION)-*.js libav-$(LIBAVJS_VERSION)-*.wasm
-	-rm -f exports.json libav-$(LIBAVJS_VERSION).js post.js libav.types.d.ts
+	-rm -rf dist/
+	-rm -f build/exports.json build/libav-$(LIBAVJS_VERSION).js build/post.js
 
 clean: halfclean
-	-rm -rf tmp-inst
-	-rm -rf opus-$(OPUS_VERSION)
-	-rm -rf libaom-$(LIBAOM_VERSION)
-	-rm -rf libvorbis-$(LIBVORBIS_VERSION)
-	-rm -rf libogg-$(LIBOGG_VERSION)
-	-rm -rf libvpx-$(LIBVPX_VERSION)
-	-rm -rf lame-$(LAME_VERSION)
-	-rm -rf openh264-$(OPENH264_VERSION)
-	-rm -rf ffmpeg-$(FFMPEG_VERSION)
+	-rm -rf build/inst
+	-rm -rf build/opus-$(OPUS_VERSION)
+	-rm -rf build/libaom-$(LIBAOM_VERSION)
+	-rm -rf build/libvorbis-$(LIBVORBIS_VERSION)
+	-rm -rf build/libogg-$(LIBOGG_VERSION)
+	-rm -rf build/libvpx-$(LIBVPX_VERSION)
+	-rm -rf build/lame-$(LAME_VERSION)
+	-rm -rf build/openh264-$(OPENH264_VERSION)
+	-rm -rf build/ffmpeg-$(FFMPEG_VERSION)
+	-rm -rf build/x265_$(X265_VERSION)
 
 distclean: clean
-	-rm -f opus-$(OPUS_VERSION).tar.gz
-	-rm -f libaom-$(LIBAOM_VERSION).tar.gz
-	-rm -f libvorbis-$(LIBVORBIS_VERSION).tar.xz
-	-rm -f libogg-$(LIBOGG_VERSION).tar.xz
-	-rm -f libvpx-$(LIBVPX_VERSION).tar.gz
-	-rm -f lame-$(LAME_VERSION).tar.gz
-	-rm -rf openh264-$(OPENH264_VERSION).tar.gz
-	-rm -f ffmpeg-$(FFMPEG_VERSION).tar.xz
+	-rm -rf build/
 
 .PRECIOUS: \
-	libav-$(LIBAVJS_VERSION)-%.js \
-	libav-$(LIBAVJS_VERSION)-%.asm.js \
-	libav-$(LIBAVJS_VERSION)-%.wasm.js \
-	libav-$(LIBAVJS_VERSION)-%.thr.js \
-	libav-$(LIBAVJS_VERSION)-%.simd.js \
-	libav-$(LIBAVJS_VERSION)-%.thrsimd.js
+	build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a \
+	dist/libav-$(LIBAVJS_VERSION)-%.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.simd.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js

@@ -55,10 +55,10 @@
                 main.innerHTML = "Loading...";
 
                 // Load libav.js
-                LibAV = {base: ".."};
+                LibAV = {base: "../dist"};
                 await new Promise(res => {
                     const scr = dce("script");
-                    scr.src = `../libav-${version}-${variant}.js?${Math.random()}`;
+                    scr.src = `../dist/libav-${version}-${variant}.js?${Math.random()}`;
                     scr.onload = res;
                     scr.onerror = () => {
                         alert("Failed to load variant!");
@@ -89,9 +89,9 @@
                 main.innerHTML = "Loading...";
 
                 // Initial read
-                const fname = await libav.mkworkerfsfile("input", file);
+                await libav.mkreadaheadfile("input", file);
                 const [fmt_ctx, streams] =
-                    await libav.ff_init_demuxer_file(fname);
+                    await libav.ff_init_demuxer_file("input");
 
                 // Find the video stream (FIXME: eventually audio stream too?)
                 let videoIdx = -1;

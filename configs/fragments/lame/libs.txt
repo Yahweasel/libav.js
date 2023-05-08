@@ -1,1 +1,0 @@
-tmp-inst/@TARGET/lib/libmp3lame.a

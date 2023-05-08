@@ -1,0 +1,3 @@
+--enable-demuxer=aiff
+--enable-decoder=pcm_s16be --enable-decoder=pcm_s24be
+--enable-decoder=pcm_f32be

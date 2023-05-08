@@ -1,0 +1,2 @@
+--enable-libvpx
+--enable-encoder=libvpx_vp9

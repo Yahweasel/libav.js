@@ -18,37 +18,45 @@ const cproc = require("child_process");
 const fs = require("fs");
 
 const configs = [
-    ["default", ["ogg", "webm", "opus", "ipod", "aac", "flac", "wav", "audio-filters"]],
-    ["lite", ["ogg", "opus", "flac", "wav", "audio-filters"]],
-    ["fat", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vorbis", "wavpack", "alac", "wav", "audio-filters"]],
-    ["obsolete", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vorbis", "lame", "audio-filters"]],
-    ["opus", ["ogg", "opus"]],
-    ["flac", ["flac"]],
-    ["opus-flac", ["ogg", "opus", "flac"]],
-    ["all-audio-cli", ["ogg", "webm", "opus", "ipod", "aac", "flac", "vorbis", "lame", "wav", "flt", "audio-filters", "cli", "workerfs"]],
+    ["default", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "format-wav", "audio-filters"]],
+    ["lite", ["format-ogg", "codec-libopus", "format-flac", "codec-flac", "format-wav", "audio-filters"]],
+    ["fat", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-wavpack", "codec-alac", "format-wav", "audio-filters"]],
+    ["obsolete", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "audio-filters"]],
+    ["opus", ["format-ogg", "codec-libopus"]],
+    ["flac", ["format-flac", "codec-flac"]],
+    ["opus-flac", ["format-ogg", "codec-libopus", "format-flac", "codec-flac"]],
+    ["all-audio-cli", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "format-wav", "format-pcm_f32le", "codec-pcm_f32le", "audio-filters", "cli", "workerfs"]],
 
-    ["webm", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "wav", "audio-filters"]],
-    ["webm-opus-flac", ["ogg", "webm", "opus", "flac", "swscale", "vpx", "vp8"]],
-    ["mediarecorder-transcoder", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264"]],
-    ["open-media", ["ogg", "webm", "opus", "flac", "vorbis", "swscale", "vpx", "vp8", "vp9", "av1"]],
+    ["webm", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "format-wav", "audio-filters"]],
+    ["webm-opus-flac", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8"]],
+    ["mediarecorder-transcoder", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264"]],
+    ["open-media", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "codec-libvorbis", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-libvpx_vp9", "codec-libaom_av1"]],
 
-    ["h265", ["ipod", "webm", "swscale", "hevc"]],
-    ["prores", ["ipod", "webm", "swscale", "prores"]],
+    ["h265", ["format-mp4", "format-webm", "swscale", "decoder-hevc"]],
+    ["prores", ["format-mp4", "format-webm", "swscale", "codec-prores"]],
 
     // Patent and/or license encumbered encoders
-    ["mediarecorder-openh264", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264", "openh264"]],
-    ["mediarecorder-x265", ["ogg", "webm", "opus", "ipod", "aac", "flac", "swscale", "vpx", "vp8", "h264", "hevc", "x265"]],
+    ["mediarecorder-openh264", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "codec-libopenh264"]],
+    ["mediarecorder-x265", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "decoder-hevc", "encoder-libx265"]],
 
-    ["descript",      ["ogg", "webm", "opus", "ipod", "aac", "flac",/*"vorbis",*/"lame", "wav", "flt", "swscale", "vpx", "vp8", "h264", "hevc", "audio-filters", "cli", "workerfs"]],
+    // ["descript",      ["webm", "opus", "ipod", "aac", "flac",/*"vorbis",*/"lame", "wav", "flt", "swscale", "vpx", "vp8", "h264", "hevc", "audio-filters", "cli", "workerfs"]],
 
     ["empty", []],
-    ["all", fs.readdirSync("fragments").filter(x => x !== "default")]
+    ["all", null]
 ];
+let all = Object.create(null);
 
 (async function() {
-    for (const [name, config] of configs) {
+    for (let [name, config] of configs) {
+        if (name !== "all") {
+            for (const fragment of config)
+                all[fragment] = true;
+        } else {
+            config = Object.keys(all);
+        }
+
         const p = cproc.spawn("./mkconfig.js", [name, JSON.stringify(config)], {
-            stdio: "ignore"
+            stdio: "inherit"
         });
         await new Promise(res => p.on("close", res));
     }

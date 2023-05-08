@@ -6,19 +6,19 @@ changequote(`[[[', `]]]')
 # 3.5.0
 LIBAOM_VERSION=bcfe6fbf
 
-tmp-inst/%/lib/pkgconfig/aom.pc: libaom-$(LIBAOM_VERSION)/build-%/Makefile
-	cd libaom-$(LIBAOM_VERSION)/build-$* ; \
+build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefile
+	cd build/libaom-$(LIBAOM_VERSION)/build-$* ; \
 		$(MAKE) install
 
 # General build rule for any target
 # Use: buildrule(target name, cmake flags)
 define([[[buildrule]]], [[[
-libaom-$(LIBAOM_VERSION)/build-$1/Makefile: tmp-inst/$1/cflags.txt libaom-$(LIBAOM_VERSION)/PATCHED
-	mkdir -p libaom-$(LIBAOM_VERSION)/build-$1
-	cd libaom-$(LIBAOM_VERSION)/build-$1 ; \
-		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/tmp-inst/$1" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/tmp-inst/$1/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/tmp-inst/$1/cflags.txt`" \
+build/libaom-$(LIBAOM_VERSION)/build-$1/Makefile: build/inst/$1/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
+	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-$1
+	cd build/libaom-$(LIBAOM_VERSION)/build-$1 ; \
+		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/$1" \
+		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/$1/cflags.txt`" \
+		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/$1/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \
@@ -37,26 +37,27 @@ buildrule(simd, [[[-DCONFIG_MULTITHREAD=0]]])
 buildrule(thr, [[[]]])
 buildrule(thrsimd, [[[]]])
 
-extract: libaom-$(LIBAOM_VERSION)/PATCHED
+extract: build/libaom-$(LIBAOM_VERSION)/PATCHED
 
-libaom-$(LIBAOM_VERSION)/PATCHED: libaom-$(LIBAOM_VERSION)/CMakeLists.txt
-	cd libaom-$(LIBAOM_VERSION) ; test -e PATCHED || patch -p1 -i ../patches/libaom.diff
+build/libaom-$(LIBAOM_VERSION)/PATCHED: build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt
+	cd build/libaom-$(LIBAOM_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/libaom.diff )
 	touch $@
 
-libaom-$(LIBAOM_VERSION)/CMakeLists.txt: libaom-$(LIBAOM_VERSION).tar.gz
-	mkdir -p libaom-$(LIBAOM_VERSION)
-	cd libaom-$(LIBAOM_VERSION) ; \
+build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt: build/libaom-$(LIBAOM_VERSION).tar.gz
+	mkdir -p build/libaom-$(LIBAOM_VERSION)
+	cd build/libaom-$(LIBAOM_VERSION) ; \
 		tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
 	touch $@
 
-libaom-$(LIBAOM_VERSION).tar.gz:
+build/libaom-$(LIBAOM_VERSION).tar.gz:
+	mkdir -p build
 	curl https://aomedia.googlesource.com/aom/+archive/$(LIBAOM_VERSION).tar.gz -L -o $@
 
 libaom-release:
-	cp libaom-$(LIBAOM_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/libaom-$(LIBAOM_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
-	tmp-inst/%/lib/pkgconfig/aom.pc \
-	libaom-$(LIBAOM_VERSION)/build-%/Makefile \
-	libaom-$(LIBAOM_VERSION)/PATCHED \
-	libaom-$(LIBAOM_VERSION)/CMakeLists.txt
+	build/inst/%/lib/pkgconfig/aom.pc \
+	build/libaom-$(LIBAOM_VERSION)/build-%/Makefile \
+	build/libaom-$(LIBAOM_VERSION)/PATCHED \
+	build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt

@@ -1,0 +1,2 @@
+--enable-demuxer=gif
+--enable-decoder=gif

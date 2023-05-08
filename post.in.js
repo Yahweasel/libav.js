@@ -67,6 +67,65 @@ var readerCallbacks = {
     }
 };
 
+var blockReaderCallbacks = {
+    open: function(stream) {
+        if (stream.flags & 3)
+            throw new FS.ErrnoError(ERRNO_CODES.EPERM);
+    },
+
+    close: function(stream) {
+        delete Module.readBuffers[stream.node.name];
+    },
+
+    read: function(stream, buffer, offset, length, position) {
+        var data = Module.blockReadBuffers[stream.node.name];
+        if (!data)
+            throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+
+        var bufMin = data.position;
+        var bufMax = data.position + data.buf.length;
+        if (position < bufMin || position >= bufMax) {
+            if (position >= stream.node.ff_block_reader_dev_size)
+                return 0; // EOF
+
+            if (!Module.onblockread)
+                throw new FS.ErrnoError(ERRNO_CODES.EIO);
+            Module.onblockread(stream.node.name, position, length);
+
+            // If it was asynchronous, this won't be ready yet
+            bufMin = data.position;
+            bufMax = data.position + data.buf.length;
+            if (position < bufMin || position >= bufMax)
+                throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        }
+
+        var bufPos = position - bufMin;
+        var ret;
+        if (bufPos + length < data.buf.length) {
+            // Cut a slice
+            ret = data.buf.subarray(bufPos, bufPos + length);
+        } else {
+            // Get the beginning of what was requested
+            ret = data.buf.subarray(bufPos, data.buf.length);
+        }
+
+        (new Uint8Array(buffer.buffer)).set(ret, offset);
+        return ret.length;
+    },
+
+    write: function() {
+        throw new FS.ErrnoError(ERRNO_CODES.EIO);
+    },
+
+    llseek: function(stream, offset, whence) {
+        if (whence === 2 /* SEEK_END */)
+            offset = stream.node.size + offset;
+        else if (whence === 1 /* SEEK_CUR */)
+            offset += stream.position;
+        return offset;
+    }
+};
+
 var writerCallbacks = {
     open: function(stream) {
         if (!(stream.flags & 1)) {
@@ -107,6 +166,7 @@ var CAccessors = {};
 var readerDev = FS.makedev(44, 0);
 FS.registerDevice(readerDev, readerCallbacks);
 Module.readBuffers = {};
+Module.blockReadBuffers = {};
 var writerDev = FS.makedev(44, 1);
 FS.registerDevice(writerDev, writerCallbacks);
 
@@ -114,7 +174,7 @@ FS.registerDevice(writerDev, writerCallbacks);
  * Read a complete file from the in-memory filesystem.
  * @param name  Filename to read
  */
-/// @types readFile(name: string): Promise<Uint8Array>
+/// @types readFile@sync(name: string): @promise@Uint8Array@
 Module.readFile = FS.readFile.bind(FS);
 
 /**
@@ -122,14 +182,14 @@ Module.readFile = FS.readFile.bind(FS);
  * @param name  Filename to write
  * @param content  Content to write to the file
  */
-/// @types writeFile(name: string, content: Uint8Array): Promise<Uint8Array>
+/// @types writeFile@sync(name: string, content: Uint8Array): @promise@Uint8Array@
 Module.writeFile = FS.writeFile.bind(FS);
 
 /**
  * Delete a file in the in-memory filesystem.
  * @param name  Filename to delete
  */
-/// @types unlink(name: string): Promise<void>
+/// @types unlink@sync(name: string): @promise@void@
 Module.unlink = FS.unlink.bind(FS);
 
 Module.mkdev = FS.mkdev.bind(FS);
@@ -138,23 +198,140 @@ Module.mkdev = FS.mkdev.bind(FS);
  * Make a lazy file. Direct link to createLazyFile.
  */
 /* @types
- * createLazyFile(
+ * createLazyFile@sync(
  *     parent: string, name: string, url: string, canRead: boolean,
  *     canWrite: boolean
- * ): Promise<void>
+ * ): @promise@void@
  */
 Module.createLazyFile = FS.createLazyFile.bind(FS);
 
 /**
  * Make a reader device.
- * @param name  Filename to create
+ * @param name  Filename to create.
  * @param mode  Unix permissions (pointless since this is an in-memory
  *              filesystem)
  */
-/// @types mkreaderdev(name: string, mode?: number): Promise<void>
+/// @types mkreaderdev@sync(name: string, mode?: number): @promise@void@
 Module.mkreaderdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0777, readerDev);
     return 0;
+};
+
+/**
+ * Make a block reader "device". Technically a file that we then hijack to have
+ * our behavior.
+ * @param name  Filename to create.
+ * @param size  Size of the device to present.
+ */
+/// @types mkblockreaderdev@sync(name: string, size: number): @promise@void@
+var mkblockreaderdev = Module.mkblockreaderdev = function(name, size) {
+    FS.writeFile(name, new Uint8Array(0));
+    var f = FS.open(name, 0);
+
+    var super_node_ops = f.node.node_ops;
+    var node_ops = f.node.node_ops = Object.create(super_node_ops);
+    node_ops.getattr = function(node) {
+        var ret = super_node_ops.getattr(node);
+        ret.size = size;
+        ret.blksize = 4096;
+        ret.blocks = Math.ceil(size / 4096);
+        return ret;
+    };
+
+    f.node.stream_ops = blockReaderCallbacks;
+    f.node.ff_block_reader_dev_size = size;
+
+    Module.blockReadBuffers[name] = {
+        position: -1,
+        buf: new Uint8Array(0)
+    };
+
+    FS.close(f);
+};
+
+// Readahead devices
+var readaheads = {};
+
+// Original onblockread
+var preReadaheadOnBlockRead = null;
+
+// Passthru for readahead.
+function readaheadOnBlockRead(name, position, length) {
+    if (!(name in readaheads)) {
+        if (preReadaheadOnBlockRead)
+            preReadaheadOnBlockRead(name, position, length);
+        return;
+    }
+
+    var ra = readaheads[name];
+
+    function then() {
+        if (ra.position !== position) {
+            ra.position = position;
+            ra.buf = null;
+            ra.bufPromise = ra.file.slice(position, position + length).arrayBuffer()
+                .then(function(ret) {
+                    ra.buf = ret;
+                }).catch(function(ex) {
+                    console.error(ex + "\n" + ex.stack);
+                    ra.buf = new Uint8Array(0);
+                }).then(then);
+            return;
+        }
+
+        console.log("Readahead " + name + ":" + position + " (" + ra.buf.byteLength + ")");
+        ff_block_reader_dev_send(name, position, new Uint8Array(ra.buf));
+
+        // Attempt to predict the next read
+        position += length;
+        ra.position = position;
+        ra.buf = null;
+        ra.bufPromise = ra.file.slice(position, position + length).arrayBuffer()
+            .then(function(ret) {
+                ra.buf = ret;
+            }).catch(function(ex) {
+                console.error(ex + "\n" + ex.stack);
+                ra.buf = new Uint8Array(0);
+            });
+    }
+
+    if (!ra.buf && ra.bufPromise)
+        ra.bufPromise.then(then);
+    else
+        then();
+}
+
+/**
+ * Make a readahead device. This reads a File (or other Blob) and attempts to
+ * read ahead of whatever libav actually asked for. Note that this overrides
+ * onblockread, so if you want to support both kinds of files, make sure you set
+ * onblockread before calling this.
+ * @param name  Filename to create.
+ * @param file  Blob or file to read.
+ */
+/// @types mkreadaheadfile@sync(name: string, file: Blob): @promise@void@
+Module.mkreadaheadfile = function(name, file) {
+    if (Module.onblockread !== readaheadOnBlockRead) {
+        preReadaheadOnBlockRead = Module.onblockread;
+        Module.onblockread = readaheadOnBlockRead;
+    }
+
+    mkblockreaderdev(name, file.size);
+    readaheads[name] = {
+        file: file,
+        position: -1,
+        bufPromise: null,
+        buf: null
+    };
+};
+
+/**
+ * Unlink a readahead file. Also gets rid of the File reference.
+ * @param name  Filename to unlink.
+ */
+Module.unlinkreadaheadfile = function(name) {
+    FS.unlink(name);
+    delete readaheads[name];
 };
 
 /**
@@ -162,7 +339,7 @@ Module.mkreaderdev = function(loc, mode) {
  * @param name  Filename to create
  * @param mode  Unix permissions
  */
-/// @types mkwriterdev(name: string, mode?: number): Promise<void>
+/// @types mkwriterdev@sync(name: string, mode?: number): @promise@void@
 Module.mkwriterdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0777, writerDev);
     return 0;
@@ -176,7 +353,7 @@ Module.ff_reader_dev_waiters = [];
  * @param name  Filename to use.
  * @param blob  Blob to load at that file.
  */
-/// @types mkworkerfsfile(name: string, blob: Blob): Promise<string>
+/// @types mkworkerfsfile@sync(name: string, blob: Blob): @promise@string@
 Module.mkworkerfsfile = function(name, blob) {
     FS.mkdir("/" + name + ".d");
     FS.mount(WORKERFS, {
@@ -190,7 +367,7 @@ Module.mkworkerfsfile = function(name, blob) {
  * the name mkworkerfsfile returned.
  * @param name  Filename to unmount.
  */
-/// @types unlinkworkerfsfile(name: string): Promise<void>
+/// @types unlinkworkerfsfile@sync(name: string): @promise@void@
 Module.unlinkworkerfsfile = function(name) {
     FS.unmount("/" + name + ".d");
     FS.rmdir("/" + name + ".d");
@@ -201,7 +378,7 @@ Module.unlinkworkerfsfile = function(name) {
  * @param name  Filename of the reader device
  * @param data  Data to send
  */
-/// @types ff_reader_dev_send(name: string, data: Uint8Array): Promise<void>
+/// @types ff_reader_dev_send@sync(name: string, data: Uint8Array): @promise@void@
 var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
     var idata;
     if (!(name in Module.readBuffers))
@@ -228,11 +405,42 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
 };
 
 /**
+ * Send some data to a block reader device.
+ * @param name  Filename of the reader device.
+ * @param pos  Position of the data in the file.
+ * @param data  Data to send.
+ */
+/* @types
+ * ff_block_reader_dev_send@sync(
+ *     name: string, pos: number, data: Uint8Array
+ *  ): @promise@void@
+ */
+var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, pos, data) {
+    if (!(name in Module.blockReadBuffers)) {
+        Module.blockReadBuffers[name] = {
+            position: pos,
+            buf: data
+        };
+    } else {
+        var idata = Module.blockReadBuffers[name];
+        idata.position = pos;
+        idata.buf = data;
+    }
+
+    /* Wake up waiters (FIXME: make this file-specific so we don't get weird
+     * loops) */
+    var waiters = Module.ff_reader_dev_waiters;
+    Module.ff_reader_dev_waiters = [];
+    for (var i = 0; i < waiters.length; i++)
+        waiters[i]();
+};
+
+/**
  * Metafunction to determine whether any device has any waiters. This can be
  * used to determine whether more data needs to be sent before a previous step
  * will be fully resolved.
  */
-/// @types ff_reader_dev_waiting(): Promise<boolean>
+/// @types ff_reader_dev_waiting@sync(): @promise@boolean@
 var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function() {
     return ff_nothing().then(function() {
         return !!Module.ff_reader_dev_waiters.length;
@@ -246,11 +454,11 @@ var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function() {
  * @param opts  Encoder options
  */
 /* @types
- * ff_init_encoder(
+ * ff_init_encoder@sync(
  *     name: string, opts?: {
  *         ctx?: AVCodecContextProps, options?: Record<string, string>
  *     }
- * ): Promise<[number, number, number, number, number]>
+ * ): @promise@[number, number, number, number, number]@
  */
 var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
     opts = opts || {};
@@ -306,9 +514,9 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
  * @param codecpar  Optional AVCodecParameters
  */
 /* @types
- * ff_init_decoder(
+ * ff_init_decoder@sync(
  *     name: string | number, codecpar?: number
- * ): Promise<[number, number, number, number]>
+ * ): @promise@[number, number, number, number]@
  */
 var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
     var codec, ret;
@@ -351,9 +559,9 @@ var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
  * @param pkt  AVPacket
  */
 /* @types
- * ff_free_encoder(
+ * ff_free_encoder@sync(
  *     c: number, frame: number, pkt: number
- * ): Promise<void>
+ * ): @promise@void@
  */
 var ff_free_encoder = Module.ff_free_encoder = function(c, frame, pkt) {
     av_frame_free_js(frame);
@@ -368,9 +576,9 @@ var ff_free_encoder = Module.ff_free_encoder = function(c, frame, pkt) {
  * @param frame  AVFrame
  */
 /* @types
- * ff_free_decoder(
+ * ff_free_decoder@sync(
  *     c: number, pkt: number, frame: number
- * ): Promise<void>
+ * ): @promise@void@
  */
 var ff_free_decoder = Module.ff_free_decoder = function(c, pkt, frame) {
     ff_free_encoder(c, frame, pkt);
@@ -386,10 +594,10 @@ var ff_free_decoder = Module.ff_free_decoder = function(c, pkt, frame) {
  * @param fin  Set to true if this is the end of encoding
  */
 /* @types
- * ff_encode_multi(
+ * ff_encode_multi@sync(
  *     ctx: number, frame: number, pkt: number, inFrames: Frame[],
  *     fin?: boolean
- * ): Promise<Packet[]>
+ * ): @promise@Packet[]@
  */
 var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrames, fin) {
     var outPackets = [];
@@ -435,13 +643,13 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
  * @param config  Decoding options. May be "true" to indicate end of stream.
  */
 /* @types
- * ff_decode_multi(
+ * ff_decode_multi@sync(
  *     ctx: number, pkt: number, frame: number, inPackets: Packet[],
  *     config?: boolean | {
  *         fin?: boolean,
  *         ignoreErrors?: boolean
  *     }
- * ): Promise<Frame[]>
+ * ): @promise@Frame[]@
  */
 var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPackets, config) {
     var outFrames = [];
@@ -521,7 +729,7 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
  * @param stramCtxs  Context info for each stream to mux
  */
 /* @types
- * ff_init_muxer(
+ * ff_init_muxer@sync(
  *     opts: {
  *         oformat?: number, // format pointer
  *         format_name?: string, // libav name
@@ -530,7 +738,7 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
  *         open?: boolean // Open the file for writing
  *     },
  *     streamCtxs: [number, number, number][] // AVCodecContext, time_base_num, time_base_den
- * ): Promise<[number, number, number, number[]]>
+ * ): @promise@[number, number, number, number[]]@
  */
 var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
     var oformat = opts.oformat ? opts.oformat : 0;
@@ -573,7 +781,7 @@ var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
  * @param oc  AVFormatContext
  * @param pb  AVIOContext
  */
-/// @types ff_free_muxer(oc: number, pb: number): Promise<void>
+/// @types ff_free_muxer@sync(oc: number, pb: number): @promise@void@
 var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
     avformat_free_context(oc);
     if (pb)
@@ -588,9 +796,9 @@ var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
  * @param fmt  Format to use (optional)
  */
 /* @types
- * ff_init_demuxer_file(
+ * ff_init_demuxer_file@sync(
  *     filename: string, fmt?: string
- * ): Promise<[number, Stream[]]>
+ * ): @promsync@[number, Stream[]]@
  */
 var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt) {
     var fmt_ctx;
@@ -638,9 +846,9 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
  *                    Interleaving is the default.
  */
 /* @types
- * ff_write_multi(
+ * ff_write_multi@sync(
  *     oc: number, pkt: number, inPackets: Packet[], interleave?: boolean
- * ): Promise<void>
+ * ): @promise@void@
  */
 var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interleave) {
     var step = av_interleaved_write_frame;
@@ -670,12 +878,12 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  * @param opts  Other options
  */
 /* @types
- * ff_read_multi(
+ * ff_read_multi@sync(
  *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
  *         limit?: number, // OUTPUT limit, in bytes
  *         devLimit?: number // INPUT limit, in bytes (don't read if less than this much data is available)
  *     }
- * ): Promise<[number, Record<number, Packet[]>]>
+ * ): @promsync@[number, Record<number, Packet[]>]@
  */
 var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts) {
     var sz = 0;
@@ -733,26 +941,26 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
  *                outputs
  */
 /* @types
- * ff_init_filter_graph(
+ * ff_init_filter_graph@sync(
  *     filters_descr: string,
  *     input: FilterIOSettings,
  *     output: FilterIOSettings
- * ): Promise<[number, number, number]>;
- * ff_init_filter_graph(
+ * ): @promise@[number, number, number]@;
+ * ff_init_filter_graph@sync(
  *     filters_descr: string,
  *     input: FilterIOSettings[],
  *     output: FilterIOSettings
- * ): Promise<[number, number[], number]>;
- * ff_init_filter_graph(
+ * ): @promise@[number, number[], number]@;
+ * ff_init_filter_graph@sync(
  *     filters_descr: string,
  *     input: FilterIOSettings,
  *     output: FilterIOSettings[]
- * ): Promise<[number, number, number[]]>;
- * ff_init_filter_graph(
+ * ): @promise@[number, number, number[]]@;
+ * ff_init_filter_graph@sync(
  *     filters_descr: string,
  *     input: FilterIOSettings[],
  *     output: FilterIOSettings[]
- * ): Promise<[number, number[], number[]]>
+ * ): @promise@[number, number[], number[]]@
  */
 var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, input, output) {
     var abuffersrc, abuffersink, filter_graph, tmp_src_ctx, tmp_sink_ctx,
@@ -910,14 +1118,14 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
  * @param fin  Indicate end-of-stream(s)
  */
 /* @types
- * ff_filter_multi(
+ * ff_filter_multi@sync(
  *     srcs: number, buffersink_ctx: number, framePtr: number,
  *     inFrames: Frame[], fin?: boolean
- * ): Promise<Frame[]>;
- * ff_filter_multi(
+ * ): @promise@Frame[]@;
+ * ff_filter_multi@sync(
  *     srcs: number[], buffersink_ctx: number, framePtr: number,
  *     inFrames: Frame[][], fin?: boolean[]
- * ): Promise<Frame[]>
+ * ): @promise@Frame[]@
  */
 var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, framePtr, inFrames, fin) {
     var outFrames = [];
@@ -972,7 +1180,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
  * Copy out a frame.
  * @param frame  AVFrame
  */
-/// @types ff_copyout_frame(frame: number): Promise<Frame>
+/// @types ff_copyout_frame@sync(frame: number): @promise@Frame@
 var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     var nb_samples = AVFrame_nb_samples(frame);
     if (nb_samples === 0) {
@@ -1089,7 +1297,7 @@ var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, wid
  * @param framePtr  AVFrame
  * @param frame  Frame to copy in
  */
-/// @types ff_copyin_frame(framePtr: number, frame: Frame): Promise<void>
+/// @types ff_copyin_frame@sync(framePtr: number, frame: Frame): @promise@void@
 var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
     if (frame.width)
         return ff_copyin_frame_video(framePtr, frame);
@@ -1217,7 +1425,7 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
  * Copy out a packet.
  * @param pkt  AVPacket
  */
-/// @types ff_copyout_packet(pkt: number): Promise<Packet>
+/// @types ff_copyout_packet@sync(pkt: number): @promise@Packet@
 var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
     var data = AVPacket_data(pkt);
     var size = AVPacket_size(pkt);
@@ -1259,7 +1467,7 @@ var ff_copyout_side_data = Module.ff_copyout_side_data = function(pkt) {
  * @param pktPtr  AVPacket
  * @param packet  Packet to copy in.
  */
-/// @types ff_copyin_packet(pktPtr: number, packet: Packet): Promise<void>
+/// @types ff_copyin_packet@sync(pktPtr: number, packet: Packet): @promise@void@
 var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     ff_set_packet(pktPtr, packet.data);
 
@@ -1289,7 +1497,7 @@ var ff_copyin_side_data = Module.ff_copyin_side_data = function(pktPtr, side_dat
  * Allocate and copy in a 32-bit int list.
  * @param list  List of numbers to copy in
  */
-/// @types ff_malloc_int32_list(list: number[]): Promise<number>
+/// @types ff_malloc_int32_list@sync(list: number[]): @promise@number@
 var ff_malloc_int32_list = Module.ff_malloc_int32_list = function(list) {
     var ptr = malloc(list.length * 4);
     if (ptr === 0)
@@ -1304,7 +1512,7 @@ var ff_malloc_int32_list = Module.ff_malloc_int32_list = function(list) {
  * Allocate and copy in a 64-bit int list.
  * @param list  List of numbers to copy in
  */
-/// @types ff_malloc_int64_list(list: number[]): Promise<number>
+/// @types ff_malloc_int64_list@sync(list: number[]): @promise@number@
 var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
     var ptr = malloc(list.length * 8);
     if (ptr === 0)
@@ -1322,7 +1530,7 @@ var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
  * NULL-terminated.
  * @param arr  Array of strings to copy in.
  */
-/// @types ff_malloc_string_array(arr: string[]): Promise<number>
+/// @types ff_malloc_string_array@sync(arr: string[]): @promise@number@
 var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
     var ptr = malloc((arr.length + 1) * 4);
     if (ptr === 0)
@@ -1339,7 +1547,7 @@ var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
  * Free a string array allocated by ff_malloc_string_array.
  * @param ptr  Pointer to the array to free.
  */
-/// @types ff_free_string_array(ptr: number): Promise<void>
+/// @types ff_free_string_array@sync(ptr: number): @promise@void@
 var ff_free_string_array = Module.ff_free_string_array = function(ptr) {
     var iPtr = ptr / 4;
     for (;; iPtr++) {
@@ -1391,7 +1599,7 @@ function runMain(main, name, args) {
  * Frontend to the ffmpeg CLI (if it's compiled in). Pass arguments as strings,
  * or you may intermix arrays of strings for multiple arguments.
  */
-/// @types ffmpeg(...args: (string | string[])[]): Promise<number>
+/// @types ffmpeg@sync(...args: (string | string[])[]): @promsync@number@
 var ffmpeg = Module.ffmpeg = function() {
     return runMain(ffmpeg_main, "ffmpeg", arguments);
 };
@@ -1400,7 +1608,7 @@ var ffmpeg = Module.ffmpeg = function() {
  * Frontend to the ffprobe CLI (if it's compiled in). Pass arguments as strings,
  * or you may intermix arrays of strings for multiple arguments.
  */
-/// @types ffprobe(...args: (string | string[])[]): Promise<number>
+/// @types ffprobe@sync(...args: (string | string[])[]): @promsync@number@
 var ffprobe = Module.ffprobe = function() {
     return runMain(ffprobe_main, "ffprobe", arguments);
 };

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Copyright (C) 2019-2022 Yahweasel
+ * Copyright (C) 2019-2023 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -16,6 +16,7 @@
 
 const fs = require("fs");
 const funcs = JSON.parse(fs.readFileSync("funcs.json", "utf8"));
+const doxygen = JSON.parse(fs.readFileSync("mk/doxygen.json", "utf8"));
 
 function s(x) {
     return JSON.stringify(x);
@@ -122,53 +123,108 @@ function decls(f, meta) {
 
     outp = inp.replace("@FUNCS", outp);
 
-    fs.writeFileSync("post.js", outp);
+    fs.writeFileSync("build/post.js", outp);
 })();
 
 // libav.types.d.ts
 (function() {
     var inp = fs.readFileSync("libav.types.in.d.ts", "utf8");
 
-    function args(x) {
-        return x.map((t, idx) => `a${idx}: ${t}`).join(",");
-    }
+    let outp = "", syncp = "";
 
     function ret(x) {
         return (x === null) ? "void" : x;
     }
 
-    var outp = "";
+    function signature(name, args, ret, async) {
+        outp += `${name}(${args}): Promise<${ret}>;\n`;
+        if (async)
+            syncp += `${name}_sync(${args}): ${ret} | Promise<${ret}>;\n`;
+        else
+            syncp += `${name}_sync(${args}): ${ret};\n`;
+    }
+
     funcs.functions.forEach((decl) => {
-        outp += `${decl[0]}(${args(decl[2])}): Promise<${ret(decl[1])}>;\n`;
+        const nm = decl[0];
+        const noJSName = nm.replace(/_js$/, "");
+        const doc = doxygen[noJSName];
+        let args;
+        if (doc && doc.param) {
+            // Try to make the parameters names match the real names
+            let param = doc.param;
+            if (!(param instanceof Array))
+                param = [param];
+
+            args = decl[2].map((t, idx) => {
+                if (param[idx])
+                    return `${param[idx].declname}: ${t}`;
+                return `a${idx}: ${t}`;
+            }).join(",");
+
+        } else {
+            args = decl[2].map((t, idx) => `a${idx}: ${t}`).join(",");
+
+        }
+
+        // Give the function description
+        if (doc && doc.briefdescription && doc.briefdescription.para) {
+            let desc = doc.briefdescription.para;
+            if (typeof desc === "object") {
+                if (desc["#text"] && typeof desc["#text"] === "string")
+                    desc = desc["#text"];
+                else
+                    desc = JSON.stringify(desc);
+            } else if (typeof desc !== "string")
+                desc = JSON.stringify(desc);
+            outp += `/**\n * ${desc}\n */\n`;
+            syncp += `/**\n * ${desc}\n */\n`;
+        }
+
+        signature(decl[0], args, ret(decl[1]), decl[3] && decl[3].async);
     });
     accessors((decl, field) => {
         if (field && field.array) {
-            outp += `${decl}(ptr: number, idx: number): Promise<number>;\n`;
-            outp += `${decl}_s(ptr: number, idx: number, val: number): Promise<void>;\n`;
+            signature(decl, "ptr: number, idx: number", "number");
+            signature(`${decl}_s`, "ptr: number, idx: number, val: number",
+                "void");
         } else {
-            outp += `${decl}(ptr: number): Promise<number>;\n`;
-            outp += `${decl}_s(ptr: number, val: number): Promise<void>;\n`;
+            signature(decl, "ptr: number", "number");
+            signature(`${decl}_s`, "ptr: number, val: number", "void");
         }
     });
 
     funcs.freers.forEach((decl) => {
-        outp += `${decl}_js(ptr: number): Promise<void>;\n`;
+        signature(`${decl}_js`, "ptr: number", "void");
     });
 
     funcs.copiers.forEach((type) => {
-        outp += `copyin_${type[0]}(ptr: number, arr: ${type[1]}): Promise<void>;\n`;
-        outp += `copyout_${type[0]}(ptr: number, len: number): Promise<${type[1]}>;\n`;
+        signature(`copyin_${type[0]}`, `ptr: number, arr: ${type[1]}`, "void");
+        signature(`copyout_${type[0]}`, "ptr: number, len: number", type[1]);
     });
 
-    inp = inp.replace("@FUNCS", outp);
+    inp = inp.replace("@FUNCS", outp).replace("@SYNCFUNCS", syncp);
 
     /* We also read type declarations out of post.in.js, to keep all the decls
      * in one place */
     outp = "";
+    syncp = "";
     let lastComment = "";
     let inComment = false;
     let lastTypes = "";
     let inTypes = false;
+
+    function commentType(decl) {
+        let async = decl.replace(/@sync/g, "")
+            .replace(/@promise@([^@]*)@/g, "Promise<$1>")
+            .replace(/@promsync@([^@]*)@/g, "Promise<$1>");
+        let syncy = decl
+            .replace(/@sync/g, "_sync")
+            .replace(/@promise@([^@]*)@/g, "$1")
+            .replace(/@promsync@([^@]*)@/g, "$1 | Promise<$1>");
+        outp += async + ";\n";
+        syncp += syncy + ";\n";
+    }
+
     for (const line of fs.readFileSync("post.in.js", "utf8").split("\n")) {
         if (line === "/**") {
             inComment = true;
@@ -183,17 +239,17 @@ function decls(f, meta) {
         } else if (inTypes) {
             if (line === " */") {
                 inTypes = false;
-                outp += lastComment + lastTypes.trim() + ";\n";
+                commentType(lastComment + lastTypes.trim());
             } else {
                 lastTypes += line.slice(3) + "\n";
             }
         } else if (line.slice(0, 10) === "/// @types") {
-            outp += lastComment + line.slice(11) + ";\n";
+            commentType(lastComment + line.slice(11));
         }
     }
-    outp = inp.replace("@DECLS", outp);
+    outp = inp.replace("@DECLS", outp).replace("@SYNCDECLS", syncp);
 
-    fs.writeFileSync("libav.types.d.ts", outp);
+    fs.writeFileSync("dist/libav.types.d.ts", outp);
 })();
 
 // libav.js
@@ -208,7 +264,7 @@ function decls(f, meta) {
 
     outp = inp.replace("@FUNCS", s(outp)).replace(/@VER/g, ver);
 
-    fs.writeFileSync("libav-" + ver + ".js", outp);
+    fs.writeFileSync("build/libav-" + ver + ".js", outp);
 })();
 
 // exports.json
@@ -218,5 +274,5 @@ function decls(f, meta) {
         outp.push("_" + decl);
     });
 
-    fs.writeFileSync("exports.json", s(outp));
+    fs.writeFileSync("build/exports.json", s(outp));
 })();

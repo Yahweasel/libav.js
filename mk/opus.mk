@@ -1,30 +1,31 @@
 OPUS_VERSION=1.3.1
 
-tmp-inst/%/lib/pkgconfig/opus.pc: opus-$(OPUS_VERSION)/build-%/config.h
-	cd opus-$(OPUS_VERSION)/build-$* ; \
+build/inst/%/lib/pkgconfig/opus.pc: build/opus-$(OPUS_VERSION)/build-%/config.h
+	cd build/opus-$(OPUS_VERSION)/build-$* ; \
 		$(MAKE) install
 
-opus-$(OPUS_VERSION)/build-%/config.h: tmp-inst/%/cflags.txt opus-$(OPUS_VERSION)/configure
-	mkdir -p opus-$(OPUS_VERSION)/build-$*
-	cd opus-$(OPUS_VERSION)/build-$* ; \
-		emconfigure ../configure --prefix="$(PWD)/tmp-inst/$*" --host=mipsel-sysv \
+build/opus-$(OPUS_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/opus-$(OPUS_VERSION)/configure
+	mkdir -p build/opus-$(OPUS_VERSION)/build-$*
+	cd build/opus-$(OPUS_VERSION)/build-$* ; \
+		emconfigure ../configure --prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
 			--disable-shared \
-			CFLAGS="-Oz `cat $(PWD)/tmp-inst/$*/cflags.txt`"
+			CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@
 
-extract: opus-$(OPUS_VERSION)/configure
+extract: build/opus-$(OPUS_VERSION)/configure
 
-opus-$(OPUS_VERSION)/configure: opus-$(OPUS_VERSION).tar.gz
-	tar zxf opus-$(OPUS_VERSION).tar.gz
+build/opus-$(OPUS_VERSION)/configure: build/opus-$(OPUS_VERSION).tar.gz
+	cd build ; tar zxf opus-$(OPUS_VERSION).tar.gz
 	touch $@
 
-opus-$(OPUS_VERSION).tar.gz:
+build/opus-$(OPUS_VERSION).tar.gz:
+	mkdir -p build
 	curl https://downloads.xiph.org/releases/opus/opus-$(OPUS_VERSION).tar.gz -L -o $@
 
 opus-release:
-	cp opus-$(OPUS_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/opus-$(OPUS_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
-	tmp-inst/%/lib/pkgconfig/opus.pc \
-	opus-$(OPUS_VERSION)/build-%/config.h \
-	opus-$(OPUS_VERSION)/configure
+	build/inst/%/lib/pkgconfig/opus.pc \
+	build/opus-$(OPUS_VERSION)/build-%/config.h \
+	build/opus-$(OPUS_VERSION)/configure
