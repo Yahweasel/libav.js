@@ -52,6 +52,10 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" || !Li
             postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
         };
 
+        libav.onblockread = function(name, pos) {
+            postMessage(["onblockread", "onblockread", true, [name, pos]]);
+        };
+
         postMessage(["onready", "onready", true, null]);
     });
 }

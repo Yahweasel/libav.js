@@ -134,6 +134,10 @@
                         onwrite: [function(args) {
                             if (ret.onwrite)
                                 ret.onwrite.apply(ret, args);
+                        }, null],
+                        onblockread: [function(args) {
+                            if (ret.onblockread)
+                                ret.onblockread.apply(ret, args);
                         }, null]
                     };
 

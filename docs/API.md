@@ -307,6 +307,24 @@ mkreaderdev(name: string, mode?: number): Promise<void>
 Make a reader device. This is used to stream data, and acts like a Unix
 character device. The mode is usually unnecessary.
 
+
+### `mkblockreaderdev`
+```
+mkblockreaderdev(name: string): Promise<void>
+```
+
+Similar to `mkreaderdev`, but `mkreaderdev` creates a character device
+(streaming device), whereas `mkblockreaderdev` creates a block device, so it
+will have a size and random access.
+
+To intercept read requests from the block reader device(s), you must set
+`libav.onblockread` to a function `(name: string, position: number, length:
+number) => void`.
+
+Because `onblockread` is a callback, it is usually possible to create a block
+reader device and its callback and then use the API as if no devices are used.
+
+
 ### `ff_reader_dev_send`
 ```
 ff_reader_dev_send(name: string, data: Uint8Array): Promise<void>
@@ -315,18 +333,30 @@ ff_reader_dev_send(name: string, data: Uint8Array): Promise<void>
 Send data to a reader device. There is no limit imposed by libav.js to how much
 data a reader device can buffer.
 
+
+### `ff_block_reader_dev_send`
+```
+ff_block_reader_dev_send(
+    name: string, position: number, data: Uint8Array
+): Promise<void>
+```
+
+Similar to `ff_reader_dev_send`, but for block reader devices, and has a
+position specified for the data.
+
+
 ### `ff_reader_dev_waiting`
 ```
 ff_reader_dev_waiting(): Promise<boolean>
 ```
 
-Returns `true` if one or more reader devices are waiting for data. Typically,
-this is used along with `ff_init_demuxer_file` and `ff_read_multi` to feed in
-data. If instead of awaiting those promises, you store the promises aside, you
-can loop with `while (await libav.ff_reader_dev_waiting())` and send data,
-*then* await the file-reading promise. In this way, you can control the transfer
-of input data without having to send entire files or predict how much data might
-be needed.
+Returns `true` if one or more reader or block reader devices are waiting for
+data. Typically, this is used along with `ff_init_demuxer_file` and
+`ff_read_multi` to feed in data. If instead of awaiting those promises, you
+store the promises aside, you can loop with `while (await
+libav.ff_reader_dev_waiting())` and send data, *then* await the file-reading
+promise. In this way, you can control the transfer of input data without having
+to send entire files or predict how much data might be needed.
 
 
 ## Writer device

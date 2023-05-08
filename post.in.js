@@ -67,6 +67,65 @@ var readerCallbacks = {
     }
 };
 
+var blockReaderCallbacks = {
+    open: function(stream) {
+        if (stream.flags & 3)
+            throw new FS.ErrnoError(ERRNO_CODES.EPERM);
+    },
+
+    close: function(stream) {
+        delete Module.readBuffers[stream.node.name];
+    },
+
+    read: function(stream, buffer, offset, length, position) {
+        var data = Module.blockReadBuffers[stream.node.name];
+        if (!data)
+            throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+
+        var bufMin = data.position;
+        var bufMax = data.position + data.buf.length;
+        if (position < bufMin || position >= bufMax) {
+            if (position >= stream.node.ff_block_reader_dev_size)
+                return 0; // EOF
+
+            if (!Module.onblockread)
+                throw new FS.ErrnoError(ERRNO_CODES.EIO);
+            Module.onblockread(stream.node.name, position, length);
+
+            // If it was asynchronous, this won't be ready yet
+            bufMin = data.position;
+            bufMax = data.position + data.buf.length;
+            if (position < bufMin || position >= bufMax)
+                throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        }
+
+        var bufPos = position - bufMin;
+        var ret;
+        if (bufPos + length < data.buf.length) {
+            // Cut a slice
+            ret = data.buf.subarray(bufPos, bufPos + length);
+        } else {
+            // Get the beginning of what was requested
+            ret = data.buf.subarray(bufPos, data.buf.length);
+        }
+
+        (new Uint8Array(buffer.buffer)).set(ret, offset);
+        return ret.length;
+    },
+
+    write: function() {
+        throw new FS.ErrnoError(ERRNO_CODES.EIO);
+    },
+
+    llseek: function(stream, offset, whence) {
+        if (whence === 2 /* SEEK_END */)
+            offset = stream.node.size + offset;
+        else if (whence === 1 /* SEEK_CUR */)
+            offset += stream.position;
+        return offset;
+    }
+};
+
 var writerCallbacks = {
     open: function(stream) {
         if (!(stream.flags & 1)) {
@@ -107,6 +166,7 @@ var CAccessors = {};
 var readerDev = FS.makedev(44, 0);
 FS.registerDevice(readerDev, readerCallbacks);
 Module.readBuffers = {};
+Module.blockReadBuffers = {};
 var writerDev = FS.makedev(44, 1);
 FS.registerDevice(writerDev, writerCallbacks);
 
@@ -147,7 +207,7 @@ Module.createLazyFile = FS.createLazyFile.bind(FS);
 
 /**
  * Make a reader device.
- * @param name  Filename to create
+ * @param name  Filename to create.
  * @param mode  Unix permissions (pointless since this is an in-memory
  *              filesystem)
  */
@@ -155,6 +215,123 @@ Module.createLazyFile = FS.createLazyFile.bind(FS);
 Module.mkreaderdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0777, readerDev);
     return 0;
+};
+
+/**
+ * Make a block reader "device". Technically a file that we then hijack to have
+ * our behavior.
+ * @param name  Filename to create.
+ * @param size  Size of the device to present.
+ */
+/// @types mkblockreaderdev@sync(name: string, size: number): @promise@void@
+var mkblockreaderdev = Module.mkblockreaderdev = function(name, size) {
+    FS.writeFile(name, new Uint8Array(0));
+    var f = FS.open(name, 0);
+
+    var super_node_ops = f.node.node_ops;
+    var node_ops = f.node.node_ops = Object.create(super_node_ops);
+    node_ops.getattr = function(node) {
+        var ret = super_node_ops.getattr(node);
+        ret.size = size;
+        ret.blksize = 4096;
+        ret.blocks = Math.ceil(size / 4096);
+        return ret;
+    };
+
+    f.node.stream_ops = blockReaderCallbacks;
+    f.node.ff_block_reader_dev_size = size;
+
+    Module.blockReadBuffers[name] = {
+        position: -1,
+        buf: new Uint8Array(0)
+    };
+
+    FS.close(f);
+};
+
+// Readahead devices
+var readaheads = {};
+
+// Original onblockread
+var preReadaheadOnBlockRead = null;
+
+// Passthru for readahead.
+function readaheadOnBlockRead(name, position, length) {
+    if (!(name in readaheads)) {
+        if (preReadaheadOnBlockRead)
+            preReadaheadOnBlockRead(name, position, length);
+        return;
+    }
+
+    var ra = readaheads[name];
+
+    function then() {
+        if (ra.position !== position) {
+            ra.position = position;
+            ra.buf = null;
+            ra.bufPromise = ra.file.slice(position, position + length).arrayBuffer()
+                .then(function(ret) {
+                    ra.buf = ret;
+                }).catch(function(ex) {
+                    console.error(ex + "\n" + ex.stack);
+                    ra.buf = new Uint8Array(0);
+                }).then(then);
+            return;
+        }
+
+        console.log("Readahead " + name + ":" + position + " (" + ra.buf.byteLength + ")");
+        ff_block_reader_dev_send(name, position, new Uint8Array(ra.buf));
+
+        // Attempt to predict the next read
+        position += length;
+        ra.position = position;
+        ra.buf = null;
+        ra.bufPromise = ra.file.slice(position, position + length).arrayBuffer()
+            .then(function(ret) {
+                ra.buf = ret;
+            }).catch(function(ex) {
+                console.error(ex + "\n" + ex.stack);
+                ra.buf = new Uint8Array(0);
+            });
+    }
+
+    if (!ra.buf && ra.bufPromise)
+        ra.bufPromise.then(then);
+    else
+        then();
+}
+
+/**
+ * Make a readahead device. This reads a File (or other Blob) and attempts to
+ * read ahead of whatever libav actually asked for. Note that this overrides
+ * onblockread, so if you want to support both kinds of files, make sure you set
+ * onblockread before calling this.
+ * @param name  Filename to create.
+ * @param file  Blob or file to read.
+ */
+/// @types mkreadaheadfile@sync(name: string, file: Blob): @promise@void@
+Module.mkreadaheadfile = function(name, file) {
+    if (Module.onblockread !== readaheadOnBlockRead) {
+        preReadaheadOnBlockRead = Module.onblockread;
+        Module.onblockread = readaheadOnBlockRead;
+    }
+
+    mkblockreaderdev(name, file.size);
+    readaheads[name] = {
+        file: file,
+        position: -1,
+        bufPromise: null,
+        buf: null
+    };
+};
+
+/**
+ * Unlink a readahead file. Also gets rid of the File reference.
+ * @param name  Filename to unlink.
+ */
+Module.unlinkreadaheadfile = function(name) {
+    FS.unlink(name);
+    delete readaheads[name];
 };
 
 /**
@@ -221,6 +398,37 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
     }
 
     // Wake up waiters
+    var waiters = Module.ff_reader_dev_waiters;
+    Module.ff_reader_dev_waiters = [];
+    for (var i = 0; i < waiters.length; i++)
+        waiters[i]();
+};
+
+/**
+ * Send some data to a block reader device.
+ * @param name  Filename of the reader device.
+ * @param pos  Position of the data in the file.
+ * @param data  Data to send.
+ */
+/* @types
+ * ff_block_reader_dev_send@sync(
+ *     name: string, pos: number, data: Uint8Array
+ *  ): @promise@void@
+ */
+var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, pos, data) {
+    if (!(name in Module.blockReadBuffers)) {
+        Module.blockReadBuffers[name] = {
+            position: pos,
+            buf: data
+        };
+    } else {
+        var idata = Module.blockReadBuffers[name];
+        idata.position = pos;
+        idata.buf = data;
+    }
+
+    /* Wake up waiters (FIXME: make this file-specific so we don't get weird
+     * loops) */
     var waiters = Module.ff_reader_dev_waiters;
     Module.ff_reader_dev_waiters = [];
     for (var i = 0; i < waiters.length; i++)
