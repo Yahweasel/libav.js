@@ -6,6 +6,7 @@
 --enable-muxer=matroska --enable-muxer=webm
 --enable-libopus
 --enable-decoder=libopus
+--enable-bsf=opus_metadata
 --enable-encoder=libopus
 --enable-demuxer=mov
 --enable-muxer=ipod
@@ -21,4 +22,5 @@
 --enable-libvpx
 --enable-encoder=libvpx_vp8
 --enable-decoder=h264
+--enable-bsf=h264_metadata
 --enable-bsf=extract_extradata

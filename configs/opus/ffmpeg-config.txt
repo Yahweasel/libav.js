@@ -4,4 +4,5 @@
 --enable-muxer=ogg
 --enable-libopus
 --enable-decoder=libopus
+--enable-bsf=opus_metadata
 --enable-encoder=libopus
