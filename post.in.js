@@ -1591,8 +1591,26 @@ function runMain(main, name, args) {
         else
             throw ex;
     }
-    ff_free_string_array(argv);
-    return ret;
+
+    function cleanup() {
+        ff_free_string_array(argv);
+    }
+
+    if (ret && ret.then) {
+        return ret.then(function(ret) {
+            cleanup();
+            return ret;
+        }).catch(function(ex) {
+            cleanup();
+            if (ex && ex.name === "ExitStatus")
+                return Promise.resolve(ex.status);
+            else
+                return Promise.reject(ex);
+        });
+    } else {
+        cleanup();
+        return ret;
+    }
 }
 
 /**

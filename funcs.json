@@ -113,8 +113,8 @@
         ["dup2", "number", ["number", "number"]],
         ["libavjs_with_swscale", "number", []],
 
-        ["ffmpeg_main", "number", ["number", "number"]],
-        ["ffprobe_main", "number", ["number", "number"]]
+        ["ffmpeg_main", "number", ["number", "number"], {"async": true}],
+        ["ffprobe_main", "number", ["number", "number"], {"async": true}]
     ],
 
     "meta": [
