@@ -37,6 +37,8 @@
 --enable-bsf=extract_extradata
 --enable-decoder=prores
 --enable-bsf=prores_metadata
+--enable-demuxer=matroska
+--enable-demuxer=flac
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-demuxer=aiff

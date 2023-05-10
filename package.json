@@ -1,8 +1,8 @@
 {
   "name": "@descript/libav.js",
-  "version": "3.9.30",
+  "version": "3.9.31",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
-  "main": "dist/libav-3.9.30-descript-p3.js",
+  "main": "dist/libav-3.9.31-descript-p3.js",
   "types": "dist/libav.types.d.ts",
   "directories": {
     "test": "tests"
