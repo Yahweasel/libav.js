@@ -8,6 +8,7 @@
 --enable-decoder=libopus
 --enable-bsf=opus_metadata
 --enable-encoder=libopus
+--enable-decoder=opus
 --enable-demuxer=mov
 --enable-muxer=ipod
 --enable-decoder=aac
