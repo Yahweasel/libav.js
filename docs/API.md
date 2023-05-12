@@ -295,7 +295,8 @@ these are the last input frames.
 # Filesystem
 
 The `readFile`, `writeFile`, `unlink`, and `mkdev` functions are provided
-directly from Emscripten's filesystem module.
+directly from Emscripten's filesystem module. In addition, functions to create
+streaming devices are provided. These are further documented in [IO.md](IO.md).
 
 ## Reader device
 
@@ -371,6 +372,20 @@ aren't streamable, so this acts a bit more like a Unix *block* device.
 
 To receive data from the writer device(s), you must set `libav.onwrite` to a
 function `(name: string, position: number, buffer: Uint8Array) => void`.
+
+
+### `mkstreamwriterdev`
+```
+mkstreamwriterdev(name: string, mode? number): Promise<void>
+```
+
+Make a stream writer device. Identical to a writer device except that seeking
+is not allowed, so libav treats it like a stream. Most formats either don't
+care or simply won't work with a stream, but certain formats (like `wav` and
+`matroska`) will behave differently if the output is a stream than if it's a
+block device.
+
+Receive data in the same way as with `mkwriterdev`.
 
 
 # CLI
