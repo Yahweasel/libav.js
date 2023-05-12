@@ -287,6 +287,12 @@
             ret.AVIO_FLAG_NONBLOCK = 8;
             ret.AVIO_FLAG_DIRECT = 0x8000;
 
+            // AVSEEK_FLAGs
+            ret.AVSEEK_FLAG_BACKWARD = 1;
+            ret.AVSEEK_FLAG_BYTE = 2;
+            ret.AVSEEK_FLAG_ANY = 4;
+            ret.AVSEEK_FLAG_FRAME = 8;
+
             // Errors
             ret.EAGAIN = 6;
             ret.AVERROR_EOF = -0x20464f45;
