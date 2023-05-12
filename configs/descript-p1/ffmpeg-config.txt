@@ -32,6 +32,7 @@
 --enable-decoder=libopus
 --enable-encoder=libopus
 --enable-decoder=libopus
+--enable-decoder=opus
 --enable-decoder=h264
 --enable-bsf=extract_extradata
 --enable-decoder=hevc
