@@ -156,6 +156,18 @@ var writerCallbacks = {
     }
 };
 
+var streamWriterCallbacks = Object.create(writerCallbacks);
+streamWriterCallbacks.write = function(stream, buffer, offset, length, position) {
+    if (position != stream.position)
+        throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
+    var ret = writerCallbacks.write(stream, buffer, offset, length, position);
+    stream.position += ret;
+    return ret;
+};
+streamWriterCallbacks.llseek = function() {
+    throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
+};
+
 /* Original versions of all our functions, since the Module version is replaced
  * if we're a Worker */
 var CAccessors = {};
@@ -169,6 +181,8 @@ Module.readBuffers = {};
 Module.blockReadBuffers = {};
 var writerDev = FS.makedev(44, 1);
 FS.registerDevice(writerDev, writerCallbacks);
+var streamWriterDev = FS.makedev(44, 2);
+FS.registerDevice(streamWriterDev, streamWriterCallbacks);
 
 /**
  * Read a complete file from the in-memory filesystem.
@@ -342,6 +356,18 @@ Module.unlinkreadaheadfile = function(name) {
 /// @types mkwriterdev@sync(name: string, mode?: number): @promise@void@
 Module.mkwriterdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0777, writerDev);
+    return 0;
+};
+
+/**
+ * Make a stream writer device. The same as a writer device but does not allow
+ * seeking.
+ * @param name  Filename to create
+ * @param mode  Unix permissions
+ */
+/// @types mkstreamwriterdev@sync(name: string, mode?: number): @promise@void@
+Module.mkstreamwriterdev = function(loc, mode) {
+    FS.mkdev(loc, mode?mode:0777, streamWriterDev);
     return 0;
 };
 
