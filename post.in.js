@@ -160,9 +160,7 @@ var streamWriterCallbacks = Object.create(writerCallbacks);
 streamWriterCallbacks.write = function(stream, buffer, offset, length, position) {
     if (position != stream.position)
         throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
-    var ret = writerCallbacks.write(stream, buffer, offset, length, position);
-    stream.position += ret;
-    return ret;
+    return writerCallbacks.write(stream, buffer, offset, length, position);
 };
 streamWriterCallbacks.llseek = function() {
     throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
