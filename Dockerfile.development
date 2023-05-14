@@ -1,0 +1,7 @@
+# syntax = docker/dockerfile:1.2
+FROM emscripten/emsdk
+
+ARG ENV
+
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y pkg-config
+# This dockerfile supplies a perfect building environment, e.g. to be used with VS code
