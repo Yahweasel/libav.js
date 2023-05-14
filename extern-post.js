@@ -14,18 +14,20 @@
  */
 
 if (typeof LibAV !== "undefined" && LibAV.wasmurl){
-    (globalThis || window || self).LibAVFactoryAsync = new Promise((resolve, reject) => {   
+    (globalThis || window || self).LibAVFactoryAsync = new Promise(function (resolve, reject) {   
             const initialFactory = LibAVFactory
             fetch(LibAV.wasmurl).then(function (response) {
             if (!response['ok']) {
                throw ("failed to load wasm binary file at '" + LibAV.wasmurl + "'");
             }
             return response['arrayBuffer']();
-        }).then((binary) => {
+        }).then(function (binary) {
             resolve (function () { 
                 return initialFactory({ wasmBinary: binary });
             })
-        }).catch((error)=> reject(error))
+        }).catch(function (error) {
+            reject(error)
+        })
   })
 }
 
