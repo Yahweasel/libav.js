@@ -73,11 +73,29 @@
     }
     libav.target = target;
 
+    function getFiles(conf) {
+        // define a similar function, adapted to your bundler, probably you will ignore base
+        if (conf.ext === "wasm") {
+            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + conf.dbg + "." + conf.topts + ".wasm");
+        } else if (conf.ext === "import") {
+            // not supported by the standard implementation, since it is only required for bundler
+            // and it would trigger the bundler and fail.
+            return null
+            // example what it should do, if it is implemented externally
+            // return import(conf.base + "/libav-" + conf.ver + "-" + conf.config + conf.dbg + "." + conf.topts + ".js")
+        } else {
+            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + conf.dbg + "." + conf.topts + ".js");
+        }
+    } 
+
     // Now start making our instance generating function
     libav.LibAV = function(opts) {
         opts = opts || {};
         var base = opts.base || libav.base;
-        var toImport = base + "/libav-@VER-@CONFIG@DBG." + target(opts) + ".js";
+        var topts = target(opts)
+        var getfiles = libav.getFiles || getFiles
+        var url = getfiles( { ext: "js", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
+        (globalThis || window || self).LibAV.wasmurl = getfiles( { ext: "wasm", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
         var ret;
 
         return Promise.all([]).then(function() {
@@ -85,21 +103,36 @@
             if (!libav.LibAVFactory) {
                 if (nodejs) {
                     // Node.js: Load LibAV now
-                    libav.LibAVFactory = require(toImport);
+                    libav.LibAVFactory = require(url);
 
                 } else if (typeof Worker !== "undefined" && !opts.noworker) {
                     // Worker: Nothing to load now
 
                 } else if (typeof importScripts !== "undefined") {
                     // Worker scope. Import it.
-                    importScripts(toImport);
-                    libav.LibAVFactory = LibAVFactory;
+                    if (this !== undefined) { // this tells us, if we inside a module
+                        importScripts(url);
+                    } else {
+                        var imported = getfiles( { ext: "import", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
+                        return imported
+                            .then((mod) => {
+                                if (globalThis.LibAVFactoryAsync)
+                                    return globalThis.LibAVFactoryAsync
+                                else throw new Error('No LibAVFactoryAsync')
+                            })
+                            .then((LibAVFactory) => {
+                                libav.LibAVFactory = LibAVFactory
+                            })
+                            .catch((error) => {
+                               console.log('Error loading libAV', error)
+                            })
+                    }
 
                 } else {
                     // Web: Load the script
                     return new Promise(function(res, rej) {
                         var scr = document.createElement("script");
-                        scr.src = toImport;
+                        scr.src = url;
                         scr.addEventListener("load", res);
                         scr.addEventListener("error", rej);
                         scr.async = true;
@@ -119,11 +152,14 @@
                 ret = {};
 
                 // Load the worker
-                ret.worker = new Worker(toImport);
+                ret.worker = new Worker(url);
+
+                ret.worker.postMessage({
+                    wasmurl: (globalThis || window || self).LibAV.wasmurl.toString()
+                  })
 
                 // Report our readiness
                 return new Promise(function(res, rej) {
-                    var ready = 0;
 
                     // Our handlers
                     ret.on = 1;
@@ -179,6 +215,8 @@
                         libav.LibAVFactory().then(function(x) {
                             delete x.then;
                             res(x);
+                        }).catch((error) => { // promise was unhandled, can lead to wacky errors
+                            console.log('libAV: problem', error)
                         });
                     });
                 }).then(function(x) {

@@ -13,10 +13,58 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" || !LibAV.nolibavworker)) {
+if (typeof LibAV !== "undefined" && LibAV.wasmurl){
+    (globalThis || window || self).LibAVFactoryAsync = new Promise((resolve, reject) => {   
+            const initialFactory = LibAVFactory
+            fetch(LibAV.wasmurl).then((response) => {
+            if (!response['ok']) {
+               throw ("failed to load wasm binary file at '" + LibAV.wasmurl + "'");
+            }
+            return response['arrayBuffer']();
+        }).then((binary) => {
+            resolve (() => { 
+                return initialFactory({ wasmBinary: binary });
+            })
+        }).catch((error)=> reject(error))
+  })
+}
+
+if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || !LibAV.nolibavworker*/)) {
     // We're a WebWorker, so arrange messages
-    LibAVFactory().then(function(libav) {
-        onmessage = function(e) {
+    const loadLibAV = async (wasmurl) => {
+        try {
+            const response = await fetch(wasmurl);
+            if (!response['ok']) {
+                throw ("failed to load wasm binary file at '" + wasmurl + "'");
+            }
+            return await LibAVFactory({ wasmBinary: await response['arrayBuffer']()})
+        } catch(error) {
+            throw error
+        }
+    }   
+    let libav
+    onmessage = async function (e) {
+            if (e?.data?.wasmurl) {
+                try {
+       
+                   libav = await loadLibAV(e.data.wasmurl)
+                   libav.onwrite = function (name, pos, buf) {
+                        /* We have to buf.slice(0) so we don't duplicate the entire heap just
+                         * to get one part of it in postMessage */
+                        buf = buf.slice(0);
+                        postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
+                    };
+
+          
+                    libav.onblockread = function(name, pos) {
+                        postMessage(["onblockread", "onblockread", true, [name, pos]]);
+                    };
+                    postMessage(['onready', 'onready', true, null])
+                } catch (ex) {  
+                    console.log('Loading LibAV failed' + '\n' + ex.stack)
+                }
+                return
+            } 
             var id = e.data[0];
             var fun = e.data[1];
             var args = e.data.slice(2);
@@ -43,19 +91,5 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" || !Li
                 postMessage([id, fun, succ, ret]);
 
             }
-        };
-
-        libav.onwrite = function(name, pos, buf) {
-            /* We have to buf.slice(0) so we don't duplicate the entire heap just
-             * to get one part of it in postMessage */
-            buf = buf.slice(0);
-            postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
-        };
-
-        libav.onblockread = function(name, pos) {
-            postMessage(["onblockread", "onblockread", true, [name, pos]]);
-        };
-
-        postMessage(["onready", "onready", true, null]);
-    });
+        }
 }
