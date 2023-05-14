@@ -115,15 +115,15 @@
                     } else {
                         var imported = getfiles( { ext: "import", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
                         return imported
-                            .then((mod) => {
+                            .then(function(mod) {
                                 if (globalThis.LibAVFactoryAsync)
                                     return globalThis.LibAVFactoryAsync
                                 else throw new Error('No LibAVFactoryAsync')
                             })
-                            .then((LibAVFactory) => {
+                            .then(function(LibAVFactory) {
                                 libav.LibAVFactory = LibAVFactory
                             })
-                            .catch((error) => {
+                            .catch(function(error) {
                                console.log('Error loading libAV', error)
                             })
                     }
@@ -215,7 +215,7 @@
                         libav.LibAVFactory().then(function(x) {
                             delete x.then;
                             res(x);
-                        }).catch((error) => { // promise was unhandled, can lead to wacky errors
+                        }).catch(function (error) { // promise was unhandled, can lead to wacky errors
                             console.log('libAV: problem', error)
                         });
                     });

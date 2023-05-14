@@ -16,13 +16,13 @@
 if (typeof LibAV !== "undefined" && LibAV.wasmurl){
     (globalThis || window || self).LibAVFactoryAsync = new Promise((resolve, reject) => {   
             const initialFactory = LibAVFactory
-            fetch(LibAV.wasmurl).then((response) => {
+            fetch(LibAV.wasmurl).then(function (response) {
             if (!response['ok']) {
                throw ("failed to load wasm binary file at '" + LibAV.wasmurl + "'");
             }
             return response['arrayBuffer']();
         }).then((binary) => {
-            resolve (() => { 
+            resolve (function () { 
                 return initialFactory({ wasmBinary: binary });
             })
         }).catch((error)=> reject(error))
@@ -31,23 +31,27 @@ if (typeof LibAV !== "undefined" && LibAV.wasmurl){
 
 if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || !LibAV.nolibavworker*/)) {
     // We're a WebWorker, so arrange messages
-    const loadLibAV = async (wasmurl) => {
-        try {
-            const response = await fetch(wasmurl);
-            if (!response['ok']) {
-                throw ("failed to load wasm binary file at '" + wasmurl + "'");
-            }
-            return await LibAVFactory({ wasmBinary: await response['arrayBuffer']()})
-        } catch(error) {
-            throw error
-        }
+    const loadLibAV = function (wasmurl) {
+        return new Promise(function (response, reject) {
+            fetch(wasmurl).then(function (response) {
+                if (!response['ok']) {
+                    throw ("failed to load wasm binary file at '" + wasmurl + "'");
+                }
+                return response['arrayBuffer']()
+            }).then(function (wasmBinary) {
+                return LibAVFactory({ wasmBinary: wasmBinary })
+            }).then(function (libav) {
+                response(libav)
+            }).catch(function (error) {
+                reject(error)
+            })
+        })
     }   
     let libav
-    onmessage = async function (e) {
-            if (e?.data?.wasmurl) {
-                try {
-       
-                   libav = await loadLibAV(e.data.wasmurl)
+    onmessage = function (e) {
+            if (e && e.data && e.data.wasmurl) {
+                loadLibAV(e.data.wasmurl).then(function (lib) {
+                   libav = lib
                    libav.onwrite = function (name, pos, buf) {
                         /* We have to buf.slice(0) so we don't duplicate the entire heap just
                          * to get one part of it in postMessage */
@@ -55,14 +59,13 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || 
                         postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
                     };
 
-          
                     libav.onblockread = function(name, pos) {
                         postMessage(["onblockread", "onblockread", true, [name, pos]]);
                     };
                     postMessage(['onready', 'onready', true, null])
-                } catch (ex) {  
+                }).catch(function (ex) {
                     console.log('Loading LibAV failed' + '\n' + ex.stack)
-                }
+                })
                 return
             } 
             var id = e.data[0];
