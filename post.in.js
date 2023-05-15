@@ -13,6 +13,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Fix to _scriptDir bugginess
+if (typeof _scriptDir === "undefined")
+    _scriptDir = self.location.href;
+
 var ERRNO_CODES = {
     EPERM: 1,
     EIO: 5,
