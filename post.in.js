@@ -295,7 +295,6 @@ function readaheadOnBlockRead(name, position, length) {
             return;
         }
 
-        console.log("Readahead " + name + ":" + position + " (" + ra.buf.byteLength + ")");
         ff_block_reader_dev_send(name, position, new Uint8Array(ra.buf));
 
         // Attempt to predict the next read
