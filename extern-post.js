@@ -15,7 +15,7 @@
 
 if (typeof LibAV !== "undefined" && LibAV.wasmurl){
     (globalThis || window || self).LibAVFactoryAsync = new Promise(function (resolve, reject) {   
-            const initialFactory = LibAVFactory
+            var initialFactory = LibAVFactory;
             fetch(LibAV.wasmurl).then(function (response) {
             if (!response['ok']) {
                throw ("failed to load wasm binary file at '" + LibAV.wasmurl + "'");
@@ -24,36 +24,36 @@ if (typeof LibAV !== "undefined" && LibAV.wasmurl){
         }).then(function (binary) {
             resolve (function () { 
                 return initialFactory({ wasmBinary: binary });
-            })
+            });
         }).catch(function (error) {
-            reject(error)
-        })
-  })
+            reject(error);
+        });
+  });
 }
 
 if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || !LibAV.nolibavworker*/)) {
     // We're a WebWorker, so arrange messages
-    const loadLibAV = function (wasmurl) {
+    var loadLibAV = function (wasmurl) {
         return new Promise(function (response, reject) {
             fetch(wasmurl).then(function (response) {
                 if (!response['ok']) {
                     throw ("failed to load wasm binary file at '" + wasmurl + "'");
                 }
-                return response['arrayBuffer']()
+                return response['arrayBuffer']();
             }).then(function (wasmBinary) {
-                return LibAVFactory({ wasmBinary: wasmBinary })
+                return LibAVFactory({ wasmBinary: wasmBinary });
             }).then(function (libav) {
-                response(libav)
+                response(libav);
             }).catch(function (error) {
-                reject(error)
-            })
-        })
-    }   
-    let libav
+                reject(error);
+            });
+        });
+    };   
+    var libav;
     onmessage = function (e) {
             if (e && e.data && e.data.wasmurl) {
                 loadLibAV(e.data.wasmurl).then(function (lib) {
-                   libav = lib
+                   libav = lib;
                    libav.onwrite = function (name, pos, buf) {
                         /* We have to buf.slice(0) so we don't duplicate the entire heap just
                          * to get one part of it in postMessage */
@@ -64,11 +64,11 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || 
                     libav.onblockread = function(name, pos) {
                         postMessage(["onblockread", "onblockread", true, [name, pos]]);
                     };
-                    postMessage(['onready', 'onready', true, null])
+                    postMessage(['onready', 'onready', true, null]);
                 }).catch(function (ex) {
-                    console.log('Loading LibAV failed' + '\n' + ex.stack)
-                })
-                return
+                    console.log('Loading LibAV failed' + '\n' + ex.stack);
+                });
+                return;
             } 
             var id = e.data[0];
             var fun = e.data[1];
@@ -96,5 +96,5 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || 
                 postMessage([id, fun, succ, ret]);
 
             }
-        }
+        };
 }

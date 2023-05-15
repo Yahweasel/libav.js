@@ -80,7 +80,7 @@
         } else if (conf.ext === "import") {
             // not supported by the standard implementation, since it is only required for bundler
             // and it would trigger the bundler and fail.
-            return null
+            return null;
             // example what it should do, if it is implemented externally
             // return import(conf.base + "/libav-" + conf.ver + "-" + conf.config + conf.dbg + "." + conf.topts + ".js")
         } else {
@@ -92,9 +92,9 @@
     libav.LibAV = function(opts) {
         opts = opts || {};
         var base = opts.base || libav.base;
-        var topts = target(opts)
-        var getfiles = libav.getFiles || getFiles
-        var url = getfiles( { ext: "js", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
+        var topts = target(opts);
+        var getfiles = libav.getFiles || getFiles;
+        var url = getfiles( { ext: "js", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", topts: topts });
         (globalThis || window || self).LibAV.wasmurl = getfiles( { ext: "wasm", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
         var ret;
 
@@ -113,19 +113,19 @@
                     if (this !== undefined) { // this tells us, if we inside a module
                         importScripts(url);
                     } else {
-                        var imported = getfiles( { ext: "import", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
+                        var imported = getfiles( { ext: "import", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", topts: topts });
                         return imported
                             .then(function(mod) {
                                 if (globalThis.LibAVFactoryAsync)
-                                    return globalThis.LibAVFactoryAsync
-                                else throw new Error('No LibAVFactoryAsync')
+                                    return globalThis.LibAVFactoryAsync;
+                                else throw new Error('No LibAVFactoryAsync');
                             })
                             .then(function(LibAVFactory) {
-                                libav.LibAVFactory = LibAVFactory
+                                libav.LibAVFactory = LibAVFactory;
                             })
                             .catch(function(error) {
-                               console.log('Error loading libAV', error)
-                            })
+                               console.log('Error loading libAV', error);
+                            });
                     }
 
                 } else {
@@ -156,7 +156,7 @@
 
                 ret.worker.postMessage({
                     wasmurl: (globalThis || window || self).LibAV.wasmurl.toString()
-                  })
+                  });
 
                 // Report our readiness
                 return new Promise(function(res, rej) {
@@ -216,7 +216,7 @@
                             delete x.then;
                             res(x);
                         }).catch(function (error) { // promise was unhandled, can lead to wacky errors
-                            console.log('libAV: problem', error)
+                            console.log('libAV: problem', error);
                         });
                     });
                 }).then(function(x) {
@@ -261,7 +261,7 @@
                                 rej(ex);
                             }
                         });
-                    }
+                    };
 
                 } else {
                     ret[f] = function() {
