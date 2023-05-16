@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019, 2020 Yahweasel
+ * Copyright (C) 2019-2023 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -31,8 +31,16 @@ if (typeof LibAV !== "undefined" && LibAV.wasmurl){
   });
 }
 
-if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || !LibAV.nolibavworker*/)) {
-    // We're a WebWorker, so arrange messages
+if (/* We're in a worker */
+    typeof importScripts !== "undefined" &&
+    /* CHORE: Test the following code beforre merge */
+    /* We haven't explicitly been requested not to load */
+    (typeof LibAV === "undefined" || !LibAV.nolibavworker) &&
+
+    /* We're not being loaded as a thread */
+    typeof Module === "undefined"
+    ) {
+    // We're the primary code for this worker
     var loadLibAV = function (wasmurl) {
         return new Promise(function (response, reject) {
             fetch(wasmurl).then(function (response) {
@@ -70,6 +78,7 @@ if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" /* || 
                 });
                 return;
             } 
+
             var id = e.data[0];
             var fun = e.data[1];
             var args = e.data.slice(2);

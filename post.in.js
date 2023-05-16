@@ -13,6 +13,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Fix to _scriptDir bugginess
+if (typeof _scriptDir === "undefined")
+    _scriptDir = self.location.href;
+
 var ERRNO_CODES = {
     EPERM: 1,
     EIO: 5,
@@ -291,7 +295,6 @@ function readaheadOnBlockRead(name, position, length) {
             return;
         }
 
-        console.log("Readahead " + name + ":" + position + " (" + ra.buf.byteLength + ")");
         ff_block_reader_dev_send(name, position, new Uint8Array(ra.buf));
 
         // Attempt to predict the next read

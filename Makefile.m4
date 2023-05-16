@@ -81,14 +81,14 @@ buildrule(dbg.asm.js, base, [[[-g2 -s WASM=0]]])
 buildrule(wasm.js, base, [[[]]])
 buildrule(dbg.wasm.js, base, [[[-g2]]])
 # wasm + threads
-buildrule(thr.js, thr, [[[-pthread]]])
-buildrule(dbg.thr.js, thr, [[[-g2 -pthread]]])
+buildrule(thr.js, thr, [[[-pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
+buildrule(dbg.thr.js, thr, [[[-g2 -pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
 # wasm + simd
 buildrule(simd.js, simd, [[[-msimd128]]])
 buildrule(dbg.simd.js, simd, [[[-g2 -msimd128]]])
 # wasm + threads + simd
-buildrule(thrsimd.js, thrsimd, [[[-pthread -msimd128]]])
-buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 -pthread -msimd128]]])
+buildrule(thrsimd.js, thrsimd, [[[-pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency -msimd128]]])
+buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 -pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency -msimd128]]])
 
 build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 	mkdir -p build dist
