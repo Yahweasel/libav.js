@@ -418,6 +418,76 @@ AVFormatContext *avformat_open_input_js(const char *url, AVInputFormat *fmt,
     return ret;
 }
 
+
+char readRawPacketDurations[1000000] = "";
+const char * avformat_read_raw_packet_durations(const char *filename) {
+
+    AVFormatContext *pFormatContext = NULL;
+
+    // Open the file and read header.
+    int ret;
+    if ((ret = avformat_open_input(&pFormatContext, filename, NULL, NULL)) < 0) {
+        printf("Error: avformat_read_raw_packet_durations in: (%s). \"%s\",  %i \n", filename, av_err2str(ret), ret);
+        strcpy(readRawPacketDurations, "{\"audioDuration\":-1, \"videoDuration\":-1}");
+        return readRawPacketDurations;
+    }
+
+    float audioDuration = -1;
+    float videoDuration = -1;
+
+    AVPacket pkt;
+    // Seek to the last keyframe
+    av_seek_frame(pFormatContext, -1, INT64_MAX, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_ANY);
+
+    // Initialize the highest timestamp
+    double max_audio_duration = -1;
+    double max_video_duration = -1;
+
+    while(av_read_frame(pFormatContext, &pkt)>=0) {
+        if(pkt.flags & AV_PKT_FLAG_KEY) {
+            // This is a new GOP, stop scanning
+            break;
+        }
+
+        AVStream* avStream = pFormatContext->streams[pkt.stream_index];
+
+        // Skip if it's not audio or video
+        bool isVideo = avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO;
+        bool isAudio = avStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO;
+        if( isAudio || isVideo ){
+            double end = (pkt.pts + pkt.duration)/av_q2d(pFormatContext->streams[pkt.stream_index]->time_base);
+
+            if(isVideo && end>max_video_duration){
+                max_video_duration = end;
+            } else if(isAudio && end>max_audio_duration){
+                max_audio_duration = end;
+            }
+        }
+
+        av_packet_unref(&pkt);
+    }
+
+    // Audio and video
+    if( max_audio_duration != -1 && max_video_duration != -1 ) {
+        sprintf(readRawPacketDurations, "{\"audioDuration\": %f, \"videoDuration\": %f}", max_audio_duration, max_video_duration);
+        return readRawPacketDurations;
+    }
+    // Just audio
+    else if(audioDuration != -1){
+        sprintf(readRawPacketDurations, "{\"audioDuration\": %f, \"videoDuration\": -1}", max_audio_duration);
+        return readRawPacketDurations;
+    }
+    // Just video
+    else if(videoDuration != -1){
+        sprintf(readRawPacketDurations, "{\"videoDuration\": %f, \"audioDuration\": -1}", max_video_duration);
+        return readRawPacketDurations;
+    } else {
+        printf("Error: avformat_read_raw_packet_durations no audio or video tracks");
+        strcpy(readRawPacketDurations, "{\"audioDuration\":-1, \"videoDuration\":-1}");
+        return readRawPacketDurations;
+    }
+}
+
 char videoSampleTimingJson2[1000000] = "";
 const char * avformat_get_video_sample_timing(const char *filename) {
     videoSampleTimingJson2[0] = 0;
