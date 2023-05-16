@@ -5,7 +5,7 @@ FRAGS='[
 "audio-filters", "swscale", "workerfs", "cli",
 "format-wav", "demuxer-mp3", "decoder-mp3", "format-mp4", "format-ogg", "format-aac",
 "demuxer-gif",
-"codec-aac", "format-pcm_f32le", "codec-pcm_f32le", "codec-libopus", "decoder-h264", "decoder-hevc", "decoder-prores"'
+"codec-aac", "format-pcm_f32le", "codec-pcm_f32le", "codec-libopus", "decoder-opus", "decoder-h264", "decoder-hevc", "decoder-prores"'
 ./mkconfig.js 'descript-p1' "$FRAGS]"
 FRAGS="$FRAGS"',
 "demuxer-webm", "demuxer-flac",
