@@ -116,8 +116,9 @@
                         var imported = getfiles( { ext: "import", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", topts: topts });
                         return imported
                             .then(function(mod) {
-                                if (globalThis.LibAVFactoryAsync)
-                                    return globalThis.LibAVFactoryAsync;
+                                var gt = (globalThis || window || self)
+                                if (gt.LibAVFactoryAsync)
+                                    return gt.LibAVFactoryAsync;
                                 else throw new Error('No LibAVFactoryAsync');
                             })
                             .then(function(LibAVFactory) {
