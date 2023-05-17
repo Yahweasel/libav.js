@@ -133,7 +133,7 @@
                     // Web: Load the script
                     return new Promise(function(res, rej) {
                         var scr = document.createElement("script");
-                        scr.src = url;
+                        scr.src = url.href;
                         scr.addEventListener("load", res);
                         scr.addEventListener("error", rej);
                         scr.async = true;
