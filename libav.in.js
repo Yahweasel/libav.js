@@ -311,23 +311,23 @@
             }
 
             var funcs = @FUNCS;
-            var fsFuncs = @FSFUNCS;
+            var localFuncs = @LOCALFUNCS;
 
             ret.libavjsMode = mode;
             if (mode === "worker") {
                 // All indirect
                 indirectors(funcs);
-                indirectors(fsFuncs);
+                indirectors(localFuncs);
 
             } else if (mode === "threads") {
-                // FS funcs are direct, rest are indirect
+                // Some funcs are direct, rest are indirect
                 indirectors(funcs);
-                directs(fsFuncs);
+                directs(localFuncs);
 
             } else { // direct
                 // All direct
                 directs(funcs);
-                directs(fsFuncs);
+                directs(localFuncs);
 
             }
 

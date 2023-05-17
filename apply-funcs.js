@@ -261,17 +261,17 @@ function decls(f, meta) {
     var inp = fs.readFileSync("libav.in.js", "utf8");
 
     var normalFuncs = [];
-    var fsFuncs = [];
+    var localFuncs = [];
     decls((decl, type) => {
-        if (type === "fs")
-            fsFuncs.push(decl);
+        if (type === "fs" || type === "copyin" || type === "copyout")
+            localFuncs.push(decl);
         else
             normalFuncs.push(decl);
     }, true);
 
     outp = inp
         .replace("@FUNCS", s(normalFuncs))
-        .replace("@FSFUNCS", s(fsFuncs))
+        .replace("@LOCALFUNCS", s(localFuncs))
         .replace(/@VER/g, ver);
 
     fs.writeFileSync("build/libav-" + ver + ".js", outp);
