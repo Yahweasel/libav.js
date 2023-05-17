@@ -7,6 +7,8 @@ LIBAVJS_VERSION=3.11.5.1.2
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 CFLAGS=-Oz
+SIMDFLAGS=-msimd128
+THRFLAGS=-pthread
 EFLAGS=\
 	--memory-init-file 0 --post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
@@ -33,6 +35,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.simd.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js \
 	node_modules/.bin/uglifyjs
 	mkdir -p dist
 	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
@@ -81,14 +87,14 @@ buildrule(dbg.asm.js, base, [[[-g2 -s WASM=0]]])
 buildrule(wasm.js, base, [[[]]])
 buildrule(dbg.wasm.js, base, [[[-g2]]])
 # wasm + threads
-buildrule(thr.js, thr, [[[-pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
-buildrule(dbg.thr.js, thr, [[[-g2 -pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
+buildrule(thr.js, thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
+buildrule(dbg.thr.js, thr, [[[-g2 $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
 # wasm + simd
-buildrule(simd.js, simd, [[[-msimd128]]])
-buildrule(dbg.simd.js, simd, [[[-g2 -msimd128]]])
+buildrule(simd.js, simd, [[[$(SIMDFLAGS)]]])
+buildrule(dbg.simd.js, simd, [[[-g2 $(SIMDFLAGS)]]])
 # wasm + threads + simd
-buildrule(thrsimd.js, thrsimd, [[[-pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency -msimd128]]])
-buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 -pthread -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency -msimd128]]])
+buildrule(thrsimd.js, thrsimd, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
+buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
 
 build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 	mkdir -p build dist
@@ -107,15 +113,15 @@ build/inst/base/cflags.txt:
 
 build/inst/thr/cflags.txt:
 	mkdir -p build/inst/thr
-	echo '-pthread' > $@
+	echo $(THRFLAGS) > $@
 
 build/inst/simd/cflags.txt:
 	mkdir -p build/inst/simd
-	echo '-msimd128' > $@
+	echo $(SIMDFLAGS) > $@
 
 build/inst/thrsimd/cflags.txt:
 	mkdir -p build/inst/thrsimd
-	echo '-pthread -msimd128' > $@
+	echo $(THRFLAGS) $(SIMDFLAGS) > $@
 
 release: build-default build-lite build-fat build-obsolete build-opus build-flac \
         build-opus-flac build-webm build-webm-opus-flac \

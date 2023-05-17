@@ -41,10 +41,12 @@ var readerCallbacks = {
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
         if (data.buf.length === 0) {
-            if (data.eof)
+            if (data.eof) {
                 return 0;
-            else
+            } else {
+                data.ready = false;
                 throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+            }
         }
 
         var ret;
@@ -99,8 +101,10 @@ var blockReaderCallbacks = {
             // If it was asynchronous, this won't be ready yet
             bufMin = data.position;
             bufMax = data.position + data.buf.length;
-            if (position < bufMin || position >= bufMax)
+            if (position < bufMin || position >= bufMax) {
+                data.ready = false;
                 throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+            }
         }
 
         var bufPos = position - bufMin;
@@ -259,7 +263,8 @@ var mkblockreaderdev = Module.mkblockreaderdev = function(name, size) {
 
     Module.blockReadBuffers[name] = {
         position: -1,
-        buf: new Uint8Array(0)
+        buf: new Uint8Array(0),
+        ready: false
     };
 
     FS.close(f);
@@ -424,6 +429,8 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
 
     }
 
+    idata.ready = true;
+
     // Wake up waiters
     var waiters = Module.ff_reader_dev_waiters;
     Module.ff_reader_dev_waiters = [];
@@ -446,12 +453,14 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
     if (!(name in Module.blockReadBuffers)) {
         Module.blockReadBuffers[name] = {
             position: pos,
-            buf: data
+            buf: data,
+            ready: true
         };
     } else {
         var idata = Module.blockReadBuffers[name];
         idata.position = pos;
         idata.buf = data;
+        idata.ready = true;
     }
 
     /* Wake up waiters (FIXME: make this file-specific so we don't get weird
@@ -472,6 +481,19 @@ var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function() {
     return ff_nothing().then(function() {
         return !!Module.ff_reader_dev_waiters.length;
     });
+};
+
+/**
+ * Internal function to determine if this device is ready (to avoid race
+ * conditions).
+ */
+Module.readerDevReady = function(fd) {
+    var stream = FS.streams[fd].node.name;
+    if (stream in Module.readBuffers)
+        return Module.readBuffers[stream].ready;
+    else if (stream in Module.blockReadBuffers)
+        return Module.blockReadBuffers[stream].ready;
+    return false;
 };
 
 /**

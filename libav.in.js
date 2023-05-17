@@ -77,8 +77,15 @@
     libav.LibAV = function(opts) {
         opts = opts || {};
         var base = opts.base || libav.base;
-        var toImport = base + "/libav-@VER-@CONFIG@DBG." + target(opts) + ".js";
+        var t = target(opts);
+        var toImport = base + "/libav-@VER-@CONFIG@DBG." + t + ".js";
         var ret;
+
+        var mode = "direct";
+        if (t.indexOf("thr") === 0)
+            mode = "threads";
+        else if (!nodejs && !opts.noworker && typeof Worker !== "undefined")
+            mode = "worker";
 
         return Promise.all([]).then(function() {
             // Step one: Get LibAV loaded
@@ -87,7 +94,7 @@
                     // Node.js: Load LibAV now
                     libav.LibAVFactory = require(toImport);
 
-                } else if (typeof Worker !== "undefined" && !opts.noworker) {
+                } else if (mode === "worker") {
                     // Worker: Nothing to load now
 
                 } else if (typeof importScripts !== "undefined") {
@@ -114,7 +121,7 @@
 
         }).then(function() {
             // Step two: Create the underlying instance
-            if (!nodejs && typeof Worker !== "undefined" && !opts.noworker) {
+            if (mode === "worker") {
                 // Worker thread
                 ret = {};
 
@@ -171,16 +178,76 @@
                     };
                 });
 
-            } else { // Not Workers
+            } else if (mode === "threads") {
+                /* Worker through Emscripten's own threads. Start with a real
+                 * instance. */
+                return Promise.all([]).then(function() {
+                    return libav.LibAVFactory();
+                }).then(function(x) {
+                    ret = x;
+
+                    // Get the worker
+                    var pthreadT = ret.libavjs_create_main_thread();
+                    var worker = ret.PThread.pthreads[pthreadT];
+                    var ready = 0;
+
+                    // Our handlers
+                    var on = 1;
+                    var handlers = {};
+                    var readyPromiseRes = null;
+                    var readyPromise = new Promise(function(res) {
+                        readyPromiseRes = res;
+                    });
+
+                    // And passthru functions
+                    ret.c = function() {
+                        var msg = Array.prototype.slice.call(arguments);
+                        return new Promise(function(res, rej) {
+                            var id = on++;
+                            msg = [id].concat(msg);
+                            handlers[id] = [res, rej];
+                            worker.postMessage({
+                                c: "libavjs_run",
+                                a: msg
+                            });
+                        });
+                    };
+
+                    var origOnmessage = worker.onmessage;
+                    worker.onmessage = function(e) {
+                        if (e.data && e.data.c === "libavjs_ret") {
+                            // Return from a command
+                            var a = e.data.a;
+                            var h = handlers[a[0]];
+                            if (h) {
+                                if (a[2])
+                                    h[0](a[3]);
+                                else
+                                    h[1](a[3]);
+                                delete handlers[a[0]];
+                            }
+                        } else if (e.data && e.data.c === "libavjs_wait_reader") {
+                            if (ret.readerDevReady(e.data.fd)) {
+                                worker.postMessage({c: "libavjs_wait_reader"});
+                            } else {
+                                ret.ff_reader_dev_waiters.push(function() {
+                                    worker.postMessage({c: "libavjs_wait_reader"});
+                                });
+                            }
+                        } else if (e.data && e.data.c === "libavjs_ready") {
+                            readyPromiseRes();
+                        } else {
+                            return origOnmessage.apply(this, arguments);
+                        }
+                    };
+
+                    return readyPromise;
+                });
+
+            } else { // Direct mode
                 // Start with a real instance
                 return Promise.all([]).then(function() {
-                    // Annoyingly, Emscripten's "Promise" isn't really a Promise
-                    return new Promise(function(res) {
-                        libav.LibAVFactory().then(function(x) {
-                            delete x.then;
-                            res(x);
-                        });
-                    });
+                    return libav.LibAVFactory();
                 }).then(function(x) {
                     ret = x;
                     ret.worker = false;
@@ -206,9 +273,16 @@
         }).then(function() {
             // Step three: Add wrappers to the instance(s)
 
-            // Our direct function wrappers
-            @FUNCS.forEach(function(f) {
-                if (ret[f]) {
+            function indirectors(funcs) {
+                funcs.forEach(function(f) {
+                    ret[f] = function() {
+                        return ret.c.apply(ret, [f].concat(Array.prototype.slice.call(arguments)));
+                    };
+                });
+            }
+
+            function directs(funcs) {
+                funcs.forEach(function(f) {
                     var real = ret[f + "_sync"] = ret[f];
                     ret[f] = function() {
                         var args = arguments;
@@ -224,14 +298,29 @@
                             }
                         });
                     }
+                });
+            }
 
-                } else {
-                    ret[f] = function() {
-                        return ret.c.apply(ret, [f].concat(Array.prototype.slice.call(arguments)));
-                    };
+            var funcs = @FUNCS;
+            var fsFuncs = @FSFUNCS;
 
-                }
-            });
+            ret.libavjsMode = mode;
+            if (mode === "worker") {
+                // All indirect
+                indirectors(funcs);
+                indirectors(fsFuncs);
+
+            } else if (mode === "threads") {
+                // FS funcs are direct, rest are indirect
+                indirectors(funcs);
+                directs(fsFuncs);
+
+            } else { // direct
+                // All direct
+                directs(funcs);
+                directs(fsFuncs);
+
+            }
 
             // Some enumerations lifted directly from FFmpeg
             function enume(vals, first) {
