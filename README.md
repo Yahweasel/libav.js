@@ -88,8 +88,8 @@ easier to avoid race conditions.
 
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
 ready instance of libav. `LibAV.LibAV` takes an optional argument in which
-loading options may be provided, but they're rarely useful. The loading options
-and their default values are:
+loading options may be provided. The loading options and their default values
+are:
 ```
 {
     "noworker": false,
@@ -100,18 +100,35 @@ and their default values are:
     "base": LibAV.base
 }
 ```
-If `noworker` is set, Web Workers will be disabled, so libav.js runs in the
-main thread. If `nowasm` is set, WebAssembly will be disabled. WebAssembly
-threads are disabled by default *and not built by default*, as most browsers
-have a limit to the number of worker threads an entire page is allowed to
-have, so instead, `yesthreads` must be set to enable threads, and you'll have
-to build the threaded versions manually. Note that separate instances of
-libav.js, created by separate calls to `LibAV.LibAV`, will be in separate
-threads as long as workers are used, regardless of the value of `yesthreads`,
-and this is how you're intended to thread libav.js. If `nothreads` is set then
-threads will be disabled even if `yesthreads` is set (this is so that the
-default setting of threads can be changed in the future). If `nosimd` is set,
-WebAssembly's SIMD extension won't be used.
+`nowasm` and `nosimd` affect what forms of code libav.js is allowed to load. By
+default it will load SIMD WebAssembly if the browser supports it, non-SIMD
+WebAssembly if the browser supports WebAssembly but not SIMD, and asm.js if the
+browser supports no WebAssembly. These are overridable here for testing purposes
+only.
+
+The other no/yes options affect the execution mode of libav.js. libav.js can run
+in one of three modes: `"direct"` (synchronous), `"worker"`, or `"threads"`.
+After creating a libav.js instance, the mode can be found in
+`libav.libavjsMode`. By default, libav.js will use the `"worker"` mode if
+Web Workers are available, and `"direct"` otherwise. libav.js never uses the
+`"threads"` mode by default, though this may change in the future.
+
+If `noworker` is set or Web Workers are not available, Web Workers will be
+disabled, so libav.js will run in the main thread (i.e., will run in `"direct"`
+mode). This is synchronous, so usually undesirable.
+
+If `yesthreads` is set (and `nothreads` is not set) and threads are supported
+(see
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+), then a threaded version of libav.js will be loaded. This will significantly
+improve the performance of some encoders and decoders. However, threads are
+disabled by default, as their benefit or otherwise depends on the precise
+behavior of your code, and some browsers have a fairly low limit to the number
+of worker threads an entire page is allowed to have. Note that separate
+instances of libav.js, created by separate calls to `LibAV.LibAV`, will be in
+separate threads as long as workers are used, regardless of the value of
+`yesthreads`, and thus `yesthreads` is only needed if you need concurrency
+*within* a libav.js instance.
 
 libav.js automatically detects which WebAssembly features are available, so
 even if you set `yesthreads` to `true` and don't set `nosimd`, a version with

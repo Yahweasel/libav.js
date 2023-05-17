@@ -241,6 +241,15 @@
                         }
                     };
 
+                    // Termination is more complicated
+                    ret.terminate = function() {
+                        ret.PThread.unusedWorkers
+                        .concat(ret.PThread.runningWorkers)
+                        .forEach(function(worker) {
+                            worker.terminate()
+                        });
+                    };
+
                     return readyPromise;
                 });
 
