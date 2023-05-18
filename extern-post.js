@@ -33,9 +33,16 @@ if (typeof LibAV !== "undefined" && LibAV.wasmurl){
 
 if (/* We're in a worker */
     typeof importScripts !== "undefined" &&
-    /* CHORE: Test the following code beforre merge */
+    /* Note: I have removed  || !LibAV.nolibavworker
+    why? If libav is loaded by a worker (so not the worker spanned by libAV)
+    The libAV will be defined, but libAV.noworker will not be set.
+    So the callback will be installed, should not, since it is not the LibAVWorker.
+    Actually, inside a Worker, LibAV will never be installed!
+    So testing for LibAV.noworker will never be true inside a worker,
+    so no test required, or do I miss something?
+    */
     /* We haven't explicitly been requested not to load */
-    (typeof LibAV === "undefined" || !LibAV.nolibavworker) &&
+    (typeof LibAV === "undefined" /* || !LibAV.nolibavworker */) &&
 
     /* We're not being loaded as a thread */
     typeof Module === "undefined"

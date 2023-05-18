@@ -13,6 +13,15 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Jason Miller on twitter, suggested this
+function ismodule() {
+    try{ 
+     importScripts("data:,"); 
+     return false; 
+    } catch(e) {}
+    return true;
+}
+
 (function() {
     function isWebAssemblySupported(module) {
         module = module || [0x0, 0x61, 0x73, 0x6d, 0x1, 0x0, 0x0, 0x0];
@@ -95,7 +104,7 @@
         var t = target(opts);
         var getfiles = libav.getFiles || getFiles;
         var url = getfiles( { ext: "js", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", t: t });
-        (globalThis || window || self).LibAV.wasmurl = getfiles( { ext: "wasm", base, ver: "@VER", config: "@VER", dbg: "@DBG", topts });
+        (globalThis || window || self).LibAV.wasmurl = getfiles( { ext: "wasm", base, ver: "@VER", config: "@VER", dbg: "@DBG", t: t });
         var ret;
 
         var mode = "direct";
@@ -116,10 +125,10 @@
 
                 } else if (typeof importScripts !== "undefined") {
                     // Worker scope. Import it.
-                    if (this !== undefined) { // this tells us, if we inside a module
+                    if (!ismodule()) {
                         importScripts(url);
                     } else {
-                        var imported = getfiles( { ext: "import", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", topts: topts });
+                        var imported = getfiles( { ext: "import", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", t: t });
                         return imported
                             .then(function(mod) {
                                 var gt = (globalThis || window || self)
