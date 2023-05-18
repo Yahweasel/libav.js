@@ -6,7 +6,7 @@
  *
  * ffmpeg:
  *
- *  Copyright (c) 2000-2022 Fabrice Bellard et al
+ *  Copyright (c) 2000-2023 Fabrice Bellard et al
  *
  *                   GNU LESSER GENERAL PUBLIC LICENSE
  *                        Version 2.1, February 1999

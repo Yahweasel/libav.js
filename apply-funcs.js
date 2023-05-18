@@ -35,22 +35,25 @@ function accessors(f) {
 
 function decls(f, meta) {
     funcs.functions.forEach((decl) => {
-        f(decl[0]);
+        f(decl[0], "func");
     });
     accessors((decl) => {
-        f(decl);
-        f(decl+"_s");
+        f(decl, "getter");
+        f(decl+"_s", "setter");
     });
     if (meta) {
+        funcs.fs.forEach((decl) => {
+            f(decl, "fs");
+        });
         funcs.meta.forEach((decl) => {
-            f(decl);
+            f(decl, "meta");
         });
         funcs.freers.forEach((decl) => {
-            f(decl + "_js");
+            f(decl + "_js", "freer");
         });
         funcs.copiers.forEach((type) => {
-            f("copyin_" + type[0]);
-            f("copyout_" + type[0]);
+            f("copyin_" + type[0], "copyin");
+            f("copyout_" + type[0], "copyout");
         });
     }
 }
@@ -257,12 +260,19 @@ function decls(f, meta) {
     var ver = process.argv[2];
     var inp = fs.readFileSync("libav.in.js", "utf8");
 
-    var outp = [];
-    decls((decl) => {
-        outp.push(decl);
+    var normalFuncs = [];
+    var localFuncs = [];
+    decls((decl, type) => {
+        if (type === "fs" || type === "copyin" || type === "copyout")
+            localFuncs.push(decl);
+        else
+            normalFuncs.push(decl);
     }, true);
 
-    outp = inp.replace("@FUNCS", s(outp)).replace(/@VER/g, ver);
+    outp = inp
+        .replace("@FUNCS", s(normalFuncs))
+        .replace("@LOCALFUNCS", s(localFuncs))
+        .replace(/@VER/g, ver);
 
     fs.writeFileSync("build/libav-" + ver + ".js", outp);
 })();

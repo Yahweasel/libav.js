@@ -1,6 +1,6 @@
- can consult FFmpeg's
-documentation. Not every function is exposed, of course; see funcs.json for a
-list of exposed functions or to add new functions.
+Most of libav.js's API is libav's API, and for such functions, you can consult
+FFmpeg's documentation. Not every function is exposed, of course; see funcs.json
+for a list of exposed functions or to add new functions.
 
 Functions that use double-pointers are exposed as `_js` metafunctions that
 return single pointers.

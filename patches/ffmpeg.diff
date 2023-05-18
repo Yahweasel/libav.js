@@ -191,7 +191,7 @@ index db252aa..86c9c92 100644
  
      encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);
 diff --git a/libavformat/file.c b/libavformat/file.c
-index 98c9e81..f232791 100644
+index 98c9e81..2dc963f 100644
 --- a/libavformat/file.c
 +++ b/libavformat/file.c
 @@ -40,6 +40,8 @@
@@ -203,7 +203,7 @@ index 98c9e81..f232791 100644
  /* Some systems may not have S_ISFIFO */
  #ifndef S_ISFIFO
  #  ifdef S_IFIFO
-@@ -108,12 +110,31 @@ static const AVClass pipe_class = {
+@@ -108,12 +110,34 @@ static const AVClass pipe_class = {
      .version    = LIBAVUTIL_VERSION_INT,
  };
  
@@ -212,6 +212,9 @@ index 98c9e81..f232791 100644
 +    return Asyncify.handleAsync(function() {
 +        return new Promise(function(res) {
 +            Module.ff_reader_dev_waiters.push(res);
++#ifdef __EMSCRIPTEN_PTHREADS__
++            postMessage({c: "libavjs_wait_reader", fd: fd});
++#endif
 +        });
 +    });
 +});
