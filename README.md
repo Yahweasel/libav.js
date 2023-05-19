@@ -1,7 +1,3 @@
-Using this workflow for pulling changes from upstream:
-https://chat.openai.com/c/7fcc2c28-7a4b-4394-ab2a-070a3557b076
-
-
 ## Workflows
 
 ### Syncing with upstream
@@ -12,8 +8,9 @@ https://chat.openai.com/c/7fcc2c28-7a4b-4394-ab2a-070a3557b076
     git checkout master
     git fetch upstream
     git merge upstream/master
+    git push
     ```
- 1. Switch to the descript branch and create a branch to make a PR for the upstream sync
+ 1. Switch to the descript branch and create a branch to make a PR for the upstream sync (combining it with other changes if you have them)
     ```
     git checkout descript
     git checkout -b <name the update branch>
@@ -107,8 +104,8 @@ of using libav.js from a CDN:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.6/dist"};</script>
-        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.6/dist/libav-3.11.6.0-default.js"></script>
+        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.7/dist"};</script>
+        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.7/dist/libav-3.11.7.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -131,7 +128,7 @@ Here's a better example, using libav.js locally:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript" src="libav-3.11.6.0-default.js"></script>
+        <script type="text/javascript" src="libav-3.11.7.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV();
             await libav.writeFile("tmp.opus", new Uint8Array(
