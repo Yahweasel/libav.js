@@ -1,3 +1,45 @@
+diff --git a/PATCHED b/PATCHED
+new file mode 100644
+index 0000000..416a6d1
+--- /dev/null
++++ b/PATCHED
+@@ -0,0 +1 @@
++PATCHED
+diff --git a/configure b/configure
+index b6616f0..76acb09 100755
+--- a/configure
++++ b/configure
+@@ -3831,7 +3831,7 @@ avfilter_extralibs="pthreads_extralibs"
+ avutil_extralibs="d3d11va_extralibs nanosleep_extralibs pthreads_extralibs vaapi_drm_extralibs vaapi_x11_extralibs vdpau_x11_extralibs"
+ 
+ # programs
+-ffmpeg_deps="avcodec avfilter avformat threads"
++ffmpeg_deps="avcodec avfilter avformat"
+ ffmpeg_select="aformat_filter anull_filter atrim_filter format_filter
+                hflip_filter null_filter
+                transpose_filter trim_filter vflip_filter"
+diff --git a/doc/Doxyfile b/doc/Doxyfile
+index db677f2..1b5f361 100644
+--- a/doc/Doxyfile
++++ b/doc/Doxyfile
+@@ -1030,7 +1030,7 @@ IGNORE_PREFIX          =
+ # If the GENERATE_HTML tag is set to YES doxygen will generate HTML output
+ # The default value is: YES.
+ 
+-GENERATE_HTML          = YES
++GENERATE_HTML          = NO
+ 
+ # The HTML_OUTPUT tag is used to specify where the HTML docs will be put. If a
+ # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
+@@ -1821,7 +1821,7 @@ MAN_LINKS              = NO
+ # captures the structure of the code including all documentation.
+ # The default value is: NO.
+ 
+-GENERATE_XML           = NO
++GENERATE_XML           = YES
+ 
+ # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a
+ # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
 diff --git a/fftools/ffmpeg-5.1.3/cmdutils.h b/fftools/ffmpeg-5.1.3/cmdutils.h
 new file mode 100644
 index 0000000..c2a8933
@@ -11770,3 +11812,128 @@ index a1ab4ce..7c707b3 100644
      pthread_mutex_unlock(&tq->lock);
  }
 +#endif
+diff --git a/libavcodec/libopenh264enc.c b/libavcodec/libopenh264enc.c
+index 8b4755f..da39340 100644
+--- a/libavcodec/libopenh264enc.c
++++ b/libavcodec/libopenh264enc.c
+@@ -378,7 +378,7 @@ static int svc_encode_frame(AVCodecContext *avctx, AVPacket *avpkt,
+     sp.iPicHeight = avctx->height;
+ 
+     if (frame->pict_type == AV_PICTURE_TYPE_I) {
+-        (*s->encoder)->ForceIntraFrame(s->encoder, true);
++        (*s->encoder)->ForceIntraFrame(s->encoder, true, -1);
+     }
+ 
+     encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);
+diff --git a/libavformat/file.c b/libavformat/file.c
+index cbdf48d..aeb3767 100644
+--- a/libavformat/file.c
++++ b/libavformat/file.c
+@@ -41,6 +41,8 @@
+ #include "os_support.h"
+ #include "url.h"
+ 
++#include <emscripten.h>
++
+ /* Some systems may not have S_ISFIFO */
+ #ifndef S_ISFIFO
+ #  ifdef S_IFIFO
+@@ -135,12 +137,34 @@ static const AVClass fd_class = {
+     .version    = LIBAVUTIL_VERSION_INT,
+ };
+ 
++/* libav.js */
++EM_JS(void, libavjs_wait_reader, (int fd), {
++    return Asyncify.handleAsync(function() {
++        return new Promise(function(res) {
++            Module.ff_reader_dev_waiters.push(res);
++#ifdef __EMSCRIPTEN_PTHREADS__
++            postMessage({c: "libavjs_wait_reader", fd: fd});
++#endif
++        });
++    });
++});
++/* /libav.js */
++
+ static int file_read(URLContext *h, unsigned char *buf, int size)
+ {
+     FileContext *c = h->priv_data;
+     int ret;
+     size = FFMIN(size, c->blocksize);
+     ret = read(c->fd, buf, size);
++
++    /* libav.js */
++    while (ret < 0 && errno == EAGAIN) {
++        /* wait for more data */
++        libavjs_wait_reader(c->fd);
++        ret = read(c->fd, buf, size);
++    }
++    /* /libav.js */
++
+     if (ret == 0 && c->follow)
+         return AVERROR(EAGAIN);
+     if (ret == 0)
+diff --git a/libavformat/oggdec.c b/libavformat/oggdec.c
+index 3b19e0b..474d82d 100644
+--- a/libavformat/oggdec.c
++++ b/libavformat/oggdec.c
+@@ -319,10 +319,12 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+     int flags, nsegs;
+     uint64_t gp;
+     uint32_t serial;
+-    uint32_t crc, crc_tmp;
++    uint32_t crc /*, crc_tmp*/;
+     int size = 0, idx;
+     int64_t version, page_pos;
++#if 0
+     int64_t start_pos;
++#endif
+     uint8_t sync[4];
+     uint8_t segments[255];
+     uint8_t *readout_buf;
+@@ -359,12 +361,14 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+         return AVERROR_INVALIDDATA;
+     }
+ 
++#if 0
+     /* 0x4fa9b05f = av_crc(AV_CRC_32_IEEE, 0x0, "OggS", 4) */
+     ffio_init_checksum(bc, ff_crc04C11DB7_update, 0x4fa9b05f);
+ 
+     /* To rewind if checksum is bad/check magic on switches - this is the max packet size */
+     ffio_ensure_seekback(bc, MAX_PAGE_SIZE);
+     start_pos = avio_tell(bc);
++#endif
+ 
+     version = avio_r8(bc);
+     flags   = avio_r8(bc);
+@@ -372,10 +376,14 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+     serial  = avio_rl32(bc);
+     avio_skip(bc, 4); /* seq */
+ 
++#if 0
+     crc_tmp = ffio_get_checksum(bc);
++#endif
+     crc     = avio_rb32(bc);
++#if 0
+     crc_tmp = ff_crc04C11DB7_update(crc_tmp, (uint8_t[4]){0}, 4);
+     ffio_init_checksum(bc, ff_crc04C11DB7_update, crc_tmp);
++#endif
+ 
+     nsegs    = avio_r8(bc);
+     page_pos = avio_tell(bc) - 27;
+@@ -407,6 +415,7 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+         return ret < 0 ? ret : AVERROR_EOF;
+     }
+ 
++#if 0
+     if (crc ^ ffio_get_checksum(bc)) {
+         av_log(s, AV_LOG_ERROR, "CRC mismatch!\n");
+         if (idx < 0)
+@@ -426,6 +435,7 @@ static int ogg_read_page(AVFormatContext *s, int *sid, int probing)
+         *sid = -1;
+         return 0;
+     }
++#endif
+ 
+     /* CRC is correct so we can be 99% sure there's an actual change here */
+     if (idx < 0) {
