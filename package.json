@@ -1,4 +1,5 @@
 {
+
   "name": "@descript/libav.js",
   "version": "3.9.38",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",

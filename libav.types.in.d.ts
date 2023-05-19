@@ -225,6 +225,17 @@ export interface AVCodecContextProps {
 }
 
 export interface LibAV {
+    /**
+     * The operating mode of this libav.js instance. Each operating mode has
+     * different constraints.
+     */
+    libavjsMode: "direct" | "worker" | "threads";
+
+    /**
+     * If the operating mode is "worker", the worker itself.
+     */
+    worker?: Worker;
+
 @FUNCS
 @DECLS
 

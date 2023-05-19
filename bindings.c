@@ -20,6 +20,11 @@
 #include <time.h>
 #include <malloc.h>
 
+#ifdef __EMSCRIPTEN_PTHREADS__
+#include <emscripten.h>
+#include <pthread.h>
+#endif
+
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavfilter/avfilter.h"
@@ -393,6 +398,73 @@ int ffmpeg_main() { return 0; }
 int ffprobe_main() { return 0; }
 #endif
 
+
+/****************************************************************
+ * Threading
+ ***************************************************************/
+
+#ifdef __EMSCRIPTEN_PTHREADS__
+EM_JS(void *, libavjs_main_thread, (void *ignore), {
+    // Avoid exiting the runtime so we can receive normal requests
+    noExitRuntime = Module.noExitRuntime = true;
+
+    // Hijack the event handler
+    var origOnmessage = onmessage;
+    onmessage = function(ev) {
+        var a;
+
+        function reply(succ, ret) {
+            postMessage({
+                c: "libavjs_ret",
+                a: [a[0], a[1], succ, ret]
+            });
+        }
+
+        if (ev.data && ev.data.c === "libavjs_run") {
+            a = ev.data.a;
+            var succ = true;
+            var ret;
+            try {
+                ret = Module[a[1]].apply(Module, a.slice(2));
+            } catch (ex) {
+                succ = false;
+                ret = ex + "\n" + ex.stack;
+            }
+            if (succ && ret && ret.then) {
+                ret
+                    .then(function(ret) { reply(true, ret); })
+                    .catch(function(ret) { reply(false, ret + "\n" + ret.stack); });
+            } else {
+                reply(succ, ret);
+            }
+
+        } else if (ev.data && ev.data.c === "libavjs_wait_reader") {
+            var waiters = Module.ff_reader_dev_waiters;
+            Module.ff_reader_dev_waiters = [];
+            for (var i = 0; i < waiters.length; i++)
+                waiters[i]();
+
+        } else {
+            return origOnmessage.apply(this, arguments);
+        }
+    };
+
+    // And indicate that we're ready
+    postMessage({c: "libavjs_ready"});
+});
+
+pthread_t libavjs_create_main_thread()
+{
+    pthread_t ret;
+    if (pthread_create(&ret, NULL, libavjs_main_thread, NULL))
+        return NULL;
+    return ret;
+}
+
+#else
+void *libavjs_create_main_thread() { return NULL; }
+
+#endif
 
 /****************************************************************
  * Other bindings

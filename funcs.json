@@ -110,6 +110,7 @@
       ["ff_error", "string", ["number"]],
       ["ff_nothing", null, [], {"async": true}],
 
+<<<<<<< HEAD
       ["calloc", "number", ["number", "number"]],
       ["free", null, ["number"]],
       ["malloc", "number", ["number"]],
@@ -122,8 +123,23 @@
       ["ffmpeg_main", "number", ["number", "number"]],
       ["ffprobe_main", "number", ["number", "number"]]
   ],
+=======
+        ["calloc", "number", ["number", "number"]],
+        ["free", null, ["number"]],
+        ["malloc", "number", ["number"]],
+        ["mallinfo_uordblks", "number", []],
+        ["open", "number", ["string", "number", "number"]],
+        ["close", "number", ["number"]],
+        ["dup2", "number", ["number", "number"]],
+        ["libavjs_with_swscale", "number", []],
+        ["libavjs_create_main_thread", "number", []],
 
-    "meta": [
+        ["ffmpeg_main", "number", ["number", "number"], {"async": true}],
+        ["ffprobe_main", "number", ["number", "number"], {"async": true}]
+    ],
+>>>>>>> upstream/master
+
+    "fs": [
         "readFile",
         "writeFile",
         "unlink",
@@ -134,8 +150,12 @@
         "mkreadaheadfile",
         "unlinkreadaheadfile",
         "mkwriterdev",
+        "mkstreamwriterdev",
         "mkworkerfsfile",
-        "unlinkworkerfsfile",
+        "unlinkworkerfsfile"
+    ],
+
+    "meta": [
         "ff_reader_dev_send",
         "ff_block_reader_dev_send",
         "ff_reader_dev_waiting",
