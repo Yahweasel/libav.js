@@ -6,7 +6,7 @@
  *
  * ffmpeg:
  *
- *  Copyright (c) 2000-2022 Fabrice Bellard et al
+ *  Copyright (c) 2000-2023 Fabrice Bellard et al
  *
  *                   GNU LESSER GENERAL PUBLIC LICENSE
  *                        Version 2.1, February 1999
@@ -856,8 +856,8 @@
  *
  * emscripten and musl:
  *
- * Copyright (c) 2010-2022 Emscripten authors, see AUTHORS file.
- * Copyright © 2005-2022 Rich Felker, et al.
+ * Copyright (c) 2010-2023 Emscripten authors, see AUTHORS file.
+ * Copyright © 2005-2023 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to

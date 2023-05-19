@@ -1,4 +1,4 @@
-OPUS_VERSION=1.3.1
+OPUS_VERSION=1.4
 
 build/inst/%/lib/pkgconfig/opus.pc: build/opus-$(OPUS_VERSION)/build-%/config.h
 	cd build/opus-$(OPUS_VERSION)/build-$* ; \
