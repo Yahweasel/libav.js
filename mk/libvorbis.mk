@@ -4,8 +4,8 @@ build/inst/%/lib/pkgconfig/vorbis.pc: build/libvorbis-$(LIBVORBIS_VERSION)/build
 	cd build/libvorbis-$(LIBVORBIS_VERSION)/build-$* ; \
 		$(MAKE) install
 	# This .pc file assumes .so semantics :(
-	sed 's/-lvorbisenc/-lvorbisenc -lvorbis -logg/g' < $@ > $@.tmp
-	mv $@.tmp $@
+	sed 's/-lvorbisenc/-lvorbisenc -lvorbis -logg/g' < build/inst/$*/lib/pkgconfig/vorbisenc.pc > build/inst/$*/lib/pkgconfig/vorbisenc.pc.tmp
+	mv build/inst/$*/lib/pkgconfig/vorbisenc.pc.tmp build/inst/$*/lib/pkgconfig/vorbisenc.pc
 
 build/libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h: build/inst/%/lib/pkgconfig/ogg.pc \
 	build/libvorbis-$(LIBVORBIS_VERSION)/configure
