@@ -4,11 +4,58 @@ https://chat.openai.com/c/7fcc2c28-7a4b-4394-ab2a-070a3557b076
 
 ## Workflows
 
+### Syncing with upstream
+
+
+ 1. Update our master which is a shadow of upstream's master
+    ```
+    git checkout master
+    git fetch upstream
+    git merge upstream/master
+    ```
+ 1. Switch to the descript branch and create a branch to make a PR for the upstream sync
+    ```
+    git checkout descript
+    git checkout -b <name the update branch>
+    ```
+ 1. Merge with upstream changes by merging with master (fix merge conflicts)
+    ``` 
+    git merge master
+    ```
+ 1. Build the latest and test it via `pnpm link` workflows or publishing a test build and consuming it in a PR in the monorepo.
+ 1. Once it looks good publish a new version, and go make or update a monorepo side PR to pull in the new version.
+
 ### pnpm link . while developing
 
-**TODO**
+```
+cd libav.js
+pnpm link .
+
+cd descript-web-v2/pkg-js/libav-utils
+pnpm link <path to libav.js on disk>
+```
 
 ### publishing
+
+1. Bump version by search replacing for the previous version with the new version
+1. Build the latest
+
+```
+pnpm superclean
+make build-descript-p3
+```
+1. Commit changes (such as version bump files)
+
+1. Publish it
+```
+npm publish
+```
+1. Tag it
+```
+git tag <version-number>
+git push -tags
+```
+1. Go make a Github Release using the new tag, and adding release notes.
 
 **TODO**
 
