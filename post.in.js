@@ -13,6 +13,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Fix to _scriptDir bugginess
+if (typeof _scriptDir === "undefined")
+    _scriptDir = self.location.href;
+
 var ERRNO_CODES = {
     EPERM: 1,
     EIO: 5,
@@ -37,10 +41,12 @@ var readerCallbacks = {
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
         if (data.buf.length === 0) {
-            if (data.eof)
+            if (data.eof) {
                 return 0;
-            else
+            } else {
+                data.ready = false;
                 throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+            }
         }
 
         var ret;
@@ -95,8 +101,10 @@ var blockReaderCallbacks = {
             // If it was asynchronous, this won't be ready yet
             bufMin = data.position;
             bufMax = data.position + data.buf.length;
-            if (position < bufMin || position >= bufMax)
+            if (position < bufMin || position >= bufMax) {
+                data.ready = false;
                 throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+            }
         }
 
         var bufPos = position - bufMin;
@@ -156,6 +164,16 @@ var writerCallbacks = {
     }
 };
 
+var streamWriterCallbacks = Object.create(writerCallbacks);
+streamWriterCallbacks.write = function(stream, buffer, offset, length, position) {
+    if (position != stream.position)
+        throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
+    return writerCallbacks.write(stream, buffer, offset, length, position);
+};
+streamWriterCallbacks.llseek = function() {
+    throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
+};
+
 /* Original versions of all our functions, since the Module version is replaced
  * if we're a Worker */
 var CAccessors = {};
@@ -169,6 +187,8 @@ Module.readBuffers = {};
 Module.blockReadBuffers = {};
 var writerDev = FS.makedev(44, 1);
 FS.registerDevice(writerDev, writerCallbacks);
+var streamWriterDev = FS.makedev(44, 2);
+FS.registerDevice(streamWriterDev, streamWriterCallbacks);
 
 /**
  * Read a complete file from the in-memory filesystem.
@@ -243,7 +263,8 @@ var mkblockreaderdev = Module.mkblockreaderdev = function(name, size) {
 
     Module.blockReadBuffers[name] = {
         position: -1,
-        buf: new Uint8Array(0)
+        buf: new Uint8Array(0),
+        ready: false
     };
 
     FS.close(f);
@@ -279,7 +300,6 @@ function readaheadOnBlockRead(name, position, length) {
             return;
         }
 
-        console.log("Readahead " + name + ":" + position + " (" + ra.buf.byteLength + ")");
         ff_block_reader_dev_send(name, position, new Uint8Array(ra.buf));
 
         // Attempt to predict the next read
@@ -345,6 +365,18 @@ Module.mkwriterdev = function(loc, mode) {
     return 0;
 };
 
+/**
+ * Make a stream writer device. The same as a writer device but does not allow
+ * seeking.
+ * @param name  Filename to create
+ * @param mode  Unix permissions
+ */
+/// @types mkstreamwriterdev@sync(name: string, mode?: number): @promise@void@
+Module.mkstreamwriterdev = function(loc, mode) {
+    FS.mkdev(loc, mode?mode:0777, streamWriterDev);
+    return 0;
+};
+
 // Users waiting to read
 Module.ff_reader_dev_waiters = [];
 
@@ -397,6 +429,8 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
 
     }
 
+    idata.ready = true;
+
     // Wake up waiters
     var waiters = Module.ff_reader_dev_waiters;
     Module.ff_reader_dev_waiters = [];
@@ -419,12 +453,14 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
     if (!(name in Module.blockReadBuffers)) {
         Module.blockReadBuffers[name] = {
             position: pos,
-            buf: data
+            buf: data,
+            ready: true
         };
     } else {
         var idata = Module.blockReadBuffers[name];
         idata.position = pos;
         idata.buf = data;
+        idata.ready = true;
     }
 
     /* Wake up waiters (FIXME: make this file-specific so we don't get weird
@@ -445,6 +481,19 @@ var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function() {
     return ff_nothing().then(function() {
         return !!Module.ff_reader_dev_waiters.length;
     });
+};
+
+/**
+ * Internal function to determine if this device is ready (to avoid race
+ * conditions).
+ */
+Module.readerDevReady = function(fd) {
+    var stream = FS.streams[fd].node.name;
+    if (stream in Module.readBuffers)
+        return Module.readBuffers[stream].ready;
+    else if (stream in Module.blockReadBuffers)
+        return Module.blockReadBuffers[stream].ready;
+    return false;
 };
 
 /**
@@ -1591,13 +1640,38 @@ function runMain(main, name, args) {
         else
             throw ex;
     }
-    ff_free_string_array(argv);
-    return ret;
+
+    function cleanup() {
+        ff_free_string_array(argv);
+    }
+
+    if (ret && ret.then) {
+        return ret.then(function(ret) {
+            cleanup();
+            return ret;
+        }).catch(function(ex) {
+            cleanup();
+            if (ex && ex.name === "ExitStatus")
+                return Promise.resolve(ex.status);
+            else
+                return Promise.reject(ex);
+        });
+    } else {
+        cleanup();
+        return ret;
+    }
 }
 
 /**
  * Frontend to the ffmpeg CLI (if it's compiled in). Pass arguments as strings,
  * or you may intermix arrays of strings for multiple arguments.
+ *
+ * NOTE: ffmpeg 6.0 and later require threads for the ffmpeg CLI. libav.js
+ * *does* support the ffmpeg CLI on unthreaded environments, but to do so, it
+ * uses an earlier version of the CLI, from 5.1.3. The libraries are still
+ * modern, and if running libav.js in threaded mode, the ffmpeg CLI is modern as
+ * well. As time passes, these two versions will drift apart, so make sure you
+ * know whether you're running in threaded mode or not!
  */
 /// @types ffmpeg@sync(...args: (string | string[])[]): @promsync@number@
 var ffmpeg = Module.ffmpeg = function() {
