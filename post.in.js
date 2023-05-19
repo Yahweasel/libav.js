@@ -40,6 +40,8 @@ var readerCallbacks = {
         var data = Module.readBuffers[stream.node.name];
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        if (data.errorCode)
+            throw new FS.ErrnoError(data.errorCode);
         if (data.buf.length === 0) {
             if (data.eof) {
                 return 0;
@@ -87,6 +89,8 @@ var blockReaderCallbacks = {
         var data = Module.blockReadBuffers[stream.node.name];
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        if (data.errorCode)
+            throw new FS.ErrnoError(data.errorCode);
 
         var bufMin = data.position;
         var bufMax = data.position + data.buf.length;
@@ -264,7 +268,8 @@ var mkblockreaderdev = Module.mkblockreaderdev = function(name, size) {
     Module.blockReadBuffers[name] = {
         position: -1,
         buf: new Uint8Array(0),
-        ready: false
+        ready: false,
+        errorCode: 0
     };
 
     FS.close(f);
@@ -406,19 +411,33 @@ Module.unlinkworkerfsfile = function(name) {
 };
 
 /**
- * Send some data to a reader device
- * @param name  Filename of the reader device
- * @param data  Data to send
+ * Send some data to a reader device. To indicate EOF, send null. To indicate an
+ * error, send EOF and include an error code in the options.
+ * @param name  Filename of the reader device.
+ * @param data  Data to send.
+ * @param opts  Optional send options, such as an error code.
  */
-/// @types ff_reader_dev_send@sync(name: string, data: Uint8Array): @promise@void@
-var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
+/* @types
+ * ff_reader_dev_send@sync(
+ *     name: string, data: Uint8Array,
+ *     opts?: {
+ *         errorCode?: number
+ *     }
+ * ): @promise@void@
+ */
+var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) {
     var idata;
-    if (!(name in Module.readBuffers))
-        Module.readBuffers[name] = {buf: new Uint8Array(0), eof: false};
+    if (!(name in Module.readBuffers)) {
+        Module.readBuffers[name] = {
+            buf: new Uint8Array(0),
+            eof: false,
+            errorCode: 0
+        };
+    }
     idata = Module.readBuffers[name];
 
     if (data === null) {
-        // EOF
+        // EOF or error
         idata.eof = true;
 
     } else {
@@ -431,6 +450,9 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
 
     idata.ready = true;
 
+    idata.errorCode = (opts && typeof opts.errorCode === "number")
+        ? opts.errorCode : 0;
+
     // Wake up waiters
     var waiters = Module.ff_reader_dev_waiters;
     Module.ff_reader_dev_waiters = [];
@@ -439,29 +461,44 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data) {
 };
 
 /**
- * Send some data to a block reader device.
+ * Send some data to a block reader device. To indicate EOF, send null (but note
+ * that block read devices have a fixed size, and will automatically send EOF
+ * for reads outside of that size, so you should not normally need to send EOF).
+ * To indicate an error, send EOF and include an error code in the options.
  * @param name  Filename of the reader device.
  * @param pos  Position of the data in the file.
  * @param data  Data to send.
+ * @param opts  Optional send options, such as an error code.
  */
 /* @types
  * ff_block_reader_dev_send@sync(
- *     name: string, pos: number, data: Uint8Array
- *  ): @promise@void@
+ *     name: string, pos: number, data: Uint8Array,
+ *     opts?: {
+ *         errorCode?: number
+ *     }
+ * ): @promise@void@
  */
-var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, pos, data) {
+var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, pos, data, opts) {
     if (!(name in Module.blockReadBuffers)) {
         Module.blockReadBuffers[name] = {
             position: pos,
             buf: data,
-            ready: true
+            ready: true,
+            errorCode: 0
         };
     } else {
         var idata = Module.blockReadBuffers[name];
         idata.position = pos;
         idata.buf = data;
         idata.ready = true;
+        idata.errorCode = 0;
     }
+
+    if (data === null)
+        idata.buf = new Uint8Array(0);
+
+    if (opts && typeof opts.errorCode === "number")
+        idata.errorCode = opts.errorCode;
 
     /* Wake up waiters (FIXME: make this file-specific so we don't get weird
      * loops) */
