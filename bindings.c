@@ -432,9 +432,6 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
         return readRawPacketDurations;
     }
 
-    float audioDuration = -1;
-    float videoDuration = -1;
-
     AVPacket pkt;
     // Seek to the last keyframe
     av_seek_frame(pFormatContext, -1, INT64_MAX, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_ANY);
@@ -447,24 +444,33 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
     while(av_read_frame(pFormatContext, &pkt)>=0) {
         AVStream* avStream = pFormatContext->streams[pkt.stream_index];
 
-        printf("avformat_read_raw_packet_durations loop\n");
+        
 
         // Skip if it's not audio or video
         bool isVideo = avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO;
-        bool isAudio = avStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO;
+        bool isAudio = avStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO; 
+
+        printf("avformat_read_raw_packet_durations loop (isVideo = %i, isAudio = %i\n", isVideo, isAudio);
+
         if( isAudio || isVideo ){
             double end = (pkt.pts + pkt.duration)*av_q2d(pFormatContext->streams[pkt.stream_index]->time_base);
+
+            printf("end = %f. max_video_duration = %f, max_audio_duration = %f\n", end, max_video_duration, max_audio_duration);
 
             if(isVideo && end>max_video_duration){
                 max_video_duration = end;
             } else if(isAudio && end>max_audio_duration){
                 max_audio_duration = end;
             }
+
+            
         }
 
         av_packet_unref(&pkt);
     }
+    
     printf("avformat_read_raw_packet_durations after loop\n");
+    printf("max_video_duration = %f, max_audio_duration = %f\n", max_video_duration, max_audio_duration);
 
     // Audio and video
     if( max_audio_duration != -1 && max_video_duration != -1 ) {
@@ -472,12 +478,12 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
         return readRawPacketDurations;
     }
     // Just audio
-    else if(audioDuration != -1){
+    else if(max_audio_duration != -1){
         sprintf(readRawPacketDurations, "{\"audioDuration\": %f, \"videoDuration\": -1}", max_audio_duration);
         return readRawPacketDurations;
     }
     // Just video
-    else if(videoDuration != -1){
+    else if(max_video_duration != -1){
         sprintf(readRawPacketDurations, "{\"videoDuration\": %f, \"audioDuration\": -1}", max_video_duration);
         return readRawPacketDurations;
     } else {
