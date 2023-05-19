@@ -245,6 +245,11 @@ export interface LibAV {
     onwrite?: (filename: string, position: number, buffer: Uint8Array | Int8Array) => void;
 
     /**
+     * Callback for bock reader devices. Set by the user.
+     */
+    onblockread?: (filename: string, pos: number, length: number | undefined)  => void;
+
+    /**
      * Terminate the worker associated with this libav.js instance, rendering
      * it inoperable and freeing its memory.
      */
