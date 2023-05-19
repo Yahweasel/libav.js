@@ -1637,6 +1637,8 @@ function runMain(main, name, args) {
     } catch (ex) {
         if (ex && ex.name === "ExitStatus")
             ret = ex.status;
+        else if (ex === "unwind")
+            ret = EXITSTATUS;
         else
             throw ex;
     }
@@ -1653,6 +1655,8 @@ function runMain(main, name, args) {
             cleanup();
             if (ex && ex.name === "ExitStatus")
                 return Promise.resolve(ex.status);
+            else if (ex === "unwind")
+                return Promise.resolve(EXITSTATUS);
             else
                 return Promise.reject(ex);
         });
