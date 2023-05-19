@@ -247,7 +247,7 @@ export interface LibAV {
     /**
      * Callback for bock reader devices. Set by the user.
      */
-    onblockread?: (filename: string, pos: number, length: number | undefined)  => void;
+    onblockread?: (filename: string, pos: number, length: number)  => void;
 
     /**
      * Terminate the worker associated with this libav.js instance, rendering
