@@ -37,7 +37,6 @@ const configs = [
 
     // Patent and/or license encumbered encoders
     ["mediarecorder-openh264", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "codec-libopenh264"]],
-    ["mediarecorder-x265", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "decoder-hevc", "encoder-libx265"]],
 
     ["empty", []],
     ["all", null]

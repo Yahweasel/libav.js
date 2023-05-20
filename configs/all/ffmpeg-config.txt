@@ -72,6 +72,3 @@
 --enable-libopenh264
 --enable-decoder=libopenh264
 --enable-encoder=libopenh264
---enable-gpl
---enable-libx265
---enable-encoder=libx265
