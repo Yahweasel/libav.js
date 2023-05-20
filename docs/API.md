@@ -401,6 +401,13 @@ ffmpeg(...args: (string | string[])[]): Promise<number>
 Runs the `ffmpeg` CLI tool. `args` can be each string argument to `ffmpeg`, or
 an array of strings, or any combination thereof. Returns `ffmpeg`'s exit code.
 
+NOTE: ffmpeg 6.0 and later require threads for the ffmpeg CLI. libav.js *does*
+support the ffmpeg CLI on unthreaded environments, but to do so, it uses an
+earlier version of the CLI, from 5.1.3. The libraries are still modern, and if
+running libav.js in threaded mode, the ffmpeg CLI is modern as well. As time
+passes, these two versions will drift apart, so make sure you know whether
+you're running in threaded mode or not!
+
 
 ### `ffprobe`
 ```

@@ -1,4 +1,4 @@
-LIBVPX_VERSION=1.12.0
+LIBVPX_VERSION=1.13.0
 
 build/inst/%/lib/pkgconfig/vpx.pc: build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile
 	-cd build/libvpx-$(LIBVPX_VERSION)/build-$* ; \
@@ -20,7 +20,8 @@ build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile: build/inst/%/cflags.txt build/l
 			--enable-static --disable-shared \
 			--disable-webm-io \
 			--disable-examples --disable-tools --disable-docs
-	sed 's/^.* cfg = ".*/static const char* const cfg = "";/' -i build/libvpx-$(LIBVPX_VERSION)/build-$*/vpx_config.c
+	sed 's/^.* cfg = ".*/static const char* const cfg = "";/' < build/libvpx-$(LIBVPX_VERSION)/build-$*/vpx_config.c > build/libvpx-$(LIBVPX_VERSION)/build-$*/vpx_config.c.tmp
+	mv build/libvpx-$(LIBVPX_VERSION)/build-$*/vpx_config.c.tmp build/libvpx-$(LIBVPX_VERSION)/build-$*/vpx_config.c
 
 extract: build/libvpx-$(LIBVPX_VERSION)/configure
 

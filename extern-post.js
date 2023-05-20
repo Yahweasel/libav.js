@@ -69,17 +69,17 @@ if (/* We're in a worker */
             if (e && e.data && e.data.wasmurl) {
                 loadLibAV(e.data.wasmurl).then(function (lib) {
                    libav = lib;
-                   libav.onwrite = function (name, pos, buf) {
+                   libav.onwrite = function(name, pos, buf) {
                         /* We have to buf.slice(0) so we don't duplicate the entire heap just
                          * to get one part of it in postMessage */
                         buf = buf.slice(0);
                         postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
                     };
 
-                    libav.onblockread = function(name, pos) {
-                        postMessage(["onblockread", "onblockread", true, [name, pos]]);
+                    libav.onblockread = function(name, pos, len) {
+                        postMessage(["onblockread", "onblockread", true, [name, pos, len]]);
                     };
-                    postMessage(['onready', 'onready', true, null]);
+                    postMessage(["onready", "onready", true, null]);
                 }).catch(function (ex) {
                     console.log('Loading LibAV failed' + '\n' + ex.stack);
                 });
