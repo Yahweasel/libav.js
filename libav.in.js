@@ -85,15 +85,15 @@ function ismodule() {
     function getFiles(conf) {
         // define a similar function, adapted to your bundler, probably you will ignore base
         if (conf.ext === "wasm") {
-            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + conf.dbg + "." + conf.t + ".wasm");
+            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + "." + conf.t + ".wasm");
         } else if (conf.ext === "import") {
             // not supported by the standard implementation, since it is only required for bundler
             // and it would trigger the bundler and fail.
             return null;
             // example what it should do, if it is implemented externally
-            // return import(conf.base + "/libav-" + conf.ver + "-" + conf.config + conf.dbg + "." + conf.t + ".js")
+            // return import(conf.base + "/libav-" + conf.ver + "-" + conf.config  + "." + conf.t + ".js")
         } else {
-            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + conf.dbg + "." + conf.t + ".js");
+            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + "." + conf.t + ".js");
         }
     } 
 
@@ -103,8 +103,8 @@ function ismodule() {
         var base = opts.base || libav.base;
         var t = target(opts);
         var getfiles = libav.getFiles || getFiles;
-        var url = getfiles( { ext: "js", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", t: t });
-        (globalThis || window || self).LibAV.wasmurl = getfiles( { ext: "wasm", base, ver: "@VER", config: "@VER", dbg: "@DBG", t: t });
+        var url = getfiles( { ext: "js", base: base, ver: "@VER", config: "@CONFIG@DBG", t: t });
+        (globalThis || window || self).LibAV.wasmurl = getfiles( { ext: "wasm", base, ver: "@VER", config: "@CONFIG@DBG", t: t });
         var ret;
 
         var mode = "direct";
@@ -125,10 +125,11 @@ function ismodule() {
 
                 } else if (typeof importScripts !== "undefined") {
                     // Worker scope. Import it.
+                    libav.loadingWorker = true // this is a bit dangerous, as a another libav start might interfere, import in getFiles is async
                     if (!ismodule()) {
                         importScripts(url);
                     } else {
-                        var imported = getfiles( { ext: "import", base: base, ver: "@VER", config: "@VER", dbg: "@DBG", t: t });
+                        var imported = getfiles( { ext: "import", base: base, ver: "@VER", config: "@CONFIG@DBG", t: t });
                         return imported
                             .then(function(mod) {
                                 var gt = (globalThis || window || self)
