@@ -8,7 +8,7 @@ build/opus-$(OPUS_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/opus-
 	mkdir -p build/opus-$(OPUS_VERSION)/build-$*
 	cd build/opus-$(OPUS_VERSION)/build-$* ; \
 		emconfigure ../configure --prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
-			--disable-shared \
+			--disable-shared --disable-extra-programs \
 			CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@
 
