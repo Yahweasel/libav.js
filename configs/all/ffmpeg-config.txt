@@ -41,7 +41,6 @@
 --enable-decoder=mp3
 --enable-libmp3lame
 --enable-encoder=libmp3lame
---enable-decoder=opus
 --enable-demuxer=pcm_f32le
 --enable-muxer=pcm_f32le
 --enable-decoder=pcm_f32le

@@ -25,7 +25,7 @@ const configs = [
     ["opus", ["format-ogg", "codec-libopus"]],
     ["flac", ["format-flac", "codec-flac"]],
     ["opus-flac", ["format-ogg", "codec-libopus", "format-flac", "codec-flac"]],
-    ["all-audio-cli", ["format-ogg", "format-webm", "codec-libopus", "decoder-opus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "format-wav", "format-pcm_f32le", "codec-pcm_f32le", "audio-filters", "cli", "workerfs"]],
+    ["all-audio-cli", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "format-wav", "format-pcm_f32le", "codec-pcm_f32le", "audio-filters", "cli", "workerfs"]],
 
     ["webm", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "format-wav", "audio-filters"]],
     ["webm-opus-flac", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8"]],
