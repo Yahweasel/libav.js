@@ -125,7 +125,6 @@ function ismodule() {
 
                 } else if (typeof importScripts !== "undefined") {
                     // Worker scope. Import it.
-                    libav.loadingWorker = true // this is a bit dangerous, as a another libav start might interfere, import in getFiles is async
                     if (!ismodule()) {
                         importScripts(url);
                     } else {
