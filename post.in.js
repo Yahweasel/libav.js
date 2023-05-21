@@ -617,11 +617,15 @@ var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
     if (c === 0)
         throw new Error("Could not allocate audio codec context");
 
+    var codecid = AVCodecContext_codec_id(c);
+
     if (codecpar) {
         ret = avcodec_parameters_to_context(c, codecpar);
         if (ret < 0)
             throw new Error("Could not set codec parameters: " + ff_error(ret));
     }
+    // if it is not set, use the copy.
+    if (AVCodecContext_codec_id(c) === 0)  AVCodecContext_codec_id_s(c, codecid);
 
     ret = avcodec_open2(c, codec, 0);
     if (ret < 0)
