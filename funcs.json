@@ -167,6 +167,8 @@
             "channel_layout",
             "channel_layouthi",
             "channels",
+            "channel_layoutmask",
+            "ch_layout_nb_channels",
             {"name": "data", "array": true},
             "format",
             "height",
@@ -183,11 +185,15 @@
             "log2_chroma_h"
         ]],
         ["AVCodecContext", [
+            "codec_id",
+            "codec_type",
             "bit_rate",
             "bit_ratehi",
             "channel_layout",
             "channel_layouthi",
             "channels",
+            "channel_layoutmask",
+            "ch_layout_nb_channels",
             "extradata",
             "extradata_size",
             "frame_size",
@@ -224,6 +230,8 @@
             "color_space",
             "chroma_location",
             "channels",
+            "channel_layoutmask",
+            "ch_layout_nb_channels",
             "sample_rate"
         ]],
         ["AVPacket", [
