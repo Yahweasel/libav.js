@@ -104,8 +104,8 @@ of using libav.js from a CDN:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.7/dist"};</script>
-        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.7/dist/libav-3.11.7.0-default.js"></script>
+        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.8/dist"};</script>
+        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.8/dist/libav-3.11.8.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -128,7 +128,7 @@ Here's a better example, using libav.js locally:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript" src="libav-3.11.7.0-default.js"></script>
+        <script type="text/javascript" src="libav-3.11.8.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV();
             await libav.writeFile("tmp.opus", new Uint8Array(

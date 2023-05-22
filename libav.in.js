@@ -383,7 +383,10 @@
             ret.AVSEEK_FLAG_FRAME = 8;
 
             // Errors
-            ret.EAGAIN = 6;
+            enume(["E2BIG", "EPERM", "EADDRINUSE", "EADDRNOTAVAIL",
+                "EAFNOSUPPORT", "EAGAIN", "EALREADY", "EBADF", "EBADMSG",
+                "EBUSY", "ECANCELED", "ECHILD", "ECONNABORTED", "ECONNREFUSED",
+                "ECONNRESET", "EDEADLOCK"], 1);
             ret.AVERROR_EOF = -0x20464f45;
 
             return ret;

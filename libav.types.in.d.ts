@@ -327,7 +327,22 @@ export interface LibAV {
     AVIO_FLAG_READ_WRITE: number;
     AVIO_FLAG_NONBLOCK: number;
     AVIO_FLAG_DIRECT: number;
+    E2BIG: number;
+    EPERM: number;
+    EADDRINUSE: number;
+    EADDRNOTAVAIL: number;
+    EAFNOSUPPORT: number;
     EAGAIN: number;
+    EALREADY: number;
+    EBADF: number;
+    EBADMSG: number;
+    EBUSY: number;
+    ECANCELED: number;
+    ECHILD: number;
+    ECONNABORTED: number;
+    ECONNREFUSED: number;
+    ECONNRESET: number;
+    EDEADLOCK: number;
     AVERROR_EOF: number;
 }
 
