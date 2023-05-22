@@ -1,6 +1,6 @@
- can consult FFmpeg's
-documentation. Not every function is exposed, of course; see funcs.json for a
-list of exposed functions or to add new functions.
+Most of libav.js's API is libav's API, and for such functions, you can consult
+FFmpeg's documentation. Not every function is exposed, of course; see funcs.json
+for a list of exposed functions or to add new functions.
 
 Functions that use double-pointers are exposed as `_js` metafunctions that
 return single pointers.
@@ -295,7 +295,8 @@ these are the last input frames.
 # Filesystem
 
 The `readFile`, `writeFile`, `unlink`, and `mkdev` functions are provided
-directly from Emscripten's filesystem module.
+directly from Emscripten's filesystem module. In addition, functions to create
+streaming devices are provided. These are further documented in [IO.md](IO.md).
 
 ## Reader device
 
@@ -373,6 +374,20 @@ To receive data from the writer device(s), you must set `libav.onwrite` to a
 function `(name: string, position: number, buffer: Uint8Array) => void`.
 
 
+### `mkstreamwriterdev`
+```
+mkstreamwriterdev(name: string, mode? number): Promise<void>
+```
+
+Make a stream writer device. Identical to a writer device except that seeking
+is not allowed, so libav treats it like a stream. Most formats either don't
+care or simply won't work with a stream, but certain formats (like `wav` and
+`matroska`) will behave differently if the output is a stream than if it's a
+block device.
+
+Receive data in the same way as with `mkwriterdev`.
+
+
 # CLI
 
 If a variant is used that employs the `cli` fragment, then the entire `ffmpeg`
@@ -385,6 +400,13 @@ ffmpeg(...args: (string | string[])[]): Promise<number>
 
 Runs the `ffmpeg` CLI tool. `args` can be each string argument to `ffmpeg`, or
 an array of strings, or any combination thereof. Returns `ffmpeg`'s exit code.
+
+NOTE: ffmpeg 6.0 and later require threads for the ffmpeg CLI. libav.js *does*
+support the ffmpeg CLI on unthreaded environments, but to do so, it uses an
+earlier version of the CLI, from 5.1.3. The libraries are still modern, and if
+running libav.js in threaded mode, the ffmpeg CLI is modern as well. As time
+passes, these two versions will drift apart, so make sure you know whether
+you're running in threaded mode or not!
 
 
 ### `ffprobe`

@@ -1,14 +1,58 @@
-Using this workflow for pulling changes from upstream:
-https://chat.openai.com/c/7fcc2c28-7a4b-4394-ab2a-070a3557b076
-
-
 ## Workflows
+
+### Syncing with upstream
+
+
+ 1. Update our master which is a shadow of upstream's master
+    ```
+    git checkout master
+    git fetch upstream
+    git merge upstream/master
+    git push
+    ```
+ 1. Switch to the descript branch and create a branch to make a PR for the upstream sync (combining it with other changes if you have them)
+    ```
+    git checkout descript
+    git checkout -b <name the update branch>
+    ```
+ 1. Merge with upstream changes by merging with master (fix merge conflicts)
+    ``` 
+    git merge master
+    ```
+ 1. Build the latest and test it via `pnpm link` workflows or publishing a test build and consuming it in a PR in the monorepo.
+ 1. Once it looks good publish a new version, and go make or update a monorepo side PR to pull in the new version.
 
 ### pnpm link . while developing
 
-**TODO**
+```
+cd libav.js
+pnpm link .
+
+cd descript-web-v2/pkg-js/libav-utils
+pnpm link <path to libav.js on disk>
+```
 
 ### publishing
+
+1. Bump version by search replacing for the previous version with the new version
+1. Build the latest
+
+```
+pnpm superclean
+make build-descript-p3
+```
+1. Commit changes (such as version bump files)
+
+1. Publish it
+```
+npm publish
+```
+1. Tag it
+```
+git tag <version-number>
+git push -tags
+```
+1. Go make a Github Release using the new tag, and adding release notes.
 
 **TODO**
 
@@ -60,8 +104,8 @@ of using libav.js from a CDN:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.5/dist"};</script>
-        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.5/dist/libav-3.11.5.1.2-default.js"></script>
+        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.7/dist"};</script>
+        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.7/dist/libav-3.11.7.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -84,7 +128,7 @@ Here's a better example, using libav.js locally:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript" src="libav-3.11.5.1.2-default.js"></script>
+        <script type="text/javascript" src="libav-3.11.7.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV();
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -119,8 +163,8 @@ easier to avoid race conditions.
 
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
 ready instance of libav. `LibAV.LibAV` takes an optional argument in which
-loading options may be provided, but they're rarely useful. The loading options
-and their default values are:
+loading options may be provided. The loading options and their default values
+are:
 ```
 {
     "noworker": false,
@@ -131,18 +175,35 @@ and their default values are:
     "base": LibAV.base
 }
 ```
-If `noworker` is set, Web Workers will be disabled, so libav.js runs in the
-main thread. If `nowasm` is set, WebAssembly will be disabled. WebAssembly
-threads are disabled by default *and not built by default*, as most browsers
-have a limit to the number of worker threads an entire page is allowed to
-have, so instead, `yesthreads` must be set to enable threads, and you'll have
-to build the threaded versions manually. Note that separate instances of
-libav.js, created by separate calls to `LibAV.LibAV`, will be in separate
-threads as long as workers are used, regardless of the value of `yesthreads`,
-and this is how you're intended to thread libav.js. If `nothreads` is set then
-threads will be disabled even if `yesthreads` is set (this is so that the
-default setting of threads can be changed in the future). If `nosimd` is set,
-WebAssembly's SIMD extension won't be used.
+`nowasm` and `nosimd` affect what forms of code libav.js is allowed to load. By
+default it will load SIMD WebAssembly if the browser supports it, non-SIMD
+WebAssembly if the browser supports WebAssembly but not SIMD, and asm.js if the
+browser supports no WebAssembly. These are overridable here for testing purposes
+only.
+
+The other no/yes options affect the execution mode of libav.js. libav.js can run
+in one of three modes: `"direct"` (synchronous), `"worker"`, or `"threads"`.
+After creating a libav.js instance, the mode can be found in
+`libav.libavjsMode`. By default, libav.js will use the `"worker"` mode if
+Web Workers are available, and `"direct"` otherwise. libav.js never uses the
+`"threads"` mode by default, though this may change in the future.
+
+If `noworker` is set or Web Workers are not available, Web Workers will be
+disabled, so libav.js will run in the main thread (i.e., will run in `"direct"`
+mode). This is synchronous, so usually undesirable.
+
+If `yesthreads` is set (and `nothreads` is not set) and threads are supported
+(see
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+), then a threaded version of libav.js will be loaded. This will significantly
+improve the performance of some encoders and decoders. However, threads are
+disabled by default, as their benefit or otherwise depends on the precise
+behavior of your code, and some browsers have a fairly low limit to the number
+of worker threads an entire page is allowed to have. Note that separate
+instances of libav.js, created by separate calls to `LibAV.LibAV`, will be in
+separate threads as long as workers are used, regardless of the value of
+`yesthreads`, and thus `yesthreads` is only needed if you need concurrency
+*within* a libav.js instance.
 
 libav.js automatically detects which WebAssembly features are available, so
 even if you set `yesthreads` to `true` and don't set `nosimd`, a version with

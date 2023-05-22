@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019, 2020 Yahweasel
+ * Copyright (C) 2019-2023 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -13,8 +13,17 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-if (typeof importScripts !== "undefined" && (typeof LibAV === "undefined" || !LibAV.nolibavworker)) {
-    // We're a WebWorker, so arrange messages
+if (/* We're in a worker */
+    typeof importScripts !== "undefined" &&
+
+    /* We haven't explicitly been requested not to load */
+    (typeof LibAV === "undefined" || !LibAV.nolibavworker) &&
+
+    /* We're not being loaded as a thread */
+    typeof Module === "undefined"
+    ) {
+
+    // We're the primary code for this worker
     LibAVFactory().then(function(libav) {
         onmessage = function(e) {
             var id = e.data[0];

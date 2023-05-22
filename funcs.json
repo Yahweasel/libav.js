@@ -118,12 +118,12 @@
       ["close", "number", ["number"]],
       ["dup2", "number", ["number", "number"]],
       ["libavjs_with_swscale", "number", []],
+      ["libavjs_create_main_thread", "number", []],
+      ["ffmpeg_main", "number", ["number", "number"], {"async": true}],
+      ["ffprobe_main", "number", ["number", "number"], {"async": true}]
+    ],
 
-      ["ffmpeg_main", "number", ["number", "number"]],
-      ["ffprobe_main", "number", ["number", "number"]]
-  ],
-
-    "meta": [
+    "fs": [
         "readFile",
         "writeFile",
         "unlink",
@@ -134,8 +134,12 @@
         "mkreadaheadfile",
         "unlinkreadaheadfile",
         "mkwriterdev",
+        "mkstreamwriterdev",
         "mkworkerfsfile",
-        "unlinkworkerfsfile",
+        "unlinkworkerfsfile"
+    ],
+
+    "meta": [
         "ff_reader_dev_send",
         "ff_block_reader_dev_send",
         "ff_reader_dev_waiting",

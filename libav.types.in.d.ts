@@ -225,6 +225,17 @@ export interface AVCodecContextProps {
 }
 
 export interface LibAV {
+    /**
+     * The operating mode of this libav.js instance. Each operating mode has
+     * different constraints.
+     */
+    libavjsMode: "direct" | "worker" | "threads";
+
+    /**
+     * If the operating mode is "worker", the worker itself.
+     */
+    worker?: Worker;
+
 @FUNCS
 @DECLS
 
@@ -232,6 +243,11 @@ export interface LibAV {
      * Callback when writes occur. Set by the user.
      */
     onwrite?: (filename: string, position: number, buffer: Uint8Array | Int8Array) => void;
+
+    /**
+     * Callback for bock reader devices. Set by the user.
+     */
+    onblockread?: (filename: string, pos: number, length: number)  => void;
 
     /**
      * Terminate the worker associated with this libav.js instance, rendering

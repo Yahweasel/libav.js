@@ -1,0 +1,11 @@
+# syntax = docker/dockerfile:1.2
+
+# THIS DOCKERFILE IS NOT MAINTAINED BY THE AUTHOR OF libav.js!
+# I know of no reason why it would drift out of date (emsdk is the only
+# dependency), but if you have issues using it, DO NOT REPORT BUGS. Pull
+# requests are accepted.
+FROM emscripten/emsdk
+
+ARG ENV
+
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y pkg-config
