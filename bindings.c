@@ -100,10 +100,13 @@ uint32_t struc ##_channel_layouthi(struc *a) { \
     return (uint32_t) (a->ch_layout.u.mask >> 32);\
 }\
 void struc ##_channel_layout_s(struc *a, uint32_t b) { \
-    a->ch_layout.u.mask = b;\
+    a->ch_layout.u.mask = (a->ch_layout.u.mask & (0xFFFFFFFFull << 32)) | (((uint64_t) b));\
+    uint64_t mask = a->ch_layout.u.mask;\
+    av_channel_layout_uninit(&a->ch_layout);\
+    av_channel_layout_from_mask(&a->ch_layout, mask);\
 }\
 void struc ##_channel_layouthi_s(struc *a, uint32_t b) { \
-    a->ch_layout.u.mask |= (((uint64_t) b) << 32);\
+    a->ch_layout.u.mask = (a->ch_layout.u.mask & 0xFFFFFFFFull) | (((uint64_t) b) << 32);\
     uint64_t mask = a->ch_layout.u.mask;\
     av_channel_layout_uninit(&a->ch_layout);\
     av_channel_layout_from_mask(&a->ch_layout, mask);\
