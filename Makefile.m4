@@ -15,9 +15,17 @@ EFLAGS=\
 	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
 	-s "EXPORTED_RUNTIME_METHODS=['cwrap']" \
 	-s MODULARIZE=1 \
+	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
 	-s ALLOW_MEMORY_GROWTH=1
+
+# For debugging:
+#EFLAGS+=\
+#	-s ASSERTIONS=2 \
+#	-s STACK_OVERFLOW_CHECK=2 \
+#	-s MALLOC=emmalloc-memvalidate \
+#	-s SAFE_HEAP=1
 
 all: build-default
 

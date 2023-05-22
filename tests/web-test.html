@@ -1,0 +1,70 @@
+<!doctype html>
+<!--
+ * Copyright (C) 2023 Yahweasel and contributors
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<html>
+    <head>
+        <meta charset="utf8" />
+        <title>libav.js tests</title>
+    </head>
+    <body>
+        <script type="text/javascript" src="harness.js"></script>
+
+        <pre id="status"></pre>
+        <hr/>
+        <pre id="stdout"></pre>
+        <hr/>
+        <pre id="stderr"></pre>
+        <hr/>
+        <button id="runTests">Run tests</button>
+        <input type="checkbox" id="includeSlow" />
+        <label for="includeSlow">Include slow tests</label>
+
+        <script type="text/javascript">(function() {
+            const runTests = document.getElementById("runTests");
+            runTests.onclick = async function() {
+                runTests.style.display = "none";
+                const harness = LibAVTestHarness;
+
+                harness.print = text => {
+                    document.getElementById("stdout").innerText += text + "\n";
+                };
+                harness.printErr = text => {
+                    document.getElementById("stderr").innerText += text + "\n";
+                };
+                harness.printStatus = text => {
+                    document.getElementById("status").innerText = text;
+                };
+
+                let suite;
+                {
+                    const resp = await fetch("suite.json");
+                    suite = await resp.json();
+                }
+                await harness.loadTests(suite);
+                harness.options.includeSlow =
+                    document.getElementById("includeSlow").checked;
+                await harness.runTests([
+                    null,
+                    {nosimd: true},
+                    {yesthreads: true},
+                    {yesthreads: true, nosimd: true},
+                    {nowasm: true}
+                ]);
+
+                runTests.style.display = "";
+            };
+        </script>
+    </body>
+</html>
