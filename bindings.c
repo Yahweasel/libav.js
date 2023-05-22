@@ -512,22 +512,20 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
     double max_audio_duration = -1;
     double max_video_duration = -1;
 
-    printf("avformat_read_raw_packet_durations before loop\n");
+    // printf("avformat_read_raw_packet_durations before loop\n");
     while(av_read_frame(pFormatContext, &pkt)>=0) {
         AVStream* avStream = pFormatContext->streams[pkt.stream_index];
-
-        
 
         // Skip if it's not audio or video
         bool isVideo = avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO;
         bool isAudio = avStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO; 
 
-        printf("avformat_read_raw_packet_durations loop (isVideo = %i, isAudio = %i\n", isVideo, isAudio);
+        // printf("avformat_read_raw_packet_durations loop (isVideo = %i, isAudio = %i\n", isVideo, isAudio);
 
         if( isAudio || isVideo ){
             double end = (pkt.pts + pkt.duration)*av_q2d(pFormatContext->streams[pkt.stream_index]->time_base);
 
-            printf("end = %f. max_video_duration = %f, max_audio_duration = %f\n", end, max_video_duration, max_audio_duration);
+            // printf("end = %f. max_video_duration = %f, max_audio_duration = %f\n", end, max_video_duration, max_audio_duration);
 
             if(isVideo && end>max_video_duration){
                 max_video_duration = end;
@@ -541,8 +539,8 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
         av_packet_unref(&pkt);
     }
     
-    printf("avformat_read_raw_packet_durations after loop\n");
-    printf("max_video_duration = %f, max_audio_duration = %f\n", max_video_duration, max_audio_duration);
+    // printf("avformat_read_raw_packet_durations after loop\n");
+    // printf("max_video_duration = %f, max_audio_duration = %f\n", max_video_duration, max_audio_duration);
 
     // Audio and video
     if( max_audio_duration != -1 && max_video_duration != -1 ) {
