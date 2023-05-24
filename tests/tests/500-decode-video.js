@@ -120,5 +120,4 @@ async function main()
     await libav.av_frame_free_js(frame);
     await libav.av_packet_free_js(pkt);
 }
-if (h.options.includeSlow)
-    await main();
+await main();
