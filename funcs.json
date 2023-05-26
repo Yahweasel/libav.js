@@ -197,6 +197,7 @@
             "height",
             "keyint_min",
             "level",
+            "max_b_frames",
             "pix_fmt",
             "profile",
             "rc_max_rate",
