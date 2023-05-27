@@ -11698,7 +11698,7 @@ index 055275d..4fea561 100644
  };
 +#endif
 diff --git a/fftools/ffprobe.c b/fftools/ffprobe.c
-index af927cb..9ec5979 100644
+index af927cb..7851a22 100644
 --- a/fftools/ffprobe.c
 +++ b/fftools/ffprobe.c
 @@ -92,8 +92,11 @@ typedef struct InputFile {
@@ -11713,7 +11713,7 @@ index af927cb..9ec5979 100644
  
  static int do_bitexact = 0;
  static int do_count_frames = 0;
-@@ -384,6 +387,57 @@ static void ffprobe_cleanup(int ret)
+@@ -384,6 +387,68 @@ static void ffprobe_cleanup(int ret)
  #if HAVE_THREADS
      pthread_mutex_destroy(&log_mutex);
  #endif
@@ -11738,40 +11738,51 @@ index af927cb..9ec5979 100644
 +do_show_pixel_format_flags = 0;
 +do_show_pixel_format_components = 0;
 +do_show_log = 0;
++
 +do_show_chapter_tags = 0;
 +do_show_format_tags = 0;
 +do_show_frame_tags = 0;
 +do_show_program_tags = 0;
 +do_show_stream_tags = 0;
 +do_show_packet_tags = 0;
++
 +show_value_unit              = 0;
 +use_value_prefix             = 0;
 +use_byte_value_binary_prefix = 0;
 +use_value_sexagesimal_format = 0;
 +show_private_data            = 1;
++
 +show_optional_fields = SHOW_OPTIONAL_FIELDS_AUTO;
++
 +print_format = NULL;
 +stream_specifier = NULL;
 +show_data_hash = NULL;
++
 +read_intervals = NULL;
 +read_intervals_nb = 0;
++
 +find_stream_info  = 1;
++
 +options = NULL;
++
 +input_filename = NULL;
 +print_input_filename = NULL;
 +iformat = NULL;
 +output_filename = NULL;
++
 +hash = NULL;
++
 +nb_streams = 0;
 +nb_streams_packets = NULL;
 +nb_streams_frames = NULL;
 +selected_streams = NULL;
++
 +log_buffer = NULL;
 +log_buffer_size = 0;
  }
  
  struct unit_value {
-@@ -3770,6 +3824,8 @@ static int opt_print_filename(void *optctx, const char *opt, const char *arg)
+@@ -3770,6 +3835,8 @@ static int opt_print_filename(void *optctx, const char *opt, const char *arg)
      return 0;
  }
  
@@ -11780,7 +11791,7 @@ index af927cb..9ec5979 100644
  void show_help_default(const char *opt, const char *arg)
  {
      av_log_set_callback(log_callback_help);
-@@ -3780,6 +3836,7 @@ void show_help_default(const char *opt, const char *arg)
+@@ -3780,6 +3847,7 @@ void show_help_default(const char *opt, const char *arg)
      show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
      show_help_children(avcodec_get_class(), AV_OPT_FLAG_DECODING_PARAM);
  }
@@ -11788,7 +11799,7 @@ index af927cb..9ec5979 100644
  
  /**
   * Parse interval specification, according to the format:
-@@ -4050,7 +4107,8 @@ static inline int check_section_show_entries(int section_id)
+@@ -4050,7 +4118,8 @@ static inline int check_section_show_entries(int section_id)
              do_show_##varname = 1;                                      \
      } while (0)
  
@@ -11798,6 +11809,13 @@ index af927cb..9ec5979 100644
  {
      const Writer *w;
      WriterContext *wctx;
+@@ -4201,5 +4270,6 @@ end:
+ 
+     avformat_network_deinit();
+ 
++    exit_program(ret < 0);
+     return ret < 0;
+ }
 diff --git a/fftools/thread_queue.c b/fftools/thread_queue.c
 index a1ab4ce..7c707b3 100644
 --- a/fftools/thread_queue.c
