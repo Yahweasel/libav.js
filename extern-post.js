@@ -18,7 +18,7 @@ if (LibAVFactory) (globalThis || window || self).LibAVFactory = LibAVFactory
 if (/* We're in a worker */
     typeof importScripts !== "undefined" &&
     /* We haven't explicitly been requested not to load */
-    (typeof LibAV === "undefined"  || !LibAV.nolibavworker) &&
+    (typeof LibAV === "undefined" || !LibAV.nolibavworker) &&
     /* We're not being loaded as a thread */
     typeof Module === "undefined"
     ) {
