@@ -81,30 +81,16 @@ function ismodule() {
             return (thr ? "thr" : "") + (simd ? "simd" : "");
     }
     libav.target = target;
-
-    function getFiles(conf) {
-        // define a similar function, adapted to your bundler, probably you will ignore base
-        if (conf.ext === "wasm") {
-            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + "." + conf.t + ".wasm");
-        } else if (conf.ext === "import") {
-            // not supported by the standard implementation, since it is only required for bundler
-            // and it would trigger the bundler and fail.
-            return null;
-            // example what it should do, if it is implemented externally
-            // return import(conf.base + "/libav-" + conf.ver + "-" + conf.config  + "." + conf.t + ".js")
-        } else {
-            return new URL(conf.base + "/libav-" + conf.ver + "-" + conf.config + "." + conf.t + ".js");
-        }
-    } 
+    libav.VER = "@VER";
+    libav.CONFIG = "@CONFIG";
+    libav.DBG = "@DBG";
 
     // Now start making our instance generating function
     libav.LibAV = function(opts) {
         opts = opts || {};
         var base = opts.base || libav.base;
         var t = target(opts);
-        var getfiles = libav.getFiles || getFiles;
-        var url = getfiles( { ext: "js", base: base, ver: "@VER", config: "@CONFIG@DBG", t: t });
-        (globalThis || window || self).LibAV.wasmurl = getfiles( { ext: "wasm", base, ver: "@VER", config: "@CONFIG@DBG", t: t });
+        var toImport = libav.toImport ||  base + "/libav-@VER-@CONFIG@DBG." + t + ".js";
         var ret;
 
         var mode = "direct";
@@ -118,7 +104,7 @@ function ismodule() {
             if (!libav.LibAVFactory) {
                 if (nodejs) {
                     // Node.js: Load LibAV now
-                    libav.LibAVFactory = require(url);
+                    libav.LibAVFactory = require(toImport);
 
                 } else if (mode === "worker") {
                     // Worker: Nothing to load now
@@ -126,29 +112,25 @@ function ismodule() {
                 } else if (typeof importScripts !== "undefined") {
                     // Worker scope. Import it.
                     if (!ismodule()) {
-                        importScripts(url);
+                        importScripts(toImport);            
                     } else {
-                        var imported = getfiles( { ext: "import", base: base, ver: "@VER", config: "@CONFIG@DBG", t: t });
-                        return imported
-                            .then(function(mod) {
-                                var gt = (globalThis || window || self)
-                                if (gt.LibAVFactoryAsync)
-                                    return gt.LibAVFactoryAsync;
-                                else throw new Error('No LibAVFactoryAsync');
-                            })
-                            .then(function(LibAVFactory) {
-                                libav.LibAVFactory = LibAVFactory;
-                            })
-                            .catch(function(error) {
-                               console.log('Error loading libAV', error);
-                            });
+                        var imported = libav.importedjs
+                        // just a sanity check if externally loaded
+                        if (!imported) throw new Error(`You need to import ${toImport} in module case beforehand`)
+
+                        var gt = (globalThis || window || self)
+                        libav.LibAVFactory = gt.LibAVFactory;
+                        if (gt.LibAVFactory)
+                            return gt.LibAVFactory;
+                        else throw new Error('No LibAVFactory');
                     }
+                    libav.LibAVFactory = LibAVFactory;
 
                 } else {
                     // Web: Load the script
                     return new Promise(function(res, rej) {
                         var scr = document.createElement("script");
-                        scr.src = url.href;
+                        scr.src = toImport;
                         scr.addEventListener("load", res);
                         scr.addEventListener("error", rej);
                         scr.async = true;
@@ -168,11 +150,13 @@ function ismodule() {
                 ret = {};
 
                 // Load the worker
-                ret.worker = new Worker(url);
+                ret.worker = new Worker(toImport);
 
                 ret.worker.postMessage({
-                    wasmurl: (globalThis || window || self).LibAV.wasmurl.toString()
-                  });
+                    config: {
+                        wasmurl: libav.wasmurl
+                    }
+                });
 
                 // Report our readiness
                 return new Promise(function(res, rej) {

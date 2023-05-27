@@ -1,0 +1,24 @@
+/*
+ * Copyright (C) 2019-2023 Yahweasel and contributors
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+Module['locateFile'] = function(path, prefix) {
+    // if it's the wasm file
+    var gt = (globalThis || window || self)
+    if (gt.LibAV && gt.LibAV.wasmurl 
+        && path.endsWith(".wasm") && path.includes("libav-")) 
+        return gt.LibAV.wasmurl;
+    // otherwise, use the default, the prefix (JS file's dir) + the path
+    return prefix + path;
+}

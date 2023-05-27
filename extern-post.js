@@ -13,23 +13,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-if (typeof LibAV !== "undefined" && LibAV.wasmurl){
-    (globalThis || window || self).LibAVFactoryAsync = new Promise(function (resolve, reject) {   
-            var initialFactory = LibAVFactory;
-            fetch(LibAV.wasmurl).then(function (response) {
-            if (!response['ok']) {
-               throw ("failed to load wasm binary file at '" + LibAV.wasmurl + "'");
-            }
-            return response['arrayBuffer']();
-        }).then(function (binary) {
-            resolve (function () { 
-                return initialFactory({ wasmBinary: binary });
-            });
-        }).catch(function (error) {
-            reject(error);
-        });
-  });
-}
+if (LibAVFactory) (globalThis || window || self).LibAVFactory = LibAVFactory
 
 if (/* We're in a worker */
     typeof importScripts !== "undefined" &&
@@ -38,27 +22,16 @@ if (/* We're in a worker */
     /* We're not being loaded as a thread */
     typeof Module === "undefined"
     ) {
-    // We're the primary code for this worker
-    var loadLibAV = function (wasmurl) {
-        return new Promise(function (response, reject) {
-            fetch(wasmurl).then(function (response) {
-                if (!response['ok']) {
-                    throw ("failed to load wasm binary file at '" + wasmurl + "'");
-                }
-                return response['arrayBuffer']();
-            }).then(function (wasmBinary) {
-                return LibAVFactory({ wasmBinary: wasmBinary });
-            }).then(function (libav) {
-                response(libav);
-            }).catch(function (error) {
-                reject(error);
-            });
-        });
-    };   
+    // We're the primary code for this worker   
     var libav;
     onmessage = function (e) {
-            if (e && e.data && e.data.wasmurl) {
-                loadLibAV(e.data.wasmurl).then(function (lib) {
+            if (e && e.data && e.data.config) {
+                if (e.data.config.wasmurl) {
+                    var gt = (globalThis || window || self)
+                    if (!gt.LibAV) gt.LibAV = {}
+                    gt.LibAV.wasmurl =  e.data.config.wasmurl
+                } 
+                LibAVFactory().then(function (lib) {
                    libav = lib;
                    libav.onwrite = function(name, pos, buf) {
                         /* We have to buf.slice(0) so we don't duplicate the entire heap just
