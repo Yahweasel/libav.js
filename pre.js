@@ -13,12 +13,19 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-Module['locateFile'] = function(path, prefix) {
+Module.locateFile = function(path, prefix) {
     // if it's the wasm file
-    var gt = (globalThis || window || self)
-    if (gt.LibAV && gt.LibAV.wasmurl 
-        && path.endsWith(".wasm") && path.includes("libav-")) 
-        return gt.LibAV.wasmurl;
-    // otherwise, use the default, the prefix (JS file's dir) + the path
+    if (path.indexOf(".wasm") === path.length - 5 &&
+        path.indexOf("libav-") !== -1) {
+        // Consider using an overridden wasm URL
+        var gt;
+        if (typeof globalThis !== "undefined") gt = globalThis;
+        else if (typeof self !== "undefined") gt = self;
+        else gt = window;
+        if (gt.LibAV && gt.LibAV.wasmurl)
+            return gt.LibAV.wasmurl;
+    }
+
+    // Otherwise, use the default
     return prefix + path;
 }

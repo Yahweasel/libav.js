@@ -13,15 +13,6 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Jason Miller on twitter, suggested this
-function ismodule() {
-    try{ 
-     importScripts("data:,"); 
-     return false; 
-    } catch(e) {}
-    return true;
-}
-
 (function() {
     function isWebAssemblySupported(module) {
         module = module || [0x0, 0x61, 0x73, 0x6d, 0x1, 0x0, 0x0, 0x0];
@@ -51,6 +42,16 @@ function ismodule() {
             0xa, 0x1, 0x8, 0x0, 0x41, 0x0, 0xfd, 0xf, 0xfd, 0x62, 0xb]);
     }
 
+    /* Source: Jason Miller on Twitter. Returns true if we're in an ES6 module
+     * in a worker. */
+    function isModule() {
+        try {
+            importScripts("data:,");
+            return false;
+        } catch(e) {}
+        return true;
+    }
+
     var libav;
     var nodejs = (typeof process !== "undefined");
 
@@ -66,6 +67,7 @@ function ismodule() {
     libav.isWebAssemblySupported = isWebAssemblySupported;
     libav.isThreadingSupported = isThreadingSupported;
     libav.isSIMDSupported = isSIMDSupported;
+    libav.isModule = isModule;
 
     // Get the target that will load, given these options
     function target(opts) {
@@ -111,20 +113,21 @@ function ismodule() {
 
                 } else if (typeof importScripts !== "undefined") {
                     // Worker scope. Import it.
-                    if (!ismodule()) {
-                        importScripts(toImport);            
+                    if (!isModule()) {
+                        importScripts(toImport);
+                        libav.LibAVFactory = LibAVFactory;
                     } else {
-                        var imported = libav.importedjs
-                        // just a sanity check if externally loaded
-                        if (!imported) throw new Error(`You need to import ${toImport} in module case beforehand`)
-
-                        var gt = (globalThis || window || self)
+                        var gt;
+                        if (typeof globalThis !== "undefined") gt = globalThis;
+                        else if (typeof self !== "undefined") gt = self;
+                        else gt = window;
                         libav.LibAVFactory = gt.LibAVFactory;
+
                         if (gt.LibAVFactory)
                             return gt.LibAVFactory;
-                        else throw new Error('No LibAVFactory');
+                        else
+                            throw new Error("If in an ES6 module, you need to import " + toImport + " yourself before loading libav.js.");
                     }
-                    libav.LibAVFactory = LibAVFactory;
 
                 } else {
                     // Web: Load the script

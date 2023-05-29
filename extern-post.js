@@ -13,7 +13,14 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-if (LibAVFactory) (globalThis || window || self).LibAVFactory = LibAVFactory
+function LibAVGlobe() {
+    if (typeof globalThis !== "undefined") return globalThis;
+    else if (typeof self !== "undefined") return self;
+    return window;
+}
+
+if (typeof LibAVFactory !== "undefined")
+    LibAVGlobe().LibAVFactory = LibAVFactory;
 
 if (/* We're in a worker */
     typeof importScripts !== "undefined" &&
@@ -21,35 +28,30 @@ if (/* We're in a worker */
     (typeof LibAV === "undefined" || !LibAV.nolibavworker) &&
     /* We're not being loaded as a thread */
     typeof Module === "undefined"
-    ) {
-    // We're the primary code for this worker   
+    ) (function() {
+    var globe = LibAVGlobe();
     var libav;
-    onmessage = function (e) {
-            if (e && e.data && e.data.config) {
-                if (e.data.config.wasmurl) {
-                    var gt = (globalThis || window || self)
-                    if (!gt.LibAV) gt.LibAV = {}
-                    gt.LibAV.wasmurl =  e.data.config.wasmurl
-                } 
-                LibAVFactory().then(function (lib) {
-                   libav = lib;
-                   libav.onwrite = function(name, pos, buf) {
-                        /* We have to buf.slice(0) so we don't duplicate the entire heap just
-                         * to get one part of it in postMessage */
-                        buf = buf.slice(0);
-                        postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
-                    };
 
-                    libav.onblockread = function(name, pos, len) {
-                        postMessage(["onblockread", "onblockread", true, [name, pos, len]]);
-                    };
-                    postMessage(["onready", "onready", true, null]);
-                }).catch(function (ex) {
-                    console.log('Loading LibAV failed' + '\n' + ex.stack);
-                });
-                return;
-            } 
+    Promise.all([]).then(function() {
+        /* We're the primary code for this worker. The host should ask us to
+         * load immediately. */
+        return new Promise(function(res, rej) {
+            onmessage = function(e) {
+                if (e && e.data && e.data.config) {
+                    if (e.data.config.wasmurl) {
+                        if (!globe.LibAV) globe.LibAV = {};
+                        globe.LibAV.wasmurl = e.data.config.wasmurl;
+                    }
+                    LibAVFactory().then(res).catch(rej);
+                }
+            };
+        });
 
+    }).then(function(lib) {
+        libav = lib;
+
+        // Now we're ready for normal messages
+        onmessage = function(e) {
             var id = e.data[0];
             var fun = e.data[1];
             var args = e.data.slice(2);
@@ -77,4 +79,20 @@ if (/* We're in a worker */
 
             }
         };
-}
+
+        libav.onwrite = function(name, pos, buf) {
+            /* We have to buf.slice(0) so we don't duplicate the entire heap just
+             * to get one part of it in postMessage */
+            buf = buf.slice(0);
+            postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
+        };
+
+        libav.onblockread = function(name, pos, len) {
+            postMessage(["onblockread", "onblockread", true, [name, pos, len]]);
+        };
+        postMessage(["onready", "onready", true, null]);
+
+    }).catch(function(ex) {
+        console.log("Loading LibAV failed\n" + ex + "\n" + ex.stack);
+    });
+})();
