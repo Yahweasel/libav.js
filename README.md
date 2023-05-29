@@ -85,6 +85,23 @@ directory, as in the CDN example above. `LibAV.base` does not need to be a full
 URL, but should be if loading from another origin. You can set `LibAV.base`
 after loading libav.js; it's set up so that you can do it before to make it
 easier to avoid race conditions.
+When loading LibAV in a worker,  `LibAV.nolibavworker = true` tells
+ the loading code of LibAV, that it is not running in a worker started by LibAV.
+Otherwise, loading LibAV without worker support will fail, when starting with `LibAV.LibAV`'s loading option `"noworker"` (cf. next section).
+
+Bundlers or development frameworks such as Webpack, Esbuild, Vite, Rollup etc. may 
+change the names and location of the LibAV's Javascript and Wasm files or even turn
+ them into modules.
+In these cases, the location of the Javascript and Wasm file of a LibAV variant can be
+overwritten by options set on the `LibAV` object after loading `LibAV` but before calling the factory function.
+`LibAV.toImport` and `LibAV.wasmurl` overwrite the URL of the used javascript and wasm file. These are usually located in the libav.js directory and follow the scheme `libav-VER-CONFIGDBG.TARGET.js` or `libav-VER-CONFIGDBG.TARGET.wasm`.
+The version, config and debug string are exposed as `LibAV.VER`, `LibAV.CONFIG` and `LibAV.DBG` after loading LibAV.
+Depending on your bundler and it may be beneficial to hardcode the used variants and verify the correct configurations.
+The target can vary between different browsers and should be determined by calling `LibAV.target()` during runtime. E.g.  A possible way to retrieve the URL in a module can be ``new URL(`node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.wasm`, import.meta.url).href``, but be sure to consult the documentation of your bundler. Note the variant `opus` is hard coded to prevent the bundler from including all variants.
+Some bundlers turn LibAV code from a CommonJS module to an ESM module, which will if loaded in a worker interfere with LibAV's loading code.
+In this case, LibAV's javascript code needs to be imported manually before calling the factory function of the LibAV instance: ``await import(`../node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.js`)`` (Note, dynamically importing ESM modules is supported by all major browsers, only for Firefox, it is currently protected by a flag).
+
+
 
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
 ready instance of libav. `LibAV.LibAV` takes an optional argument in which
