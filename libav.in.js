@@ -42,6 +42,16 @@
             0xa, 0x1, 0x8, 0x0, 0x41, 0x0, 0xfd, 0xf, 0xfd, 0x62, 0xb]);
     }
 
+    /* Source: Jason Miller on Twitter. Returns true if we're in an ES6 module
+     * in a worker. */
+    function isModule() {
+        try {
+            importScripts("data:,");
+            return false;
+        } catch(e) {}
+        return true;
+    }
+
     var libav;
     var nodejs = (typeof process !== "undefined");
 
@@ -57,6 +67,7 @@
     libav.isWebAssemblySupported = isWebAssemblySupported;
     libav.isThreadingSupported = isThreadingSupported;
     libav.isSIMDSupported = isSIMDSupported;
+    libav.isModule = isModule;
 
     // Get the target that will load, given these options
     function target(opts) {
@@ -72,13 +83,16 @@
             return (thr ? "thr" : "") + (simd ? "simd" : "");
     }
     libav.target = target;
+    libav.VER = "@VER";
+    libav.CONFIG = "@CONFIG";
+    libav.DBG = "@DBG";
 
     // Now start making our instance generating function
     libav.LibAV = function(opts) {
         opts = opts || {};
         var base = opts.base || libav.base;
         var t = target(opts);
-        var toImport = base + "/libav-@VER-@CONFIG@DBG." + t + ".js";
+        var toImport = libav.toImport ||  base + "/libav-@VER-@CONFIG@DBG." + t + ".js";
         var ret;
 
         var mode = "direct";
@@ -99,8 +113,21 @@
 
                 } else if (typeof importScripts !== "undefined") {
                     // Worker scope. Import it.
-                    importScripts(toImport);
-                    libav.LibAVFactory = LibAVFactory;
+                    if (!isModule()) {
+                        importScripts(toImport);
+                        libav.LibAVFactory = LibAVFactory;
+                    } else {
+                        var gt;
+                        if (typeof globalThis !== "undefined") gt = globalThis;
+                        else if (typeof self !== "undefined") gt = self;
+                        else gt = window;
+                        libav.LibAVFactory = gt.LibAVFactory;
+
+                        if (gt.LibAVFactory)
+                            return gt.LibAVFactory;
+                        else
+                            throw new Error("If in an ES6 module, you need to import " + toImport + " yourself before loading libav.js.");
+                    }
 
                 } else {
                     // Web: Load the script
@@ -128,9 +155,14 @@
                 // Load the worker
                 ret.worker = new Worker(toImport);
 
+                ret.worker.postMessage({
+                    config: {
+                        wasmurl: libav.wasmurl
+                    }
+                });
+
                 // Report our readiness
                 return new Promise(function(res, rej) {
-                    var ready = 0;
 
                     // Our handlers
                     ret.on = 1;

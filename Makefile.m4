@@ -10,7 +10,9 @@ CFLAGS=-Oz
 SIMDFLAGS=-msimd128
 THRFLAGS=-pthread
 EFLAGS=\
-	--memory-init-file 0 --post-js build/post.js --extern-post-js extern-post.js \
+	--memory-init-file 0 \
+	--pre-js pre.js \
+	--post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
 	-s "EXPORTED_RUNTIME_METHODS=['cwrap']" \
@@ -60,7 +62,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
 # Use: buildrule(target file name, target inst name, CFLAGS, 
 define([[[buildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%.$1: build/ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a \
-	build/exports.json build/post.js extern-post.js bindings.c
+	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
 	$(EMCC) $(CFLAGS) $(EFLAGS) $3 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*) \
