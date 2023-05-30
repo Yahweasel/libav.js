@@ -85,23 +85,9 @@ directory, as in the CDN example above. `LibAV.base` does not need to be a full
 URL, but should be if loading from another origin. You can set `LibAV.base`
 after loading libav.js; it's set up so that you can do it before to make it
 easier to avoid race conditions.
-When loading LibAV in a worker,  `LibAV.nolibavworker = true` tells
- the loading code of LibAV, that it is not running in a worker started by LibAV.
-Otherwise, loading LibAV without worker support will fail, when starting with `LibAV.LibAV`'s loading option `"noworker"` (cf. next section).
 
-Bundlers or development frameworks such as Webpack, Esbuild, Vite, Rollup etc. may 
-change the names and location of the LibAV's Javascript and Wasm files or even turn
- them into modules.
-In these cases, the location of the Javascript and Wasm file of a LibAV variant can be
-overwritten by options set on the `LibAV` object after loading `LibAV` but before calling the factory function.
-`LibAV.toImport` and `LibAV.wasmurl` overwrite the URL of the used javascript and wasm file. These are usually located in the libav.js directory and follow the scheme `libav-VER-CONFIGDBG.TARGET.js` or `libav-VER-CONFIGDBG.TARGET.wasm`.
-The version, config and debug string are exposed as `LibAV.VER`, `LibAV.CONFIG` and `LibAV.DBG` after loading LibAV.
-Depending on your bundler and it may be beneficial to hardcode the used variants and verify the correct configurations.
-The target can vary between different browsers and should be determined by calling `LibAV.target()` during runtime. E.g.  A possible way to retrieve the URL in a module can be ``new URL(`node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.wasm`, import.meta.url).href``, but be sure to consult the documentation of your bundler. Note the variant `opus` is hard coded to prevent the bundler from including all variants.
-Some bundlers turn LibAV code from a CommonJS module to an ESM module, which will if loaded in a worker interfere with LibAV's loading code.
-In this case, LibAV's javascript code needs to be imported manually before calling the factory function of the LibAV instance: ``await import(`../node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.js`)`` (Note, dynamically importing ESM modules is supported by all major browsers, only for Firefox, it is currently protected by a flag).
-
-
+Bundlers have further concerns. To use libav.js with a bundler, see the section
+on bundlers below.
 
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
 ready instance of libav. `LibAV.LibAV` takes an optional argument in which
@@ -132,7 +118,13 @@ Web Workers are available, and `"direct"` otherwise. libav.js never uses the
 
 If `noworker` is set or Web Workers are not available, Web Workers will be
 disabled, so libav.js will run in the main thread (i.e., will run in `"direct"`
-mode). This is synchronous, so usually undesirable.
+mode). This is synchronous, so usually undesirable.  Note that if you're loading
+libav.js *in* a worker, it may be reasonable to set `noworker`, and make
+libav.js synchronous with your worker thread.  However, in that case, you must
+set `LibAV.nolibavworker = true` before loading; this tells the loading code of
+libav.js that it is not running in a worker that it created, and so should not
+load its own worker code.  Otherwise, loading it `noworker` in a worker is
+likely to fail, as it will interfere with your own worker's message handling.
 
 If `yesthreads` is set (and `nothreads` is not set) and threads are supported
 (see
@@ -162,6 +154,43 @@ will override `LibAV.base` if set.
 The tests used to determine which features are available are also exported, as
 `LibAV.isWebAssemblySupported`, `LibAV.isThreadingSupported`, and
 `LibAV.isSIMDSupported`.
+
+
+## Bundlers
+
+Generally speaking, because libav.js needs to adjust its loading procedure based
+on the environment it's being loaded in, it's not a good idea to bundle
+libav.js. However, if you have to bundle it, it can be done if necessary.
+Bundlers such as WebPack, esbuild, Vite, Rollup, etc., may change the names and
+location of the LibAV's JavaScript and WebAssembly files or even turn them into
+modules.  In these cases, the location of the JavaScript and WebAssembly file of
+a LibAV variant can be overridden by options set on the `LibAV` object after
+loading libav.js, similar to `LibAV.base`.  `LibAV.toImport` and `LibAV.wasmurl`
+override the URL of the used JavaScript and WebAssembly file respectively. These
+are usually located in the libav.js directory and follow the scheme
+`libav-VER-CONFIGDBG.TARGET.js` and `libav-VER-CONFIGDBG.TARGET.wasm`,
+respectively.  The version (`VER`), variant (`CONFIG`) and debug (`DBG`) string
+are exposed as `LibAV.VER`, `LibAV.CONFIG` and `LibAV.DBG` respectively after
+loading LibAV.  However, you can generally successfully load a different variant
+or debuggability level, so these are provided to allow you to verify what your
+bundler actually bundled.  The target corresponds to the browser features
+available, and can vary between different browsers or other environments. As
+such, it should be determined at runtime, which can be done by calling
+`LibAV.target()`. For instance, a possible way to retrieve the URL in a module
+can be ``new
+URL(`node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.wasm`,
+import.meta.url).href``, but be sure to consult the documentation of your
+bundler. Note the variant `opus` is hard-coded in this case to prevent the
+bundler from including all variants.
+
+Some bundlers turn LibAV code from a CommonJS module to an ECMAScript 6 module,
+which will if loaded in a worker interfere with LibAV's loading code.  In this
+case, LibAV's JavaScript code needs to be imported manually before calling the
+factory function of the LibAV instance: ``await
+import(`../node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.js`)``.
+Note that dynamically importing ECMAScript 6 modules is supported by all major
+browsers, but at the time of this wriging, on Firefox, is protected by a flag
+that most users will not have enabled.
 
 
 ## API
