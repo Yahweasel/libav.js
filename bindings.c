@@ -78,18 +78,6 @@ B(int, width)
 #undef BL
 #undef BA
 
-// Replacement for printf, that automatically adds a newline. 
-// In Emscripten printf is line buffered. With this callers
-// don't have to always add a "\n" to the end of printf strings
-char printBuf[10000];
-void print(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    sprintf(printBuf, fmt, args);
-    va_end(args);
-    printf("%s\n",printBuf);
-}
-
 int AVFrame_sample_aspect_ratio_num(AVFrame *a) {
     return a->sample_aspect_ratio.num;
 }
@@ -458,9 +446,49 @@ AVFormatContext *avformat_open_input_js(const char *url, AVInputFormat *fmt,
     return ret;
 }
 
+AVStream* findStreamByCodecType(AVFormatContext *pFormatContext, enum AVMediaType codecType){
+    for (int i = 0; i < pFormatContext->nb_streams; i++) {
+        AVStream *avStream = pFormatContext->streams[i];
+        if (avStream->codecpar->codec_type == codecType) {
+            return avStream;
+        }
+    }
+    return NULL;
+}
 
-char readRawPacketDurations[1000000] = "";
-const char * avformat_read_raw_packet_durations(const char *filename) {
+int64_t findStartTimestamp(AVFormatContext *pFormatContext, enum AVMediaType codecType){
+    AVStream* avStream = findStreamByCodecType(pFormatContext, codecType);
+
+    if(avStream==NULL){
+        return INT64_MAX;
+    }
+
+    AVPacket pkt;
+
+    // Find the first video and audio stream
+    av_seek_frame(pFormatContext, avStream->index, 0, AVSEEK_FLAG_BACKWARD);
+
+    if( av_read_frame(pFormatContext, &pkt) >= 0 ){
+        printf("Frame codecType: %i, target codecType: %i\n", avStream->codecpar->codec_type, codecType);
+
+        if(pkt.flags & AV_PKT_FLAG_KEY) {
+            printf("The packet is a keyframe.\n");
+        } else {
+            printf("The packet is not a keyframe.\n");
+        }
+
+        int64_t start = pkt.pts;
+
+        av_packet_unref(&pkt);
+        return start;
+    } else {
+        return INT64_MAX; 
+    }
+    
+}
+
+char readRawPacketTimes[2000] = "";
+const char * avformat_read_raw_packet_times(const char *filename) {
 
     AVFormatContext *pFormatContext = NULL;
 
@@ -468,33 +496,27 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
     int ret;
     if ((ret = avformat_open_input(&pFormatContext, filename, NULL, NULL)) < 0) {
         printf("Error: avformat_read_raw_packet_durations in: (%s). \"%s\",  %i \n", filename, av_err2str(ret), ret);
-        strcpy(readRawPacketDurations, "{\"audioDuration\":-1, \"videoDuration\":-1}");
-        return readRawPacketDurations;
+        strcpy(readRawPacketTimes, "{\"audioDuration\":-1, \"videoDuration\":-1}");
+        return readRawPacketTimes;
     }
+    
+    int64_t min_video_start = findStartTimestamp(pFormatContext, AVMEDIA_TYPE_VIDEO);
+    int64_t min_audio_start = findStartTimestamp(pFormatContext, AVMEDIA_TYPE_AUDIO);
 
-    if(pFormatContext->iformat->read_seek!=NULL){
-        printf("pFormatContext->iformat->read_seek != NULL\n");
-    } else {
-        printf("pFormatContext->iformat->read_seek == NULL\n");
-    }
+    int64_t max_video_end = INT64_MIN;
+    int64_t max_audio_end = INT64_MIN;
+    
+    int videoTimebaseNumerator = -1;
+    int videoTimebaseDenominator = -1;
 
-    if(pFormatContext->iformat->read_seek2!=NULL){
-        printf("pFormatContext->iformat->read_seek2 != NULL\n");
-    } else {
-        printf("pFormatContext->iformat->read_seek2 == NULL\n");
-    }
+    int audioTimebaseNumerator = -1;
+    int audioTimebaseDenominator = -1;
 
-    printf("pFormatContext->iformat->flags = %i \n", pFormatContext->iformat->flags);
-
+    // Jump to the last GOP in a file and then scan through it's packets looking for the one highest timestamp+duration
+    // we can find
     AVPacket pkt;
-    // Seek to the last keyframe
-    // av_seek_frame(pFormatContext, -1, INT64_MAX, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_ANY);
+    av_seek_frame(pFormatContext, -1, INT64_MAX, AVSEEK_FLAG_BACKWARD);
 
-    // Initialize the highest timestamp
-    double max_audio_duration = -1000000000;
-    double max_video_duration = -1000000000;
-
-    printf("avformat_read_raw_packet_durations before loop\n");
     while(av_read_frame(pFormatContext, &pkt)>=0) {
         AVStream* avStream = pFormatContext->streams[pkt.stream_index];
 
@@ -502,150 +524,42 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
         bool isVideo = avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO;
         bool isAudio = avStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO; 
 
-        printf("avformat_read_raw_packet_durations loop (isVideo = %i, isAudio = %i\n", isVideo, isAudio);
-
         if( isAudio || isVideo ){
-            double start = (pkt.pts)*av_q2d(pFormatContext->streams[pkt.stream_index]->time_base);
-            double dts = (pkt.dts)*av_q2d(pFormatContext->streams[pkt.stream_index]->time_base);
-            double end = (pkt.pts + pkt.duration)*av_q2d(pFormatContext->streams[pkt.stream_index]->time_base);
+            int64_t end = pkt.pts + pkt.duration;
 
-            if(isAudio){
-                printf("audio packet start = %f. dts = %f. end = %f. max_video_duration = %f, max_audio_duration = %f\n", start, dts, end, max_video_duration, max_audio_duration);
-            }
-            else {
-                if (pkt.flags & AV_PKT_FLAG_KEY) {
-                    printf("AVPacket raw timestamp = %f (Keyframe)\n", start );
-                } else {
-                    printf("AVPacket raw timestamp = %f (Non-Keyframe)\n", start );
-                }
-
-                printf("video packet start = %f. dts = %f. end = %f. max_video_duration = %f, max_audio_duration = %f\n", start, dts, end, max_video_duration, max_audio_duration);
+            if(isVideo && end > max_video_end){
+                videoTimebaseNumerator = avStream->time_base.num;
+                videoTimebaseDenominator = avStream->time_base.den;
+                max_video_end = end;
             }
 
-            if(isVideo && end>max_video_duration){
-                max_video_duration = end;
-            } else if(isAudio && end>max_audio_duration){
-                max_audio_duration = end;
+            if(isAudio && end > max_audio_end){
+                audioTimebaseNumerator = avStream->time_base.num;
+                audioTimebaseDenominator = avStream->time_base.den;
+                max_audio_end = end;
             }
-
-            
         }
 
         av_packet_unref(&pkt);
     }
 
     avformat_close_input(&pFormatContext);
-    
-    printf("avformat_read_raw_packet_durations after loop\n");
-    printf("max_video_duration = %f, max_audio_duration = %f\n", max_video_duration, max_audio_duration);
 
-    // Audio and video
-    if( max_audio_duration != -1 && max_video_duration != -1 ) {
-        sprintf(readRawPacketDurations, "{\"audioDuration\": %f, \"videoDuration\": %f}", max_audio_duration, max_video_duration);
-        return readRawPacketDurations;
-    }
-    // Just audio
-    else if(max_audio_duration != -1){
-        sprintf(readRawPacketDurations, "{\"audioDuration\": %f, \"videoDuration\": -1}", max_audio_duration);
-        return readRawPacketDurations;
-    }
-    // Just video
-    else if(max_video_duration != -1){
-        sprintf(readRawPacketDurations, "{\"videoDuration\": %f, \"audioDuration\": -1}", max_video_duration);
-        return readRawPacketDurations;
+    if(min_audio_start == INT64_MAX && min_video_start == INT64_MAX){
+        const char *error = "avformat_read_raw_packet_times found no audio or video tracks";
+        printf(error);
+        sprintf(readRawPacketTimes, "{\"error\": \"%s\"", error);
     } else {
-        printf("Error: avformat_read_raw_packet_durations no audio or video tracks");
-        strcpy(readRawPacketDurations, "{\"audioDuration\":-1, \"videoDuration\":-1}");
-        return readRawPacketDurations;
-    }
-}
-
-char videoSampleTimingJson2[1000000] = "";
-const char * avformat_get_video_sample_timing(const char *filename) {
-    videoSampleTimingJson2[0] = 0;
-
-    AVFormatContext *pFormatContext = NULL;
-
-    print("%s", filename);
-
-    // Open the file and read header.
-    int ret;
-    if ((ret = avformat_open_input(&pFormatContext, filename, NULL, NULL)) < 0) {
-        printf("Error: avformat_get_video_sample_timing in: (%s). \"%s\",  %i \n", filename, av_err2str(ret), ret);
-        strcpy(videoSampleTimingJson2, "{duration:0.0, gops:[]}");
-        return videoSampleTimingJson2;
+        sprintf(readRawPacketTimes, 
+        "{\"audioStart\": %" PRId64 
+        ", \"audioEnd\": %" PRId64 
+        ", \"videoStart\": %" PRId64 
+        ", \"videoEnd\": %" PRId64 
+        ", \"videoTimeBaseNumerator\": %i, \"videoTimeBaseDenominator\": %i, \"audioTimeBaseNumerator\": %i, \"audioTimeBaseDenominator\": %i }", 
+        min_audio_start, max_audio_end, min_video_start, max_video_end, videoTimebaseNumerator, videoTimebaseDenominator, audioTimebaseNumerator, audioTimebaseDenominator);
     }
 
-    clock_t startTime, endTime;
-
-    // Record the start time
-    startTime = clock();
-
-    int offset = 0;    
-    AVStream* avStream = NULL;
-    for (int i = 0; i < pFormatContext->nb_streams; i++) {
-        avStream = pFormatContext->streams[i];
-        if(avStream->codecpar->codec_type==AVMEDIA_TYPE_VIDEO){
-            break;
-        }
-    }
-
-    double timeBase = av_q2d(avStream->time_base);
-    double duration = (double)avStream->duration * timeBase;    
-    
-    offset += sprintf(videoSampleTimingJson2+offset, "{");
-        offset += sprintf(videoSampleTimingJson2+offset, "\"gops\": [");
-    
-    double timeCompenstation = 0.0;
-
-    
-    int sampleCount = avformat_index_get_entries_count(avStream);
-    for(int c = 0; c<sampleCount; c++){
-        AVIndexEntry* indexEntry = avformat_index_get_entry(avStream, c);
-        
-        bool isKeyframe = indexEntry->flags & 0x0001;
-
-        double timestamp = (double)indexEntry->timestamp * timeBase;
-        if(isKeyframe){
-            
-            printf("AVIndexEntry.timestamp = %f (Keyframe)\n", timestamp);
-
-            // HACK: Remove this, there is a whole complicated story around timestamps I think. Marcello has mentioned
-            // in other cases where he has had to decode each packet in order to get the correct timestamp. This is a quick 
-            // workaround so I can focus on seeking logic
-            // if(timestamp<0.0&&c==0){
-            //     timeCompenstation = -timestamp;
-            //     timestamp = 0.0;
-            // } else {
-            //     timestamp += timeCompenstation;
-            // }
-
-            offset += sprintf(videoSampleTimingJson2+offset, "%.4f,", timestamp);
-        } else {
-            printf("AVIndexEntry.timestamp = %f (Non-Keyframe)\n", timestamp);
-        }
-    }
-    // Remove the dangling comma
-    if(sampleCount){
-        offset--;
-    }
-    
-    avformat_close_input(&pFormatContext);
-
-        offset += sprintf(videoSampleTimingJson2+offset, "]");
-    offset += sprintf(videoSampleTimingJson2+offset, "}");
-
-    // Record the end time
-    endTime = clock();
-
-    // Calculate the elapsed time
-    double elapsedTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
-
-    // Print the elapsed time
-    printf("Elapsed time: %f seconds\n", elapsedTime);
-
-    return videoSampleTimingJson2;
-    // return "{}";
+    return readRawPacketTimes;
 }
 
 AVIOContext *avio_open2_js(const char *url, int flags,
