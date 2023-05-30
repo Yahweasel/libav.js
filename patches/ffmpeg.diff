@@ -11555,7 +11555,7 @@ index 0000000..9d4ef61
 @@ -0,0 +1 @@
 +#include "../opt_common.h"
 diff --git a/fftools/ffmpeg.c b/fftools/ffmpeg.c
-index d721a5e..9e1f554 100644
+index d721a5e..8469c1e 100644
 --- a/fftools/ffmpeg.c
 +++ b/fftools/ffmpeg.c
 @@ -1,3 +1,6 @@
@@ -11565,6 +11565,15 @@ index d721a5e..9e1f554 100644
  /*
   * Copyright (c) 2000-2003 Fabrice Bellard
   *
+@@ -345,7 +348,7 @@ sigterm_handler(int sig)
+         ret = write(2/*STDERR_FILENO*/, "Received > 3 system signals, hard exiting\n",
+                     strlen("Received > 3 system signals, hard exiting\n"));
+         if (ret < 0) { /* Do nothing */ };
+-        exit(123);
++        exit_program(123);
+     }
+ }
+ 
 @@ -581,6 +584,24 @@ static void ffmpeg_cleanup(int ret)
      }
      term_exit();
@@ -11698,7 +11707,7 @@ index 055275d..4fea561 100644
  };
 +#endif
 diff --git a/fftools/ffprobe.c b/fftools/ffprobe.c
-index af927cb..7851a22 100644
+index af927cb..b550b27 100644
 --- a/fftools/ffprobe.c
 +++ b/fftools/ffprobe.c
 @@ -92,8 +92,11 @@ typedef struct InputFile {
@@ -11782,6 +11791,38 @@ index af927cb..7851a22 100644
  }
  
  struct unit_value {
+@@ -3359,7 +3424,7 @@ static int open_input_file(InputFile *ifile, const char *filename,
+ 
+     ifile->streams = av_calloc(fmt_ctx->nb_streams, sizeof(*ifile->streams));
+     if (!ifile->streams)
+-        exit(1);
++        exit_program(1);
+     ifile->nb_streams = fmt_ctx->nb_streams;
+ 
+     /* bind a decoder to each input stream */
+@@ -3390,11 +3455,11 @@ static int open_input_file(InputFile *ifile, const char *filename,
+ 
+             ist->dec_ctx = avcodec_alloc_context3(codec);
+             if (!ist->dec_ctx)
+-                exit(1);
++                exit_program(1);
+ 
+             err = avcodec_parameters_to_context(ist->dec_ctx, stream->codecpar);
+             if (err < 0)
+-                exit(1);
++                exit_program(1);
+ 
+             if (do_show_log) {
+                 // For loging it is needed to disable at least frame threads as otherwise
+@@ -3408,7 +3473,7 @@ static int open_input_file(InputFile *ifile, const char *filename,
+             if (avcodec_open2(ist->dec_ctx, codec, &opts) < 0) {
+                 av_log(NULL, AV_LOG_WARNING, "Could not open codec for input stream %d\n",
+                        stream->index);
+-                exit(1);
++                exit_program(1);
+             }
+ 
+             if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
 @@ -3770,6 +3835,8 @@ static int opt_print_filename(void *optctx, const char *opt, const char *arg)
      return 0;
  }
