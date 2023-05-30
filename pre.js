@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Yahweasel and contributors
+ * Copyright (C) 2019-2023 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -13,14 +13,19 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// This isn't really a test; it just gets the input file in place
-for (const file of [
-    ["bbb.mp4", "bbb_input.mp4"],
-    ["example-bad-ffprobe.mov", "sandwich-av-mp4a.40.5.mov"]
-]) {
-    const content = await h.readFile(`files/${file[1]}`);
-    h.files.push({
-        name: file[0],
-        content: new Blob([content])
-    });
+Module.locateFile = function(path, prefix) {
+    // if it's the wasm file
+    if (path.indexOf(".wasm") === path.length - 5 &&
+        path.indexOf("libav-") !== -1) {
+        // Consider using an overridden wasm URL
+        var gt;
+        if (typeof globalThis !== "undefined") gt = globalThis;
+        else if (typeof self !== "undefined") gt = self;
+        else gt = window;
+        if (gt.LibAV && gt.LibAV.wasmurl)
+            return gt.LibAV.wasmurl;
+    }
+
+    // Otherwise, use the default
+    return prefix + path;
 }

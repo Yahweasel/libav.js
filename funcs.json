@@ -1,6 +1,7 @@
 {
   "functions": [
       ["av_get_bytes_per_sample", "number", ["number"]],
+      ["av_opt_set", "number", ["number", "string", "string", "number"]],
       ["av_opt_set_int_list_js", "number", ["number", "string", "number", "number", "number", "number"]],
       ["av_frame_alloc", "number", []],
       ["av_frame_free", null, ["number"]],
@@ -48,7 +49,7 @@
       ["avformat_alloc_context", "number", []],
       ["avformat_alloc_output_context2_js", "number", ["number", "string", "string"]],
       ["avformat_close_input", null, ["number"]],
-      ["avformat_find_stream_info", "number", ["number", "number"]],
+        ["avformat_find_stream_info", "number", ["number", "number"], {"async": true}],
       ["avformat_free_context", null, ["number"]],
       ["avformat_new_stream", "number", ["number", "number"]],
       ["avformat_open_input", "number", ["number", "string", "number", "number"], {"async": true}],
@@ -62,6 +63,7 @@
       ["avio_open2_js", "number", ["string", "number", "number", "number"]],
       ["avio_close", "number", ["number"]],
       ["av_find_best_stream", "number", ["number", "number", "number", "number", "number", "number"]],
+        ["av_get_sample_fmt_name", "string", ["number"]],
       ["av_grow_packet", "number", ["number", "number"]],
       ["av_interleaved_write_frame", "number", ["number", "number"]],
       ["av_packet_make_writable", "number", ["number"]],
@@ -170,6 +172,8 @@
           "channel_layout",
           "channel_layouthi",
           "channels",
+            "channel_layoutmask",
+            "ch_layout_nb_channels",
           {"name": "data", "array": true},
           "format",
           "height",
@@ -186,11 +190,15 @@
           "log2_chroma_h"
       ]],
       ["AVCodecContext", [
+            "codec_id",
+            "codec_type",
           "bit_rate",
           "bit_ratehi",
           "channel_layout",
           "channel_layouthi",
           "channels",
+            "channel_layoutmask",
+            "ch_layout_nb_channels",
           "extradata",
           "extradata_size",
           "frame_size",
@@ -198,6 +206,7 @@
           "height",
           "keyint_min",
           "level",
+            "max_b_frames",
           "pix_fmt",
           "profile",
           "rc_max_rate",
@@ -227,6 +236,8 @@
           "color_space",
           "chroma_location",
           "channels",
+            "channel_layoutmask",
+            "ch_layout_nb_channels",
           "sample_rate"
       ]],
       ["AVPacket", [

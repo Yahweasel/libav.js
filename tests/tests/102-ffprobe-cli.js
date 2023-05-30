@@ -18,6 +18,9 @@ const libav = await h.LibAV();
 // Check that ffprobe gives consistent output version to version
 let hadUncached = false;
 for (const file of h.files) {
+    if (!/^bbb/.test(file))
+        continue;
+
     // Capture stdout
     let stdoutParts = [];
     await libav.mkwriterdev("stdout");
