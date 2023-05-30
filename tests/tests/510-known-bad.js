@@ -13,14 +13,13 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// This isn't really a test; it just gets the input file in place
-for (const file of [
-    ["bbb.mp4", "bbb_input.mp4"],
-    ["example-bad-ffprobe.mov", "sandwich-av-mp4a.40.5.mov"]
-]) {
-    const content = await h.readFile(`files/${file[1]}`);
-    h.files.push({
-        name: file[0],
-        content: new Blob([content])
-    });
-}
+const libav = await h.LibAV();
+
+/* example-bad-ffprobe.mov is a file that ffprobe fails on in current versions
+ * of ffmpeg */
+if (await libav.ffprobe("-loglevel", "quiet", "example-bad-ffprobe.mov") === 0)
+    throw new Error("Unexpected ffprobe success");
+
+// bbb.mp4 is a fine file
+if (await libav.ffprobe("-loglevel", "quiet", "bbb.mp4") !== 0)
+    throw new Error("Unexpected ffprobe failure");
