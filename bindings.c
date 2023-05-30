@@ -62,8 +62,6 @@ void ff_nothing() {}
 #define B(type, field) A(AVFrame, type, field)
 #define BL(type, field) AL(AVFrame, type, field)
 #define BA(type, field) AA(AVFrame, type, field)
-BL(uint64_t, channel_layout)
-B(int, channels)
 BA(uint8_t *, data)
 B(int, format)
 B(int, height)
@@ -78,7 +76,7 @@ B(int, width)
 #undef BL
 #undef BA
 
-// Replacement for printf, that automatically adds a newline. 
+// Replacement for printf, that automatically adds a newline.
 // In Emscripten printf is line buffered. With this callers
 // don't have to always add a "\n" to the end of printf strings
 char printBuf[10000];
@@ -89,6 +87,49 @@ void print(const char *fmt, ...) {
     va_end(args);
     printf("%s\n",printBuf);
 }
+
+// The following code should work also with older code
+#define CHL(struc)\
+void struc ## _channel_layoutmask_s(struc *a, uint32_t bl, uint32_t bh) { \
+    uint64_t mask =  (((uint64_t) bl)) | (((uint64_t) bh) << 32); \
+    av_channel_layout_uninit(&a->ch_layout); \
+    av_channel_layout_from_mask(&a->ch_layout, mask);\
+} \
+uint64_t struc ## _channel_layoutmask(struc *a) { \
+    return a->ch_layout.u.mask; \
+}\
+int struc ## _channels(struc *a) { \
+    return a->ch_layout.nb_channels; \
+} \
+void struc ## _channels_s(struc *a, int b) { \
+    a->ch_layout.nb_channels = b; \
+}\
+int struc ## _ch_layout_nb_channels(struc *a) { \
+    return a->ch_layout.nb_channels; \
+}\
+void struc ## _ch_layout_nb_channels_s(struc *a, int b) { \
+    a->ch_layout.nb_channels = b; \
+}\
+uint32_t struc ## _channel_layout(struc *a) { \
+    return (uint32_t) a->ch_layout.u.mask; \
+}\
+uint32_t struc ##_channel_layouthi(struc *a) { \
+    return (uint32_t) (a->ch_layout.u.mask >> 32);\
+}\
+void struc ##_channel_layout_s(struc *a, uint32_t b) { \
+    a->ch_layout.u.mask = (a->ch_layout.u.mask & (0xFFFFFFFFull << 32)) | (((uint64_t) b));\
+    uint64_t mask = a->ch_layout.u.mask;\
+    av_channel_layout_uninit(&a->ch_layout);\
+    av_channel_layout_from_mask(&a->ch_layout, mask);\
+}\
+void struc ##_channel_layouthi_s(struc *a, uint32_t b) { \
+    a->ch_layout.u.mask = (a->ch_layout.u.mask & 0xFFFFFFFFull) | (((uint64_t) b) << 32);\
+    uint64_t mask = a->ch_layout.u.mask;\
+    av_channel_layout_uninit(&a->ch_layout);\
+    av_channel_layout_from_mask(&a->ch_layout, mask);\
+}
+
+CHL(AVFrame)
 
 int AVFrame_sample_aspect_ratio_num(AVFrame *a) {
     return a->sample_aspect_ratio.num;
@@ -126,9 +167,9 @@ int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, in
 /* AVCodecContext */
 #define B(type, field) A(AVCodecContext, type, field)
 #define BL(type, field) AL(AVCodecContext, type, field)
+B(enum AVCodecID, codec_id)
+B(enum AVMediaType, codec_type)
 BL(int64_t, bit_rate)
-BL(uint64_t, channel_layout)
-B(int, channels)
 B(uint8_t *, extradata)
 B(int, extradata_size)
 B(int, frame_size)
@@ -136,6 +177,7 @@ B(int, gop_size)
 B(int, height)
 B(int, keyint_min)
 B(int, level)
+B(int, max_b_frames)
 B(int, pix_fmt)
 B(int, profile)
 BL(int64_t, rc_max_rate)
@@ -147,6 +189,8 @@ B(int, qmin)
 B(int, width)
 #undef B
 #undef BL
+
+CHL(AVCodecContext)
 
 int AVCodecContext_framerate_num(AVCodecContext *a) {
     return a->framerate.num;
@@ -212,10 +256,11 @@ B(enum AVColorPrimaries, color_primaries)
 B(enum AVColorTransferCharacteristic, color_trc)
 B(enum AVColorSpace, color_space)
 B(enum AVChromaLocation, chroma_location)
-B(int, channels)
 B(int, sample_rate)
 #undef B
 
+CHL(AVCodecParameters)
+#undef CHL
 struct AVCodecParameters *ff_calloc_AVCodecParameters()
 {
     return (struct AVCodecParameters *)
@@ -486,7 +531,7 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
 
         // Skip if it's not audio or video
         bool isVideo = avStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO;
-        bool isAudio = avStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO; 
+        bool isAudio = avStream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO;
 
         // printf("avformat_read_raw_packet_durations loop (isVideo = %i, isAudio = %i\n", isVideo, isAudio);
 
@@ -501,14 +546,14 @@ const char * avformat_read_raw_packet_durations(const char *filename) {
                 max_audio_duration = end;
             }
 
-            
+
         }
 
         av_packet_unref(&pkt);
     }
 
     avformat_close_input(&pFormatContext);
-    
+
     // printf("avformat_read_raw_packet_durations after loop\n");
     // printf("max_video_duration = %f, max_audio_duration = %f\n", max_video_duration, max_audio_duration);
 
@@ -554,7 +599,7 @@ const char * avformat_get_video_sample_timing(const char *filename) {
     // Record the start time
     startTime = clock();
 
-    int offset = 0;    
+    int offset = 0;
     AVStream* avStream = NULL;
     for (int i = 0; i < pFormatContext->nb_streams; i++) {
         avStream = pFormatContext->streams[i];
@@ -564,28 +609,28 @@ const char * avformat_get_video_sample_timing(const char *filename) {
     }
 
     double timeBase = av_q2d(avStream->time_base);
-    double duration = (double)avStream->duration * timeBase;    
-    
+    double duration = (double)avStream->duration * timeBase;
+
     offset += sprintf(videoSampleTimingJson2+offset, "{");
         double streamDuration = avStream->duration * timeBase;
         offset += sprintf(videoSampleTimingJson2+offset, "\"duration\": %.4f,", streamDuration);
-    
+
         offset += sprintf(videoSampleTimingJson2+offset, "\"gops\": [");
-    
+
     double timeCompenstation = 0.0;
 
-    
+
     int sampleCount = avformat_index_get_entries_count(avStream);
     for(int c = 0; c<sampleCount; c++){
         AVIndexEntry* indexEntry = avformat_index_get_entry(avStream, c);
-        
+
         bool isKeyframe = indexEntry->flags & 0x0001;
 
         if(isKeyframe){
             double timestamp = (double)indexEntry->timestamp * timeBase;
 
             // HACK: Remove this, there is a whole complicated story around timestamps I think. Marcello has mentioned
-            // in other cases where he has had to decode each packet in order to get the correct timestamp. This is a quick 
+            // in other cases where he has had to decode each packet in order to get the correct timestamp. This is a quick
             // workaround so I can focus on seeking logic
             if(timestamp<0.0&&c==0){
                 timeCompenstation = -timestamp;
@@ -601,7 +646,7 @@ const char * avformat_get_video_sample_timing(const char *filename) {
     if(sampleCount){
         offset--;
     }
-    
+
     avformat_close_input(&pFormatContext);
 
         offset += sprintf(videoSampleTimingJson2+offset, "]");
