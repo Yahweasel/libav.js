@@ -513,11 +513,17 @@ AVStream* findStreamByCodecType(AVFormatContext *pFormatContext, enum AVMediaTyp
     return NULL;
 }
 
+// Number.MIN_SAFE_INTEGER
+const int64_t JS_MIN_SAFE_INTEGER = -9007199254740991;
+// Number.MAX_SAFE_INTEGER
+const int64_t JS_MAX_SAFE_INTEGER = 9007199254740991;
+
+
 int64_t findStartTimestamp(AVFormatContext *pFormatContext, enum AVMediaType codecType){
     AVStream* avStream = findStreamByCodecType(pFormatContext, codecType);
 
     if(avStream==NULL){
-        return INT64_MAX;
+        return JS_MAX_SAFE_INTEGER;
     }
 
     AVPacket pkt;
@@ -539,7 +545,7 @@ int64_t findStartTimestamp(AVFormatContext *pFormatContext, enum AVMediaType cod
         av_packet_unref(&pkt);
         return start;
     } else {
-        return INT64_MAX; 
+        return JS_MAX_SAFE_INTEGER; 
     }
     
 }
@@ -560,8 +566,8 @@ const char * avformat_read_raw_packet_times(const char *filename) {
     int64_t min_video_start = findStartTimestamp(pFormatContext, AVMEDIA_TYPE_VIDEO);
     int64_t min_audio_start = findStartTimestamp(pFormatContext, AVMEDIA_TYPE_AUDIO);
 
-    int64_t max_video_end = INT64_MIN;
-    int64_t max_audio_end = INT64_MIN;
+    int64_t max_video_end = JS_MIN_SAFE_INTEGER;
+    int64_t max_audio_end = JS_MIN_SAFE_INTEGER;
     
     int videoTimebaseNumerator = -1;
     int videoTimebaseDenominator = -1;
@@ -608,13 +614,33 @@ const char * avformat_read_raw_packet_times(const char *filename) {
         sprintf(readRawPacketTimes, "{\"error\": \"%s\"", error);
     } else {
         sprintf(readRawPacketTimes, 
-        "{\"audioStart\": %" PRId64 
-        ", \"audioEnd\": %" PRId64 
-        ", \"videoStart\": %" PRId64 
-        ", \"videoEnd\": %" PRId64 
-        ", \"videoTimeBaseNumerator\": %i, \"videoTimeBaseDenominator\": %i, \"audioTimeBaseNumerator\": %i, \"audioTimeBaseDenominator\": %i }", 
-        min_audio_start, max_audio_end, min_video_start, max_video_end, videoTimebaseNumerator, videoTimebaseDenominator, audioTimebaseNumerator, audioTimebaseDenominator);
+        "{\n"
+        "  \"video\": {\n"
+        "    \"start\": %" PRId64 ",\n"
+        "    \"end\": %" PRId64 ",\n"
+        "    \"timebase\": {\n"
+        "      \"numerator\": %i,\n"
+        "      \"denominator\": %i\n"
+        "    }\n"
+        "  },\n"
+        "  \"audio\": {\n"
+        "    \"start\": %" PRId64 ",\n"
+        "    \"end\": %" PRId64 ",\n"
+        "    \"timebase\": {\n"
+        "      \"numerator\": %i,\n"
+        "      \"denominator\": %i\n"
+        "    }\n"
+        "  }\n"
+        "}",
+        min_video_start, max_video_end, videoTimebaseNumerator, videoTimebaseDenominator, min_audio_start, max_audio_end, audioTimebaseNumerator, audioTimebaseDenominator);
     }
+
+    // "{\"video\": {\"start\": %" PRId64 
+    //     ", \"end\": %" PRId64 
+    //     ", \"timebase\": {\"numerator\": %i, \"denominator\": %i}}, \"audio\": {\"start\": %" PRId64 
+    //     ", \"end\": %" PRId64 
+    //     ", \"timebase\": {\"numerator\": %i, \"denominator\": %i}}"
+    
 
     return readRawPacketTimes;
 }
