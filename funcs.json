@@ -1,6 +1,7 @@
 {
     "functions": [
         ["av_get_bytes_per_sample", "number", ["number"]],
+        ["av_compare_ts_js", "number", ["number", "number", "number", "number", "number", "number", "number", "number"]],
         ["av_opt_set", "number", ["number", "string", "string", "number"]],
         ["av_opt_set_int_list_js", "number", ["number", "string", "number", "number", "number", "number"]],
         ["av_frame_alloc", "number", []],
@@ -11,6 +12,7 @@
         ["av_packet_alloc", "number", []],
         ["av_packet_free", null, ["number"]],
         ["av_packet_new_side_data", "number", ["number", "number", "number"]],
+        ["av_packet_rescale_ts_js", null, ["number", "number", "number", "number", "number"]],
         ["av_packet_unref", null, ["number"]],
         ["av_strdup", "number", ["string"]],
 
@@ -37,7 +39,9 @@
         ["avcodec_free_context", null, ["number"]],
         ["avcodec_get_name", "string", ["number"]],
         ["avcodec_open2", "number", ["number", "number", "number"]],
+        ["avcodec_open2_js", "number", ["number", "number", "number"]],
         ["ff_calloc_AVCodecParameters", "number", []],
+        ["avcodec_parameters_copy", "number", ["number", "number"]],
         ["avcodec_parameters_from_context" ,"number", ["number", "number"]],
         ["avcodec_parameters_to_context" ,"number", ["number", "number"]],
         ["avcodec_receive_frame", "number", ["number", "number"]],
@@ -72,8 +76,8 @@
         ["av_write_frame", "number", ["number", "number"]],
         ["av_write_trailer", "number", ["number"]],
 
-        ["av_dict_set", "number", ["number", "string", "string", "number"]],
-        ["av_dict_free", null, ["number"]],
+        ["av_dict_copy_js", "number", ["number", "number", "number"]],
+        ["av_dict_set_js", "number", ["number", "string", "string", "number"]],
 
         ["sws_getContext", "number",
             ["number", "number", "number", "number", "number", "number",
@@ -186,6 +190,13 @@
         ["AVPixFmtDescriptor", [
             "log2_chroma_h"
         ]],
+        ["AVCodec", [
+            "sample_fmts",
+            {"name": "sample_fmts", "array": true},
+            "supported_samplerates",
+            {"name": "supported_samplerates", "array": true},
+            "type"
+        ]],
         ["AVCodecContext", [
             "codec_id",
             "codec_type",
@@ -218,6 +229,7 @@
         ]],
         ["AVCodecParameters", [
             "codec_id",
+            "codec_tag",
             "codec_type",
             "extradata",
             "extradata_size",
@@ -238,6 +250,8 @@
             "sample_rate"
         ]],
         ["AVPacket", [
+            "pos",
+            "poshi",
             "pts",
             "ptshi",
             "dts",
@@ -276,7 +290,8 @@
         "avformat_close_input",
         "avcodec_free_context",
         "avfilter_graph_free",
-        "avfilter_inout_free"
+        "avfilter_inout_free",
+        "av_dict_free"
     ],
 
     "copiers": [

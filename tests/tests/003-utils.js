@@ -49,7 +49,10 @@ h.utils.compareAudio = async function(fileA, fileB) {
 
     dataA = await h.utils.audioF32(fileA);
     dataB = await h.utils.audioF32(fileB);
-    const len = Math.max(dataA.length, dataB.length);
+    const len = Math.min(dataA.length, dataB.length);
+    if (len <= 48000) {
+        throw new Error(`Found short (nonexistent?) file while trying to compare ${fileA} and ${fileB}`);
+    }
 
     let diff = 0;
     for (let i = 0; i < len; i++) {
