@@ -58,7 +58,6 @@ LibAVTestHarness = {
     },
 
     LibAV: async function(opts, variant) {
-        opts = opts || this.libAVOpts;
         variant = variant || "all";
         if (variant !== this.libAVVariant) {
             // Load a variant
@@ -88,6 +87,8 @@ LibAVTestHarness = {
 
         if (!opts && this.libav)
             return this.libav;
+
+        opts = opts || this.libAVOpts;
 
         const ret = await LibAV.LibAV(opts);
         if (!opts)
@@ -121,7 +122,10 @@ LibAVTestHarness = {
                 try {
                     await test.func(this);
                 } catch (ex) {
-                    this.printErr("\n" + test.name + "\n" + ex + "\n" + ex.stack);
+                    this.printErr("\n" +
+                        JSON.stringify(this.libAVOpts) + "\n" +
+                        test.name + "\n" +
+                        ex + "\n" + ex.stack);
                     fails++;
                 }
             }
