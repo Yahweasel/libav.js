@@ -566,19 +566,16 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
 
     var options = 0;
     if (opts.options) {
-        options = ff_malloc_int32_list([0]);
         for (var prop in opts.options)
-            av_dict_set(options, prop, opts.options[prop], 0);
+            options = av_dict_set_js(options, prop, opts.options[prop], 0);
     }
 
-    var ret = avcodec_open2(c, codec, options);
+    var ret = avcodec_open2_js(c, codec, options);
     if (ret < 0)
         throw new Error("Could not open codec: " + ff_error(ret));
 
-    if (options) {
-        av_dict_free(options);
-        free(options);
-    }
+    if (options)
+        av_dict_free_js(options);
 
     var frame = av_frame_alloc();
     if (frame === 0)
