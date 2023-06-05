@@ -13,6 +13,18 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Utility function to interleave planar data
+function interleave(planar) {
+    const ret = new Float32Array(planar.length * planar[0].length);
+    let i = 0;
+    for (let si = 0; si < planar[0].length; si++) {
+        for (let ci = 0; ci < planar.length; ci++) {
+            ret[i++] = planar[ci][si];
+        }
+    }
+    return ret;
+}
+
 h.utils.audioF32 = async function(file) {
     if (typeof file === "string") {
         // Convert it to raw float data
@@ -35,8 +47,20 @@ h.utils.audioF32 = async function(file) {
         file = parts;
     }
 
-    if (file instanceof Array)
-        file = new Blob(file);
+    if (file instanceof Array) {
+        if (file[0].data) {
+            if (file[0].data.buffer) {
+                // Frames of flat data
+                file = new Blob(file.map(x => x.data));
+            } else {
+                // Frames of planar data
+                file = new Blob(file.map(x => interleave(x.data)));
+            }
+        } else {
+            // Just data
+            file = new Blob(file);
+        }
+    }
 
     if (file instanceof Blob)
         file = new Float32Array(await file.arrayBuffer());

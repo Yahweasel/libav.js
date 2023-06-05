@@ -1,1 +1,1 @@
-["001-input.js","002-formats.js","003-utils.js","100-ffmpeg-cli.js","101-ffprobe-cli-expected.js","102-ffprobe-cli.js","500-decode-audio.js","500-decode-video.js","500-demux-decode.js","500-encode-audio.js","500-encode-video.js","500-remux.js","510-known-bad.js"]
+["001-input.js","002-formats.js","003-utils.js","100-ffmpeg-cli.js","101-ffprobe-cli-expected.js","102-ffprobe-cli.js","500-decode-audio.js","500-decode-video.js","500-demux-decode.js","500-encode-audio.js","500-encode-video.js","500-remux.js","510-known-bad.js","600-decode-audio.js","601-demuxing-aac.js"]
