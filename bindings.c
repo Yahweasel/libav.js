@@ -47,7 +47,7 @@
 
 #define AA(struc, type, field) \
     type struc ## _ ## field ## _a(struc *a, size_t c) { return a->field[c]; } \
-    void struc ## _ ## field ## _a_s(struc *a, size_t c, type b) { a->field[c] = b; }
+    void struc ## _ ## field ## _a_s(struc *a, size_t c, type b) { ((type *) a->field)[c] = b; }
 
 
 /* Not part of libav, just used to ensure a round trip to C for async purposes */
@@ -164,6 +164,17 @@ int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, in
  * libavcodec
  ***************************************************************/
 
+/* AVCodec */
+#define B(type, field) A(AVCodec, type, field)
+#define BA(type, field) AA(AVCodec, type, field)
+B(enum AVSampleFormat *, sample_fmts)
+BA(enum AVSampleFormat, sample_fmts)
+B(int *, supported_samplerates)
+BA(int, supported_samplerates)
+B(enum AVMediaType, type)
+#undef B
+#undef BA
+
 /* AVCodecContext */
 #define B(type, field) A(AVCodecContext, type, field)
 #define BL(type, field) AL(AVCodecContext, type, field)
@@ -242,6 +253,7 @@ void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
 /* AVCodecParameters */
 #define B(type, field) A(AVCodecParameters, type, field)
 B(enum AVCodecID, codec_id)
+B(uint32_t, codec_tag)
 B(enum AVMediaType, codec_type)
 B(uint8_t *, extradata)
 B(int, extradata_size)
@@ -274,6 +286,7 @@ B(uint8_t *, data)
 BL(int64_t, dts)
 BL(int64_t, duration)
 B(int, flags)
+BL(int64_t, pos)
 BL(int64_t, pts)
 B(AVPacketSideData *, side_data)
 B(int, side_data_elems)
@@ -294,6 +307,23 @@ int AVPacketSideData_size(AVPacketSideData *a, int idx) {
 
 enum AVPacketSideDataType AVPacketSideData_type(AVPacketSideData *a, int idx) {
     return a[idx].type;
+}
+
+int avcodec_open2_js(
+    AVCodecContext *avctx, const AVCodec *codec, AVDictionary *options
+) {
+    return avcodec_open2(avctx, codec, &options);
+}
+
+/* Implemented as a binding so that we don't have to worry about struct copies */
+void av_packet_rescale_ts_js(
+    AVPacket *pkt,
+    int tb_src_num, int tb_src_den,
+    int tb_dst_num, int tb_dst_den
+) {
+    AVRational tb_src = {tb_src_num, tb_src_den},
+               tb_dst = {tb_dst_num, tb_dst_den};
+    av_packet_rescale_ts(pkt, tb_src, tb_dst);
 }
 
 
@@ -663,6 +693,33 @@ AVFilterContext *avfilter_graph_create_filter_js(const AVFilter *filt,
     if (err < 0)
         fprintf(stderr, "[avfilter_graph_create_filter_js] %s\n", av_err2str(err));
     return ret;
+}
+
+AVDictionary *av_dict_copy_js(
+    AVDictionary *dst, const AVDictionary *src, int flags
+) {
+    av_dict_copy(&dst, src, flags);
+    return dst;
+}
+
+AVDictionary *av_dict_set_js(
+    AVDictionary *pm, const char *key, const char *value, int flags
+) {
+    av_dict_set(&pm, key, value, flags);
+    return pm;
+}
+
+int av_compare_ts_js(
+    unsigned int ts_a_lo, int ts_a_hi,
+    int tb_a_num, int tb_a_den,
+    unsigned int ts_b_lo, int ts_b_hi,
+    int tb_b_num, int tb_b_den
+) {
+    int64_t ts_a = (int64_t) ts_a_lo + ((int64_t) ts_a_hi << 32);
+    int64_t ts_b = (int64_t) ts_b_lo + ((int64_t) ts_b_hi << 32);
+    AVRational tb_a = {tb_a_num, tb_b_den},
+               tb_b = {tb_b_num, tb_b_den};
+    return av_compare_ts(ts_a, tb_a, ts_b, tb_b);
 }
 
 
