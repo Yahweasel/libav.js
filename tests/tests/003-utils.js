@@ -69,6 +69,8 @@ h.utils.audioF32 = async function(file) {
 };
 
 h.utils.compareAudio = async function(fileA, fileB) {
+    const nameA = fileA.toString().slice(0, 16);
+    const nameB = fileB.toString().slice(0, 16);
     let dataA, dataB;
 
     dataA = await h.utils.audioF32(fileA);
@@ -88,6 +90,71 @@ h.utils.compareAudio = async function(fileA, fileB) {
 
     if (diff > 0.005) {
         // Suspicious amount of difference!
-        throw new Error(`Files ${fileA} and ${fileB} differ by ${(diff*100).toFixed(2)}%!`);
+        throw new Error(`Files ${nameA} and ${nameB} differ by ${(diff*100).toFixed(2)}%!`);
+    }
+};
+
+h.utils.videoYUV = async function(file) {
+    if (typeof file === "string") {
+        // Convert it to raw float data
+        const libav = await h.LibAV();
+
+        await libav.mkwriterdev("output");
+        const parts = [];
+        libav.onwrite = (name, pos, buf) => {
+            parts.push(buf.slice(0));
+        };
+
+        await libav.ffmpeg(
+            "-nostdin", "-loglevel", "0",
+            "-i", file,
+            "-f", "rawvideo",
+            "-pix_fmt", "yuv420p",
+            "-fps", "60",
+            "-y", "output");
+        await libav.unlink("output");
+
+        file = parts;
+    }
+
+    if (file instanceof Array) {
+        if (file[0].data) {
+            // libav frames
+            throw new Error("Converting libav video frames directly is not yet supported");
+        } else {
+            // Just data
+            file = new Blob(file);
+        }
+    }
+
+    if (file instanceof Blob)
+        file = new Uint8Array(await file.arrayBuffer());
+
+    return file;
+};
+
+h.utils.compareVideo = async function(fileA, fileB) {
+    const nameA = fileA.toString().slice(0, 16);
+    const nameB = fileB.toString().slice(0, 16);
+    let dataA, dataB;
+
+    dataA = await h.utils.videoYUV(fileA);
+    dataB = await h.utils.videoYUV(fileB);
+    const len = Math.min(dataA.length, dataB.length);
+    if (len <= 1152000) {
+        throw new Error(`Found short (nonexistent?) file while trying to compare ${fileA} and ${fileB}`);
+    }
+
+    let diff = 0;
+    for (let i = 0; i < len; i++) {
+        const da = dataA[i] || 0;
+        const db = dataB[i] || 0;
+        diff += Math.abs(db - da) / 255;
+    }
+    diff /= len;
+
+    if (diff > 0.005) {
+        // Suspicious amount of difference!
+        throw new Error(`Files ${nameA} and ${nameB} differ by ${(diff*100).toFixed(2)}%!`);
     }
 };

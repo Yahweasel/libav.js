@@ -57,6 +57,14 @@ LibAVTestHarness = {
         return new Uint8Array(ab);
     },
 
+    readCachedFile: async function(name) {
+        for (const file of this.files) {
+            if (file.name === name)
+                return new Uint8Array(await file.content.arrayBuffer());
+        }
+        return null;
+    },
+
     LibAV: async function(opts, variant) {
         variant = variant || "all";
         if (variant !== this.libAVVariant) {

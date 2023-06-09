@@ -13,18 +13,11 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Example of directly using a block device
+// Audio demuxing+decoding using our meta API, with a normal file
 
 const libav = await h.LibAV();
 const buf = await h.readCachedFile("bbb.webm");
-
-let rd = 0;
-await libav.mkblockreaderdev("tmp.webm", buf.length);
-
-const origOnBlockRead = libav.onblockread;
-libav.onblockread = function(name, position, length) {
-    libav.ff_block_reader_dev_send(name, position, buf.slice(position, position + length));
-};
+await libav.writeFile("tmp.webm", buf);
 
 const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("tmp.webm");
 
@@ -41,38 +34,17 @@ let audio_stream_idx = stream.index;
 const [, c, pkt, frame] = await libav.ff_init_decoder(
     stream.codec_id, stream.codecpar);
 
-// Force floating point decoding for compareAudio
-await libav.AVCodecContext_sample_fmt_s(c, libav.AV_SAMPLE_FMT_FLT);
+const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt);
 
-let packets = [];
-while (true) {
-    const [res, rdPackets] =
-        await libav.ff_read_multi(fmt_ctx, pkt, null, {limit: 1024 * 1024});
+if (res !== libav.AVERROR_EOF)
+    throw new Error("Error reading: " + res);
 
-    if (audio_stream_idx in rdPackets) {
-        packets = packets.concat(rdPackets[audio_stream_idx]);
-        continue;
-    }
-
-    if (res === libav.AVERROR_EOF) {
-        // Done!
-        break;
-
-    } else if (res !== -libav.EAGAIN) {
-        throw new Error("Error reading: " + res);
-
-    }
-}
-
-const frames = await libav.ff_decode_multi(c, pkt, frame, packets, true);
+const frames = await libav.ff_decode_multi(c, pkt, frame,
+    packets[audio_stream_idx], true);
 
 await libav.ff_free_decoder(c, pkt, frame);
 await libav.avformat_close_input_js(fmt_ctx);
 
 await libav.unlink("tmp.webm");
-if (origOnBlockRead)
-    libav.onblockread = origOnBlockRead;
-else
-    delete libav.onblockread;
 
 await h.utils.compareAudio("bbb.webm", frames);
