@@ -14,7 +14,8 @@ build/inst/%/lib/pkgconfig/vpx.pc: build/libvpx-$(LIBVPX_VERSION)/build-%/Makefi
 build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile: build/inst/%/cflags.txt build/libvpx-$(LIBVPX_VERSION)/configure
 	mkdir -p build/libvpx-$(LIBVPX_VERSION)/build-$*
 	cd build/libvpx-$(LIBVPX_VERSION)/build-$* ; \
-		emconfigure ../configure --prefix="$(PWD)/build/inst/$*" \
+		emconfigure ../../libvpx-$(LIBVPX_VERSION)/configure \
+			--prefix="$(PWD)/build/inst/$*" \
 			--target=generic-gnu \
 			--extra-cflags="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`" \
 			--enable-static --disable-shared \

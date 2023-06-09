@@ -40,6 +40,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/
 		--extra-cflags="-I$(PWD)/build/inst/base/include " \
 		--extra-ldflags="-L$(PWD)/build/inst/base/lib " \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp
+	mv build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h
 	touch $(@)
 
 # wasm + threads
@@ -55,6 +57,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: build/inst/thr/cf
 		--extra-cflags="-I$(PWD)/build/inst/thr/include $(THRFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS)" \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp
+	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h
 	touch $(@)
 
 # wasm + simd
@@ -70,6 +74,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: build/inst/simd/
 		--extra-cflags="-I$(PWD)/build/inst/simd/include $(SIMDFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/simd/lib $(SIMDFLAGS)" \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h.tmp
+	mv build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h
 	touch $(@)
 
 # wasm + threads + simd
@@ -85,6 +91,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: build/inst/th
 		--extra-cflags="-I$(PWD)/build/inst/thrsimd/include $(THRFLAGS) $(SIMDFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/thrsimd/lib $(THRFLAGS) $(SIMDFLAGS)" \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h.tmp
+	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h
 	touch $(@)
 
 

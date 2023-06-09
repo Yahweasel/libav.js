@@ -12,7 +12,8 @@ build/libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h: build/inst/%/lib/pkgconfi
 	mkdir -p build/libvorbis-$(LIBVORBIS_VERSION)/build-$*
 	cd build/libvorbis-$(LIBVORBIS_VERSION)/build-$* ; \
 		emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$*/lib/pkgconfig" \
-			../configure --prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
+			../../libvorbis-$(LIBVORBIS_VERSION)/configure \
+			--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
 			--disable-shared \
 			CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@

@@ -7,7 +7,8 @@ build/inst/%/lib/pkgconfig/opus.pc: build/opus-$(OPUS_VERSION)/build-%/config.h
 build/opus-$(OPUS_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/opus-$(OPUS_VERSION)/configure
 	mkdir -p build/opus-$(OPUS_VERSION)/build-$*
 	cd build/opus-$(OPUS_VERSION)/build-$* ; \
-		emconfigure ../configure --prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
+		emconfigure ../../opus-$(OPUS_VERSION)/configure \
+			--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
 			--disable-shared --disable-extra-programs \
 			CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@

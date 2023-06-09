@@ -16,7 +16,8 @@ define([[[buildrule]]], [[[
 build/libaom-$(LIBAOM_VERSION)/build-$1/Makefile: build/inst/$1/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-$1
 	cd build/libaom-$(LIBAOM_VERSION)/build-$1 ; \
-		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/$1" \
+		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
+		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/$1" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/$1/cflags.txt`" \
 		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/$1/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
