@@ -45,7 +45,7 @@ async function main() {
             /^\.\.\/src\/libsw[rs]/.test(orig)
         ) {
             // In ffmpeg
-            res = `../build/ffmpeg-${version("ffmpeg")}/` + orig.slice(3);
+            res = `../build/ffmpeg-${version("ffmpeg")}/` + orig.slice(7);
 
         } else if (
             /^(\.\.\/)*(opus|libvorbis|libogg|lame|libvpx|openh264)-/.test(orig)
