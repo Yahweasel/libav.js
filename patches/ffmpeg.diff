@@ -11884,6 +11884,21 @@ index 8b4755f..da39340 100644
      }
  
      encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);
+diff --git a/libavcodec/libopusdec.c b/libavcodec/libopusdec.c
+index 9b9a610..66186c0 100644
+--- a/libavcodec/libopusdec.c
++++ b/libavcodec/libopusdec.c
+@@ -63,8 +63,8 @@ static av_cold int libopus_decode_init(AVCodecContext *avc)
+     }
+ 
+     avc->sample_rate    = 48000;
+-    avc->sample_fmt     = avc->request_sample_fmt == AV_SAMPLE_FMT_FLT ?
+-                          AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_S16;
++    avc->sample_fmt     = avc->request_sample_fmt == AV_SAMPLE_FMT_S16 ?
++                          AV_SAMPLE_FMT_S16 : AV_SAMPLE_FMT_FLT;
+     av_channel_layout_uninit(&avc->ch_layout);
+     if (channels > 8) {
+         avc->ch_layout.order       = AV_CHANNEL_ORDER_UNSPEC;
 diff --git a/libavformat/file.c b/libavformat/file.c
 index cbdf48d..aeb3767 100644
 --- a/libavformat/file.c
