@@ -40,8 +40,9 @@
         ["avcodec_get_name", "string", ["number"]],
         ["avcodec_open2", "number", ["number", "number", "number"]],
         ["avcodec_open2_js", "number", ["number", "number", "number"]],
-        ["ff_calloc_AVCodecParameters", "number", []],
+        ["avcodec_parameters_alloc", "number", []],
         ["avcodec_parameters_copy", "number", ["number", "number"]],
+        ["avcodec_parameters_free", null, ["number"]],
         ["avcodec_parameters_from_context" ,"number", ["number", "number"]],
         ["avcodec_parameters_to_context" ,"number", ["number", "number"]],
         ["avcodec_receive_frame", "number", ["number", "number"]],
@@ -289,6 +290,7 @@
         "av_packet_free",
         "avformat_close_input",
         "avcodec_free_context",
+        "avcodec_parameters_free",
         "avfilter_graph_free",
         "avfilter_inout_free",
         "av_dict_free"
