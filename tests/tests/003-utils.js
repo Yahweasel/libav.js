@@ -77,7 +77,8 @@ h.utils.compareAudio = async function(fileA, fileB) {
     dataB = await h.utils.audioF32(fileB);
     const len = Math.min(dataA.length, dataB.length);
     if (len <= 48000) {
-        throw new Error(`Found short (nonexistent?) file while trying to compare ${fileA} and ${fileB}`);
+        console.error("\n\n " + dataA.length + " " + dataB.length + "\n\n");
+        throw new Error(`Found short (nonexistent?) file while trying to compare ${nameA} and ${nameB}`);
     }
 
     let diff = 0;
@@ -110,7 +111,6 @@ h.utils.videoYUV = async function(file) {
             "-i", file,
             "-f", "rawvideo",
             "-pix_fmt", "yuv420p",
-            "-fps", "60",
             "-y", "output");
         await libav.unlink("output");
 
@@ -119,8 +119,17 @@ h.utils.videoYUV = async function(file) {
 
     if (file instanceof Array) {
         if (file[0].data) {
-            // libav frames
-            throw new Error("Converting libav video frames directly is not yet supported");
+            // Gather together the planar data
+            const parts = [];
+            for (const frame of file) {
+                let lineWidth = frame.width;
+                for (const plane of frame.data) {
+                    for (const line of plane)
+                        parts.push(line.subarray(0, lineWidth));
+                    lineWidth = frame.width / 2;
+                }
+            }
+            file = new Blob(parts);
         } else {
             // Just data
             file = new Blob(file);
@@ -142,7 +151,7 @@ h.utils.compareVideo = async function(fileA, fileB) {
     dataB = await h.utils.videoYUV(fileB);
     const len = Math.min(dataA.length, dataB.length);
     if (len <= 1152000) {
-        throw new Error(`Found short (nonexistent?) file while trying to compare ${fileA} and ${fileB}`);
+        throw new Error(`Found short (nonexistent?) file while trying to compare ${nameA} and ${nameB}`);
     }
 
     let diff = 0;

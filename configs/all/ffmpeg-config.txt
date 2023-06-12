@@ -62,6 +62,10 @@
 --enable-bsf=av1_metadata
 --enable-bsf=extract_extradata
 --enable-encoder=libaom_av1
+--enable-demuxer=rawvideo
+--enable-muxer=rawvideo
+--enable-decoder=rawvideo
+--enable-encoder=rawvideo
 --enable-decoder=hevc
 --enable-bsf=hevc_metadata
 --enable-bsf=extract_extradata
