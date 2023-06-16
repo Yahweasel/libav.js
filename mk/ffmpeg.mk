@@ -36,7 +36,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/base/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-		--disable-pthreads --arch=emscripten \
+                --disable-pthreads --arch=emscripten \
+		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/base/include " \
 		--extra-ldflags="-L$(PWD)/build/inst/base/lib " \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
@@ -53,7 +54,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: build/inst/thr/cf
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/thr/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-		--enable-pthreads --arch=emscripten \
+                --enable-pthreads --arch=emscripten \
+		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/thr/include $(THRFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS)" \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
@@ -70,7 +72,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: build/inst/simd/
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/simd/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-		--disable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm \
+                --disable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm \
+		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/simd/include $(SIMDFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/simd/lib $(SIMDFLAGS)" \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
@@ -87,7 +90,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: build/inst/th
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/thrsimd/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-		--enable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm --enable-cross-compile \
+                --enable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm --enable-cross-compile \
+		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/thrsimd/include $(THRFLAGS) $(SIMDFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/thrsimd/lib $(THRFLAGS) $(SIMDFLAGS)" \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`

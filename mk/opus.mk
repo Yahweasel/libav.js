@@ -10,7 +10,7 @@ build/opus-$(OPUS_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/opus-
 		emconfigure ../../opus-$(OPUS_VERSION)/configure \
 			--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
 			--disable-shared --disable-extra-programs \
-			CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
+			CFLAGS="$(OPTFLAGS) `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@
 
 extract: build/opus-$(OPUS_VERSION)/configure

@@ -6,7 +6,7 @@
 LIBAVJS_VERSION=3.11.6.0
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
-CFLAGS=-Oz
+OPTFLAGS=-Oz
 SIMDFLAGS=-msimd128
 THRFLAGS=-pthread
 EFLAGS=\
@@ -59,7 +59,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
 	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
 # General build rule for any target
-# Use: buildrule(target file name, target inst name, CFLAGS, 
+# Use: buildrule(target file name, target inst name, CFLAGS)
 
 
 # asm.js version
@@ -67,7 +67,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
 dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) -s WASM=0 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) -s WASM=0 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -108,7 +108,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) -g2 -s WASM=0 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) -g2 -s WASM=0 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -150,7 +150,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS)  \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS)  \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -191,7 +191,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) -gsource-map \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) -gsource-map \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -233,7 +233,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -274,7 +274,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) -gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) -gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -316,7 +316,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 dist/libav-$(LIBAVJS_VERSION)-%.simd.js: build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) $(SIMDFLAGS) \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(SIMDFLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -357,7 +357,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.simd.js: build/ffmpeg-$(FFMPEG_VERSION)/build-si
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js: build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) -gsource-map $(SIMDFLAGS) \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) -gsource-map $(SIMDFLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -399,7 +399,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS) \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -440,7 +440,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) -gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS) \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) -gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \

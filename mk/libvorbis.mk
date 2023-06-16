@@ -15,7 +15,7 @@ build/libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h: build/inst/%/lib/pkgconfi
 			../../libvorbis-$(LIBVORBIS_VERSION)/configure \
 			--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
 			--disable-shared \
-			CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
+			CFLAGS="$(OPTFLAGS) `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@
 
 extract: build/libvorbis-$(LIBVORBIS_VERSION)/configure

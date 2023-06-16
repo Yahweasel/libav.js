@@ -6,7 +6,7 @@ changequote(`[[[', `]]]')
 LIBAVJS_VERSION=3.11.6.0
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
-CFLAGS=-Oz
+OPTFLAGS=-Oz
 SIMDFLAGS=-msimd128
 THRFLAGS=-pthread
 EFLAGS=\
@@ -59,12 +59,12 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
 	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
 # General build rule for any target
-# Use: buildrule(target file name, target inst name, CFLAGS, 
+# Use: buildrule(target file name, target inst name, CFLAGS)
 define([[[buildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%.$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) $3 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $3 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \

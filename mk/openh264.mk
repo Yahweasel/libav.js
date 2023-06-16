@@ -5,7 +5,7 @@ build/inst/%/lib/pkgconfig/openh264.pc: build/inst/%/cflags.txt build/openh264-$
 	cd build/openh264-$(OPENH264_VERSION)/build-$* ; \
 		emmake $(MAKE) -j9 -f ../../openh264-$(OPENH264_VERSION)/Makefile \
 		install-static OS=linux ARCH=mips \
-		CFLAGS="-Oz -fno-stack-protector `cat $(PWD)/build/inst/$*/cflags.txt`" \
+		CFLAGS="$(OPTFLAGS) -fno-stack-protector `cat $(PWD)/build/inst/$*/cflags.txt`" \
 		PREFIX="$(PWD)/build/inst/$*"
 
 extract: build/openh264-$(OPENH264_VERSION)/PATCHED
