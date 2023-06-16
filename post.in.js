@@ -979,7 +979,8 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  * ff_read_multi@sync(
  *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
  *         limit?: number, // OUTPUT limit, in bytes
- *         devLimit?: number // INPUT limit, in bytes (don't read if less than this much data is available)
+ *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
+ *         unify: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
  */
@@ -995,6 +996,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
     var devLimit = 32*1024;
     if (opts.devLimit)
         devLimit = opts.devLimit;
+    var unify = !!opts.unify;
 
     function step() {
         // If we risk running past the end of the currently-read data, stop now
@@ -1011,9 +1013,10 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
 
             // And copy it out
             var packet = ff_copyout_packet(pkt);
-            if (!(packet.stream_index in outPackets))
-                outPackets[packet.stream_index] = [];
-            outPackets[packet.stream_index].push(packet);
+            var idx = unify ? 0 : packet.stream_index;
+            if (!(idx in outPackets))
+                outPackets[idx] = [];
+            outPackets[idx].push(packet);
             av_packet_unref(pkt);
             sz += packet.data.length;
             if (opts.limit && sz >= opts.limit)
