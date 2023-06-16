@@ -56,8 +56,10 @@ Write packets to an output context. You need to not just provide the packet(s)
 in libav.js format (`inPackets`), but allocate space for packets in libav
 format, so there's somewhere to write them to temporarily (`pkt`). Use
 `av_packet_alloc` (and eventually, `av_packet_free`) for that, or get it from
-one of the AVCodec metafunctions. `interleave` is fairly format-specific, but
-can usually be ignored.
+one of the AVCodec metafunctions. `interleave` means that it will use
+`av_interleaved_write_frame`, and if `interleave===false`, it will use `av_write_frame`
+instead. `interleave` defaults to true, and this is usually the right option,
+but if your input is already interleaved, you should set this to false.
 
 
 ### `ff_free_muxer`
