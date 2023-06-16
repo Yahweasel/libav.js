@@ -906,6 +906,9 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
         if (fmt_ctx === 0)
             throw new Error("Could not open source file");
 
+        return avformat_find_stream_info(fmt_ctx, 0);
+
+    }).then(function() {
         var nb_streams = AVFormatContext_nb_streams(fmt_ctx);
         var streams = [];
         for (var i = 0; i < nb_streams; i++) {
