@@ -822,9 +822,10 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
  *         format_name?: string, // libav name
  *         filename?: string,
  *         device?: boolean, // Create a writer device
- *         open?: boolean // Open the file for writing
+ *         open?: boolean, // Open the file for writing
+ *         codecpars?: boolean // Streams is in terms of codecpars, not codecctx
  *     },
- *     streamCtxs: [number, number, number][] // AVCodecContext, time_base_num, time_base_den
+ *     streamCtxs: [number, number, number][] // AVCodecContext | AVCodecParameters, time_base_num, time_base_den
  * ): @promise@[number, number, number, number[]]@
  */
 var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
@@ -840,8 +841,15 @@ var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
         var st = avformat_new_stream(oc, 0);
         if (st === 0)
             throw new Error("Could not allocate stream");
+        sts.push(st);
         var codecpar = AVStream_codecpar(st);
-        var ret = avcodec_parameters_from_context(codecpar, ctx[0]);
+        var ret;
+        if (opts.codecpars) {
+            ret = avcodec_parameters_copy(codecpar, ctx[0]);
+            AVCodecParameters_codec_tag_s(codecpar, 0);
+        } else {
+            ret = avcodec_parameters_from_context(codecpar, ctx[0]);
+        }
         if (ret < 0)
             throw new Error("Could not copy the stream parameters: " + ff_error(ret));
         AVStream_time_base_s(st, ctx[1], ctx[2]);

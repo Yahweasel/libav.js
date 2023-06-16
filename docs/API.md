@@ -22,7 +22,8 @@ ff_init_muxer(
         format_name?: string,
         filename?: string,
         device?: boolean,
-        open?: boolean
+        open?: boolean,
+        codecpars?: boolean
     },
     streamCtxs: [number, number, number][]
 ): Promise<[number, number, number, number[]]>
@@ -37,7 +38,8 @@ case you will need to provide your own `pb`.
 
 For the streams to mux, each stream is in the form `[number, number, number]`,
 consisting of the codec context, `time_base_num`, and `time_base_den`,
-respectively.
+respectively. If `opts.codecpars` is set, use a codec parameters (codecpar), not
+a codec context.
 
 Returns `[output context (oc), format, writer context (pb), stream contexts]`.
 Usually called as `[oc, fmt, pb] = await ff_init_muxer(...)`.
