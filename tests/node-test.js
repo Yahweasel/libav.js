@@ -14,13 +14,30 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+const options = {};
+for (const arg of process.argv.slice(2)) {
+    switch (arg) {
+        case "--include-slow":
+            options.includeSlow = true;
+            break;
+
+        case "--coverage":
+            options.coverage = true;
+            break;
+
+        default:
+            console.error(`Unrecognized argument ${arg}`);
+            process.exit(1);
+    }
+}
+
 const harness = require("./harness.js");
+Object.assign(harness.options, options);
 async function main() {
     harness.printStatus = x => {
         process.stderr.write("\x1b[K" + x + "\r");
     };
     await harness.loadTests(require("./suite.json"));
-    //harness.options.includeSlow = true;
     await harness.runTests([
         null,
         {nosimd: true},
