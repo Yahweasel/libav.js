@@ -68,7 +68,7 @@ h.utils.audioF32 = async function(file) {
     return file;
 };
 
-h.utils.compareAudio = async function(fileA, fileB) {
+h.utils.compareAudio = async function(fileA, fileB, opts = {}) {
     const nameA = fileA.toString().slice(0, 16);
     const nameB = fileB.toString().slice(0, 16);
     let dataA, dataB;
@@ -89,7 +89,8 @@ h.utils.compareAudio = async function(fileA, fileB) {
     }
     diff /= len;
 
-    if (diff > 0.005) {
+    const tolerance = opts.tolerance || 0.005;
+    if (diff > tolerance) {
         // Suspicious amount of difference!
         throw new Error(`Files ${nameA} and ${nameB} differ by ${(diff*100).toFixed(2)}%!`);
     }
@@ -142,7 +143,7 @@ h.utils.videoYUV = async function(file) {
     return file;
 };
 
-h.utils.compareVideo = async function(fileA, fileB) {
+h.utils.compareVideo = async function(fileA, fileB, opts = {}) {
     const nameA = fileA.toString().slice(0, 16);
     const nameB = fileB.toString().slice(0, 16);
     let dataA, dataB;
@@ -162,7 +163,8 @@ h.utils.compareVideo = async function(fileA, fileB) {
     }
     diff /= len;
 
-    if (diff > 0.005) {
+    const tolerance = opts.tolerance || 0.01;
+    if (diff > tolerance) {
         // Suspicious amount of difference!
         throw new Error(`Files ${nameA} and ${nameB} differ by ${(diff*100).toFixed(2)}%!`);
     }
