@@ -57,6 +57,8 @@
 --enable-libvpx
 --enable-decoder=libvpx_vp9
 --enable-bsf=vp9_metadata
+--enable-libvpx
+--enable-encoder=libvpx_vp9
 --enable-libaom
 --enable-decoder=libaom_av1
 --enable-bsf=av1_metadata

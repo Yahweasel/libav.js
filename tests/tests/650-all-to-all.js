@@ -117,8 +117,8 @@ for (const cv of encoders.video) {
     if (!h.options.includeSlow)
         break;
 
-    // Even in slow-mode, skip AV1, because it's just too slow!
-    if (cv === "libaom-av1")
+    // Even in slow-mode, skip VP9 and AV1, because they're just too slow!
+    if (cv === "libvpx-vp9" || cv === "libaom-av1")
         continue;
 
     // Transcode this

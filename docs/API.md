@@ -44,6 +44,10 @@ a codec context.
 Returns `[output context (oc), format, writer context (pb), stream contexts]`.
 Usually called as `[oc, fmt, pb] = await ff_init_muxer(...)`.
 
+To write, you must first use `libav.avformat_write_header`, and after writing
+all packets, you must use `libav.av_write_trailer`. You may write packets with
+`libav.ff_write_multi` (below), or directly using libav APIs.
+
 
 ### `ff_write_multi`
 ```
