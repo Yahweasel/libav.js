@@ -30,7 +30,8 @@ const configs = [
     ["webm", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "format-wav", "audio-filters"]],
     ["webm-opus-flac", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8"]],
     ["mediarecorder-transcoder", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264"]],
-    ["open-media", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "codec-libvorbis", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-libvpx_vp9", "codec-libaom_av1"]],
+    ["open-media", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "codec-libvorbis", "swscale", "libvpx", "codec-libvpx_vp8", "codec-libvpx_vp9", "codec-libaom_av1"]],
+    ["rawvideo", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "format-rawvideo", "codec-rawvideo"]],
 
     ["h265", ["format-mp4", "format-webm", "swscale", "decoder-hevc"]],
     ["prores", ["format-mp4", "format-webm", "swscale", "codec-prores"]],

@@ -64,11 +64,16 @@ async function decode(dec_ctx, pkt, frame, outbuf)
             throw new Error(
                 "Failed to calculate data size");
         }
-        for (let i = 0; i < await libav.AVFrame_nb_samples(frame); i++) {
-            for (let ch = 0; ch < await libav.AVCodecContext_channels(dec_ctx); ch++) {
-                const data = await libav.AVFrame_data_a(frame, ch);
-                const part = await libav.copyout_u8(data + data_size * i, data_size);
-                outbuf.push(part);
+        const nb_samples = await libav.AVFrame_nb_samples(frame);
+        const channels = await libav.AVCodecContext_channels(dec_ctx);
+        const data = [];
+        for (let ch = 0; ch < channels; ch++) {
+            const ptr = await libav.AVFrame_data_a(frame, ch);
+            data.push(await libav.copyout_u8(ptr, data_size * nb_samples));
+        }
+        for (let i = 0; i < nb_samples; i++) {
+            for (let ch = 0; ch < channels; ch++) {
+                outbuf.push(data[ch].slice(data_size * i, data_size * i + data_size));
             }
         }
     }

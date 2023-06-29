@@ -7,9 +7,10 @@ build/inst/%/lib/pkgconfig/ogg.pc: build/libogg-$(LIBOGG_VERSION)/build-%/config
 build/libogg-$(LIBOGG_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/libogg-$(LIBOGG_VERSION)/configure
 	mkdir -p build/libogg-$(LIBOGG_VERSION)/build-$*
 	cd build/libogg-$(LIBOGG_VERSION)/build-$* ; \
-		emconfigure ../configure --prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
+		emconfigure ../../libogg-$(LIBOGG_VERSION)/configure \
+			--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
 			--disable-shared \
-			CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
+			CFLAGS="$(OPTFLAGS) `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@
 
 extract: build/libogg-$(LIBOGG_VERSION)/configure

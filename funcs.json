@@ -40,8 +40,9 @@
         ["avcodec_get_name", "string", ["number"]],
         ["avcodec_open2", "number", ["number", "number", "number"]],
         ["avcodec_open2_js", "number", ["number", "number", "number"]],
-        ["ff_calloc_AVCodecParameters", "number", []],
+        ["avcodec_parameters_alloc", "number", []],
         ["avcodec_parameters_copy", "number", ["number", "number"]],
+        ["avcodec_parameters_free", null, ["number"]],
         ["avcodec_parameters_from_context" ,"number", ["number", "number"]],
         ["avcodec_parameters_to_context" ,"number", ["number", "number"]],
         ["avcodec_receive_frame", "number", ["number", "number"]],
@@ -73,14 +74,13 @@
         ["av_packet_make_writable", "number", ["number"]],
         ["av_pix_fmt_desc_get", "number", ["number"]],
         ["av_read_frame", "number", ["number", "number"], {"async": true}],
-        ["av_seek_frame", "number", ["number", "number", "number", "number", "number"]],
+        ["av_seek_frame", "number", ["number", "number", "number", "number", "number"], {"async":  true}],
         ["av_shrink_packet", null, ["number", "number"]],
         ["av_write_frame", "number", ["number", "number"]],
         ["av_write_trailer", "number", ["number"]],
 
         ["av_dict_copy_js", "number", ["number", "number", "number"]],
         ["av_dict_set_js", "number", ["number", "string", "string", "number"]],
-
 
         ["sws_getContext", "number",
             ["number", "number", "number", "number", "number", "number",
@@ -106,8 +106,6 @@
         ["AVStream_time_base_num", "number", ["number"]],
         ["AVStream_time_base_den", "number", ["number"]],
         ["AVStream_time_base_s", null, ["number", "number", "number"]],
-        ["AVStream_width", "number", ["number"]],
-        ["AVStream_height", "number", ["number"]],
         ["AVPacketSideData_data", "number", ["number", "number"]],
         ["AVPacketSideData_size", "number", ["number", "number"]],
         ["AVPacketSideData_type", "number", ["number", "number"]],
@@ -173,29 +171,29 @@
         "ffprobe"
     ],
 
-  "accessors": [
-      ["AVFrame", [
-          "channel_layout",
-          "channel_layouthi",
-          "channels",
+    "accessors": [
+        ["AVFrame", [
+            "channel_layout",
+            "channel_layouthi",
+            "channels",
             "channel_layoutmask",
             "ch_layout_nb_channels",
-          {"name": "data", "array": true},
-          "format",
-          "height",
-          "key_frame",
-          {"name": "linesize", "array": true},
-          "nb_samples",
-          "pict_type",
-          "pts",
-          "ptshi",
-          "sample_rate",
-          "width"
-      ]],
-      ["AVPixFmtDescriptor", [
-          "log2_chroma_h"
-      ]],
-      ["AVCodec", [
+            {"name": "data", "array": true},
+            "format",
+            "height",
+            "key_frame",
+            {"name": "linesize", "array": true},
+            "nb_samples",
+            "pict_type",
+            "pts",
+            "ptshi",
+            "sample_rate",
+            "width"
+        ]],
+        ["AVPixFmtDescriptor", [
+            "log2_chroma_h"
+        ]],
+        ["AVCodec", [
             "sample_fmts",
             {"name": "sample_fmts", "array": true},
             "supported_samplerates",
@@ -205,104 +203,105 @@
         ["AVCodecContext", [
             "codec_id",
             "codec_type",
-          "bit_rate",
-          "bit_ratehi",
-          "channel_layout",
-          "channel_layouthi",
-          "channels",
+            "bit_rate",
+            "bit_ratehi",
+            "channel_layout",
+            "channel_layouthi",
+            "channels",
             "channel_layoutmask",
             "ch_layout_nb_channels",
-          "extradata",
-          "extradata_size",
-          "frame_size",
-          "gop_size",
-          "height",
-          "keyint_min",
-          "level",
+            "extradata",
+            "extradata_size",
+            "frame_size",
+            "gop_size",
+            "height",
+            "keyint_min",
+            "level",
             "max_b_frames",
-          "pix_fmt",
-          "profile",
-          "rc_max_rate",
-          "rc_max_ratehi",
-          "rc_min_rate",
-          "rc_min_ratehi",
-          "sample_fmt",
-          "sample_rate",
-          "qmax",
-          "qmin",
-          "width"
-      ]],
-      ["AVCodecParameters", [
-          "codec_id",
-          "codec_tag",
+            "pix_fmt",
+            "profile",
+            "rc_max_rate",
+            "rc_max_ratehi",
+            "rc_min_rate",
+            "rc_min_ratehi",
+            "sample_fmt",
+            "sample_rate",
+            "qmax",
+            "qmin",
+            "width"
+        ]],
+        ["AVCodecParameters", [
+            "codec_id",
+            "codec_tag",
             "codec_type",
-          "extradata",
-          "extradata_size",
-          "format",
-          "bit_rate",
-          "profile",
-          "level",
-          "width",
-          "height",
-          "color_range",
-          "color_primaries",
-          "color_trc",
-          "color_space",
-          "chroma_location",
-          "channels",
+            "extradata",
+            "extradata_size",
+            "format",
+            "bit_rate",
+            "profile",
+            "level",
+            "width",
+            "height",
+            "color_range",
+            "color_primaries",
+            "color_trc",
+            "color_space",
+            "chroma_location",
+            "channels",
             "channel_layoutmask",
             "ch_layout_nb_channels",
-          "sample_rate"
-      ]],
-      ["AVPacket", [
-          "pos",
+            "sample_rate"
+        ]],
+        ["AVPacket", [
+            "pos",
             "poshi",
             "pts",
-          "ptshi",
-          "dts",
-          "dtshi",
-          "data",
-          "size",
-          "stream_index",
-          "flags",
-          "side_data",
-          "side_data_elems",
-          "duration",
-          "durationhi"
-      ]],
-      ["AVFormatContext", [
-          "nb_streams",
-          "oformat",
-          "pb",
-          {"name": "streams", "array": true}
-      ]],
-      ["AVStream", [
-          "codecpar",
-          "duration",
-          "durationhi"
-      ]],
-      ["AVFilterInOut", [
-          "filter_ctx",
-          "name",
-          "next",
-          "pad_idx"
-      ]]
-  ],
-
-  "freers": [
-      "av_frame_free",
-      "av_packet_free",
-      "avformat_close_input",
-      "avcodec_free_context",
-      "avfilter_graph_free",
-      "avfilter_inout_free",
-  "av_dict_free"
+            "ptshi",
+            "dts",
+            "dtshi",
+            "data",
+            "size",
+            "stream_index",
+            "flags",
+            "side_data",
+            "side_data_elems",
+            "duration",
+            "durationhi"
+        ]],
+        ["AVFormatContext", [
+            "nb_streams",
+            "oformat",
+            "pb",
+            {"name": "streams", "array": true}
+        ]],
+        ["AVStream", [
+            "codecpar",
+            "duration",
+            "durationhi"
+        ]],
+        ["AVFilterInOut", [
+            "filter_ctx",
+            "name",
+            "next",
+            "pad_idx"
+        ]]
     ],
 
-  "copiers": [
-      ["u8", "Uint8Array"],
-      ["s16", "Int16Array"],
-      ["s32", "Int32Array"],
-      ["f32", "Float32Array"]
-  ]
+    "freers": [
+        "av_frame_free",
+        "av_packet_free",
+        "avformat_close_input",
+        "avcodec_free_context",
+        "avcodec_parameters_free",
+        "avfilter_graph_free",
+        "avfilter_inout_free",
+        "av_dict_free"
+    ],
+
+    "copiers": [
+        ["u8", "Uint8Array"],
+        ["s16", "Int16Array"],
+        ["s32", "Int32Array"],
+        ["f32", "Float32Array"]
+    ]
 }

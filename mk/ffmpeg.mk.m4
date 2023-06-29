@@ -33,10 +33,13 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: build/inst/$1/cfla
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$1/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-		$2 \
+                $2 \
+		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/$1/include $3" \
 		--extra-ldflags="-L$(PWD)/build/inst/$1/lib $3" \
 		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp
+	mv build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h
 	touch $(@)
 ]]])
 

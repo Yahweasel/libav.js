@@ -230,6 +230,61 @@ The tests used to determine which features are available are also exported, as
 `LibAV.isSIMDSupported`.
 
 
+## Which files do I need?
+
+You need the main entry file and at least one target, for a minimum of three
+files, but you should probably include several others.
+
+The main entry file is named as follows: `libav-<version>-<variant>.js`. You
+only need the variant you intend to use. The debug version is named
+`libav-<version>-<variant>.dbg.js`, and you can use that in place of the
+original, but it is not required.
+
+That entry file will load a target based on the environment it's loaded in and
+the options used to load it, as described above. The supported targets are
+asm.js, plain WebAssembly, SIMD WebAssembly, threaded WebAssembly, and
+threaded+SIMD WebAssembly. It is harmless to include all of them, as users will
+not download all of them, only the ones they use. But, you may also include only
+those you intend to use. In every case, there is a `.dbg.js` equivalent which is
+only needed if you intend to use debug mode.
+
+ * asm.js: Named `libav-<version>-<variant>.asm.js`. No modern browser excludes
+   support for WebAssembly, so this is probably not necessary.
+
+ * Plain WebAssembly: Named `libav-<version>-<variant>.wasm.js` and
+   `libav-<version>-<variant>.wasm.wasm`. Since most browsers support SIMD, this
+   is actually rarely used in practice, but if you want to reduce the number of
+   builds, it's better to set `nosimd` and *only* use this version.
+
+ * SIMD WebAssembly: Named `libav-<version>-<variant>.simd.js` (and
+   `.simd.wasm`). Used in most situations.
+
+ * Threaded WebAssembly: Named `libav-<version>-<variant>.thr.js` (and
+   `.thr.wasm`). Used only when threading is supported by the browser *and*
+   `yesthreads` is set. If you don't intend to use threads (set `yesthreads`),
+   it is safe to exclude this. Like with unthreaded WebAssembly, most real
+   browsers will load the SIMD version, but you can set `nosimd` to always load
+   this version and thus reduce the number of files you need to distribute.
+
+ * Threaded+SIMD WebAssembly: Named `libav-<version>-<variant>.thrsimd.js` (and
+   `.thrsimd.wasm`). Used in most threaded situations.
+
+At a minimum, it is usually sufficient to include only the `.js`, `.wasm.js`,
+and `.wasm.wasm` files, if you always set `nosimd`. To include SIMD support, you
+must also include `.simd.js` and `.simd.wasm`. Similarly, to include threads,
+you must include `.thr.js` and `.thr.wasm`, and to include both, `.thrsimd.js`,
+`.thrsimd.wasm`.
+
+The file `libav.types.d.ts` is a TypeScript types definition file, and is only
+needed to compile TypeScript code with support for libav.js's types. It should
+never be necessary to distribute.
+
+Note that, independently of what files are available to end users, *you are
+contractually obligated to release the source code of libav.js and all of its
+dependencies* if you provide the compiled version. If you are using a compiled,
+released version, it is sufficient to provide the `sources` directory.
+
+
 ## Bundlers
 
 Generally speaking, because libav.js needs to adjust its loading procedure based

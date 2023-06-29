@@ -7,8 +7,10 @@ build/inst/%/lib/libmp3lame.a: build/lame-$(LAME_VERSION)/build-%/config.h
 build/lame-$(LAME_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/lame-$(LAME_VERSION)/configure
 	mkdir -p build/lame-$(LAME_VERSION)/build-$*
 	cd build/lame-$(LAME_VERSION)/build-$* ; \
-		emconfigure ../configure --prefix="$(PWD)/build/inst/$*" \
-			--host=mipsel-sysv --disable-shared CFLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`"
+		emconfigure ../../lame-$(LAME_VERSION)/configure \
+		--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
+		--disable-shared \
+		CFLAGS="$(OPTFLAGS) `cat $(PWD)/build/inst/$*/cflags.txt`"
 	touch $@
 
 extract: build/lame-$(LAME_VERSION)/configure

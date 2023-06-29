@@ -6,7 +6,7 @@ changequote(`[[[', `]]]')
 LIBAVJS_VERSION=3.11.12
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
-CFLAGS=-Oz
+OPTFLAGS=-Oz
 SIMDFLAGS=-msimd128
 THRFLAGS=-pthread
 EFLAGS=\
@@ -59,12 +59,12 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
 	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
 
 # General build rule for any target
-# Use: buildrule(target file name, target inst name, CFLAGS, 
+# Use: buildrule(target file name, target inst name, CFLAGS)
 define([[[buildrule]]], [[[
-dist/libav-$(LIBAVJS_VERSION)-%.$1: build/ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a \
+dist/libav-$(LIBAVJS_VERSION)-%.$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$2-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p dist
-	$(EMCC) $(CFLAGS) $(EFLAGS) $3 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $3 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*) \
 		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -92,25 +92,31 @@ dist/libav-$(LIBAVJS_VERSION)-%.$1: build/ffmpeg-$(FFMPEG_VERSION)/build-$2-%/li
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavutil/libavutil.a \
 		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libswscale/libswscale.a'` \
 		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/$2/' configs/$(*)/libs.txt` -o $(@)
-	cat configs/$(*)/license.js $(@) > $(@).tmp
+	sed 's/^\/\/.*include:.*//' $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
+	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).$1.wasm.map ] ; then \
+		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).$1.wasm.map \
+			ffmpeg $(FFMPEG_VERSION) \
+			libvpx $(LIBVPX_VERSION) \
+			libaom $(LIBAOM_VERSION); \
+	fi || ( rm -f $(@) ; false )
 ]]])
 
 # asm.js version
-buildrule(asm.js, base, [[[-s WASM=0]]])
-buildrule(dbg.asm.js, base, [[[-g2 -s WASM=0]]])
+buildrule(asm, base, [[[-s WASM=0]]])
+buildrule(dbg.asm, base, [[[-g2 -s WASM=0]]])
 # wasm version with no added features
-buildrule(wasm.js, base, [[[]]])
-buildrule(dbg.wasm.js, base, [[[-g2]]])
+buildrule(wasm, base, [[[]]])
+buildrule(dbg.wasm, base, [[[-gsource-map]]])
 # wasm + threads
-buildrule(thr.js, thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
-buildrule(dbg.thr.js, thr, [[[-g2 $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
+buildrule(thr, thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
+buildrule(dbg.thr, thr, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
 # wasm + simd
-buildrule(simd.js, simd, [[[$(SIMDFLAGS)]]])
-buildrule(dbg.simd.js, simd, [[[-g2 $(SIMDFLAGS)]]])
+buildrule(simd, simd, [[[$(SIMDFLAGS)]]])
+buildrule(dbg.simd, simd, [[[-gsource-map $(SIMDFLAGS)]]])
 # wasm + threads + simd
-buildrule(thrsimd.js, thrsimd, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
-buildrule(dbg.thrsimd.js, thrsimd, [[[-g2 $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
+buildrule(thrsimd, thrsimd, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
+buildrule(dbg.thrsimd, thrsimd, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
 
 build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
 	mkdir -p build dist
@@ -125,19 +131,19 @@ node_modules/.bin/uglifyjs:
 # Targets
 build/inst/base/cflags.txt:
 	mkdir -p build/inst/base
-	touch $@
+	echo -gsource-map > $@
 
 build/inst/thr/cflags.txt:
 	mkdir -p build/inst/thr
-	echo $(THRFLAGS) > $@
+	echo $(THRFLAGS) -gsource-map > $@
 
 build/inst/simd/cflags.txt:
 	mkdir -p build/inst/simd
-	echo $(SIMDFLAGS) > $@
+	echo $(SIMDFLAGS) -gsource-map > $@
 
 build/inst/thrsimd/cflags.txt:
 	mkdir -p build/inst/thrsimd
-	echo $(THRFLAGS) $(SIMDFLAGS) > $@
+	echo $(THRFLAGS) $(SIMDFLAGS) -gsource-map > $@
 
 release: build-default build-lite build-fat build-obsolete build-opus build-flac \
         build-opus-flac build-webm build-webm-opus-flac \

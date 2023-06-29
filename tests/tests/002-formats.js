@@ -23,11 +23,9 @@ for (const combo of [
     ["mp3", null, "libmp3lame"],
     ["ogg", null, "libvorbis"],
     ["opus", null, "libopus"],
-    // FIXME: Why isn't prores in a .mp4 working?
-    ["prores.mkv", "prores", "aac", {slow: true}],
+    ["prores.mov", "prores", "aac", {slow: true}],
     ["s16.wav", null, "pcm_s16le"],
-    ["vp8.webm", "libvpx", "libopus", {slow: true}],
-    ["vp9.webm", "libvpx-vp9", "libopus", {slow: true}]
+    ["vp8.webm", "libvpx", "libopus", {slow: true}]
 ]) {
     if (combo[3] && combo[3].slow && !h.options.includeSlow)
         continue;

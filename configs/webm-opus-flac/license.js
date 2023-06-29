@@ -1,4 +1,4 @@
-/*
+/*!
  * This software is compiled from several sources, the licenses for which are
  * included herein.
  *

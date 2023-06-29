@@ -273,11 +273,6 @@ B(int, sample_rate)
 
 CHL(AVCodecParameters)
 #undef CHL
-struct AVCodecParameters *ff_calloc_AVCodecParameters()
-{
-    return (struct AVCodecParameters *)
-        calloc(1, sizeof(struct AVCodecParameters));
-}
 
 /* AVPacket */
 #define B(type, field) A(AVPacket, type, field)
