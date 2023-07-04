@@ -357,18 +357,6 @@ void AVStream_time_base_s(AVStream *a, int n, int d) {
     a->time_base.den = d;
 }
 
-int AVStream_width(AVStream* avStream) {
-    return avStream->codecpar->width;
-}
-
-int AVStream_height(AVStream* avStream) {
-    return avStream->codecpar->height;
-}
-
-int64_t toInt64(unsigned int lowBits, unsigned int highBits) {
-    return ((int64_t) highBits << 32) | lowBits;
-}
-
 int avformat_seek_file_min(
     AVFormatContext *s, int stream_index, int64_t ts, int flags
 ) {
