@@ -916,11 +916,13 @@ function ff_init_demuxer_file(filename, fmt) {
         var streams = [];
         for (var i = 0; i < nb_streams; i++) {
             var inStream = AVFormatContext_streams_a(fmt_ctx, i);
-            var outStream = {};
-            var codecpar = AVStream_codecpar(inStream);
-            outStream.index = i;
+            var outStream = {
+                ptr: inStream,
+                index: i
+            };
 
             // Codec info
+            var codecpar = AVStream_codecpar(inStream);
             outStream.codecpar = codecpar;
             outStream.codec_type = AVCodecParameters_codec_type(codecpar);
             outStream.codec_id = AVCodecParameters_codec_id(codecpar);

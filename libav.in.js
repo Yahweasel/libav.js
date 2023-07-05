@@ -423,6 +423,15 @@
             ret.AVSEEK_FLAG_ANY = 4;
             ret.AVSEEK_FLAG_FRAME = 8;
 
+            // AVDISCARDs
+            ret.AVDISCARD_NONE = -16;
+            ret.AVDISCARD_DEFAULT = 0;
+            ret.AVDISCARD_NONREF = 8;
+            ret.AVDISCARD_BIDIR = 16;
+            ret.AVDISCARD_NONINTRA = 24;
+            ret.AVDISCARD_NONKEY = 32;
+            ret.AVDISCARD_ALL = 48;
+
             // Errors
             enume(["E2BIG", "EPERM", "EADDRINUSE", "EADDRNOTAVAIL",
                 "EAFNOSUPPORT", "EAGAIN", "EALREADY", "EBADF", "EBADMSG",

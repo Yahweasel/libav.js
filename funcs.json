@@ -274,6 +274,7 @@
         ]],
         ["AVStream", [
             "codecpar",
+            "discard",
             "duration",
             "durationhi"
         ]],

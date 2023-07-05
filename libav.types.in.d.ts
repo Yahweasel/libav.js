@@ -132,6 +132,11 @@ export interface Packet {
  */
 export interface Stream {
     /**
+     * Pointer to the underlying AVStream.
+     */
+    ptr: number;
+
+    /**
      * Index of this stream.
      */
     index: number;
@@ -368,6 +373,13 @@ export interface LibAV {
     AVSEEK_FLAG_BYTE: number;
     AVSEEK_FLAG_ANY: number;
     AVSEEK_FLAG_FRAME: number;
+    AVDISCARD_NONE: number;
+    AVDISCARD_DEFAULT: number;
+    AVDISCARD_NONREF: number;
+    AVDISCARD_BIDIR: number;
+    AVDISCARD_NONINTRA: number;
+    AVDISCARD_NONKEY: number;
+    AVDISCARD_ALL: number;
     E2BIG: number;
     EPERM: number;
     EADDRINUSE: number;
