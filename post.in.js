@@ -17,6 +17,9 @@
 if (typeof _scriptDir === "undefined")
     _scriptDir = self.location.href;
 
+// A global promise chain for serialization of asyncify components
+Module.serializationPromise = Promise.all([]);
+
 var ERRNO_CODES = {
     EPERM: 1,
     EIO: 5,
@@ -895,7 +898,7 @@ var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
  *     filename: string, fmt?: string
  * ): @promsync@[number, Stream[]]@
  */
-var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt) {
+function ff_init_demuxer_file(filename, fmt) {
     var fmt_ctx;
 
     return Promise.all([]).then(function() {
@@ -934,6 +937,13 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
 
     });
 }
+Module.ff_init_demuxer_file = function() {
+    var args = arguments;
+    Module.serializationPromise = Module.serializationPromise.catch(function(){}).then(function() {
+        return ff_init_demuxer_file.apply(void 0, args);
+    });
+    return Module.serializationPromise;
+};
 
 /**
  * Write some number of packets at once.
@@ -984,7 +994,7 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
  */
-var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts) {
+function ff_read_multi(fmt_ctx, pkt, devfile, opts) {
     var sz = 0;
     var outPackets = {};
     var dev = Module.readBuffers[devfile];
@@ -1027,6 +1037,13 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
     }
 
     return Promise.all([]).then(step);
+}
+Module.ff_read_multi = function() {
+    var args = arguments;
+    Module.serializationPromise = Module.serializationPromise.catch(function(){}).then(function() {
+        return ff_read_multi.apply(void 0, args);
+    });
+    return Module.serializationPromise;
 };
 
 /**
