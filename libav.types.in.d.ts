@@ -239,6 +239,43 @@ export interface LibAV {
 @FUNCS
 @DECLS
 
+    // Declarations for things that use int64, so will be communicated incorrectly
+
+    /**
+     * Seek to timestamp ts, bounded by min_ts and max_ts. All 64-bit ints are
+     * in the form of low and high bits.
+     */
+    avformat_seek_file(
+        s: number, stream_index: number, min_tslo: number, min_tshi: number,
+        tslo: number, tshi: number, max_tslo: number, max_tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to *at the earliest* the given timestamp.
+     */
+    avformat_seek_file_min(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to *at the latest* the given timestamp.
+     */
+    avformat_seek_file_max(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to as close to this timestamp as the format allows.
+     */
+    avformat_seek_file_approx(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+
     /**
      * Callback when writes occur. Set by the user.
      */

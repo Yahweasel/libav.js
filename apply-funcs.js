@@ -148,6 +148,9 @@ function decls(f, meta) {
     }
 
     funcs.functions.forEach((decl) => {
+        if (decl[3] && decl[3].notypes)
+            return;
+
         const nm = decl[0];
         const noJSName = nm.replace(/_js$/, "");
         const doc = doxygen[noJSName];
