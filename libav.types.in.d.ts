@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Yahweasel
+ * Copyright (C) 2021-2023 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -327,6 +327,10 @@ export interface LibAV {
     AVIO_FLAG_READ_WRITE: number;
     AVIO_FLAG_NONBLOCK: number;
     AVIO_FLAG_DIRECT: number;
+    AVSEEK_FLAG_BACKWARD: number;
+    AVSEEK_FLAG_BYTE: number;
+    AVSEEK_FLAG_ANY: number;
+    AVSEEK_FLAG_FRAME: number;
     E2BIG: number;
     EPERM: number;
     EADDRINUSE: number;
