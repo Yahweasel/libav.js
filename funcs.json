@@ -74,7 +74,6 @@
         ["av_packet_make_writable", "number", ["number"]],
         ["av_pix_fmt_desc_get", "number", ["number"]],
         ["av_read_frame", "number", ["number", "number"], {"async": true}],
-        ["av_seek_frame", "number", ["number", "number", "number", "number", "number"], {"async":  true}],
         ["av_shrink_packet", null, ["number", "number"]],
         ["av_write_frame", "number", ["number", "number"]],
         ["av_write_trailer", "number", ["number"]],
