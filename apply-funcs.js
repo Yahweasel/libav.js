@@ -71,6 +71,16 @@ function decls(f, meta) {
         if (decl[3] && decl[3].async)
             outp += `, {async:true}`;
         outp += ");\n";
+
+        if (decl[3] && decl[3].async) {
+            // Need to serialize async functions
+            outp += `Module.${decl[0]} = function() { ` +
+                "var args = arguments; " +
+                "Module.serializationPromise = Module.serializationPromise.catch(function(){}).then(function() { " +
+                `return ${decl[0]}.apply(void 0, args); ` +
+                "}); " +
+                "return Module.serializationPromise; };\n";
+        }
     });
     accessors((decl, field) => {
         if (field && field.array) {
@@ -148,6 +158,9 @@ function decls(f, meta) {
     }
 
     funcs.functions.forEach((decl) => {
+        if (decl[3] && decl[3].notypes)
+            return;
+
         const nm = decl[0];
         const noJSName = nm.replace(/_js$/, "");
         const doc = doxygen[noJSName];

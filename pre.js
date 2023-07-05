@@ -15,7 +15,7 @@
 
 Module.locateFile = function(path, prefix) {
     // if it's the wasm file
-    if (path.indexOf(".wasm") === path.length - 5 &&
+    if (path.lastIndexOf(".wasm") === path.length - 5 &&
         path.indexOf("libav-") !== -1) {
         // Consider using an overridden wasm URL
         var gt;

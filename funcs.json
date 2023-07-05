@@ -60,10 +60,10 @@
         ["avformat_open_input", "number", ["number", "string", "number", "number"], {"async": true}],
         ["avformat_open_input_js", "number", ["string", "number", "number"], {"async": true}],
         ["avformat_read_raw_packet_times", "string", ["string"], {"async": true}],
-        ["avformat_seek_file", "number", ["number", "number", "number", "number", "number", "number"], {"async": true}],
-        ["avformat_seek_file_min", "number", ["number", "number", "number", "number"], {"async": true}],
-        ["avformat_seek_file_max", "number", ["number", "number", "number", "number"], {"async": true}],
-        ["avformat_seek_file_approx", "number", ["number", "number", "number", "number"], {"async": true}],
+        ["avformat_seek_file", "number", ["number", "number", "number", "number", "number", "number"], {"async": true, "notypes": true}],
+        ["avformat_seek_file_min", "number", ["number", "number", "number", "number"], {"async": true, "notypes": true}],
+        ["avformat_seek_file_max", "number", ["number", "number", "number", "number"], {"async": true, "notypes": true}],
+        ["avformat_seek_file_approx", "number", ["number", "number", "number", "number"], {"async": true, "notypes": true}],
         ["avformat_write_header", "number", ["number", "number"]],
         ["avio_open2_js", "number", ["string", "number", "number", "number"]],
         ["avio_close", "number", ["number"]],
@@ -276,6 +276,7 @@
         ]],
         ["AVStream", [
             "codecpar",
+            "discard",
             "duration",
             "durationhi"
         ]],
