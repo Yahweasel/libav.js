@@ -9,9 +9,15 @@
 --enable-filter=amix --enable-filter=volume --enable-filter=anull
 --enable-filter=scale
 --enable-ffmpeg --enable-ffprobe
---enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
 --enable-demuxer=wav
---enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
+--enable-decoder=pcm_u8
+--enable-decoder=pcm_s8
+--enable-decoder=pcm_s16le
+--enable-encoder=pcm_s16le
+--enable-decoder=pcm_s24le
+--enable-encoder=pcm_s24le
+--enable-decoder=pcm_s32le
+--enable-encoder=pcm_s32le
 --enable-muxer=wav
 --enable-demuxer=mp3
 --enable-decoder=mp3
@@ -43,11 +49,11 @@
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-demuxer=aiff
---enable-decoder=pcm_s16be --enable-decoder=pcm_s24be
+--enable-decoder=pcm_s16be
+--enable-decoder=pcm_s24be
+--enable-decoder=pcm_s32be
 --enable-decoder=pcm_f32be
 --enable-decoder=alac
---enable-decoder=pcm_s32le
---enable-encoder=pcm_s32le
 --enable-libvpx
 --enable-decoder=libvpx_vp8
 --enable-libvpx

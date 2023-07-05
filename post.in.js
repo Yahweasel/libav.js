@@ -566,19 +566,16 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
 
     var options = 0;
     if (opts.options) {
-        options = ff_malloc_int32_list([0]);
         for (var prop in opts.options)
-            av_dict_set(options, prop, opts.options[prop], 0);
+            options = av_dict_set_js(options, prop, opts.options[prop], 0);
     }
 
-    var ret = avcodec_open2(c, codec, options);
+    var ret = avcodec_open2_js(c, codec, options);
     if (ret < 0)
         throw new Error("Could not open codec: " + ff_error(ret));
 
-    if (options) {
-        av_dict_free(options);
-        free(options);
-    }
+    if (options)
+        av_dict_free_js(options);
 
     var frame = av_frame_alloc();
     if (frame === 0)
@@ -825,9 +822,10 @@ var ff_set_packet = Module.ff_set_packet = function(pkt, data) {
  *         format_name?: string, // libav name
  *         filename?: string,
  *         device?: boolean, // Create a writer device
- *         open?: boolean // Open the file for writing
+ *         open?: boolean, // Open the file for writing
+ *         codecpars?: boolean // Streams is in terms of codecpars, not codecctx
  *     },
- *     streamCtxs: [number, number, number][] // AVCodecContext, time_base_num, time_base_den
+ *     streamCtxs: [number, number, number][] // AVCodecContext | AVCodecParameters, time_base_num, time_base_den
  * ): @promise@[number, number, number, number[]]@
  */
 var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
@@ -843,8 +841,15 @@ var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
         var st = avformat_new_stream(oc, 0);
         if (st === 0)
             throw new Error("Could not allocate stream");
+        sts.push(st);
         var codecpar = AVStream_codecpar(st);
-        var ret = avcodec_parameters_from_context(codecpar, ctx[0]);
+        var ret;
+        if (opts.codecpars) {
+            ret = avcodec_parameters_copy(codecpar, ctx[0]);
+            AVCodecParameters_codec_tag_s(codecpar, 0);
+        } else {
+            ret = avcodec_parameters_from_context(codecpar, ctx[0]);
+        }
         if (ret < 0)
             throw new Error("Could not copy the stream parameters: " + ff_error(ret));
         AVStream_time_base_s(st, ctx[1], ctx[2]);
@@ -901,6 +906,9 @@ var ff_init_demuxer_file = Module.ff_init_demuxer_file = function(filename, fmt)
         if (fmt_ctx === 0)
             throw new Error("Could not open source file");
 
+        return avformat_find_stream_info(fmt_ctx, 0);
+
+    }).then(function() {
         var nb_streams = AVFormatContext_nb_streams(fmt_ctx);
         var streams = [];
         for (var i = 0; i < nb_streams; i++) {
@@ -971,7 +979,8 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  * ff_read_multi@sync(
  *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
  *         limit?: number, // OUTPUT limit, in bytes
- *         devLimit?: number // INPUT limit, in bytes (don't read if less than this much data is available)
+ *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
+ *         unify: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
  */
@@ -987,6 +996,7 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
     var devLimit = 32*1024;
     if (opts.devLimit)
         devLimit = opts.devLimit;
+    var unify = !!opts.unify;
 
     function step() {
         // If we risk running past the end of the currently-read data, stop now
@@ -1003,9 +1013,10 @@ var ff_read_multi = Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts)
 
             // And copy it out
             var packet = ff_copyout_packet(pkt);
-            if (!(packet.stream_index in outPackets))
-                outPackets[packet.stream_index] = [];
-            outPackets[packet.stream_index].push(packet);
+            var idx = unify ? 0 : packet.stream_index;
+            if (!(idx in outPackets))
+                outPackets[idx] = [];
+            outPackets[idx].push(packet);
             av_packet_unref(pkt);
             sz += packet.data.length;
             if (opts.limit && sz >= opts.limit)

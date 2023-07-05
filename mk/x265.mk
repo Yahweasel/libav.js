@@ -9,7 +9,7 @@ build/inst/%/lib/pkgconfig/x265.pc: build/x265_$(X265_VERSION)/build-%/Makefile
 build/x265_$(X265_VERSION)/build-%/Makefile: build/inst/%/cflags.txt build/x265_$(X265_VERSION)/source/CMakeLists.txt
 	mkdir -p build/x265_$(X265_VERSION)/build-$*
 	cd build/x265_$(X265_VERSION)/build-$* ; \
-		emcmake cmake ../source \
+		emcmake cmake ../../x265_$(X265_VERSION)/source \
 		-DCMAKE_TOOLCHAIN_FILE="$(PWD)/mk/x265.cmake" \
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/$*" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`" \

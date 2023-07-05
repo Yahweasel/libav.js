@@ -273,11 +273,6 @@ B(int, sample_rate)
 
 CHL(AVCodecParameters)
 #undef CHL
-struct AVCodecParameters *ff_calloc_AVCodecParameters()
-{
-    return (struct AVCodecParameters *)
-        calloc(1, sizeof(struct AVCodecParameters));
-}
 
 /* AVPacket */
 #define B(type, field) A(AVPacket, type, field)
@@ -360,18 +355,6 @@ int AVStream_time_base_den(AVStream *a) {
 void AVStream_time_base_s(AVStream *a, int n, int d) {
     a->time_base.num = n;
     a->time_base.den = d;
-}
-
-int AVStream_width(AVStream* avStream) {
-    return avStream->codecpar->width;
-}
-
-int AVStream_height(AVStream* avStream) {
-    return avStream->codecpar->height;
-}
-
-int64_t toInt64(unsigned int lowBits, unsigned int highBits) {
-    return ((int64_t) highBits << 32) | lowBits;
 }
 
 int avformat_seek_file_min(

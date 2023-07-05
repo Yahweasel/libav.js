@@ -20,7 +20,7 @@ LibAVTestHarness = {
     data: {},
     utils: {},
 
-    libAVVersion: "3.11.6.0",
+    libAVVersion: "3.11.17-descript-p3",
     libAVVariant: null,
     libAVOpts: null,
     libav: null,
@@ -55,6 +55,14 @@ LibAVTestHarness = {
         const resp = await fetch(name);
         const ab = await resp.arrayBuffer();
         return new Uint8Array(ab);
+    },
+
+    readCachedFile: async function(name) {
+        for (const file of this.files) {
+            if (file.name === name)
+                return new Uint8Array(await file.content.arrayBuffer());
+        }
+        return null;
     },
 
     LibAV: async function(opts, variant) {
@@ -93,6 +101,30 @@ LibAVTestHarness = {
         const ret = await LibAV.LibAV(opts);
         if (!opts)
             this.libav = ret;
+
+        if (this.options.coverage) {
+            // Add coverage checks to each function
+            if (!this.data.funcs) {
+                const funcsJSONU8 = await this.readFile("../funcs.json");
+                const funcsJSON = (new TextDecoder()).decode(funcsJSONU8);
+                const funcsObj = JSON.parse(funcsJSON);
+                this.data.funcs = [];
+                for (const func of funcsObj.functions)
+                    this.data.funcs.push(func[0]);
+                this.data.funcs = this.data.funcs.concat(funcsObj.meta);
+                this.data.coverage = {};
+            }
+
+            const self = this;
+            for (const func of this.data.funcs) (function(func) {
+                const orig = ret[func];
+                ret[func] = function() {
+                    self.data.coverage[func] = true;
+                    return orig.apply(this, arguments);
+                };
+            })(func);
+        }
+
         for (const f of this.files)
             await ret.mkreadaheadfile(f.name, f.content);
         return ret;
@@ -128,6 +160,14 @@ LibAVTestHarness = {
                         ex + "\n" + ex.stack);
                     fails++;
                 }
+            }
+        }
+
+        // Check coverage if applicable
+        if (this.options.coverage) {
+            for (const func of this.data.funcs) {
+                if (!this.data.coverage[func])
+                    this.printErr(`Function ${func} is not covered.`);
             }
         }
 

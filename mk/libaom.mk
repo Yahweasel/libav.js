@@ -19,7 +19,8 @@ build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefi
 build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/inst/base/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-base
 	cd build/libaom-$(LIBAOM_VERSION)/build-base ; \
-		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/base" \
+		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
+		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/base" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/base/cflags.txt`" \
 		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/base/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
@@ -36,7 +37,8 @@ build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/inst/base/cflags.txt b
 build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/inst/simd/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-simd
 	cd build/libaom-$(LIBAOM_VERSION)/build-simd ; \
-		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/simd" \
+		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
+		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/simd" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/simd/cflags.txt`" \
 		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/simd/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
@@ -54,7 +56,8 @@ build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/inst/simd/cflags.txt b
 build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/inst/thr/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-thr
 	cd build/libaom-$(LIBAOM_VERSION)/build-thr ; \
-		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thr" \
+		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
+		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thr" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/thr/cflags.txt`" \
 		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/thr/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
@@ -71,7 +74,8 @@ build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/inst/thr/cflags.txt bui
 build/libaom-$(LIBAOM_VERSION)/build-thrsimd/Makefile: build/inst/thrsimd/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-thrsimd
 	cd build/libaom-$(LIBAOM_VERSION)/build-thrsimd ; \
-		emcmake cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thrsimd" \
+		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
+		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thrsimd" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/thrsimd/cflags.txt`" \
 		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/thrsimd/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
