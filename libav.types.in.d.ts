@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Yahweasel
+ * Copyright (C) 2021-2023 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -132,6 +132,11 @@ export interface Packet {
  */
 export interface Stream {
     /**
+     * Pointer to the underlying AVStream.
+     */
+    ptr: number;
+
+    /**
      * Index of this stream.
      */
     index: number;
@@ -239,6 +244,43 @@ export interface LibAV {
 @FUNCS
 @DECLS
 
+    // Declarations for things that use int64, so will be communicated incorrectly
+
+    /**
+     * Seek to timestamp ts, bounded by min_ts and max_ts. All 64-bit ints are
+     * in the form of low and high bits.
+     */
+    avformat_seek_file(
+        s: number, stream_index: number, min_tslo: number, min_tshi: number,
+        tslo: number, tshi: number, max_tslo: number, max_tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to *at the earliest* the given timestamp.
+     */
+    avformat_seek_file_min(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to *at the latest* the given timestamp.
+     */
+    avformat_seek_file_max(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to as close to this timestamp as the format allows.
+     */
+    avformat_seek_file_approx(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+
     /**
      * Callback when writes occur. Set by the user.
      */
@@ -327,6 +369,17 @@ export interface LibAV {
     AVIO_FLAG_READ_WRITE: number;
     AVIO_FLAG_NONBLOCK: number;
     AVIO_FLAG_DIRECT: number;
+    AVSEEK_FLAG_BACKWARD: number;
+    AVSEEK_FLAG_BYTE: number;
+    AVSEEK_FLAG_ANY: number;
+    AVSEEK_FLAG_FRAME: number;
+    AVDISCARD_NONE: number;
+    AVDISCARD_DEFAULT: number;
+    AVDISCARD_NONREF: number;
+    AVDISCARD_BIDIR: number;
+    AVDISCARD_NONINTRA: number;
+    AVDISCARD_NONKEY: number;
+    AVDISCARD_ALL: number;
     E2BIG: number;
     EPERM: number;
     EADDRINUSE: number;
