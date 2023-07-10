@@ -107,6 +107,7 @@
         ["AVPacketSideData_data", "number", ["number", "number"]],
         ["AVPacketSideData_size", "number", ["number", "number"]],
         ["AVPacketSideData_type", "number", ["number", "number"]],
+        ["AVPixFmtDescriptor_comp_depth", "number", ["number", "number"]],
 
         ["ff_error", "string", ["number"]],
         ["ff_nothing", null, [], {"async": true}],
@@ -189,7 +190,9 @@
             "width"
         ]],
         ["AVPixFmtDescriptor", [
-            "log2_chroma_h"
+            "log2_chroma_h",
+            "log2_chroma_w",
+            "nb_components"
         ]],
         ["AVCodec", [
             "sample_fmts",
