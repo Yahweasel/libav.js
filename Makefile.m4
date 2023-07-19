@@ -164,6 +164,7 @@ publish:
 	unzip libav.js-$(LIBAVJS_VERSION).zip
 	( cd libav.js-$(LIBAVJS_VERSION) && \
 	  cp -a ../package.json ../README.md ../docs . && \
+	  rm -f dist/*.dbg.* && \
 	  npm publish )
 	rm -rf libav.js-$(LIBAVJS_VERSION)
 
