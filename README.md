@@ -2,10 +2,8 @@
 
 This is a compilation of the libraries associated with handling audio and video
 in FFmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for
-WebAssembly and asm.js, and thus the web. It is compiled via emscripten.  This
-compilation exposes the *library* interface of FFmpeg, not ffmpeg itself, and
-there is a separate project by a different author, ffmpeg.js, if what you need
-is ffmpeg.
+WebAssembly and asm.js, and thus the web. It is compiled via emscripten and is
+highly customizable.
 
 In short, this is a pure JavaScript and WebAssembly system for low-level audio
 and video encoding, decoding, muxing, demuxing, and filtering.
@@ -438,3 +436,49 @@ The asm.js versions are much bigger, but will not be loaded on
 WebAssembly-capable clients.
 
 The wrapper (“glue”) code is about 292KiB, but is highly compressible.
+
+
+## Performance
+
+Generally speaking, the performance of audio en- and decoding is much faster
+than real time, to the point that it's simply not a concern for most
+applications. The author of libav.js regularly uses libav.js in live audio
+systems.
+
+Video is a different story, of course.
+
+Video is nowhere near as slow as you might imagine. On reasonable systems,
+faster-than-real-time performance for decoding of up to 1080P is achievable if
+you use a threaded version of libav.js. If you're willing to use older, simpler
+video codecs and lower-resolution video, even real-time *encoding* is possible.
+But, for complex codecs, real-time en/decoding is not realistic. One of the
+revolutions of video en/decoding is hardware en/decoding, and libav.js cannot do
+that, so its performance ceiling is already low.
+
+Muxing and demuxing are bound by I/O time, not software performance. libav.js
+will always mux or demux faster than you can use the data.
+
+
+## libav.js and WebCodecs
+
+On some modern browsers, the WebCodecs API is availble for hardware-accelerated
+(or at least, CPU-specific) en/decoding of various codecs. When it is available,
+it is better to use it than libav.js. However, WebCodecs does not mux or demux,
+and which codecs it supports varies based on the moods of its implementor (if it
+is even present), so generally, it is necessary to support WebCodecs but fall
+back to libav.js when necessary.
+
+To make this easier, two companion projects to libav.js are provided that
+connect it to WebCodecs:
+
+ * [libavjs-webcodecs-polyfill](https://github.com/ennuicastr/libavjs-webcodecs-polyfill)
+   is a polyfill for the WebCodecs API using libav.js. Even if WebCodecs exists
+   on your browser, this polyfill allows the user to guarantee a certain set of
+   supported codecs; any codecs not supported by the built-in WebCodecs can
+   simply fall back to libav.js, using only one API.
+
+ * [libavjs-webcodecs-bridge](https://github.com/Yahweasel/libavjs-webcodecs-bridge)
+   is a bridge between libav.js and WebCodecs, converting between the two data
+   formats. This makes it easy to use libav.js for demuxing and WebCodecs for
+   decoding, or WebCodecs for encoding and libav.js for muxing. Of course, the
+   WebCodecs used with the bridge can easily be the polyfill if needed.
