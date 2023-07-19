@@ -188,6 +188,22 @@ var CAccessors = {};
 @FUNCS
 
 // Filesystem
+function fsBinding(of) {
+    Module[of] = function() {
+        try {
+            return FS[of].apply(FS, arguments);
+        } catch (ex) {
+            if (ex && ex.name === "ErrnoError") {
+                // Give a more useful error
+                ex.message = strerror(ex.errno);
+                if (typeof arguments[0] === "string")
+                    ex.message = arguments[0] + ": " + ex.message;
+            }
+            throw ex;
+        }
+    };
+}
+
 var readerDev = FS.makedev(44, 0);
 FS.registerDevice(readerDev, readerCallbacks);
 Module.readBuffers = {};
@@ -202,7 +218,7 @@ FS.registerDevice(streamWriterDev, streamWriterCallbacks);
  * @param name  Filename to read
  */
 /// @types readFile@sync(name: string): @promise@Uint8Array@
-Module.readFile = FS.readFile.bind(FS);
+fsBinding("readFile");
 
 /**
  * Write a complete file to the in-memory filesystem.
@@ -210,16 +226,16 @@ Module.readFile = FS.readFile.bind(FS);
  * @param content  Content to write to the file
  */
 /// @types writeFile@sync(name: string, content: Uint8Array): @promise@Uint8Array@
-Module.writeFile = FS.writeFile.bind(FS);
+fsBinding("writeFile");
 
 /**
  * Delete a file in the in-memory filesystem.
  * @param name  Filename to delete
  */
 /// @types unlink@sync(name: string): @promise@void@
-Module.unlink = FS.unlink.bind(FS);
+fsBinding("unlink");
 
-Module.mkdev = FS.mkdev.bind(FS);
+fsBinding("mkdev");
 
 /**
  * Make a lazy file. Direct link to createLazyFile.
@@ -230,7 +246,7 @@ Module.mkdev = FS.mkdev.bind(FS);
  *     canWrite: boolean
  * ): @promise@void@
  */
-Module.createLazyFile = FS.createLazyFile.bind(FS);
+fsBinding("createLazyFile");
 
 /**
  * Make a reader device.

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*
  * Copyright (C) 2023 Yahweasel and contributors
  *
@@ -14,15 +13,15 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-const fs = require("fs/promises");
+// Checks that at least some FS errno errors get transcribed to something useful
 
-async function main() {
-    const res = [];
-    for (const f of await fs.readdir("tests")) {
-        if (!/\.js$/.test(f))
-            continue;
-        res.push(f);
-    }
-    process.stdout.write(JSON.stringify(res, null, 1) + "\n");
+const libav = await h.LibAV();
+
+try {
+    await libav.unlink("nonexistent-file");
+    throw new Error("Unlinking a nonexistent file did not throw an error!");
+} catch (ex) {
+    if (!ex || ex.name !== "ErrnoError" ||
+        ex.message !== "nonexistent-file: No such file or directory")
+        throw ex;
 }
-main();

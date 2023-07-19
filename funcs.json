@@ -113,12 +113,14 @@
         ["ff_nothing", null, [], {"async": true}],
 
         ["calloc", "number", ["number", "number"]],
+        ["close", "number", ["number"]],
+        ["dup2", "number", ["number", "number"]],
         ["free", null, ["number"]],
         ["malloc", "number", ["number"]],
         ["mallinfo_uordblks", "number", []],
         ["open", "number", ["string", "number", "number"]],
-        ["close", "number", ["number"]],
-        ["dup2", "number", ["number", "number"]],
+        ["strerror", "string", ["number"]],
+
         ["libavjs_with_swscale", "number", []],
         ["libavjs_create_main_thread", "number", []],
 
