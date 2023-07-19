@@ -6,13 +6,14 @@ const fs = require("fs/promises");
 const ffmpegVersion = process.argv[2];
 
 async function main() {
-    const parser = new XMLParser();
+    const parser = new XMLParser({ignoreAttributes: false});
     const dir = `build/ffmpeg-${ffmpegVersion}/build-base-default/doc/doxy/xml`;
     const types = {};
     for (const file of await fs.readdir(dir)) {
         if (!/^.*h\.xml$/.test(file))
             continue;
 
+        // Import the XML data
         const xmlData = await fs.readFile(`${dir}/${file}`);
         const xml = parser.parse(xmlData);
         if (!xml.doxygen)
@@ -43,12 +44,41 @@ async function main() {
                             `WARNING: Duplicate definition of ${member.name}`);
                     }
                     types[member.name] = member;
+
+                    // Try to extract the raw documentation
+                    if (member.location) {
+                        try {
+                            const file = await fs.readFile(
+                                `build/ffmpeg-${ffmpegVersion}/${member.location["@_file"]}`,
+                                "utf8");
+                            const lines = file.split("\n");
+                            let startLine = +member.location["@_line"] - 1;
+
+                            // Find the start line
+                            for (; startLine >= 0; startLine--) {
+                                if (/\/\*/.test(lines[startLine]))
+                                    break;
+                            }
+
+                            // Find the end line
+                            let endLine = startLine;
+                            for (; endLine < lines.length; endLine++) {
+                                if (/\*\//.test(lines[endLine]))
+                                    break;
+                            }
+
+                            // And combine those into the raw comment
+                            member.raw = lines.slice(startLine, endLine + 1).join("\n");
+                        } catch (ex) {
+                            console.error(ex);
+                        }
+                    }
                 }
             }
         }
     }
 
-    await fs.writeFile("mk/doxygen.json", JSON.stringify(types));
+    await fs.writeFile("mk/doxygen.json", JSON.stringify(types, null, 1));
 }
 
 main();
