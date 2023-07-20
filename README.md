@@ -118,11 +118,7 @@ If `noworker` is set or Web Workers are not available, Web Workers will be
 disabled, so libav.js will run in the main thread (i.e., will run in `"direct"`
 mode). This is synchronous, so usually undesirable.  Note that if you're loading
 libav.js *in* a worker, it may be reasonable to set `noworker`, and make
-libav.js synchronous with your worker thread.  However, in that case, you must
-set `LibAV.nolibavworker = true` before loading; this tells the loading code of
-libav.js that it is not running in a worker that it created, and so should not
-load its own worker code.  Otherwise, loading it `noworker` in a worker is
-likely to fail, as it will interfere with your own worker's message handling.
+libav.js synchronous with your worker thread.
 
 If `yesthreads` is set (and `nothreads` is not set) and threads are supported
 (see
