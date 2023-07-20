@@ -149,7 +149,14 @@ release: build-default build-lite build-fat build-obsolete build-opus build-flac
         build-opus-flac build-webm build-webm-opus-flac \
 	build-mediarecorder-transcoder build-open-media
 	mkdir libav.js-$(LIBAVJS_VERSION)
-	cp -a dist/ libav.js-$(LIBAVJS_VERSION)/
+	cp -a README.md docs libav.js-$(LIBAVJS_VERSION)/
+	mkdir libav.js-$(LIBAVJS_VERSION)/dist
+	for v in default lite fat obsolete opus flac opus-flac webm \
+		webm-opus-flac mediarecorder-transcoder open-media; \
+	do \
+		cp dist/libav-$(LIBAVJS_VERSION)-$$v.* \
+			libav.js-$(LIBAVJS_VERSION)/dist; \
+	done
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
 	for t in ffmpeg lame libaom libogg libvorbis libvpx opus; \
 	do \
@@ -163,7 +170,7 @@ release: build-default build-lite build-fat build-obsolete build-opus build-flac
 publish:
 	unzip libav.js-$(LIBAVJS_VERSION).zip
 	( cd libav.js-$(LIBAVJS_VERSION) && \
-	  cp -a ../package.json ../README.md ../docs . && \
+	  cp ../package.json . && \
 	  rm -f dist/*.dbg.* && \
 	  npm publish )
 	rm -rf libav.js-$(LIBAVJS_VERSION)
