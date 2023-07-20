@@ -507,12 +507,12 @@ build/inst/thrsimd/cflags.txt:
 
 release: build-default build-lite build-fat build-obsolete build-opus build-flac \
         build-opus-flac build-webm build-webm-opus-flac \
-	build-mediarecorder-transcoder build-open-media
+	build-mediarecorder-transcoder build-open-media build-webcodecs
 	mkdir libav.js-$(LIBAVJS_VERSION)
 	cp -a README.md docs libav.js-$(LIBAVJS_VERSION)/
 	mkdir libav.js-$(LIBAVJS_VERSION)/dist
 	for v in default lite fat obsolete opus flac opus-flac webm \
-		webm-opus-flac mediarecorder-transcoder open-media; \
+		webm-opus-flac mediarecorder-transcoder open-media webcodecs; \
 	do \
 		cp dist/libav-$(LIBAVJS_VERSION)-$$v.* \
 			libav.js-$(LIBAVJS_VERSION)/dist; \

@@ -337,47 +337,44 @@ find more on configuration fragments or making your own variants in
 Use `make build-variant`, replacing `variant` with the variant name, to build
 another variant.
 
-libav.js includes several other variants:
+libav.js includes several other variants, listed here by feature:
 
-The “lite” variant removes, relative to the default variant, AAC, and the M4A
-and WebM/Matroska containers.
+| Variant Name		| mp4	| ogg	| webm	| aac	| flac	| opus	| wav	| Standard audio filters	| Video						| Others	|
+| ----------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ------------------------- | ------------------------- | --------- |
+| default			| x		| x		| x		| 		| x		| x		| x		| x							|							| |
+| lite				| 		| x		| 		| 		| x		| x		| x		| x							|							| |
+| fat				| x		| x		| 		| x		| x		| x		| x		| x							|							| vorbis, alac, wavpack |
+| obsolete			| x		| x		| x		| x		| x		| x		| 		| x							|							| mp3, vorbis |
+| opus				| 		| x		| 		| 		| 		| x		| 		| 							|							| |
+| flac				| 		| 		| 		| 		| x		| 		| 		| 							|							| |
+| opus-flac			| 		| x		| 		| 		| x		| x		| 		| 							|							| |
+| webm				| x		| x		| x		| x		| x		| x		| x		| x							| VP8						| |
+| webm-opus-flac	| 		| x		| x		| 		| x		| x		| 		| 							| VP8						| |
+| mediarecorder-transcoder | x | x	| x		| x		| x		| x		| 		| 							| VP8, H.264 (decoding)		| |
+| open-media		| 		| x		| x		| 		| x		| x		| 		| 							| VP8, VP9, AV1				| vorbis |
+| webcodecs			| x		| x		| x		| x		| x		| x		| 		| 							| VP8						| Note 1 |
 
-The “fat” variant adds, relative to the default variant, Vorbis, wavpack and
-its container, and ALAC.
+The following variants have defined configurations, and so can be built “out of
+the box”, but are not included in libav.js distributions.
 
-The “obsolete” variant adds, relative to the default variant, two obsolete but
-still commonly found audio formats, namely Vorbis in the ogg container and MP3
-in its own container. Note that while Vorbis has been formally replaced by
-Opus, at the time of this writing, Opus still has lackluster support in audio
-software, so Vorbis is still useful. MP3, on the other hand, is completely
-worthless, and is only supplied in case your end users are idiots. Friends
-don't let friends use MP3.
+| Variant Name		| mp4	| ogg	| webm	| aac	| flac	| opus	| wav	| Standard audio filters	| Video						| Others	|
+| ----------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ------------------------- | ------------------------- | --------- |
+| all-audio-cli		| x		| x		| x		| x		| x		| x		| x		| x							|							| floating-point wav, mp3, vorbis. Note 2 |
+| rawvideo			| x		| x		| x		| x		| x		| x		| 		| 							| VP8, H.264 (decoding), rawvideo | |
+| h265				| x		| 		| x		| 		| 		| 		| 		| 							| H.265 (decoding)			| Note 3 |
+| prores			| x		| x		| 		| 		| 		| 		| 		| 							| ProRes					| |
+| mediarecorder-transcoder | x | x	| x		| x		| x		| x		| 		| 							| VP8, H.264				| Note 3 |
+| all				| x		| x		| x		| x		| x		| x		| x		| x							| (All)						| (All) |
 
-The “opus”, “flac”, and “opus-flac” variants are intended just for encoding or
-decoding Opus and/or FLAC. They include only their named format(s), the
-appropriate container(s), and the `aresample` filter; in particular, no other
-filters are provided whatsoever. With Opus in particular, this is a better
-option than a simple conversion of libopus to JavaScript, because Opus mandates
-a limited range of audio sample rates, so having a resampler is beneficial.
+Note 1: Also includes bitstream data extractors for VP9, AV1, H.264, and H.265.
+This makes the `webcodecs` variant ideal for pairing with WebCodecs, using
+WebCodecs to do the actual decoding.
 
-The “webm” variant, relative to the default variant, includes support for VP8
-video. The “webm-opus-flac” variant, relative to “opus-flac”, includes support
-for VP8 video, as “webm”, but excludes all filters except aresample. The
-“mediarecorder-transcoder” variant, relative to “webm-opus-flac”, adds MPEG-4
-AAC and H.264, making it sufficient for transcoding formats that MediaRecorder
-can produce on all platforms. Note that support is not included for *encoding*
-MPEG-4 video, only decoding.
+Note 2: Also includes the CLI (`ffmpeg` and `ffprobe` functions).
 
-Finally, the “mediarecorder-openh264” variant, relative to
-“mediarecorder-transcoder”, adds H.264 *encoding* support, through libopenh264.
-Note that H.264 is under patent until at least 2024, and the use of the
-libopenh264 encoder in this context before that time opens you to the
-possibility of patent litigation, unless you have patent rights. For this
-reason, this variant is not provided pre-built in releases, and you must build
-it yourself if you want it. Cisco, who authors libopenh264, grants a patent
-license to its users, but this license applies only to users of the precompiled
-version compiled by Cisco, and no such version is provided in WebAssembly, so
-it does not apply to use in libav.js.
+Note 3: Includes technologies patented by the Misanthropic Patent Extortion
+Gang (MPEG). You should not use these builds, and you should not support this
+organization which works actively against the common good.
 
 To create a variant from configuration fragments, run `./mkconfig.js` in the
 `configs` directory. The first argument is the name of the variant to make, and
