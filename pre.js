@@ -13,6 +13,14 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Import LibAV.base if applicable
+if (typeof _scriptDir === "undefined") {
+    if (typeof LibAV === "object" && LibAV && LibAV.base)
+        _scriptDir = LibAV.base + "/";
+    else
+        _scriptDir = self.location.href;
+}
+
 Module.locateFile = function(path, prefix) {
     // if it's the wasm file
     if (path.lastIndexOf(".wasm") === path.length - 5 &&

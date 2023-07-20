@@ -13,10 +13,6 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Fix to _scriptDir bugginess
-if (typeof _scriptDir === "undefined")
-    _scriptDir = self.location.href;
-
 // A global promise chain for serialization of asyncify components
 Module.serializationPromise = Promise.all([]);
 
