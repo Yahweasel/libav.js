@@ -589,9 +589,6 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
     if (ret < 0)
         throw new Error("Could not open codec: " + ff_error(ret));
 
-    if (options)
-        av_dict_free_js(options);
-
     var frame = av_frame_alloc();
     if (frame === 0)
         throw new Error("Could not allocate frame");
