@@ -78,6 +78,7 @@
         ["av_write_trailer", "number", ["number"]],
 
         ["av_dict_copy_js", "number", ["number", "number", "number"]],
+        ["av_dict_free", null, ["number"]],
         ["av_dict_set_js", "number", ["number", "string", "string", "number"]],
 
         ["sws_getContext", "number",
