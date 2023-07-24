@@ -8,7 +8,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "make build-all -j9",
+    "test": "npm run build && cd tests && node node-test.js --include-slow"
   },
   "repository": {
     "type": "git",
