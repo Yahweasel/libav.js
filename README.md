@@ -12,6 +12,19 @@ FFmpeg is released under the LGPL. Therefore, if you distribute this library,
 you must provide sources. The sources are included in the `sources/` directory
 of the compiled version of libav.js.
 
+This file is the main README for using and building libav.js, and should be
+sufficient for many users. More detail on specific concepts is provided in other
+files:
+
+ * (API.md)[docs/API.md] describes the libav.js-specific parts of the API.
+
+ * (CONFIG.md)[docs/CONFIG.md] describes the configuration system and how to
+   create your own configuration of libav.js.
+
+ * (IO.md)[docs/IO.md] describes the various I/O modes provided by libav.js.
+
+ * (TESTS.md)[docs/TESTS.md] describes the testing framework.
+
 
 ## Using libav.js
 
