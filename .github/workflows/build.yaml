@@ -1,0 +1,30 @@
+name: build
+run-name: build for ${{ github.sha }}
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - uses: mymindstorm/setup-emsdk@v12
+        with:
+          version: 3.1.43
+          actions-cache-folder: 'cache-emsdk'
+      - uses: actions/cache@v3
+        with:
+          key: libav-js-dependencies
+          path: build/*.tar.*
+      - run: make extract
+      - uses: bhowell2/github-substring-action@1.0.2
+        id: sha
+        with:
+          value: ${{ github.sha }}
+          length_from_start: 7
+      - run: make release -j9 LIBAVJS_VERSION_SUFFIX=-${{ steps.sha.outputs.substring }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: libav.js-*.zip
