@@ -1,0 +1,13 @@
+name: test
+run-name: tests for ${{ github.ref }}
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - uses: mymindstorm/setup-emsdk@v11
+      - run: npm test
