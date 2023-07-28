@@ -10,4 +10,12 @@ jobs:
         with:
           node-version: '18'
       - uses: mymindstorm/setup-emsdk@v11
+        with:
+          version: 3.1.43
+          actions-cache-folder: 'cache-emsdk'
+      - uses: actions/cache@v3
+        with:
+          key: libav-js-dependencies
+          path: build/*.tar.*
+      - run: make extract
       - run: npm test
