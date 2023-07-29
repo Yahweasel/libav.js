@@ -61,7 +61,7 @@ jobs:
       - uses: actions/cache@v3
         name: Cache opus
         with:
-          key: cache-opus-${{ hashFiles('mk/opus.mk'}) }}
+          key: cache-opus-${{ hashFiles('mk/opus.mk') }}
           path: build/opus-*
 
       - uses: actions/cache@v3
