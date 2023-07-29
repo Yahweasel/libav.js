@@ -16,55 +16,55 @@ jobs:
           version: 3.1.43
           actions-cache-folder: 'cache-emsdk'
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache ffmpeg
         with:
           key: cache-ffmpeg-${{ hashFiles('Makefile.m4', 'Makefile', 'mk/ffmpeg.mk.m4', 'mk/ffmpeg.mk', 'patches/ffmpeg.diff') }}
           path: build/ffmpeg-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache lame
         with:
           key: cache-lame-${{ hashFiles('mk/lame.mk') }}
           path: build/lame-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache libaom
         with:
           key: cache-libaom-${{ hashFiles('mk/libaom.mk.m4', 'mk/libaom.mk', 'patches/libaom.diff') }}
           path: build/libaom-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache libogg
         with:
           key: cache-libogg-${{ hashFiles('mk/libogg.mk') }}
           path: build/libogg-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache libvorbis
         with:
           key: cache-libvorbis-${{ hashFiles('mk/libvorbis.mk') }}
           path: build/libvorbis-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache libvpx
         with:
           key: cache-libvpx-${{ hashFiles('mk/libvpx.mk') }}
           path: build/libvpx-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache openh264
         with:
           key: cache-openh264-${{ hashFiles('mk/openh264.mk', 'patches/openh264.diff') }}
           path: build/openh264-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache opus
         with:
           key: cache-opus-${{ hashFiles('mk/opus.mk'}) }}
           path: build/opus-*
 
-      - run: actions/cache@v3
+      - uses: actions/cache@v3
         name: Cache x265
         with:
           key: cache-x265-${{ hashFiles('mk/x265.mk', 'mk/x265.cmake') }}
