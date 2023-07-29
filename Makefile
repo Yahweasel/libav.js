@@ -479,11 +479,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js: build/ffmpeg-$(FFMPEG_VERSION)/b
 	fi || ( rm -f $(@) ; false )
 
 
-build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json apply-funcs.js
 	mkdir -p build dist
 	./apply-funcs.js $(LIBAVJS_VERSION)
 
-build/libav-$(LIBAVJS_VERSION).js build/post.js: build/exports.json
+build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
 	touch $@
 
 node_modules/.bin/uglifyjs:

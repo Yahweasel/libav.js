@@ -119,11 +119,11 @@ buildrule(dbg.simd, simd, [[[-gsource-map $(SIMDFLAGS)]]])
 buildrule(thrsimd, thrsimd, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
 buildrule(dbg.thrsimd, thrsimd, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
 
-build/exports.json: libav.in.js post.in.js funcs.json apply-funcs.js
+build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json apply-funcs.js
 	mkdir -p build dist
 	./apply-funcs.js $(LIBAVJS_VERSION)
 
-build/libav-$(LIBAVJS_VERSION).js build/post.js: build/exports.json
+build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
 	touch $@
 
 node_modules/.bin/uglifyjs:
