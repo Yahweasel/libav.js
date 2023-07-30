@@ -8,7 +8,8 @@ build/inst/%/lib/pkgconfig/vorbis.pc: build/libvorbis-$(LIBVORBIS_VERSION)/build
 	mv build/inst/$*/lib/pkgconfig/vorbisenc.pc.tmp build/inst/$*/lib/pkgconfig/vorbisenc.pc
 
 build/libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h: build/inst/%/lib/pkgconfig/ogg.pc \
-	build/libvorbis-$(LIBVORBIS_VERSION)/configure
+	build/libvorbis-$(LIBVORBIS_VERSION)/configure \
+	| build/inst/%/cflags.txt
 	mkdir -p build/libvorbis-$(LIBVORBIS_VERSION)/build-$*
 	cd build/libvorbis-$(LIBVORBIS_VERSION)/build-$* ; \
 		emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$*/lib/pkgconfig" \

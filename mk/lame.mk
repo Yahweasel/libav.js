@@ -4,7 +4,7 @@ build/inst/%/lib/libmp3lame.a: build/lame-$(LAME_VERSION)/build-%/config.h
 	cd build/lame-$(LAME_VERSION)/build-$* ; \
 		$(MAKE) install
 
-build/lame-$(LAME_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/lame-$(LAME_VERSION)/configure
+build/lame-$(LAME_VERSION)/build-%/config.h: build/lame-$(LAME_VERSION)/configure | build/inst/%/cflags.txt
 	mkdir -p build/lame-$(LAME_VERSION)/build-$*
 	cd build/lame-$(LAME_VERSION)/build-$* ; \
 		emconfigure ../../lame-$(LAME_VERSION)/configure \
