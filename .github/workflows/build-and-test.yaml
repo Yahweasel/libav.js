@@ -20,6 +20,7 @@ jobs:
         name: Cache dependencies
         with:
           key: cache-dependencies-${{ hashFiles('mk/*') }}
+          path: build/*.tar*
 
       - run: make extract
 
