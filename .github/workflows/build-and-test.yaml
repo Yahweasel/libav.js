@@ -17,72 +17,23 @@ jobs:
           actions-cache-folder: 'cache-emsdk'
 
       - uses: actions/cache@v3
-        name: Cache ffmpeg
+        name: Cache dependencies
         with:
-          key: cache-ffmpeg-${{ hashFiles('Makefile.m4', 'Makefile', 'mk/ffmpeg.mk.m4', 'mk/ffmpeg.mk', 'patches/ffmpeg.diff') }}
-          path: build/ffmpeg-*
-
-      - uses: actions/cache@v3
-        name: Cache lame
-        with:
-          key: cache-lame-${{ hashFiles('mk/lame.mk') }}
-          path: build/lame-*
-
-      - uses: actions/cache@v3
-        name: Cache libaom
-        with:
-          key: cache-libaom-${{ hashFiles('mk/libaom.mk.m4', 'mk/libaom.mk', 'patches/libaom.diff') }}
-          path: build/libaom-*
-
-      - uses: actions/cache@v3
-        name: Cache libogg
-        with:
-          key: cache-libogg-${{ hashFiles('mk/libogg.mk') }}
-          path: build/libogg-*
-
-      - uses: actions/cache@v3
-        name: Cache libvorbis
-        with:
-          key: cache-libvorbis-${{ hashFiles('mk/libvorbis.mk') }}
-          path: build/libvorbis-*
-
-      - uses: actions/cache@v3
-        name: Cache libvpx
-        with:
-          key: cache-libvpx-${{ hashFiles('mk/libvpx.mk') }}
-          path: build/libvpx-*
-
-      - uses: actions/cache@v3
-        name: Cache openh264
-        with:
-          key: cache-openh264-${{ hashFiles('mk/openh264.mk', 'patches/openh264.diff') }}
-          path: build/openh264-*
-
-      - uses: actions/cache@v3
-        name: Cache opus
-        with:
-          key: cache-opus-${{ hashFiles('mk/opus.mk') }}
-          path: build/opus-*
-
-      - uses: actions/cache@v3
-        name: Cache x265
-        with:
-          key: cache-x265-${{ hashFiles('mk/x265.mk', 'mk/x265.cmake') }}
-          path: build/x265_*
+          key: cache-dependencies-${{ hashFiles('mk/*') }}
 
       - run: make extract
 
-      - uses: bhowell2/github-substring-action@1.0.2
-        id: sha
-        with:
-          value: ${{ github.sha }}
-          length_from_start: 7
+      #- uses: bhowell2/github-substring-action@1.0.2
+      #  id: sha
+      #  with:
+      #    value: ${{ github.sha }}
+      #    length_from_start: 7
 
-      - run: make release -j9 LIBAVJS_VERSION_SUFFIX=-${{ steps.sha.outputs.substring }}
+      #- run: make release -j9 LIBAVJS_VERSION_SUFFIX=-${{ steps.sha.outputs.substring }}
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: build
-          path: libav.js-*.zip
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: build
+      #    path: libav.js-*.zip
 
       - run: npm test
