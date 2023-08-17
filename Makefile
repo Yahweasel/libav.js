@@ -4,7 +4,7 @@
 # not the generated version!
 
 LIBAVJS_VERSION_SUFFIX=
-LIBAVJS_VERSION=4.3.7$(LIBAVJS_VERSION_SUFFIX)
+LIBAVJS_VERSION=4.3.8$(LIBAVJS_VERSION_SUFFIX)
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz
@@ -39,17 +39,7 @@ build-%: dist/libav-$(LIBAVJS_VERSION)-%.js
 	true
 
 dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.simd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js \
 	node_modules/.bin/uglifyjs
 	mkdir -p dist
 	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
