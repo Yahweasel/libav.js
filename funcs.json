@@ -79,6 +79,7 @@
         ["av_write_trailer", "number", ["number"]],
 
         ["av_dict_copy_js", "number", ["number", "number", "number"]],
+        ["av_dict_free", null, ["number"]],
         ["av_dict_set_js", "number", ["number", "string", "string", "number"]],
 
         ["sws_getContext", "number",
@@ -108,17 +109,20 @@
         ["AVPacketSideData_data", "number", ["number", "number"]],
         ["AVPacketSideData_size", "number", ["number", "number"]],
         ["AVPacketSideData_type", "number", ["number", "number"]],
+        ["AVPixFmtDescriptor_comp_depth", "number", ["number", "number"]],
 
         ["ff_error", "string", ["number"]],
         ["ff_nothing", null, [], {"async": true}],
 
         ["calloc", "number", ["number", "number"]],
+        ["close", "number", ["number"]],
+        ["dup2", "number", ["number", "number"]],
         ["free", null, ["number"]],
         ["malloc", "number", ["number"]],
         ["mallinfo_uordblks", "number", []],
         ["open", "number", ["string", "number", "number"]],
-        ["close", "number", ["number"]],
-        ["dup2", "number", ["number", "number"]],
+        ["strerror", "string", ["number"]],
+
         ["libavjs_with_swscale", "number", []],
         ["libavjs_create_main_thread", "number", []],
 
@@ -190,7 +194,9 @@
             "width"
         ]],
         ["AVPixFmtDescriptor", [
-            "log2_chroma_h"
+            "log2_chroma_h",
+            "log2_chroma_w",
+            "nb_components"
         ]],
         ["AVCodec", [
             "sample_fmts",

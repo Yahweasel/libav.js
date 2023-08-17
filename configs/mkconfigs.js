@@ -33,6 +33,8 @@ const configs = [
     ["open-media", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "codec-libvorbis", "swscale", "libvpx", "codec-libvpx_vp8", "codec-libvpx_vp9", "codec-libaom_av1"]],
     ["rawvideo", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "format-rawvideo", "codec-rawvideo"]],
 
+    ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "codec-libopus", "codec-aac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "bsf-extract_extradata", "bsf-vp9_metadata", "bsf-h264_metadata", "bsf-hevc_metadata", "bsf-av1_metadata"]],
+
     ["h265", ["format-mp4", "format-webm", "swscale", "decoder-hevc"]],
     ["prores", ["format-mp4", "format-webm", "swscale", "codec-prores"]],
 

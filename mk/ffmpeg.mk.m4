@@ -26,8 +26,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 # General build rule for any target
 # Use: buildrule(target name, configure flags, CFLAGS)
 define([[[buildrule]]], [[[
-build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: build/inst/$1/cflags.txt \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
+build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
+	| configs/%/ffmpeg-config.txt build/inst/$1/cflags.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/$1/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \

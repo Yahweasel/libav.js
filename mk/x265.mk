@@ -6,7 +6,7 @@ build/inst/%/lib/pkgconfig/x265.pc: build/x265_$(X265_VERSION)/build-%/Makefile
 	cd build/x265_$(X265_VERSION)/build-$* ; \
 		$(MAKE) install
 
-build/x265_$(X265_VERSION)/build-%/Makefile: build/inst/%/cflags.txt build/x265_$(X265_VERSION)/source/CMakeLists.txt
+build/x265_$(X265_VERSION)/build-%/Makefile: build/x265_$(X265_VERSION)/source/CMakeLists.txt | build/inst/%/cflags.txt
 	mkdir -p build/x265_$(X265_VERSION)/build-$*
 	cd build/x265_$(X265_VERSION)/build-$* ; \
 		emcmake cmake ../../x265_$(X265_VERSION)/source \

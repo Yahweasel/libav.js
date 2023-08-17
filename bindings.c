@@ -145,7 +145,16 @@ void AVFrame_sample_aspect_ratio_s(AVFrame *a, int n, int d) {
 }
 
 /* AVPixFmtDescriptor */
-A(AVPixFmtDescriptor, uint8_t, log2_chroma_h)
+#define B(type, field) A(AVPixFmtDescriptor, type, field)
+B(uint8_t, nb_components)
+B(uint8_t, log2_chroma_h)
+B(uint8_t, log2_chroma_w)
+#undef B
+
+int AVPixFmtDescriptor_comp_depth(AVPixFmtDescriptor *fmt, int comp)
+{
+    return fmt->comp[comp].depth;
+}
 
 int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, int term, int flags)
 {

@@ -24,8 +24,8 @@ if (typeof LibAVFactory !== "undefined")
 
 if (/* We're in a worker */
     typeof importScripts !== "undefined" &&
-    /* We haven't explicitly been requested not to load */
-    (typeof LibAV === "undefined" || !LibAV.nolibavworker) &&
+    /* We're not being loaded with noworker from the main code */
+    typeof LibAV === "undefined" &&
     /* We're not being loaded as a thread */
     typeof Module === "undefined"
     ) (function() {

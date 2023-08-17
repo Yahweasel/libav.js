@@ -1,6 +1,6 @@
 OPENH264_VERSION=2.3.1
 
-build/inst/%/lib/pkgconfig/openh264.pc: build/inst/%/cflags.txt build/openh264-$(OPENH264_VERSION)/PATCHED
+build/inst/%/lib/pkgconfig/openh264.pc: build/openh264-$(OPENH264_VERSION)/PATCHED | build/inst/%/cflags.txt
 	mkdir -p build/openh264-$(OPENH264_VERSION)/build-$*
 	cd build/openh264-$(OPENH264_VERSION)/build-$* ; \
 		emmake $(MAKE) -j9 -f ../../openh264-$(OPENH264_VERSION)/Makefile \
