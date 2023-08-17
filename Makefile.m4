@@ -4,7 +4,7 @@ changequote(`[[[', `]]]')
 # not the generated version!
 
 LIBAVJS_VERSION_SUFFIX=
-LIBAVJS_VERSION=4.3.6.0$(LIBAVJS_VERSION_SUFFIX)
+LIBAVJS_VERSION=4.3.7$(LIBAVJS_VERSION_SUFFIX)
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz

@@ -1,4 +1,4 @@
-const version = "4.3.6.0";
+const version = "4.3.7";
 
 function load(variant = "default") {
     const opts = {
