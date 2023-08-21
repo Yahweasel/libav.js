@@ -436,7 +436,12 @@
             enume(["E2BIG", "EPERM", "EADDRINUSE", "EADDRNOTAVAIL",
                 "EAFNOSUPPORT", "EAGAIN", "EALREADY", "EBADF", "EBADMSG",
                 "EBUSY", "ECANCELED", "ECHILD", "ECONNABORTED", "ECONNREFUSED",
-                "ECONNRESET", "EDEADLOCK"], 1);
+                "ECONNRESET", "EDEADLOCK", "EDESTADDRREQ", "EDOM", "EDQUOT",
+                "EEXIST", "EFAULT", "EFBIG", "EHOSTUNREACH", "EIDRM", "EILSEQ",
+                "EINPROGRESS", "EINTR", "EINVAL", "EIO", "EISCONN", "EISDIR",
+                "ELOOP", "EMFILE", "EMLINK", "EMSGSIZE", "EMULTIHOP",
+                "ENAMETOOLONG", "ENETDOWN", "ENETRESET", "ENETUNREACH",
+                "ENFILE", "ENOBUFS", "ENODEV", "ENOENT"], 1);
             ret.AVERROR_EOF = -0x20464f45;
 
             return ret;

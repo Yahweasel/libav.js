@@ -22,6 +22,7 @@ try {
     throw new Error("Unlinking a nonexistent file did not throw an error!");
 } catch (ex) {
     if (!ex || ex.name !== "ErrnoError" ||
+        ex.errno !== libav.ENOENT ||
         ex.message !== "nonexistent-file: No such file or directory")
         throw ex;
 }
