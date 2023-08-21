@@ -32,6 +32,9 @@
 
         ["avcodec_alloc_context3", "number", ["number"]],
         ["avcodec_close", "number", ["number"]],
+        ["avcodec_descriptor_get", "number", ["number"]],
+        ["avcodec_descriptor_get_by_name", "number", ["string"]],
+        ["avcodec_descriptor_next", "number", ["number"]],
         ["avcodec_find_decoder", "number", ["number"]],
         ["avcodec_find_decoder_by_name", "number", ["string"]],
         ["avcodec_find_encoder", "number", ["number"]],
@@ -233,6 +236,14 @@
             "qmax",
             "qmin",
             "width"
+        ]],
+        ["AVCodecDescriptor", [
+            "id",
+            "long_name",
+            {"name": "mime_types", "array": true},
+            "name",
+            "props",
+            "type"
         ]],
         ["AVCodecParameters", [
             "codec_id",
