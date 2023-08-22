@@ -98,7 +98,8 @@ Note that there's no equivalent of `ff_free_muxer`, because
 ff_read_multi(
     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
         limit?: number, // OUTPUT limit, in bytes
-        devLimit?: number // INPUT limit, in bytes (don't read if less than this much data is available)
+        devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
+        unify: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
     }
 ): Promise<[number, Record<number, Packet[]>]>
 ```
@@ -123,7 +124,8 @@ limit) or `libav.AVERROR_EOF` (at the end of the file).
 
 The returned packets are in a record indexed by the stream index. Those indices
 are the indices of the `Stream` objects in the `Stream[]` array given by
-`ff_init_demuxer_file`.
+`ff_init_demuxer_file`. Alternatively, you can use `unify`, in which case all
+packets will be in input order in a single array, `packets[0]`.
 
 
 ## Data manipulation
