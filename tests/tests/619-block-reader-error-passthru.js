@@ -15,14 +15,18 @@
 
 // Checks that at least some FS errno errors get transcribed to something useful
 
-const libav = await h.LibAV();
+const libav = await h.LibAV({});
+
+libav.onblockread = function() {
+    throw new Error("passthru");
+};
+
+await libav.mkblockreaderdev("tmp.webm", 4096);
 
 try {
-    await libav.unlink("nonexistent-file");
-    throw new Error("Unlinking a nonexistent file did not throw an error!");
+    let ret = await libav.ffprobe("-loglevel", "0", "-o", "stdout", "tmp.webm");
+    throw new Error("Error was not passed through (return " + ret + ")");
 } catch (ex) {
-    if (!ex || ex.name !== "ErrnoError" ||
-        ex.errno !== libav.ENOENT ||
-        ex.message !== "nonexistent-file: No such file or directory")
+    if (ex.message !== "passthru")
         throw ex;
 }

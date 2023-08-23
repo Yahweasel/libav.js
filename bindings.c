@@ -259,6 +259,16 @@ void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
     a->time_base.den = d;
 }
 
+/* AVCodecDescriptor */
+#define B(type, field) A(AVCodecDescriptor, type, field)
+B(enum AVCodecID, id)
+B(char *, long_name)
+AA(AVCodecDescriptor, char *, mime_types)
+B(char *, name)
+B(int, props)
+B(enum AVMediaType, type)
+#undef B
+
 /* AVCodecParameters */
 #define B(type, field) A(AVCodecParameters, type, field)
 B(enum AVCodecID, codec_id)

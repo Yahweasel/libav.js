@@ -96,7 +96,8 @@ When a read request is sent to a block reader device, libav.js invokes the
 `libav.onblockread` function with the following arguments: `(<name>, <position>,
 <length>)`. When `onblockread` is called, you are expected to send data to the
 named file at the given position; the length is merely informative, and you may
-send less or more data.
+send less or more data. If `onblockread` throws an exception (directly or in a
+promise), that exception will be passed through the reading process.
 
 To send data for a block reader device, use
 `libav.ff_block_reader_dev_send(<name>, <position>, <data>)`. You may *not* send

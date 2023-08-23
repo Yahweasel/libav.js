@@ -20,7 +20,7 @@ LibAVTestHarness = {
     data: {},
     utils: {},
 
-    libAVVersion: "4.3.8",
+    libAVVersion: "4.4.6",
     libAVVariant: null,
     libAVOpts: null,
     libav: null,

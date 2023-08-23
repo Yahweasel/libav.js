@@ -16,10 +16,14 @@
 // A global promise chain for serialization of asyncify components
 Module.serializationPromise = Promise.all([]);
 
+// A global error passed through filesystem operations
+Module.fsThrownError = null;
+
 var ERRNO_CODES = {
     EPERM: 1,
     EIO: 5,
     EAGAIN: 6,
+    ECANCELED: 11,
     ESPIPE: 29
 };
 
@@ -39,6 +43,10 @@ var readerCallbacks = {
         var data = Module.readBuffers[stream.node.name];
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        if (data.error) {
+            Module.fsThrownError = data.error;
+            throw new FS.ErrnoError(ERRNO_CODES.ECANCELED);
+        }
         if (data.errorCode)
             throw new FS.ErrnoError(data.errorCode);
         if (data.buf.length === 0) {
@@ -88,6 +96,10 @@ var blockReaderCallbacks = {
         var data = Module.blockReadBuffers[stream.node.name];
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
+        if (data.error) {
+            Module.fsThrownError = data.error;
+            throw new FS.ErrnoError(ERRNO_CODES.ECANCELED);
+        }
         if (data.errorCode)
             throw new FS.ErrnoError(data.errorCode);
 
@@ -99,7 +111,12 @@ var blockReaderCallbacks = {
 
             if (!Module.onblockread)
                 throw new FS.ErrnoError(ERRNO_CODES.EIO);
-            Module.onblockread(stream.node.name, position, length);
+            try {
+                Module.onblockread(stream.node.name, position, length);
+            } catch (ex) {
+                Module.fsThrownError = ex;
+                throw new FS.ErrnoError(ERRNO_CODES.ECANCELED);
+            }
 
             // If it was asynchronous, this won't be ready yet
             bufMin = data.position;
@@ -284,7 +301,8 @@ var mkblockreaderdev = Module.mkblockreaderdev = function(name, size) {
         position: -1,
         buf: new Uint8Array(0),
         ready: false,
-        errorCode: 0
+        errorCode: 0,
+        error: null
     };
 
     FS.close(f);
@@ -436,17 +454,20 @@ Module.unlinkworkerfsfile = function(name) {
  * ff_reader_dev_send@sync(
  *     name: string, data: Uint8Array,
  *     opts?: {
- *         errorCode?: number
+ *         errorCode?: number,
+ *         error?: any // any other error, used internally
  *     }
  * ): @promise@void@
  */
 var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) {
+    opts = opts || {};
     var idata;
     if (!(name in Module.readBuffers)) {
         Module.readBuffers[name] = {
             buf: new Uint8Array(0),
             eof: false,
-            errorCode: 0
+            errorCode: 0,
+            error: null
         };
     }
     idata = Module.readBuffers[name];
@@ -465,8 +486,12 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) 
 
     idata.ready = true;
 
-    idata.errorCode = (opts && typeof opts.errorCode === "number")
-        ? opts.errorCode : 0;
+    idata.errorCode = 0;
+    if (typeof opts.errorCode === "number")
+        idata.errorCode = opts.errorCode;
+    idata.error = null;
+    if (opts.error)
+        idata.error = opts.error;
 
     // Wake up waiters
     var waiters = Module.ff_reader_dev_waiters;
@@ -489,17 +514,20 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) 
  * ff_block_reader_dev_send@sync(
  *     name: string, pos: number, data: Uint8Array,
  *     opts?: {
- *         errorCode?: number
+ *         errorCode?: number,
+ *         error?: any // any other error, used internally
  *     }
  * ): @promise@void@
  */
 var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, pos, data, opts) {
+    opts = opts || {};
     if (!(name in Module.blockReadBuffers)) {
         Module.blockReadBuffers[name] = {
             position: pos,
             buf: data,
             ready: true,
-            errorCode: 0
+            errorCode: 0,
+            error: null
         };
     } else {
         var idata = Module.blockReadBuffers[name];
@@ -507,13 +535,16 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
         idata.buf = data;
         idata.ready = true;
         idata.errorCode = 0;
+        idata.error = null;
     }
 
     if (data === null)
         idata.buf = new Uint8Array(0);
 
-    if (opts && typeof opts.errorCode === "number")
+    if (typeof opts.errorCode === "number")
         idata.errorCode = opts.errorCode;
+    if (opts.error)
+        idata.error = opts.error;
 
     /* Wake up waiters (FIXME: make this file-specific so we don't get weird
      * loops) */
@@ -1711,6 +1742,7 @@ function convertArgs(argv0, args) {
 function runMain(main, name, args) {
     args = convertArgs(name, args);
     var argv = ff_malloc_string_array(args);
+    Module.fsThrownError = null;
     var ret = null;
     try {
         ret = main(args.length, argv);
@@ -1739,9 +1771,21 @@ function runMain(main, name, args) {
                 return Promise.resolve(EXITSTATUS);
             else
                 return Promise.reject(ex);
+        }).then(function(ret) {
+            if (Module.fsThrownError) {
+                var thr = Module.fsThrownError;
+                Module.fsThrownError = null;
+                throw thr;
+            }
+            return ret;
         });
     } else {
         cleanup();
+        if (Module.fsThrownError) {
+            var thr = Module.fsThrownError;
+            Module.fsThrownError = null;
+            throw thr;
+        }
         return ret;
     }
 }

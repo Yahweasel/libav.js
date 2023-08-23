@@ -401,6 +401,34 @@ export interface LibAV {
     ECONNREFUSED: number;
     ECONNRESET: number;
     EDEADLOCK: number;
+    EDESTADDRREQ: number;
+    EDOM: number;
+    EDQUOT: number;
+    EEXIST: number;
+    EFAULT: number;
+    EFBIG: number;
+    EHOSTUNREACH: number;
+    EIDRM: number;
+    EILSEQ: number;
+    EINPROGRESS: number;
+    EINTR: number;
+    EINVAL: number;
+    EIO: number;
+    EISCONN: number;
+    EISDIR: number;
+    ELOOP: number;
+    EMFILE: number;
+    EMLINK: number;
+    EMSGSIZE: number;
+    EMULTIHOP: number;
+    ENAMETOOLONG: number;
+    ENETDOWN: number;
+    ENETRESET: number;
+    ENETUNREACH: number;
+    ENFILE: number;
+    ENOBUFS: number;
+    ENODEV: number;
+    ENOENT: number;
     AVERROR_EOF: number;
 }
 
