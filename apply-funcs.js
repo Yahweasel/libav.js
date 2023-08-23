@@ -72,6 +72,24 @@ function decls(f, meta) {
             outp += `, {async:true}`;
         outp += ");\n";
 
+        if (decl[3] && decl[3].returnsErrno) {
+            // Need to check for ECANCELED, meaning passthru error
+            outp += `var ${decl[0]}__raw = ${decl[0]}; ` +
+                `${decl[0]} = ` +
+                `Module.${decl[0]} = function() { ` +
+                "var args = arguments; " +
+                `var ret = ${decl[0]}__raw.apply(void 0, args); ` +
+                "if (ret === -11) throw Module.fsThrownError; " +
+                "else if (ret && ret.then) { " +
+                  "return ret.then(function(ret) { " +
+                    "if (ret === -11) throw Module.fsThrownError; " +
+                    "return ret; " +
+                  "}); " +
+                "} " +
+                "return ret; " +
+                "}; ";
+        }
+
         if (decl[3] && decl[3].async) {
             // Need to serialize async functions
             outp += `Module.${decl[0]} = function() { ` +

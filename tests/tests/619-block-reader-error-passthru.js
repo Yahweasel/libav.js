@@ -24,8 +24,8 @@ libav.onblockread = function() {
 await libav.mkblockreaderdev("tmp.webm", 4096);
 
 try {
-    await libav.ffprobe("-loglevel", "0", "-o", "stdout", "tmp.webm");
-    throw new Error("Error was not passed through");
+    let ret = await libav.ffprobe("-loglevel", "0", "-o", "stdout", "tmp.webm");
+    throw new Error("Error was not passed through (return " + ret + ")");
 } catch (ex) {
     if (ex.message !== "passthru")
         throw ex;

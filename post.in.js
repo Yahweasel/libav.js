@@ -16,10 +16,14 @@
 // A global promise chain for serialization of asyncify components
 Module.serializationPromise = Promise.all([]);
 
+// A global error passed through filesystem operations
+Module.fsThrownError = null;
+
 var ERRNO_CODES = {
     EPERM: 1,
     EIO: 5,
     EAGAIN: 6,
+    ECANCELED: 11,
     ESPIPE: 29
 };
 
@@ -39,8 +43,10 @@ var readerCallbacks = {
         var data = Module.readBuffers[stream.node.name];
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
-        if (data.error)
-            throw data.error;
+        if (data.error) {
+            Module.fsThrownError = data.error;
+            throw new FS.ErrnoError(ERRNO_CODES.ECANCELED);
+        }
         if (data.errorCode)
             throw new FS.ErrnoError(data.errorCode);
         if (data.buf.length === 0) {
@@ -90,8 +96,10 @@ var blockReaderCallbacks = {
         var data = Module.blockReadBuffers[stream.node.name];
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
-        if (data.error)
-            throw data.error;
+        if (data.error) {
+            Module.fsThrownError = data.error;
+            throw new FS.ErrnoError(ERRNO_CODES.ECANCELED);
+        }
         if (data.errorCode)
             throw new FS.ErrnoError(data.errorCode);
 
@@ -103,7 +111,12 @@ var blockReaderCallbacks = {
 
             if (!Module.onblockread)
                 throw new FS.ErrnoError(ERRNO_CODES.EIO);
-            Module.onblockread(stream.node.name, position, length);
+            try {
+                Module.onblockread(stream.node.name, position, length);
+            } catch (ex) {
+                Module.fsThrownError = ex;
+                throw new FS.ErrnoError(ERRNO_CODES.ECANCELED);
+            }
 
             // If it was asynchronous, this won't be ready yet
             bufMin = data.position;
@@ -1729,6 +1742,7 @@ function convertArgs(argv0, args) {
 function runMain(main, name, args) {
     args = convertArgs(name, args);
     var argv = ff_malloc_string_array(args);
+    Module.fsThrownError = null;
     var ret = null;
     try {
         ret = main(args.length, argv);
@@ -1757,9 +1771,21 @@ function runMain(main, name, args) {
                 return Promise.resolve(EXITSTATUS);
             else
                 return Promise.reject(ex);
+        }).then(function(ret) {
+            if (Module.fsThrownError) {
+                var thr = Module.fsThrownError;
+                Module.fsThrownError = null;
+                throw thr;
+            }
+            return ret;
         });
     } else {
         cleanup();
+        if (Module.fsThrownError) {
+            var thr = Module.fsThrownError;
+            Module.fsThrownError = null;
+            throw thr;
+        }
         return ret;
     }
 }

@@ -61,7 +61,7 @@ if (/* We're in a worker */
                 ret = libav[fun].apply(libav, args);
             } catch (ex) {
                 succ = false;
-                ret = ex.toString() + "\n" + ex.stack;
+                ret = ex;
             }
             if (succ && typeof ret === "object" && ret !== null && ret.then) {
                 // Let the promise resolve
@@ -69,13 +69,21 @@ if (/* We're in a worker */
                     ret = res;
                 }).catch(function(ex) {
                     succ = false;
-                    ret = ex.toString() + "\n" + ex.stack;
+                    ret = ex;
                 }).then(function() {
-                    postMessage([id, fun, succ, ret]);
+                    try {
+                        postMessage([id, fun, succ, ret]);
+                    } catch (ex) {
+                        postMessage([id, fun, succ, "" + ret]);
+                    }
                 });
 
             } else {
-                postMessage([id, fun, succ, ret]);
+                try {
+                    postMessage([id, fun, succ, ret]);
+                } catch (ex) {
+                    postMessage([id, fun, succ, "" + ret]);
+                }
 
             }
         };
