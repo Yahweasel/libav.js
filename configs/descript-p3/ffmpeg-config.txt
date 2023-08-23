@@ -22,6 +22,9 @@
 --enable-demuxer=mp3
 --enable-decoder=mp3
 --enable-demuxer=mov
+--enable-demuxer=mp4
+--enable-muxer=mov
+--enable-muxer=mp4
 --enable-muxer=ipod
 --enable-demuxer=ogg
 --enable-muxer=ogg
