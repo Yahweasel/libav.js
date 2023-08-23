@@ -175,8 +175,18 @@
                                 ret.onwrite.apply(ret, args);
                         }, null],
                         onblockread: [function(args) {
-                            if (ret.onblockread)
-                                ret.onblockread.apply(ret, args);
+                            try {
+                                var brr = null;
+                                if (ret.onblockread)
+                                    brr = ret.onblockread.apply(ret, args);
+                                if (brr && brr.catch) {
+                                    brr.catch(function(ex) {
+                                        ret.ff_block_reader_dev_send(args[0], args[1], null, {error: ex});
+                                    });
+                                }
+                            } catch (ex) {
+                                ret.ff_block_reader_dev_send(args[0], args[1], null, {error: ex});
+                            }
                         }, null]
                     };
 

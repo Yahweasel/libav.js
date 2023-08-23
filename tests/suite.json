@@ -36,5 +36,6 @@
  "616-reentrancy.js",
  "617-discard.js",
  "618-errno.js",
+ "619-block-reader-error-passthru.js",
  "650-all-to-all.js"
 ]
