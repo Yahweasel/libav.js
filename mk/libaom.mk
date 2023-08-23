@@ -16,7 +16,7 @@ build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefi
 
 # Non-threaded
 
-build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/inst/base/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
+build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/base/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-base
 	cd build/libaom-$(LIBAOM_VERSION)/build-base ; \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
@@ -34,7 +34,7 @@ build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/inst/base/cflags.txt b
 	touch $(@)
 
 
-build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/inst/simd/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
+build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/simd/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-simd
 	cd build/libaom-$(LIBAOM_VERSION)/build-simd ; \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
@@ -53,7 +53,7 @@ build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/inst/simd/cflags.txt b
 
 # Threaded
 
-build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/inst/thr/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
+build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/thr/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-thr
 	cd build/libaom-$(LIBAOM_VERSION)/build-thr ; \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
@@ -71,7 +71,7 @@ build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/inst/thr/cflags.txt bui
 	touch $(@)
 
 
-build/libaom-$(LIBAOM_VERSION)/build-thrsimd/Makefile: build/inst/thrsimd/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
+build/libaom-$(LIBAOM_VERSION)/build-thrsimd/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/thrsimd/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-thrsimd
 	cd build/libaom-$(LIBAOM_VERSION)/build-thrsimd ; \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \

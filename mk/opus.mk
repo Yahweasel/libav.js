@@ -4,7 +4,7 @@ build/inst/%/lib/pkgconfig/opus.pc: build/opus-$(OPUS_VERSION)/build-%/config.h
 	cd build/opus-$(OPUS_VERSION)/build-$* ; \
 		$(MAKE) install
 
-build/opus-$(OPUS_VERSION)/build-%/config.h: build/inst/%/cflags.txt build/opus-$(OPUS_VERSION)/configure
+build/opus-$(OPUS_VERSION)/build-%/config.h: build/opus-$(OPUS_VERSION)/configure | build/inst/%/cflags.txt
 	mkdir -p build/opus-$(OPUS_VERSION)/build-$*
 	cd build/opus-$(OPUS_VERSION)/build-$* ; \
 		emconfigure ../../opus-$(OPUS_VERSION)/configure \

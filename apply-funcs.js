@@ -183,7 +183,12 @@ function decls(f, meta) {
         }
 
         // Give the function description
-        if (doc && doc.briefdescription && doc.briefdescription.para) {
+        if (doc && doc.raw) {
+            // The raw description was retrieved from the file
+            outp += doc.raw + "\n";
+            syncp += doc.raw + "\n";
+
+        } else if (doc && doc.briefdescription && doc.briefdescription.para) {
             let desc = doc.briefdescription.para;
             if (typeof desc === "object") {
                 if (desc["#text"] && typeof desc["#text"] === "string")

@@ -280,6 +280,11 @@ export interface LibAV {
         flags: number
     ): Promise<number>;
 
+    /**
+     * Get the depth of this component of this pixel format.
+     */
+    AVPixFmtDescriptor_comp_depth(fmt: number, comp: number): Promise<number>;
+
 
     /**
      * Callback when writes occur. Set by the user.

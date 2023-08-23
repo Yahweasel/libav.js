@@ -13,7 +13,7 @@ build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefi
 # General build rule for any target
 # Use: buildrule(target name, cmake flags)
 define([[[buildrule]]], [[[
-build/libaom-$(LIBAOM_VERSION)/build-$1/Makefile: build/inst/$1/cflags.txt build/libaom-$(LIBAOM_VERSION)/PATCHED
+build/libaom-$(LIBAOM_VERSION)/build-$1/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/$1/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-$1
 	cd build/libaom-$(LIBAOM_VERSION)/build-$1 ; \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \

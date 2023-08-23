@@ -76,10 +76,8 @@ git push -tags
 
 This is a compilation of the libraries associated with handling audio and video
 in FFmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for
-WebAssembly and asm.js, and thus the web. It is compiled via emscripten.  This
-compilation exposes the *library* interface of FFmpeg, not ffmpeg itself, and
-there is a separate project by a different author, ffmpeg.js, if what you need
-is ffmpeg.
+WebAssembly and asm.js, and thus the web. It is compiled via emscripten and is
+highly customizable.
 
 In short, this is a pure JavaScript and WebAssembly system for low-level audio
 and video encoding, decoding, muxing, demuxing, and filtering.
@@ -87,6 +85,19 @@ and video encoding, decoding, muxing, demuxing, and filtering.
 FFmpeg is released under the LGPL. Therefore, if you distribute this library,
 you must provide sources. The sources are included in the `sources/` directory
 of the compiled version of libav.js.
+
+This file is the main README for using and building libav.js, and should be
+sufficient for many users. More detail on specific concepts is provided in other
+files:
+
+ * [API.md](docs/API.md) describes the libav.js-specific parts of the API.
+
+ * [CONFIG.md](docs/CONFIG.md) describes the configuration system and how to
+   create your own configuration of libav.js.
+
+ * [IO.md](docs/IO.md) describes the various I/O modes provided by libav.js.
+
+ * [TESTS.md](docs/TESTS.md) describes the testing framework.
 
 
 ## Using libav.js
@@ -103,8 +114,8 @@ of using libav.js from a CDN:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@3.11.18/dist"};</script>
-        <script type="text/javascript" src="https://unpkg.com/libav.js@3.11.18/dist/libav-3.11.18.0-default.js"></script>
+        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@4.3.8/dist"};</script>
+        <script type="text/javascript" src="https://unpkg.com/libav.js@4.3.8/dist/libav-4.3.8-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -127,7 +138,7 @@ Here's a better example, using libav.js locally:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript" src="libav-3.11.18.0-default.js"></script>
+        <script type="text/javascript" src="libav-4.3.8-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV();
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -194,11 +205,7 @@ If `noworker` is set or Web Workers are not available, Web Workers will be
 disabled, so libav.js will run in the main thread (i.e., will run in `"direct"`
 mode). This is synchronous, so usually undesirable.  Note that if you're loading
 libav.js *in* a worker, it may be reasonable to set `noworker`, and make
-libav.js synchronous with your worker thread.  However, in that case, you must
-set `LibAV.nolibavworker = true` before loading; this tells the loading code of
-libav.js that it is not running in a worker that it created, and so should not
-load its own worker code.  Otherwise, loading it `noworker` in a worker is
-likely to fail, as it will interfere with your own worker's message handling.
+libav.js synchronous with your worker thread.
 
 If `yesthreads` is set (and `nothreads` is not set) and threads are supported
 (see
@@ -417,47 +424,44 @@ find more on configuration fragments or making your own variants in
 Use `make build-variant`, replacing `variant` with the variant name, to build
 another variant.
 
-libav.js includes several other variants:
+libav.js includes several other variants, listed here by feature:
 
-The “lite” variant removes, relative to the default variant, AAC, and the M4A
-and WebM/Matroska containers.
+| Variant Name		| mp4	| ogg	| webm	| aac	| flac	| opus	| wav	| Standard audio filters	| Video						| Others	|
+| ----------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ------------------------- | ------------------------- | --------- |
+| default			| x		| x		| x		| 		| x		| x		| x		| x							|							| |
+| lite				| 		| x		| 		| 		| x		| x		| x		| x							|							| |
+| fat				| x		| x		| 		| x		| x		| x		| x		| x							|							| vorbis, alac, wavpack |
+| obsolete			| x		| x		| x		| x		| x		| x		| 		| x							|							| mp3, vorbis |
+| opus				| 		| x		| 		| 		| 		| x		| 		| 							|							| |
+| flac				| 		| 		| 		| 		| x		| 		| 		| 							|							| |
+| opus-flac			| 		| x		| 		| 		| x		| x		| 		| 							|							| |
+| webm				| x		| x		| x		| x		| x		| x		| x		| x							| VP8						| |
+| webm-opus-flac	| 		| x		| x		| 		| x		| x		| 		| 							| VP8						| |
+| mediarecorder-transcoder | x | x	| x		| x		| x		| x		| 		| 							| VP8, H.264 (decoding)		| |
+| open-media		| 		| x		| x		| 		| x		| x		| 		| 							| VP8, VP9, AV1				| vorbis |
+| webcodecs			| x		| x		| x		| x		| x		| x		| 		| 							| VP8						| Note 1 |
 
-The “fat” variant adds, relative to the default variant, Vorbis, wavpack and
-its container, and ALAC.
+The following variants have defined configurations, and so can be built “out of
+the box”, but are not included in libav.js distributions.
 
-The “obsolete” variant adds, relative to the default variant, two obsolete but
-still commonly found audio formats, namely Vorbis in the ogg container and MP3
-in its own container. Note that while Vorbis has been formally replaced by
-Opus, at the time of this writing, Opus still has lackluster support in audio
-software, so Vorbis is still useful. MP3, on the other hand, is completely
-worthless, and is only supplied in case your end users are idiots. Friends
-don't let friends use MP3.
+| Variant Name		| mp4	| ogg	| webm	| aac	| flac	| opus	| wav	| Standard audio filters	| Video						| Others	|
+| ----------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ------------------------- | ------------------------- | --------- |
+| all-audio-cli		| x		| x		| x		| x		| x		| x		| x		| x							|							| floating-point wav, mp3, vorbis. Note 2 |
+| rawvideo			| x		| x		| x		| x		| x		| x		| 		| 							| VP8, H.264 (decoding), rawvideo | |
+| h265				| x		| 		| x		| 		| 		| 		| 		| 							| H.265 (decoding)			| Note 3 |
+| prores			| x		| x		| 		| 		| 		| 		| 		| 							| ProRes					| |
+| mediarecorder-transcoder | x | x	| x		| x		| x		| x		| 		| 							| VP8, H.264				| Note 3 |
+| all				| x		| x		| x		| x		| x		| x		| x		| x							| (All)						| (All) |
 
-The “opus”, “flac”, and “opus-flac” variants are intended just for encoding or
-decoding Opus and/or FLAC. They include only their named format(s), the
-appropriate container(s), and the `aresample` filter; in particular, no other
-filters are provided whatsoever. With Opus in particular, this is a better
-option than a simple conversion of libopus to JavaScript, because Opus mandates
-a limited range of audio sample rates, so having a resampler is beneficial.
+Note 1: Also includes bitstream data extractors for VP9, AV1, H.264, and H.265.
+This makes the `webcodecs` variant ideal for pairing with WebCodecs, using
+WebCodecs to do the actual decoding.
 
-The “webm” variant, relative to the default variant, includes support for VP8
-video. The “webm-opus-flac” variant, relative to “opus-flac”, includes support
-for VP8 video, as “webm”, but excludes all filters except aresample. The
-“mediarecorder-transcoder” variant, relative to “webm-opus-flac”, adds MPEG-4
-AAC and H.264, making it sufficient for transcoding formats that MediaRecorder
-can produce on all platforms. Note that support is not included for *encoding*
-MPEG-4 video, only decoding.
+Note 2: Also includes the CLI (`ffmpeg` and `ffprobe` functions).
 
-Finally, the “mediarecorder-openh264” variant, relative to
-“mediarecorder-transcoder”, adds H.264 *encoding* support, through libopenh264.
-Note that H.264 is under patent until at least 2024, and the use of the
-libopenh264 encoder in this context before that time opens you to the
-possibility of patent litigation, unless you have patent rights. For this
-reason, this variant is not provided pre-built in releases, and you must build
-it yourself if you want it. Cisco, who authors libopenh264, grants a patent
-license to its users, but this license applies only to users of the precompiled
-version compiled by Cisco, and no such version is provided in WebAssembly, so
-it does not apply to use in libav.js.
+Note 3: Includes technologies patented by the Misanthropic Patent Extortion
+Gang (MPEG). You should not use these builds, and you should not support this
+organization which works actively against the common good.
 
 To create a variant from configuration fragments, run `./mkconfig.js` in the
 `configs` directory. The first argument is the name of the variant to make, and
@@ -512,3 +516,49 @@ The asm.js versions are much bigger, but will not be loaded on
 WebAssembly-capable clients.
 
 The wrapper (“glue”) code is about 292KiB, but is highly compressible.
+
+
+## Performance
+
+Generally speaking, the performance of audio en- and decoding is much faster
+than real time, to the point that it's simply not a concern for most
+applications. The author of libav.js regularly uses libav.js in live audio
+systems.
+
+Video is a different story, of course.
+
+Video is nowhere near as slow as you might imagine. On reasonable systems,
+faster-than-real-time performance for decoding of up to 1080P is achievable if
+you use a threaded version of libav.js. If you're willing to use older, simpler
+video codecs and lower-resolution video, even real-time *encoding* is possible.
+But, for complex codecs, real-time en/decoding is not realistic. One of the
+revolutions of video en/decoding is hardware en/decoding, and libav.js cannot do
+that, so its performance ceiling is already low.
+
+Muxing and demuxing are bound by I/O time, not software performance. libav.js
+will always mux or demux faster than you can use the data.
+
+
+## libav.js and WebCodecs
+
+On some modern browsers, the WebCodecs API is availble for hardware-accelerated
+(or at least, CPU-specific) en/decoding of various codecs. When it is available,
+it is better to use it than libav.js. However, WebCodecs does not mux or demux,
+and which codecs it supports varies based on the moods of its implementor (if it
+is even present), so generally, it is necessary to support WebCodecs but fall
+back to libav.js when necessary.
+
+To make this easier, two companion projects to libav.js are provided that
+connect it to WebCodecs:
+
+ * [libavjs-webcodecs-polyfill](https://github.com/ennuicastr/libavjs-webcodecs-polyfill)
+   is a polyfill for the WebCodecs API using libav.js. Even if WebCodecs exists
+   on your browser, this polyfill allows the user to guarantee a certain set of
+   supported codecs; any codecs not supported by the built-in WebCodecs can
+   simply fall back to libav.js, using only one API.
+
+ * [libavjs-webcodecs-bridge](https://github.com/Yahweasel/libavjs-webcodecs-bridge)
+   is a bridge between libav.js and WebCodecs, converting between the two data
+   formats. This makes it easy to use libav.js for demuxing and WebCodecs for
+   decoding, or WebCodecs for encoding and libav.js for muxing. Of course, the
+   WebCodecs used with the bridge can easily be the polyfill if needed.

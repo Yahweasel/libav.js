@@ -29,8 +29,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 
 # Base (asm.js and wasm)
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/cflags.txt \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
+build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
+	| configs/%/ffmpeg-config.txt build/inst/base/cflags.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/base/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) ; \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) ; \
@@ -47,8 +48,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/
 
 # wasm + threads
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: build/inst/thr/cflags.txt \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
+build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
+	| configs/%/ffmpeg-config.txt build/inst/thr/cflags.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/thr/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) ; \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) ; \
@@ -65,8 +67,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: build/inst/thr/cf
 
 # wasm + simd
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: build/inst/simd/cflags.txt \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
+build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
+	| configs/%/ffmpeg-config.txt build/inst/simd/cflags.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/simd/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) ; \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) ; \
@@ -83,8 +86,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: build/inst/simd/
 
 # wasm + threads + simd
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: build/inst/thrsimd/cflags.txt \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED configs/%/ffmpeg-config.txt
+build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
+	| configs/%/ffmpeg-config.txt build/inst/thrsimd/cflags.txt
 	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/thrsimd/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) ; \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) ; \
