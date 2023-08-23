@@ -453,7 +453,7 @@ Module.unlinkworkerfsfile = function(name) {
 /* @types
  * ff_reader_dev_send@sync(
  *     name: string,
- *     data?: Uint8Array,
+ *     data: Uint8Array | null,
  *     opts?: {
  *         errorCode?: number,
  *         error?: any // any other error, used internally
@@ -515,7 +515,7 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) 
  * ff_block_reader_dev_send@sync(
  *     name: string,
  *     pos: number,
- *     data?: Uint8Array,
+ *     data: Uint8Array | null,
  *     opts?: {
  *         errorCode?: number,
  *         error?: any // any other error, used internally
