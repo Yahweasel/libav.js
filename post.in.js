@@ -112,7 +112,12 @@ var blockReaderCallbacks = {
             if (!Module.onblockread)
                 throw new FS.ErrnoError(ERRNO_CODES.EIO);
             try {
-                Module.onblockread(stream.node.name, position, length);
+                var brr = Module.onblockread(stream.node.name, position, length);
+                if (brr && brr.then && brr.catch) {
+                    brr.catch(function(ex) {
+                        ff_block_reader_dev_send(stream.node.name, position, null, {error: ex});
+                    });
+                }
             } catch (ex) {
                 Module.fsThrownError = ex;
                 throw new FS.ErrnoError(ERRNO_CODES.ECANCELED);

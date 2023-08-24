@@ -17,16 +17,32 @@
 
 const libav = await h.LibAV({});
 
+await libav.mkblockreaderdev("tmp.webm", 4096);
+
+async function checkPassthru() {
+    try {
+        let ret = await libav.ffprobe("-loglevel", "0", "-o", "stdout", "tmp.webm");
+        throw new Error("Error was not passed through (return " + ret + ")");
+    } catch (ex) {
+        if (ex.message !== "passthru")
+            throw ex;
+    }
+}
+
+// Method one: an error
 libav.onblockread = function() {
     throw new Error("passthru");
 };
+await checkPassthru();
 
-await libav.mkblockreaderdev("tmp.webm", 4096);
+// Method two: Promise
+libav.onblockread = async function() {
+    throw new Error("passthru");
+};
+await checkPassthru();
 
-try {
-    let ret = await libav.ffprobe("-loglevel", "0", "-o", "stdout", "tmp.webm");
-    throw new Error("Error was not passed through (return " + ret + ")");
-} catch (ex) {
-    if (ex.message !== "passthru")
-        throw ex;
-}
+// Method three: direct
+libav.onblockread = function(file, pos) {
+    libav.ff_block_reader_dev_send(file, pos, null, {error: new Error("passthru")});
+};
+await checkPassthru();

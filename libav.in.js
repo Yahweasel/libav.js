@@ -170,7 +170,7 @@
                                 var brr = null;
                                 if (ret.onblockread)
                                     brr = ret.onblockread.apply(ret, args);
-                                if (brr && brr.catch) {
+                                if (brr && brr.then && brr.catch) {
                                     brr.catch(function(ex) {
                                         ret.ff_block_reader_dev_send(args[0], args[1], null, {error: ex});
                                     });
