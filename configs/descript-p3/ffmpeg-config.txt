@@ -69,3 +69,5 @@
 --enable-decoder=mpeg4
 --enable-decoder=wmv2
 --enable-decoder=wmv3
+--enable-protocol=pipe
+--enable-muxer=null
