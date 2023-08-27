@@ -46,7 +46,7 @@
      * in a worker. */
     function isModule() {
         try {
-            importScripts("data:,");
+            importScripts("data:text/javascript,0");
             return false;
         } catch(e) {}
         return true;
