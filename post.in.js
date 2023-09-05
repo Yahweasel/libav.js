@@ -27,6 +27,7 @@ var ERRNO_CODES = {
     ESPIPE: 29
 };
 
+// Callbacks for stream-based reader
 var readerCallbacks = {
     open: function(stream) {
         if (stream.flags & 3) {
@@ -82,6 +83,7 @@ var readerCallbacks = {
     }
 };
 
+// Callbacks for block-based reader
 var blockReaderCallbacks = {
     open: function(stream) {
         if (stream.flags & 3)
@@ -159,6 +161,7 @@ var blockReaderCallbacks = {
     }
 };
 
+// Callbacks for block-based writer
 var writerCallbacks = {
     open: function(stream) {
         if (!(stream.flags & 1)) {
@@ -189,6 +192,7 @@ var writerCallbacks = {
     }
 };
 
+// Callbacks for stream-based writer
 var streamWriterCallbacks = Object.create(writerCallbacks);
 streamWriterCallbacks.write = function(stream, buffer, offset, length, position) {
     if (position != stream.position)
@@ -197,6 +201,33 @@ streamWriterCallbacks.write = function(stream, buffer, offset, length, position)
 };
 streamWriterCallbacks.llseek = function() {
     throw new FS.ErrnoError(ERRNO_CODES.ESPIPE);
+};
+
+/* Filesystem for a writer directory. This is done by using MEMFS, but overriding
+ * the stream operations. */
+var streamWriterFS = Object.create(MEMFS);
+
+streamWriterFS.mount = function(mount) {
+    return streamWriterFS.createNode(null, "/", 0x4000 /* S_IFDIR */ | 0x1FF /* 0777 */, 0);
+}
+
+streamWriterFS.createNode = function() {
+    var node = MEMFS.createNode.apply(MEMFS, arguments);
+    if (FS.isDir(node.mode)) {
+        if (!streamWriterFS.dir_node_ops) {
+            streamWriterFS.dir_node_ops = Object.create(node.node_ops);
+            streamWriterFS.dir_node_ops.mknod = function(parent, name, mode, dev) {
+                return streamWriterFS.createNode(parent, name, mode, dev);
+            };
+        }
+        node.node_ops = streamWriterFS.dir_node_ops;
+
+    } else if (FS.isFile(node.mode)) {
+        node.stream_ops = writerCallbacks;
+
+    }
+
+    return node;
 };
 
 /* Original versions of all our functions, since the Module version is replaced
@@ -252,6 +283,13 @@ fsBinding("writeFile");
  */
 /// @types unlink@sync(name: string): @promise@void@
 fsBinding("unlink");
+
+/**
+ * Unmount a mounted filesystem.
+ * @param mountpoint  Path where the filesystem is mounted
+ */
+/// @types unmount@sync(mountpoint: string): @promise@void@
+fsBinding("unmount");
 
 fsBinding("mkdev");
 
@@ -419,6 +457,21 @@ Module.mkstreamwriterdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0777, streamWriterDev);
     return 0;
 };
+
+/**
+ * Mount a writer *filesystem*. All files created in this filesystem will be
+ * redirected as writers. The directory will be created for you if it doesn't
+ * already exist, but it may already exist.
+ * @param mountpoint  Directory to mount as a writer filesystem
+ */
+/// @types mountwriterfs@sync(mountpoint: string)
+Module.mountwriterfs = function(mountpoint) {
+    try {
+        FS.mkdir(mountpoint);
+    } catch (ex) {}
+    FS.mount(streamWriterFS, {}, mountpoint);
+    return 0;
+}
 
 // Users waiting to read
 Module.ff_reader_dev_waiters = [];

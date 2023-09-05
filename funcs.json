@@ -136,6 +136,7 @@
         "readFile",
         "writeFile",
         "unlink",
+        "unmount",
         "mkdev",
         "createLazyFile",
         "mkreaderdev",
@@ -144,6 +145,7 @@
         "unlinkreadaheadfile",
         "mkwriterdev",
         "mkstreamwriterdev",
+        "mountwriterfs",
         "mkworkerfsfile",
         "unlinkworkerfsfile"
     ],
