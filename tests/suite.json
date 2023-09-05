@@ -37,5 +37,6 @@
  "617-discard.js",
  "618-errno.js",
  "619-block-reader-error-passthru.js",
+ "620-writer-fs.js",
  "650-all-to-all.js"
 ]
