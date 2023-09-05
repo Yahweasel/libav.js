@@ -1,0 +1,12 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=matroska
+--enable-muxer=matroska --enable-muxer=webm
+--enable-demuxer=image2
+--enable-muxer=image2
+--enable-decoder=gif
+--enable-encoder=gif
+--enable-decoder=mjpeg
+--enable-encoder=mjpeg
+--enable-decoder=png
+--enable-encoder=png

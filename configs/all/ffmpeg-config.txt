@@ -73,6 +73,14 @@
 --enable-bsf=h264_metadata
 --enable-bsf=hevc_metadata
 --enable-bsf=av1_metadata
+--enable-demuxer=image2
+--enable-muxer=image2
+--enable-decoder=gif
+--enable-encoder=gif
+--enable-decoder=mjpeg
+--enable-encoder=mjpeg
+--enable-decoder=png
+--enable-encoder=png
 --enable-decoder=hevc
 --enable-bsf=hevc_metadata
 --enable-bsf=extract_extradata
