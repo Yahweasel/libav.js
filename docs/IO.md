@@ -258,3 +258,15 @@ To create a streaming writer device, use `await
 libav.mkstreamwriterdev(<name>)`. Streaming writer devices are otherwise
 identical to block writer devices in every detail, including that they use
 `onwrite` as their callback, and include the position.
+
+### Writer filesystem
+
+If you're using a format that outputs multiple files, such as image2's
+frame-output, you can use a writer *filesystem* to make all files in a directory
+automatically act as block writer files. Use `await
+libav.mountwriterfs("/somepath")` to mount a writer filesystem to `"/somepath"`,
+at which point every file created under `"/somepath"` will act as a block
+writer, invoking `onwrite` with every write.
+
+When finished, you can use `await libav.unmount("/somepath")` to unmount the
+writer filesystem.
