@@ -1090,7 +1090,7 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
  *         limit?: number, // OUTPUT limit, in bytes
  *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
- *         unify: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+ *         unify?: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
  */
