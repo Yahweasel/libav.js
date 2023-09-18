@@ -85,13 +85,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$2-%
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/fftools/thread_queue.o \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavdevice/libavdevice.a \
 		'` \
-                `test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libpostproc/libpostproc.a || echo build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libpostproc/libpostproc.a` \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavformat/libavformat.a \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavfilter/libavfilter.a \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavcodec/libavcodec.a \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libswresample/libswresample.a \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libavutil/libavutil.a \
-		`grep LIBAVJS_WITH_SWSCALE configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo 'build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/libswscale/libswscale.a'` \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/*/lib*.a \
 		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/$2/' configs/$(*)/libs.txt` -o $(@)
 	sed 's/^\/\/.*include:.*//' $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
