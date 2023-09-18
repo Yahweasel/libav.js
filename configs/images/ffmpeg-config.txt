@@ -8,5 +8,3 @@
 --enable-encoder=gif
 --enable-decoder=mjpeg
 --enable-encoder=mjpeg
---enable-decoder=png
---enable-encoder=png
