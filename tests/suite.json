@@ -38,5 +38,6 @@
  "618-errno.js",
  "619-block-reader-error-passthru.js",
  "620-writer-fs.js",
+ "621-alt-variant.js",
  "650-all-to-all.js"
 ]

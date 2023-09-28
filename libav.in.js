@@ -157,7 +157,8 @@
 
                 ret.worker.postMessage({
                     config: {
-                        wasmurl: libav.wasmurl
+                        variant: opts.variant || libav.variant,
+                        wasmurl: opts.wasmurl || libav.wasmurl
                     }
                 });
 
@@ -223,9 +224,17 @@
             } else if (mode === "threads") {
                 /* Worker through Emscripten's own threads. Start with a real
                  * instance. */
+                var libavVariant = libav.variant;
+                var libavWasmurl = libav.wasmurl;
                 return Promise.all([]).then(function() {
+                    if (opts.variant)
+                        libav.variant = opts.variant;
+                    if (opts.wasmurl)
+                        libav.wasmurl = opts.wasmurl;
                     return libav.LibAVFactory();
                 }).then(function(x) {
+                    libav.variant = libavVariant;
+                    libav.wasmurl = libavWasmurl;
                     ret = x;
 
                     // Get the worker
@@ -297,9 +306,17 @@
 
             } else { // Direct mode
                 // Start with a real instance
+                var libavVariant = libav.variant;
+                var libavWasmurl = libav.wasmurl;
                 return Promise.all([]).then(function() {
+                    if (opts.variant)
+                        libav.variant = opts.variant;
+                    if (opts.wasmurl)
+                        libav.wasmurl = opts.wasmurl;
                     return libav.LibAVFactory();
                 }).then(function(x) {
+                    libav.variant = libavVariant;
+                    libav.wasmurl = libavWasmurl;
                     ret = x;
                     ret.worker = false;
 

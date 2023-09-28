@@ -468,6 +468,16 @@ export interface LibAVOpts {
      * URL base from which to load workers and modules.
      */
     base?: string;
+
+    /**
+     * The full URL from which to load the .wasm file.
+     */
+    wasmurl?: string;
+
+    /**
+     * The variant to load (instead of whichever variant was compiled)
+     */
+    variant?: string;
 }
 
 export interface LibAVWrapper {
@@ -475,6 +485,16 @@ export interface LibAVWrapper {
      * URL base from which load workers and modules.
      */
     base: string;
+
+    /**
+     * The full URL from which to load the .wasm file.
+     */
+    wasmurl?: string;
+
+    /**
+     * The variant to load (instead of whichever variant was compiled)
+     */
+    variant?: string;
 
     /**
      * Create a LibAV instance.

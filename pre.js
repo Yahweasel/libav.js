@@ -25,13 +25,19 @@ Module.locateFile = function(path, prefix) {
     // if it's the wasm file
     if (path.lastIndexOf(".wasm") === path.length - 5 &&
         path.indexOf("libav-") !== -1) {
-        // Consider using an overridden wasm URL
+        // Look for overrides in global LibAV
         var gt;
         if (typeof globalThis !== "undefined") gt = globalThis;
         else if (typeof self !== "undefined") gt = self;
         else gt = window;
+
+        // Use the overridden URL, if there was one
         if (gt.LibAV && gt.LibAV.wasmurl)
             return gt.LibAV.wasmurl;
+
+        // Use the overridden variant, if there was one
+        if (gt.LibAV && gt.LibAV.variant)
+            return prefix + "libav-@VER-" + gt.LibAV.variant + ".@DBG@TARGET.wasm";
     }
 
     // Otherwise, use the default

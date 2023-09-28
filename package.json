@@ -8,7 +8,7 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "make build-all -j9",
+    "build": "make -j9 && make build-all -j9",
     "test": "npm run build && cd tests && node node-test.js --include-slow"
   },
   "repository": {

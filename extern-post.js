@@ -38,10 +38,11 @@ if (/* We're in a worker */
         return new Promise(function(res, rej) {
             onmessage = function(e) {
                 if (e && e.data && e.data.config) {
-                    if (e.data.config.wasmurl) {
-                        if (!globe.LibAV) globe.LibAV = {};
+                    if (!globe.LibAV) globe.LibAV = {};
+                    if (e.data.config.variant)
+                        globe.LibAV.variant = e.data.config.variant;
+                    if (e.data.config.wasmurl)
                         globe.LibAV.wasmurl = e.data.config.wasmurl;
-                    }
                     LibAVFactory().then(res).catch(rej);
                 }
             };
