@@ -111,7 +111,9 @@ are:
     "yesthreads": false,
     "nothreads": false,
     "nosimd": false,
-    "base": LibAV.base
+    "base": LibAV.base,
+    "wasmurl": undefined,
+    "variant": undefined
 }
 ```
 `nowasm` and `nosimd` affect what forms of code libav.js is allowed to load. By
@@ -157,6 +159,14 @@ the same optional argument as `LibAV.LibAV`.
 
 The `base` option can be used in these options in place of `LibAV.base`, and
 will override `LibAV.base` if set.
+
+The `wasmurl` option can be used to override the *full* URL from which to load
+the WebAssembly (if there is WebAssembly), or the `variant` option can be used
+to override the variant loaded to be different from the variant that libav.js
+was compiled with. Setting `variant` is useful if you need multiple variants
+(e.g., one variant to determine what kind of file you have, and then another
+variant to decode the data in that file), as the frontend is otherwise the same
+and uses global variables.
 
 The tests used to determine which features are available are also exported, as
 `LibAV.isWebAssemblySupported`, `LibAV.isThreadingSupported`, and
