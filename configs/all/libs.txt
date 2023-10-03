@@ -5,4 +5,5 @@ build/inst/@TARGET/lib/libogg.a
 build/inst/@TARGET/lib/libmp3lame.a
 build/inst/@TARGET/lib/libvpx.a
 build/inst/@TARGET/lib/libaom.a
+build/inst/@TARGET/lib/libz.a
 build/inst/@TARGET/lib/libopenh264.a

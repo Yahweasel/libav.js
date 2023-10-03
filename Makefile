@@ -459,7 +459,7 @@ release:
 	done
 	cp dist/libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/dist/
 	mkdir libav.js-$(LIBAVJS_VERSION)/sources
-	for t in ffmpeg lame libaom libogg libvorbis libvpx opus; \
+	for t in ffmpeg lame libaom libogg libvorbis libvpx opus zlib; \
 	do \
 		$(MAKE) $$t-release; \
 	done

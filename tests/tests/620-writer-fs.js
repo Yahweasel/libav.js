@@ -42,7 +42,7 @@ await libav.ffmpeg("-i", "bbb.webm", "-map", "0:v", "-c:v", "copy", "-frames", "
 
 // Convert to a sequence of JPEGs
 await libav.mountwriterfs("/wfs");
-await libav.ffmpeg("-i", "tmp.webm", "/wfs/%06d.jpg");
+await libav.ffmpeg("-i", "tmp.webm", "/wfs/%06d.png");
 await libav.unmount("/wfs");
 
 // Then write them
@@ -50,7 +50,7 @@ for (const name in files)
     await libav.writeFile(`tmp-${name}`, files[name]);
 
 // Check them
-await h.utils.compareVideo("tmp.webm", "tmp-%06d.jpg");
+await h.utils.compareVideo("tmp.webm", "tmp-%06d.png");
 
 // And clean up
 await libav.unlink("tmp.webm");

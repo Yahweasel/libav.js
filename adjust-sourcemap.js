@@ -48,7 +48,7 @@ async function main() {
             res = `../build/ffmpeg-${version("ffmpeg")}/` + orig.slice(7);
 
         } else if (
-            /^(\.\.\/)*(opus|libvorbis|libogg|lame|libvpx|openh264)-/.test(orig)
+            /^(\.\.\/)*(opus|libvorbis|libogg|lame|libvpx|openh264|zlib)-/.test(orig)
         ) {
             /* In a package where we already have the right path. Just swap all
              * the ..s for build */

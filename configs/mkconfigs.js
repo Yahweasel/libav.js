@@ -36,7 +36,7 @@ const configs = [
     ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "codec-libopus", "codec-aac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "bsf-extract_extradata", "bsf-vp9_metadata", "bsf-h264_metadata", "bsf-hevc_metadata", "bsf-av1_metadata"]],
 
     // These are mainly here so that "all" will have them for testing
-    ["images", ["format-webm", "format-image2", "codec-gif", "codec-mjpeg"]],
+    ["images", ["format-webm", "format-image2", "codec-gif", "codec-mjpeg", "codec-png"]],
     ["h265", ["format-mp4", "format-webm", "swscale", "decoder-hevc"]],
     ["prores", ["format-mp4", "format-webm", "swscale", "codec-prores"]],
 

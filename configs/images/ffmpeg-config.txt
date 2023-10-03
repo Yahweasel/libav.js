@@ -8,3 +8,6 @@
 --enable-encoder=gif
 --enable-decoder=mjpeg
 --enable-encoder=mjpeg
+--enable-zlib
+--enable-decoder=png
+--enable-encoder=png
