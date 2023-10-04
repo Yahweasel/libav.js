@@ -464,7 +464,7 @@ Module.mkstreamwriterdev = function(loc, mode) {
  * already exist, but it may already exist.
  * @param mountpoint  Directory to mount as a writer filesystem
  */
-/// @types mountwriterfs@sync(mountpoint: string)
+/// @types mountwriterfs@sync(mountpoint: string): @promise@void@
 Module.mountwriterfs = function(mountpoint) {
     try {
         FS.mkdir(mountpoint);
