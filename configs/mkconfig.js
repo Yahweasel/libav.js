@@ -59,7 +59,8 @@ function addFragment(out, part) {
             addFragment(out, `decoder-${res[2]}`);
             addFragment(out, `encoder-${res[2]}`);
 
-        } else if (res[1] === "demuxer" ||
+        } else if (res[1] === "protocol" ||
+                   res[1] === "demuxer" ||
                    res[1] === "muxer" ||
                    res[1] === "decoder" ||
                    res[1] === "encoder" ||

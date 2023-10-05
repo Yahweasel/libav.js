@@ -5,6 +5,13 @@ all act like files, in keeping with the Unix standard (devices and pipes are
 files). Note that libav.js's filesystem is virtual, and has no connection to the
 real filesystem.
 
+Experimentally, libav.js also supports the `jsfetch` "protocol", which uses
+JavaScript's `fetch` function to stream data over HTTP or HTTPS. This is not
+currently enabled by default in any build (other than "all"), but using an
+experimental build with `jsfetch` enabled, simply use, e.g., the URL
+`jsfetch:https://example.com/video.mkv` to use fetch. `jsfetch` does not
+currently support seeking or writing, only reading in a stream.
+
 
 ## Reading
 
