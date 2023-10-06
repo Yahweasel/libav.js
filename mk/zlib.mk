@@ -8,6 +8,7 @@ build/zlib-$(ZLIB_VERSION)/build-%/config.h: build/zlib-$(ZLIB_VERSION)/configur
 	mkdir -p build/zlib-$(ZLIB_VERSION)/build-$*
 	cd build/zlib-$(ZLIB_VERSION)/build-$* ; \
 		env CFLAGS="$(OPTFLAGS) `cat $(PWD)/build/inst/$*/cflags.txt`" \
+		CHOST=emscripten \
 		emconfigure ../../zlib-$(ZLIB_VERSION)/configure \
 			--prefix="$(PWD)/build/inst/$*" \
 			--static
