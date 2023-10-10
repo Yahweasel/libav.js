@@ -15,7 +15,7 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 	--disable-stripping \
 	--disable-programs \
 	--disable-ffplay --disable-ffprobe --disable-network --disable-iconv --disable-xlib \
-	--disable-sdl2 \
+	--disable-sdl2 --disable-zlib \
 	--disable-everything
 
 
