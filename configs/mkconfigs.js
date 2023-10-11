@@ -39,6 +39,7 @@ const configs = [
     ["images", ["format-webm", "format-image2", "codec-gif", "codec-mjpeg", "codec-png"]],
     ["h265", ["format-mp4", "format-webm", "swscale", "decoder-hevc"]],
     ["prores", ["format-mp4", "format-webm", "swscale", "codec-prores"]],
+    ["qtrle", ["format-mov", "swscale", "codec-qtrle"]],
     ["jsfetch", ["protocol-jsfetch"]],
 
     // Patent and/or license encumbered encoders

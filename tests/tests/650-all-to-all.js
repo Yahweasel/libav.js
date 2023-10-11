@@ -27,6 +27,10 @@ const formatCodecs = {
     "wv": [null, "wavpack"]
 };
 
+const codecFormats = {
+    "qtrle": "mov"
+};
+
 async function stdoutFile(libav) {
     await libav.writeFile("stdout", "");
     const stdoutFd = await libav.open("stdout", 1);
@@ -124,7 +128,10 @@ for (const cv of encoders.video) {
 
     // Transcode this
     h.printStatus(`-c:v ${cv}`);
-    const out = `tmp-${cv}.mkv`;
+    let format = codecFormats[cv];
+    if (!format)
+        format = "mkv";
+    const out = `tmp-${cv}.${format}`;
     const ret = await libav.ffmpeg(
         "-nostdin",
         "-i", "bbb.webm",
@@ -140,7 +147,10 @@ for (const cv of encoders.video) {
 // Then try each audio encoder
 for (const ca of encoders.audio) {
     h.printStatus(`-c:a ${ca}`);
-    const out = `tmp-${ca}.mkv`;
+    let format = codecFormats[ca];
+    if (!format)
+        format = "mkv";
+    const out = `tmp-${ca}.${format}`;
     const ret = await libav.ffmpeg(
         "-nostdin",
         "-i", "bbb.webm",

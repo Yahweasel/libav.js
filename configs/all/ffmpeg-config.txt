@@ -88,6 +88,10 @@
 --enable-decoder=prores
 --enable-bsf=prores_metadata
 --enable-encoder=prores
+--enable-demuxer=mov
+--enable-muxer=mov
+--enable-decoder=qtrle
+--enable-encoder=qtrle
 --enable-protocol=jsfetch
 --enable-libopenh264
 --enable-decoder=libopenh264
