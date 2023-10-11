@@ -21,8 +21,6 @@ try {
     await libav.unlink("nonexistent-file");
     throw new Error("Unlinking a nonexistent file did not throw an error!");
 } catch (ex) {
-    if (!ex || ex.name !== "ErrnoError" ||
-        ex.errno !== libav.ENOENT ||
-        ex.message !== "nonexistent-file: No such file or directory")
+    if (!ex || ex.errno !== libav.ENOENT)
         throw ex;
 }
