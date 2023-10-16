@@ -39,5 +39,6 @@
  "619-block-reader-error-passthru.js",
  "620-writer-fs.js",
  "621-alt-variant.js",
+ "622-video-imagedata.js",
  "650-all-to-all.js"
 ]

@@ -835,7 +835,8 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
  *     ctx: number, pkt: number, frame: number, inPackets: Packet[],
  *     config?: boolean | {
  *         fin?: boolean,
- *         ignoreErrors?: boolean
+ *         ignoreErrors?: boolean,
+ *         copyoutFrame?: string
  *     }
  * ): @promise@Frame[]@
  */
@@ -846,6 +847,10 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
     } else {
         config = config || {};
     }
+
+    var copyoutFrame = ff_copyout_frame;
+    if (config.copyoutFrame)
+        copyoutFrame = ff_copyout_frame_versions[config.copyoutFrame];
 
     function handlePacket(inPacket) {
         var ret;
@@ -879,7 +884,7 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
             else if (ret < 0)
                 throw new Error("Error decoding audio frame: " + ff_error(ret));
 
-            var outFrame = ff_copyout_frame(frame);
+            var outFrame = copyoutFrame(frame);
             outFrames.push(outFrame);
             av_frame_unref(frame);
         }
@@ -1333,26 +1338,38 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
  * @param framePtr  AVFrame
  * @param inFrames  Input frames, either as an array of frames or with frames
  *                  per input
- * @param fin  Indicate end-of-stream(s)
+ * @param config  Options. May be "true" to indicate end of stream.
  */
 /* @types
  * ff_filter_multi@sync(
  *     srcs: number, buffersink_ctx: number, framePtr: number,
- *     inFrames: Frame[], fin?: boolean
+ *     inFrames: Frame[], config?: boolean | {
+ *         fin?: boolean,
+ *         copyoutFrame?: string
+ *     }
  * ): @promise@Frame[]@;
  * ff_filter_multi@sync(
  *     srcs: number[], buffersink_ctx: number, framePtr: number,
- *     inFrames: Frame[][], fin?: boolean[]
+ *     inFrames: Frame[][], config?: boolean[] | {
+ *         fin?: boolean,
+ *         copyoutFrame?: string
+ *     }[]
  * ): @promise@Frame[]@
  */
-var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, framePtr, inFrames, fin) {
+var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, framePtr, inFrames, config) {
     var outFrames = [];
 
     if (!srcs.length) {
         srcs = [srcs];
         inFrames = [inFrames];
-        fin = [fin];
+        config = [config];
     }
+
+    config = config.map(function(config) {
+        if (config === true)
+            return {fin: true};
+        return config || {};
+    });
 
     // Find the longest buffer (ideally they're all the same)
     var max = inFrames.map(function(srcFrames) {
@@ -1361,7 +1378,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
         return Math.max(a, b);
     });
 
-    function handleFrame(buffersrc_ctx, inFrame) {
+    function handleFrame(buffersrc_ctx, inFrame, copyoutFrame) {
         if (inFrame !== null)
             ff_copyin_frame(framePtr, inFrame);
 
@@ -1376,7 +1393,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
                 break;
             if (ret < 0)
                 throw new Error("Error while receiving a frame from the filtergraph: " + ff_error(ret));
-            var outFrame = ff_copyout_frame(framePtr);
+            var outFrame = copyoutFrame(framePtr);
             outFrames.push(outFrame);
             av_frame_unref(framePtr);
         }
@@ -1386,8 +1403,11 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
     for (var fi = 0; fi <= max; fi++) {
         for (var ti = 0; ti < inFrames.length; ti++) {
             var inFrame = inFrames[ti][fi];
-            if (inFrame) handleFrame(srcs[ti], inFrame);
-            else if (fin[ti]) handleFrame(srcs[ti], null);
+            var copyoutFrame = ff_copyout_frame;
+            if (config[ti].copyoutFrame)
+                copyoutFrame = ff_copyout_frame_versions[config[ti].copyoutFrame];
+            if (inFrame) handleFrame(srcs[ti], inFrame, copyoutFrame);
+            else if (config[ti].fin) handleFrame(srcs[ti], null, copyoutFrame);
         }
     }
 
@@ -1405,7 +1425,7 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
         // Maybe a video frame?
         var width = AVFrame_width(frame);
         if (width)
-            return ff_copyout_frame_video(frame, width);
+            return ff_copyout_frame_video_width(frame, width);
     }
     var channels = AVFrame_channels(frame);
     var format = AVFrame_format(frame);
@@ -1472,8 +1492,18 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     return outFrame;
 };
 
+/**
+ * Copy out a video frame. `ff_copyout_frame` will copy out a video frame if a
+ * video frame is found, but this may be faster if you know it's a video frame.
+ * @param frame  AVFrame
+ */
+/// @types ff_copyout_frame_video@sync(frame: number): @promise@Frame@
+var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame) {
+    return ff_copyout_frame_video_width(frame, AVFrame_width(frame));
+};
+
 // Copy out a video frame. Used internally by ff_copyout_frame.
-var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, width) {
+var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(frame, width) {
     var data = [];
     var height = AVFrame_height(frame);
     var format = AVFrame_format(frame);
@@ -1508,6 +1538,112 @@ var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame, wid
     }
 
     return outFrame;
+};
+
+/**
+ * Get the size of a packed video frame in its native format.
+ * @param frame  AVFrame
+ */
+/// @types ff_frame_video_packed_size@sync(frame: number): @promise@Frame@
+var ff_frame_video_packed_size = Module.ff_frame_video_packed_size = function(frame) {
+    var height = AVFrame_height(frame);
+    var format = AVFrame_format(frame);
+    var desc = av_pix_fmt_desc_get(format);
+
+    var dataSz = 0;
+    for (var i = 0; i < 8 /* AV_NUM_DATA_POINTERS */; i++) {
+        var linesize = AVFrame_linesize_a(frame, i);
+        if (!linesize)
+            break;
+        var h = height;
+        if (i === 1 || i === 2)
+            h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
+        dataSz += linesize * h;
+    }
+
+    return dataSz;
+};
+
+/* Copy out just the packed data from this frame, into the given buffer. Used
+ * internally. */
+var ff_copyout_frame_data_packed = Module.ff_copyout_frame_data_packed = function(data, frame) {
+    var height = AVFrame_height(frame);
+    var format = AVFrame_format(frame);
+    var desc = av_pix_fmt_desc_get(format);
+
+    // Copy it out
+    var dIdx = 0;
+    for (var i = 0; i < 8 /* AV_NUM_DATA_POINTERS */; i++) {
+        var linesize = AVFrame_linesize_a(frame, i);
+        if (!linesize)
+            break;
+        var inData = AVFrame_data_a(frame, i);
+        var h = height;
+        if (i === 1 || i === 2)
+            h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
+        for (var y = 0; y < h; y++) {
+            data.set(
+                Module.HEAPU8.subarray(inData + y * linesize, inData + (y + 1) * linesize),
+                dIdx
+            );
+            dIdx += linesize;
+        }
+    }
+};
+
+/**
+ * Copy out a video frame, as a single packed Uint8Array.
+ * @param frame  AVFrame
+ */
+/// @types ff_copyout_frame_video_packed@sync(frame: number): @promise@Frame@
+var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = function(frame) {
+    var data = new Uint8Array(ff_frame_video_packed_size(frame));
+    ff_copyout_frame_data_packed(data, frame);
+
+    var outFrame = {
+        data: data,
+        width: AVFrame_width(frame),
+        height: AVFrame_height(frame),
+        format: AVFrame_format(frame),
+        key_frame: AVFrame_key_frame(frame),
+        pict_type: AVFrame_pict_type(frame),
+        pts: AVFrame_pts(frame),
+        ptshi: AVFrame_ptshi(frame),
+        sample_aspect_ratio: [
+            AVFrame_sample_aspect_ratio_num(frame),
+            AVFrame_sample_aspect_ratio_den(frame)
+        ]
+    };
+
+    return outFrame;
+};
+
+
+/**
+ * Copy out a video frame as an ImageData. The video frame *must* be RGBA for
+ * this to work as expected (though some ImageData will be returned for any
+ * frame).
+ * @param frame  AVFrame
+ */
+/* @types
+ * ff_copyout_frame_video_imagedata@sync(
+ *     frame: number
+ * ): @promise@ImageData@
+ */
+var ff_copyout_frame_video_imagedata = Module.ff_copyout_frame_video_imagedata = function(frame) {
+    var width = AVFrame_width(frame);
+    var height = AVFrame_height(frame);
+    var id = new ImageData(width, height);
+    ff_copyout_frame_data_packed(id.data, frame);
+    return id;
+};
+
+// All of the versions of ff_copyout_frame
+var ff_copyout_frame_versions = {
+    default: ff_copyout_frame,
+    video: ff_copyout_frame_video,
+    video_packed: ff_copyout_frame_video_packed,
+    ImageData: ff_copyout_frame_video_imagedata
 };
 
 /**
