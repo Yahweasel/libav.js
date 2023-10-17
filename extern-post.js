@@ -57,6 +57,7 @@ if (/* We're in a worker */
             var fun = e.data[1];
             var args = e.data.slice(2);
             var ret = void 0;
+            var transfer = [];
             var succ = true;
             try {
                 ret = libav[fun].apply(libav, args);
@@ -72,16 +73,20 @@ if (/* We're in a worker */
                     succ = false;
                     ret = ex;
                 }).then(function() {
+                    if (typeof ret === "object" && ret && ret.libavjsTransfer)
+                        transfer = ret.libavjsTransfer;
                     try {
-                        postMessage([id, fun, succ, ret]);
+                        postMessage([id, fun, succ, ret], transfer);
                     } catch (ex) {
                         postMessage([id, fun, succ, "" + ret]);
                     }
                 });
 
             } else {
+                if (typeof ret === "object" && ret && ret.libavjsTransfer)
+                    transfer = ret.libavjsTransfer;
                 try {
-                    postMessage([id, fun, succ, ret]);
+                    postMessage([id, fun, succ, ret], transfer);
                 } catch (ex) {
                     postMessage([id, fun, succ, "" + ret]);
                 }

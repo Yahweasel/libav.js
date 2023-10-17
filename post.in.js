@@ -842,6 +842,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
  */
 var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPackets, config) {
     var outFrames = [];
+    var transfer = [];
     if (typeof config === "boolean") {
         config = {fin: config};
     } else {
@@ -885,6 +886,8 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
                 throw new Error("Error decoding audio frame: " + ff_error(ret));
 
             var outFrame = copyoutFrame(frame);
+            if (outFrame && outFrame.libavjsTransfer && outFrame.libavjsTransfer.length)
+                transfer.push.apply(transfer, outFrame.libavjsTransfer);
             outFrames.push(outFrame);
             av_frame_unref(frame);
         }
@@ -895,6 +898,7 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
     if (config.fin)
         handlePacket(null);
 
+    outFrames.libavjsTransfer = transfer;
     return outFrames;
 };
 
@@ -1358,6 +1362,7 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
  */
 var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, framePtr, inFrames, config) {
     var outFrames = [];
+    var transfer = [];
 
     if (!srcs.length) {
         srcs = [srcs];
@@ -1394,6 +1399,8 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
             if (ret < 0)
                 throw new Error("Error while receiving a frame from the filtergraph: " + ff_error(ret));
             var outFrame = copyoutFrame(framePtr);
+            if (outFrame && outFrame.libavjsTransfer && outFrame.libavjsTransfer.length)
+                transfer.push.apply(transfer, outFrame.libavjsTransfer);
             outFrames.push(outFrame);
             av_frame_unref(framePtr);
         }
@@ -1411,6 +1418,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
         }
     }
 
+    outFrames.libavjsTransfer = transfer;
     return outFrames;
 };
 
@@ -1429,8 +1437,10 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     }
     var channels = AVFrame_channels(frame);
     var format = AVFrame_format(frame);
+    var transfer = [];
     var outFrame = {
         data: null,
+        libavjsTransfer: transfer,
         channel_layout: AVFrame_channel_layout(frame),
         channels: channels,
         format: format,
@@ -1446,22 +1456,28 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
         var data = [];
         for (var ci = 0; ci < channels; ci++) {
             var inData = AVFrame_data_a(frame, ci);
+            var outData = null;
             switch (format) {
                 case 5: // U8P
-                    data.push(copyout_u8(inData, nb_samples));
+                    outData = copyout_u8(inData, nb_samples);
                     break;
 
                 case 6: // S16P
-                    data.push(copyout_s16(inData, nb_samples));
+                    outData = copyout_s16(inData, nb_samples);
                     break;
 
                 case 7: // S32P
-                    data.push(copyout_s32(inData, nb_samples));
+                    outData = copyout_s32(inData, nb_samples);
                     break;
 
                 case 8: // FLT
-                    data.push(copyout_f32(inData, nb_samples));
+                    outData = copyout_f32(inData, nb_samples);
                     break;
+            }
+
+            if (outData) {
+                data.push(outData);
+                transfer.push(outData.buffer);
             }
         }
         outFrame.data = data;
@@ -1469,22 +1485,28 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     } else {
         var ct = channels*nb_samples;
         var inData = AVFrame_data_a(frame, 0);
+        var outData = null;
         switch (format) {
             case 0: // U8
-                outFrame.data = copyout_u8(inData, ct);
+                outData = copyout_u8(inData, ct);
                 break;
 
             case 1: // S16
-                outFrame.data = copyout_s16(inData, ct);
+                outData = copyout_s16(inData, ct);
                 break;
 
             case 2: // S32
-                outFrame.data = copyout_s32(inData, ct);
+                outData = copyout_s32(inData, ct);
                 break;
 
             case 3: // FLT
-                outFrame.data = copyout_f32(inData, ct);
+                outData = copyout_f32(inData, ct);
                 break;
+        }
+
+        if (outData) {
+            outFrame.data = outData;
+            transfer.push(outData.buffer);
         }
 
     }
@@ -1508,8 +1530,10 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(fram
     var height = AVFrame_height(frame);
     var format = AVFrame_format(frame);
     var desc = av_pix_fmt_desc_get(format);
+    var transfer = [];
     var outFrame = {
         data: data,
+        libavjsTransfer: transfer,
         width: width,
         height: height,
         format: AVFrame_format(frame),
@@ -1532,8 +1556,11 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(fram
         var h = height;
         if (i === 1 || i === 2)
             h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
-        for (var y = 0; y < h; y++)
-            plane.push(copyout_u8(inData + y * linesize, linesize));
+        for (var y = 0; y < h; y++) {
+            var line = copyout_u8(inData + y * linesize, linesize);
+            plane.push(line);
+            transfer.push(line.buffer);
+        }
         data.push(plane);
     }
 
@@ -1602,6 +1629,7 @@ var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = funct
 
     var outFrame = {
         data: data,
+        libavjsTransfer: [data.buffer],
         width: AVFrame_width(frame),
         height: AVFrame_height(frame),
         format: AVFrame_format(frame),
@@ -1635,6 +1663,7 @@ var ff_copyout_frame_video_imagedata = Module.ff_copyout_frame_video_imagedata =
     var height = AVFrame_height(frame);
     var id = new ImageData(width, height);
     ff_copyout_frame_data_packed(id.data, frame);
+    id.libavjsTransfer = [id.data.buffer];
     return id;
 };
 
@@ -1783,8 +1812,10 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
 var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
     var data = AVPacket_data(pkt);
     var size = AVPacket_size(pkt);
+    var data = copyout_u8(data, size);
     return {
-        data: copyout_u8(data, size),
+        data: data,
+        libavjsTransfer: [data.buffer],
         pts: AVPacket_pts(pkt),
         ptshi: AVPacket_ptshi(pkt),
         dts: AVPacket_dts(pkt),

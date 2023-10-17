@@ -31,7 +31,7 @@ for (let i = 0; i < streams.length; i++) {
     }
 }
 if (streamIdx < 0)
-    throw new Error("Could not find audio track");
+    throw new Error("Could not find video track");
 const stream = streams[streamIdx];
 
 const [, c, pkt, frame] = await libav.ff_init_decoder(

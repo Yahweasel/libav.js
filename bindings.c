@@ -443,10 +443,13 @@ EM_JS(void *, libavjs_main_thread, (void *ignore), {
         var a;
 
         function reply(succ, ret) {
+            var transfer = [];
+            if (typeof ret === "object" && ret && ret.libavjsTransfer)
+                transfer = ret.libavjsTransfer;
             postMessage({
                 c: "libavjs_ret",
                 a: [a[0], a[1], succ, ret]
-            });
+            }, transfer);
         }
 
         if (ev.data && ev.data.c === "libavjs_run") {

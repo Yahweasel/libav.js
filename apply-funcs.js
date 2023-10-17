@@ -148,7 +148,9 @@ function decls(f, meta) {
             `Module.copyout_${type[0]} = ` +
             `CAccessors.copyout_${type[0]} = ` +
             "function(ptr, len) { " +
-            `return (new ${type[1]}(Module.HEAPU8.buffer, ptr, len)).slice(0); ` +
+            `var ret = (new ${type[1]}(Module.HEAPU8.buffer, ptr, len)).slice(0); ` +
+            "ret.libavjsTransfer = [ret.buffer]; " +
+            "return ret; " +
             "};\n";
     });
 
