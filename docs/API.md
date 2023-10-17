@@ -99,7 +99,7 @@ ff_read_multi(
     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
         limit?: number, // OUTPUT limit, in bytes
         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
-        unify: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+        unify?: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
     }
 ): Promise<[number, Record<number, Packet[]>]>
 ```
@@ -217,7 +217,8 @@ ff_decode_multi(
     ctx: number, pkt: number, frame: number, inPackets: Packet[],
     config?: boolean | {
         fin?: boolean,
-        ignoreErrors?: boolean
+        ignoreErrors?: boolean,
+        copyoutFrame?: string
     }
 ): Promise<Frame[]>
 ```
@@ -225,6 +226,10 @@ ff_decode_multi(
 Decode multiple packets. `config` can be set to `true` as `fin`, which means
 these are the last packets. Alternatively, `config` can be set to an object, and
 `ignoreErrors` will attempt to continue decoding in the case of errors.
+
+There are multiple versions of `ff_copyout_frame`, only one of which is actually
+used to copy out frames. See the documentation of `ff_copyout_frame` below for
+how to use the `copyoutFrame` option.
 
 
 ### `ff_free_decoder`
@@ -239,12 +244,25 @@ Free the things allocated by `ff_init_decoder`.
 
 ## Data manipulation
 
-### `ff_copyout_frame`
+### `ff_copyout_frame`, `ff_copyout_frame_video`, `ff_copyout_frame_video_packed`, `ff_copyout_frame_video_imagedata`
 ```
 ff_copyout_frame(frame: number): Promise<Frame>
 ```
 
 Copy a frame out of internal libav memory (`frame`) as a libav.js object.
+`ff_copyout_frame` supports video frames, but if you know a frame is a video
+frame, you can bypass the check by using `ff_copyout_frame_video` instead.
+
+The format of video frames as `Frame`s is complicated by how they're stored
+internally in libav. For a simpler, packed format, in which all pixels are in a
+single `Uint8Array`, use `ff_copyout_frame_video_packed`. Or, to copy out video
+frames directly as `ImageData` objects instead of libav.js `Frame`s at all, use
+`ff_copyout_frame_video_imagedata`. `ImageData` is only available in browsers.
+
+Metafunctions that use `ff_copyout_frame` internally, namely `ff_read_multi` and
+`ff_filter_multi`, have a configuration option, `copyoutFrame`, to specify which
+version of `ff_copyout_frame` to use. It is a string option, accepting the
+following values: `"default", "video", "video_packed", "ImageData"`.
 
 
 ### `ff_copyin_frame`
@@ -285,10 +303,14 @@ multiple outputs (sinks), then sink contexts is an array.
 
 ### `ff_filter_multi`
 ```
-ff_filter_multi(
+ff_filter_multi@sync(
     srcs: number | number[], buffersink_ctx: number, framePtr: number,
-    inFrames: Frame[] | Frame[][], fin?: boolean
-): Promise<Frame[]>;
+    inFrames: Frame[] | Frame[][], config?: boolean | {
+        fin?: boolean,
+        copyoutFrame?: string
+    }
+): @promise@Frame[]@;
+
 ```
 
 Filter one or more frames. Takes one or more source contexts (`srcs`), but *only
@@ -298,8 +320,14 @@ an array of frames if there's only one source, or an array of arrays if there
 are multiple sources.
 
 Also requires a frame pointer (`framePtr`) to use for temporary storage, which
-can be allocated directly or by an encoding/decoding metafunction. Set `fin` if
-these are the last input frames.
+can be allocated directly or by an encoding/decoding metafunction.
+
+`config` can be used to pass configuration options, or pass `true` as `config`
+as an equivalent of `config.fin`. Set `fin` if these are the last input frames.
+
+There are multiple versions of `ff_copyout_frame`, only one of which is actually
+used to copy out frames. See the documentation of `ff_copyout_frame` above for
+how to use the `copyoutFrame` option.
 
 
 # Filesystem
