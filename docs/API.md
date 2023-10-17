@@ -258,10 +258,12 @@ internally in libav. For a simpler, packed format, in which all pixels are in a
 single `Uint8Array`, use `ff_copyout_frame_video_packed`. Or, to copy out video
 frames directly as `ImageData` objects instead of libav.js `Frame`s at all, use
 `ff_copyout_frame_video_imagedata`. `ImageData` is only available in browsers.
+Further, `ff_copyout_frame_video_imagedata` does *not* convert the image format,
+so video frames must already be in RGBA (*not* RGB32!) format to use it.
 
-Metafunctions that use `ff_copyout_frame` internally, namely `ff_read_multi` and
-`ff_filter_multi`, have a configuration option, `copyoutFrame`, to specify which
-version of `ff_copyout_frame` to use. It is a string option, accepting the
+Metafunctions that use `ff_copyout_frame` internally, namely `ff_decode_multi`
+and `ff_filter_multi`, have a configuration option, `copyoutFrame`, to specify
+which version of `ff_copyout_frame` to use. It is a string option, accepting the
 following values: `"default", "video", "video_packed", "ImageData"`.
 
 
