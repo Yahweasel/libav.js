@@ -1099,7 +1099,8 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
  *         limit?: number, // OUTPUT limit, in bytes
  *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
- *         unify?: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+ *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+ *         copyoutPacket?: string // Version of ff_copyout_packet to use
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
  */
@@ -1116,6 +1117,9 @@ function ff_read_multi(fmt_ctx, pkt, devfile, opts) {
     if (opts.devLimit)
         devLimit = opts.devLimit;
     var unify = !!opts.unify;
+    var copyoutPacket = ff_copyout_packet;
+    if (opts.copyoutPacket)
+        copyoutPacket = ff_copyout_packet_versions[opts.copyoutPacket];
 
     function step() {
         // If we risk running past the end of the currently-read data, stop now
@@ -1131,13 +1135,13 @@ function ff_read_multi(fmt_ctx, pkt, devfile, opts) {
                 return [ret, outPackets];
 
             // And copy it out
-            var packet = ff_copyout_packet(pkt);
-            var idx = unify ? 0 : packet.stream_index;
+            var packet = copyoutPacket(pkt);
+            var idx = unify ? 0 : AVPacket_stream_index(pkt);
             if (!(idx in outPackets))
                 outPackets[idx] = [];
             outPackets[idx].push(packet);
+            sz += AVPacket_size(pkt);
             av_packet_unref(pkt);
-            sz += packet.data.length;
             if (opts.limit && sz >= opts.limit)
                 return [-6 /* EAGAIN */, outPackets];
 
@@ -1749,7 +1753,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
             throw new Error("Failed to reference frame data: " + ff_error(ret));
         av_frame_unref(frame);
         av_frame_free_js(frame);
-        return 0;
+        return;
     }
 
     if (frame.width)
@@ -1918,12 +1922,41 @@ var ff_copyout_side_data = Module.ff_copyout_side_data = function(pkt) {
 };
 
 /**
+ * Copy "out" a packet by just copying its data into a new AVPacket.
+ * @param pkt  AVPacket
+ */
+/// @types ff_copyout_packet_ptr@sync(pkt: number): @promise@number@
+var ff_copyout_packet_ptr = Module.ff_copyout_packet_ptr = function(pkt) {
+    var ret = av_packet_clone(pkt);
+    if (!ret)
+        throw new Error("Failed to clone packet");
+    return ret;
+};
+
+// Versions of ff_copyout_packet
+var ff_copyout_packet_versions = {
+    default: ff_copyout_packet,
+    ptr: ff_copyout_packet_ptr
+};
+
+/**
  * Copy in a packet.
  * @param pktPtr  AVPacket
  * @param packet  Packet to copy in.
  */
 /// @types ff_copyin_packet@sync(pktPtr: number, packet: Packet): @promise@void@
 var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
+    if (typeof packet === "number") {
+        // Input packet is an AVPacket pointer, duplicate it
+        av_packet_unref(pktPtr);
+        var res = av_packet_ref(pktPtr, packet);
+        if (res < 0)
+            throw new Error("Failed to reference packet: " + ff_error(res));
+        av_packet_unref(packet);
+        av_packet_free_js(packet);
+        return;
+    }
+
     ff_set_packet(pktPtr, packet.data);
 
     [

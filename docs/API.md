@@ -99,7 +99,8 @@ ff_read_multi(
     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
         limit?: number, // OUTPUT limit, in bytes
         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
-        unify?: boolean // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+        unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+        copyoutPacket?: string // Version of ff_copyout_packet to use
     }
 ): Promise<[number, Record<number, Packet[]>]>
 ```
@@ -127,15 +128,34 @@ are the indices of the `Stream` objects in the `Stream[]` array given by
 `ff_init_demuxer_file`. Alternatively, you can use `unify`, in which case all
 packets will be in input order in a single array, `packets[0]`.
 
+There are multiple versions of `ff_copyout_packet`, only one of which is
+actually used to copy out packets. See the documentation of `ff_copyout_packet`
+below for how to use the `copyoutPacket` option.
+
 
 ## Data manipulation
 
-### `ff_copyout_packet`
+### `ff_copyout_packet` and variants
 ```
 ff_copyout_packet(pkt: number): Promise<Packet>
 ```
 
+Variants: `ff_copyout_packet_ptr`
+
 Copy a packet from internal libav memory (`pkt`) as a libav.js object.
+
+The `ff_copyout_packet_ptr` function is also available, and copies the packet
+into a separate `AVPacket` pointer, instead of actually copying out any data.
+This is a good compromise if you're building pipelines, e.g. reading then
+decoding, to avoid copying data back and forth when that data is just going back
+into libav.js. Be careful, though! `ff_read_multi` reads from every stream, and
+if you're only using data from one of them, copied packets using
+`ff_copyout_packet_ptr` will leak memory! Use `ff_copyout_packet_ptr` carefully.
+
+Metafunctions that use `ff_copyout_packet` internally, namely `ff_read_multi`,
+have a configuration option, `copyoutPacket`, to specify which version of
+`ff_copyout_packet` to use. It is a string option, accepting the following
+values: `"default", "ptr"`.
 
 
 ### `ff_copyin_packet`

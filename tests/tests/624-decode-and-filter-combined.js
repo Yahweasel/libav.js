@@ -31,13 +31,21 @@ const stream = streams[streamIdx];
 
 const [, c, pkt, frame] = await libav.ff_init_decoder(
     "libopus", streams[streamIdx].codecpar);
-const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt);
+const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt, null, {
+    copyoutPacket: "ptr"
+});
 if (res !== libav.AVERROR_EOF)
     throw new Error("Failed to read packets");
 await libav.avformat_close_input_js(fmt_ctx);
 
 if (!packets[streamIdx].length)
     throw new Error("No packets found for the appropriate stream");
+
+// Make sure it didn't actually copy
+if (typeof packets[streamIdx][0] !== "number")
+    throw new Error("ff_copyout_packet_ptr was not used");
+
+// FIXME: Discard other streams (MEMORY LEAK!)
 
 // Get a filter graph that won't really do anything
 const [filter_graph, buffersrc_ctx, buffersink_ctx] =
