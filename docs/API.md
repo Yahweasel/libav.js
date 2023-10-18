@@ -244,10 +244,13 @@ Free the things allocated by `ff_init_decoder`.
 
 ## Data manipulation
 
-### `ff_copyout_frame`, `ff_copyout_frame_video`, `ff_copyout_frame_video_packed`, `ff_copyout_frame_video_imagedata`
+### `ff_copyout_frame` and variants
 ```
 ff_copyout_frame(frame: number): Promise<Frame>
 ```
+
+Variants: `ff_copyout_frame_video`, `ff_copyout_frame_video_packed`,
+`ff_copyout_frame_video_imagedata`, `ff_copyout_frame_ptr`
 
 Copy a frame out of internal libav memory (`frame`) as a libav.js object.
 `ff_copyout_frame` supports video frames, but if you know a frame is a video
@@ -261,10 +264,16 @@ frames directly as `ImageData` objects instead of libav.js `Frame`s at all, use
 Further, `ff_copyout_frame_video_imagedata` does *not* convert the image format,
 so video frames must already be in RGBA (*not* RGB32!) format to use it.
 
+The `ff_copyout_frame_ptr` function is also available, and copies the frame into
+a separate `AVFrame` pointer, instead of actually copying out any data. This is
+a good compromise if you're building pipelines, e.g. decoding and then
+filtering, to avoid copying data back and forth when that data is just going
+back into libav.js.
+
 Metafunctions that use `ff_copyout_frame` internally, namely `ff_decode_multi`
 and `ff_filter_multi`, have a configuration option, `copyoutFrame`, to specify
 which version of `ff_copyout_frame` to use. It is a string option, accepting the
-following values: `"default", "video", "video_packed", "ImageData"`.
+following values: `"default", "video", "video_packed", "ImageData", "ptr"`.
 
 
 ### `ff_copyin_frame`
@@ -272,7 +281,9 @@ following values: `"default", "video", "video_packed", "ImageData"`.
 ff_copyin_frame(framePtr: number, frame: Frame): Promise<void>
 ```
 
-Copy a libav.js Frame object (`frame`) into libav memory (`framePtr`).
+Copy a libav.js Frame object (`frame`) into libav memory (`framePtr`). Also
+works if `frame` is another `AVFrame` pointer, e.g. as created by
+`ff_copyout_frame_ptr`.
 
 
 # AVFilter

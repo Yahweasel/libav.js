@@ -1646,7 +1646,6 @@ var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = funct
     return outFrame;
 };
 
-
 /**
  * Copy out a video frame as an ImageData. The video frame *must* be RGBA for
  * this to work as expected (though some ImageData will be returned for any
@@ -1667,12 +1666,24 @@ var ff_copyout_frame_video_imagedata = Module.ff_copyout_frame_video_imagedata =
     return id;
 };
 
+/**
+ * Copy "out" a video frame by just allocating another frame in libav.
+ * @param frame  AVFrame
+ */
+var ff_copyout_frame_ptr = Module.ff_copyout_frame_ptr = function(frame) {
+    var ret = av_frame_clone(frame);
+    if (!ret)
+        throw new Error("Failed to allocate new frame");
+    return ret;
+};
+
 // All of the versions of ff_copyout_frame
 var ff_copyout_frame_versions = {
     default: ff_copyout_frame,
     video: ff_copyout_frame_video,
     video_packed: ff_copyout_frame_video_packed,
-    ImageData: ff_copyout_frame_video_imagedata
+    ImageData: ff_copyout_frame_video_imagedata,
+    ptr: ff_copyout_frame_ptr
 };
 
 /**
@@ -1682,6 +1693,17 @@ var ff_copyout_frame_versions = {
  */
 /// @types ff_copyin_frame@sync(framePtr: number, frame: Frame): @promise@void@
 var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
+    if (typeof frame === "number") {
+        // This is a frame pointer, not a libav.js Frame
+        av_frame_unref(framePtr);
+        var ret = av_frame_ref(framePtr, frame);
+        if (ret < 0)
+            throw new Error("Failed to reference frame data: " + ff_error(ret));
+        av_frame_unref(frame);
+        av_frame_free_js(frame);
+        return 0;
+    }
+
     if (frame.width)
         return ff_copyin_frame_video(framePtr, frame);
 

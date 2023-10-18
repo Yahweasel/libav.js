@@ -40,5 +40,6 @@
  "620-writer-fs.js",
  "621-alt-variant.js",
  "622-video-imagedata.js",
+ "623-decode-and-filter.js",
  "650-all-to-all.js"
 ]
