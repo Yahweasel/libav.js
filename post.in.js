@@ -1423,6 +1423,54 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
 };
 
 /**
+ * Decode and filter frames. Just a combination of ff_decode_multi and
+ * ff_filter_multi that's all done on the libav.js side.
+ * @param ctx  AVCodecContext
+ * @param buffersrc_ctx  AVFilterContext, input
+ * @param buffersink_ctx  AVFilterContext, output
+ * @param pkt  AVPacket
+ * @param frame  AVFrame
+ * @param inPackets  Incoming packets to decode and filter
+ * @param config  Decoding and filtering options. May be "true" to indicate end
+ *                of stream.
+ */
+/* @types
+ * ff_decode_filter_multi@sync(
+ *     ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
+ *     frame: number, inPackets: Packet[],
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         ignoreErrors?: boolean,
+ *         copyoutFrame?: string
+ *     }
+ * ): @promise@Frame[]@
+ */
+var ff_decode_filter_multi = Module.ff_decode_filter_multi = function(
+    ctx, buffersrc_ctx, buffersink_ctx, pkt, frame, inPackets, config
+) {
+    if (typeof config === "boolean") {
+        config = {fin: config};
+    } else {
+        config = config || {};
+    }
+
+    // 1: Decode
+    var decodedFrames = ff_decode_multi(ctx, pkt, frame, inPackets, {
+        fin: !!config.fin,
+        ignoreErrors: !!config.ignoreErrors,
+        copyoutFrame: "ptr"
+    });
+
+    // 2: Filter
+    return ff_filter_multi(
+        buffersrc_ctx, buffersink_ctx, frame, decodedFrames, {
+            fin: !!config.fin,
+            copyoutFrame: config.copyoutFrame || "default"
+        }
+    );
+}
+
+/**
  * Copy out a frame.
  * @param frame  AVFrame
  */

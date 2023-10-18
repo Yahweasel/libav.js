@@ -232,6 +232,12 @@ used to copy out frames. See the documentation of `ff_copyout_frame` below for
 how to use the `copyoutFrame` option.
 
 
+### `ff_decode_filter_multi`
+
+Combination of `ff_decode_multi` and `ff_filter_multi`. Documented with
+`ff_filter_multi`, below.
+
+
 ### `ff_free_decoder`
 ```
 ff_free_decoder(
@@ -341,6 +347,30 @@ as an equivalent of `config.fin`. Set `fin` if these are the last input frames.
 There are multiple versions of `ff_copyout_frame`, only one of which is actually
 used to copy out frames. See the documentation of `ff_copyout_frame` above for
 how to use the `copyoutFrame` option.
+
+
+### `ff_decode_filter_multi`
+```
+ff_decode_filter_multi(
+    ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
+    frame: number, inPackets: Packet[],
+    config?: boolean | {
+        fin?: boolean,
+        ignoreErrors?: boolean,
+        copyoutFrame?: string
+    }
+): Promise<Frame[]>
+```
+
+Combination of `ff_decode_multi` and `ff_filter_multi` in a single function.
+Useful to avoid the overhead of copying data and waiting for Promises between
+decoding and filtering.
+
+`await ff_decode_filter_multi(ctx, src, sink, pkt, frame, packets, config)` is
+equivalent to `await ff_filter_multi(src, sink, frame, await
+ff_decode_multi(ctx, pkt, frame, packets), config)`. That is, this really just
+combines the two calls. However, internally, neither frame copying nor Promises
+are used.
 
 
 # Filesystem
