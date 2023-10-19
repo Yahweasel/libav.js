@@ -52,18 +52,19 @@ all packets, you must use `libav.av_write_trailer`. You may write packets with
 ### `ff_write_multi`
 ```
 ff_write_multi(
-    oc: number, pkt: number, inPackets: Packet[], interleave?: boolean
+    oc: number, pkt: number, inPackets: (Packet | number)[], interleave?: boolean
 ): Promise<void>
 ```
 
 Write packets to an output context. You need to not just provide the packet(s)
-in libav.js format (`inPackets`), but allocate space for packets in libav
-format, so there's somewhere to write them to temporarily (`pkt`). Use
-`av_packet_alloc` (and eventually, `av_packet_free`) for that, or get it from
-one of the AVCodec metafunctions. `interleave` means that it will use
-`av_interleaved_write_frame`, and if `interleave===false`, it will use `av_write_frame`
-instead. `interleave` defaults to true, and this is usually the right option,
-but if your input is already interleaved, you should set this to false.
+(`inPackets`), but allocate space for packets in libav format, so there's
+somewhere to write them to temporarily (`pkt`). Packets may be in libav.js
+`Packet` format, or `AVPacket` pointers. Use `av_packet_alloc` (and eventually,
+`av_packet_free`) for that, or get it from one of the AVCodec metafunctions.
+`interleave` means that it will use `av_interleaved_write_frame`, and if
+`interleave===false`, it will use `av_write_frame` instead. `interleave`
+defaults to true, and this is usually the right option, but if your input is
+already interleaved, you should set this to false.
 
 
 ### `ff_free_muxer`
@@ -160,10 +161,11 @@ values: `"default", "ptr"`.
 
 ### `ff_copyin_packet`
 ```
-ff_copyin_packet(pktPtr: number, packet: Packet): Promise<void>
+ff_copyin_packet(pktPtr: number, packet: Packet | number): Promise<void>
 ```
 
-Copy a packet as a libav.js object (`packet`) into libav memory (`pktPtr`).
+Copy a packet as a libav.js object (`packet`) into libav memory (`pktPtr`). Also
+works to duplicate a packet that is already an `AVPacket` pointer as a number.
 
 
 # AVCodec
@@ -192,14 +194,15 @@ pkt, frame_size] = await ff_init_encoder(...)`.
 ### `ff_encode_multi`
 ```
 ff_encode_multi(
-    ctx: number, frame: number, pkt: number, inFrames: Frame[],
+    ctx: number, frame: number, pkt: number, inFrames: (Frame | number)[],
     fin?: boolean
 ): Promise<Packet[]>
 ```
 
 Encode multiple frames into packets. Set `fin` if these are the last frames;
 otherwise the arguments should be obvious. Note that it's fine to set `inFrames`
-to `[]` to encode no frames, typically to set `fin`.
+to `[]` to encode no frames, typically to set `fin`. The frames may be `AVFrame`
+pointers, as numbers.
 
 
 ### `ff_free_encoder`
@@ -234,7 +237,7 @@ ff_init_decoder(...)`.
 ### `ff_decode_multi`
 ```
 ff_decode_multi(
-    ctx: number, pkt: number, frame: number, inPackets: Packet[],
+    ctx: number, pkt: number, frame: number, inPackets: (Packet | number)[],
     config?: boolean | {
         fin?: boolean,
         ignoreErrors?: boolean,
@@ -243,9 +246,10 @@ ff_decode_multi(
 ): Promise<Frame[]>
 ```
 
-Decode multiple packets. `config` can be set to `true` as `fin`, which means
-these are the last packets. Alternatively, `config` can be set to an object, and
-`ignoreErrors` will attempt to continue decoding in the case of errors.
+Decode multiple packets, which may be libav.js `Packet`s or `AVPacket` pointers.
+`config` can be set to `true` as `fin`, which means these are the last packets.
+Alternatively, `config` can be set to an object, and `ignoreErrors` will attempt
+to continue decoding in the case of errors.
 
 There are multiple versions of `ff_copyout_frame`, only one of which is actually
 used to copy out frames. See the documentation of `ff_copyout_frame` below for
@@ -304,7 +308,7 @@ following values: `"default", "video", "video_packed", "ImageData", "ptr"`.
 
 ### `ff_copyin_frame`
 ```
-ff_copyin_frame(framePtr: number, frame: Frame): Promise<void>
+ff_copyin_frame(framePtr: number, frame: Frame | number): Promise<void>
 ```
 
 Copy a libav.js Frame object (`frame`) into libav memory (`framePtr`). Also
@@ -344,7 +348,7 @@ multiple outputs (sinks), then sink contexts is an array.
 ```
 ff_filter_multi@sync(
     srcs: number | number[], buffersink_ctx: number, framePtr: number,
-    inFrames: Frame[] | Frame[][], config?: boolean | {
+    inFrames: (Frame | number)[] | (Frame | number)[][], config?: boolean | {
         fin?: boolean,
         copyoutFrame?: string
     }
@@ -356,7 +360,8 @@ Filter one or more frames. Takes one or more source contexts (`srcs`), but *only
 one sink context* (`buffersink_ctx`). If you need to filter with multiple
 outputs, you need to use the lower-level libav functions. `inFrames` should be
 an array of frames if there's only one source, or an array of arrays if there
-are multiple sources.
+are multiple sources. Frames may be libav.js `Frame`s or `AVFrame` pointers as
+numbers.
 
 Also requires a frame pointer (`framePtr`) to use for temporary storage, which
 can be allocated directly or by an encoding/decoding metafunction.
@@ -373,7 +378,7 @@ how to use the `copyoutFrame` option.
 ```
 ff_decode_filter_multi(
     ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
-    frame: number, inPackets: Packet[],
+    frame: number, inPackets: (Packet | number)[],
     config?: boolean | {
         fin?: boolean,
         ignoreErrors?: boolean,
