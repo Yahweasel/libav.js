@@ -142,6 +142,10 @@ LibAVTestHarness = {
         for (const opt of opts) {
             oIdx++;
             this.files = [];
+            if (this.libav) {
+                this.libav.terminate();
+                this.libav = null;
+            }
             this.libAVOpts = opt;
 
             let idx = 0;
