@@ -783,7 +783,7 @@ var ff_free_decoder = Module.ff_free_decoder = function(c, pkt, frame) {
  */
 /* @types
  * ff_encode_multi@sync(
- *     ctx: number, frame: number, pkt: number, inFrames: Frame[],
+ *     ctx: number, frame: number, pkt: number, inFrames: (Frame | number)[],
  *     fin?: boolean
  * ): @promise@Packet[]@
  */
@@ -832,7 +832,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
  */
 /* @types
  * ff_decode_multi@sync(
- *     ctx: number, pkt: number, frame: number, inPackets: Packet[],
+ *     ctx: number, pkt: number, frame: number, inPackets: (Packet | number)[],
  *     config?: boolean | {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
@@ -1064,7 +1064,7 @@ Module.ff_init_demuxer_file = function() {
  */
 /* @types
  * ff_write_multi@sync(
- *     oc: number, pkt: number, inPackets: Packet[], interleave?: boolean
+ *     oc: number, pkt: number, inPackets: (Packet | number)[], interleave?: boolean
  * ): @promise@void@
  */
 var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interleave) {
@@ -1351,14 +1351,14 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
 /* @types
  * ff_filter_multi@sync(
  *     srcs: number, buffersink_ctx: number, framePtr: number,
- *     inFrames: Frame[], config?: boolean | {
+ *     inFrames: (Frame | number)[], config?: boolean | {
  *         fin?: boolean,
  *         copyoutFrame?: string
  *     }
  * ): @promise@Frame[]@;
  * ff_filter_multi@sync(
  *     srcs: number[], buffersink_ctx: number, framePtr: number,
- *     inFrames: Frame[][], config?: boolean[] | {
+ *     inFrames: (Frame | number)[][], config?: boolean[] | {
  *         fin?: boolean,
  *         copyoutFrame?: string
  *     }[]
@@ -1441,7 +1441,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
 /* @types
  * ff_decode_filter_multi@sync(
  *     ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
- *     frame: number, inPackets: Packet[],
+ *     frame: number, inPackets: (Packet | number)[],
  *     config?: boolean | {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
@@ -1741,9 +1741,9 @@ var ff_copyout_frame_versions = {
 /**
  * Copy in a frame.
  * @param framePtr  AVFrame
- * @param frame  Frame to copy in
+ * @param frame  Frame to copy in, as either a Frame or an AVFrame pointer
  */
-/// @types ff_copyin_frame@sync(framePtr: number, frame: Frame): @promise@void@
+/// @types ff_copyin_frame@sync(framePtr: number, frame: Frame | number): @promise@void@
 var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
     if (typeof frame === "number") {
         // This is a frame pointer, not a libav.js Frame
@@ -1942,9 +1942,9 @@ var ff_copyout_packet_versions = {
 /**
  * Copy in a packet.
  * @param pktPtr  AVPacket
- * @param packet  Packet to copy in.
+ * @param packet  Packet to copy in, as either a Packet or an AVPacket pointer
  */
-/// @types ff_copyin_packet@sync(pktPtr: number, packet: Packet): @promise@void@
+/// @types ff_copyin_packet@sync(pktPtr: number, packet: Packet | number): @promise@void@
 var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     if (typeof packet === "number") {
         // Input packet is an AVPacket pointer, duplicate it
