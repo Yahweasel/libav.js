@@ -38,11 +38,19 @@ libav.onwrite = function(name, pos, buf) {
 };
 
 // Get a shorter file
-await libav.ffmpeg("-i", "bbb.webm", "-map", "0:v", "-c:v", "copy", "-frames", "30", "tmp.webm");
+await libav.ffmpeg(
+    "-nostdin", "-loglevel", "quiet",
+    "-i", "bbb.webm",
+    "-map", "0:v", "-c:v", "copy", "-frames", "30",
+    "tmp.webm"
+);
 
 // Convert to a sequence of JPEGs
 await libav.mountwriterfs("/wfs");
-await libav.ffmpeg("-i", "tmp.webm", "/wfs/%06d.png");
+await libav.ffmpeg(
+    "-nostdin", "-loglevel", "quiet",
+    "-i", "tmp.webm", "/wfs/%06d.png"
+);
 await libav.unmount("/wfs");
 
 // Then write them
