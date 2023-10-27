@@ -38,4 +38,6 @@ jobs:
       #    name: build
       #    path: libav.js-*.zip
 
+      - run: make
+      - run: make build-all
       - run: npm test
