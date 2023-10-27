@@ -190,8 +190,7 @@
 
                         // Decode it
                         const frames = await libav.ff_decode_multi(
-                            c, pkt, frame, [vPacket],
-                            res === libav.AVERROR_EOF && vIdx === vPackets.length - 1
+                            c, pkt, frame, [vPacket], false
                         );
 
                         // Display any frames here
