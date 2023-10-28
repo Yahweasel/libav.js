@@ -96,9 +96,7 @@ LibAVTestHarness = {
         if (!opts && this.libav)
             return this.libav;
 
-        opts = opts || this.libAVOpts;
-
-        const ret = await LibAV.LibAV(opts);
+        const ret = await LibAV.LibAV(opts || this.libAVOpts);
         if (!opts)
             this.libav = ret;
 
@@ -159,9 +157,9 @@ LibAVTestHarness = {
                     await test.func(this);
                 } catch (ex) {
                     this.printErr("\n" +
-                        JSON.stringify(this.libAVOpts) + "\n" +
-                        test.name + "\n" +
-                        ex + "\n" + ex.stack);
+                        `Error in test ${test.name}\n` +
+                        "Options: " + JSON.stringify(this.libAVOpts) + "\n" +
+                        `Error: ${ex}\n${ex.stack}`);
                     fails++;
                 }
             }

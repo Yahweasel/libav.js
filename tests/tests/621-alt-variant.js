@@ -19,7 +19,12 @@
 let data;
 {
     const libav = await h.LibAV();
-    await libav.ffmpeg("-i", "bbb.webm", "-map", "0:a", "-c:a", "libvorbis", "tmp.ogg");
+    await libav.ffmpeg(
+        "-nostdin", "-loglevel", "quiet",
+        "-i", "bbb.webm",
+        "-map", "0:a", "-c:a", "libvorbis",
+        "tmp.ogg"
+    );
     data = await libav.readFile("tmp.ogg");
     await libav.unlink("tmp.ogg");
 }

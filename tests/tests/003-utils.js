@@ -37,7 +37,7 @@ h.utils.audioF32 = async function(file) {
         };
 
         await libav.ffmpeg(
-            "-nostdin", "-loglevel", "0",
+            "-nostdin", "-loglevel", "quiet",
             "-i", file,
             "-f", "f32le",
             "-ar", "48000",
@@ -48,7 +48,7 @@ h.utils.audioF32 = async function(file) {
     }
 
     if (file instanceof Array) {
-        if (file[0].data) {
+        if (file[0] && file[0].data) {
             if (file[0].data.buffer) {
                 // Frames of flat data
                 file = new Blob(file.map(x => x.data));
