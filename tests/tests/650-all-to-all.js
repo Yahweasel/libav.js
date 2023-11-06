@@ -18,6 +18,7 @@
 const formatCodecs = {
     "f32le": [null, "pcm_f32le", {nocheck: true}],
     "flac": [null, "flac"],
+    "hls": [null, null],
     "image2": [null, null],
     "ipod": ["libopenh264", "aac"],
     "mov": ["libopenh264", "aac"],
