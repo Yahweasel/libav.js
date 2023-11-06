@@ -99,8 +99,8 @@ static int jsfetch_open(URLContext *h, const char *url, int flags, AVDictionary 
  * Read from a fetch connection (JavaScript side).
  */
 EM_JS(int, jsfetch_read_js, (int idx, unsigned char *toBuf, int size), {
+    var jsfo = Module.libavjsJSFetch.fetches[idx];
     return Asyncify.handleAsync(function() { return Promise.all([]).then(function() {
-        var jsfo = Module.libavjsJSFetch.fetches[idx];
         if (jsfo.buf || jsfo.rej) {
             // Already have data
             var fromBuf = jsfo.buf;
@@ -109,7 +109,7 @@ EM_JS(int, jsfetch_read_js, (int idx, unsigned char *toBuf, int size), {
             if (fromBuf) {
                 if (fromBuf.done) {
                     // EOF
-                    return 0;
+                    return -0x20464f45 /* AVERROR_EOF */;
                 }
                 if (fromBuf.value.length > size) {
                     // Return some of the buffer
@@ -138,9 +138,10 @@ EM_JS(int, jsfetch_read_js, (int idx, unsigned char *toBuf, int size), {
         }
 
         // The next data isn't available yet. Force them to wait.
-        return new Promise(function(res) {
-            setTimeout(function() { res(-6 /* EAGAIN */); }, 100);
-        });
+        return Promise.race([
+            jsfo.next,
+            new Promise(function(res) { setTimeout(res, 100); })
+        ]).then(function() { return -6 /* EAGAIN */; });
     }); });
 });
 
@@ -182,6 +183,6 @@ const URLProtocol ff_jsfetch_protocol = {
     .priv_data_size     = sizeof(JSFetchContext),
     .priv_data_class    = &jsfetch_context_class,
     .flags              = URL_PROTOCOL_FLAG_NETWORK,
-    .default_whitelist  = "http,https"
+    .default_whitelist  = "jsfetch,http,https"
 };
 #endif

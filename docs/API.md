@@ -33,8 +33,8 @@ Initializes a muxer all at once, opening the file and initializing the format
 context. You can provide the format as a libav numerical code (`oformat`) or as
 a name (`format_name`), the filename to write to (which can of course be a
 device) (`filename`), and/or create it as a writer device automatically
-(`device`). You have the option not to open the file (`open=false`), in which
-case you will need to provide your own `pb`.
+(`device`). You have the option not to open the file (`open=false`, the
+default), in which case you will need to provide your own `pb`.
 
 For the streams to mux, each stream is in the form `[number, number, number]`,
 consisting of the codec context, `time_base_num`, and `time_base_den`,

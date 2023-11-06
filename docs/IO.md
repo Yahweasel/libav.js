@@ -10,7 +10,8 @@ JavaScript's `fetch` function to stream data over HTTP or HTTPS. This is not
 currently enabled by default in any build (other than "all"), but using an
 experimental build with `jsfetch` enabled, simply use, e.g., the URL
 `jsfetch:https://example.com/video.mkv` to use fetch. `jsfetch` does not
-currently support seeking or writing, only reading in a stream.
+currently support seeking or writing, only reading in a stream. If you enable
+the HLS demuxer, `jsfetch` supports reading from HLS streams as well.
 
 
 ## Reading

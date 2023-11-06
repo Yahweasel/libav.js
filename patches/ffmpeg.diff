@@ -11962,6 +11962,19 @@ index cbdf48d..aeb3767 100644
      if (ret == 0 && c->follow)
          return AVERROR(EAGAIN);
      if (ret == 0)
+diff --git a/libavformat/hls.c b/libavformat/hls.c
+index 8a96a37..ede65d6 100644
+--- a/libavformat/hls.c
++++ b/libavformat/hls.c
+@@ -673,6 +673,8 @@ static int open_url(AVFormatContext *s, AVIOContext **pb, const char *url,
+         is_http = 1;
+     } else if (av_strstart(proto_name, "data", NULL)) {
+         ;
++    } else if (av_strstart(proto_name, "jsfetch", NULL)) {
++        ;
+     } else
+         return AVERROR_INVALIDDATA;
+ 
 diff --git a/libavformat/oggdec.c b/libavformat/oggdec.c
 index 3b19e0b..474d82d 100644
 --- a/libavformat/oggdec.c

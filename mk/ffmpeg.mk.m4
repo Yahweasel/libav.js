@@ -60,8 +60,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/PATCHED: build/ffmpeg-$(FFMPEG_VERSION)/configure
 	cd build/ffmpeg-$(FFMPEG_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/ffmpeg.diff )
 	touch $@
 
-build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c: build/ffmpeg-$(FFMPEG_VERSION)/configure
-	cp patches/jsfetch.c $@
+build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c: patches/jsfetch.c \
+	build/ffmpeg-$(FFMPEG_VERSION)/configure
+	cp $< $@
 	touch $@
 
 build/ffmpeg-$(FFMPEG_VERSION)/configure: build/ffmpeg-$(FFMPEG_VERSION).tar.xz
