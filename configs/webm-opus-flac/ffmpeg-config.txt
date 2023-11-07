@@ -4,15 +4,18 @@
 --enable-muxer=ogg
 --enable-demuxer=matroska
 --enable-muxer=matroska --enable-muxer=webm
+--enable-parser=opus
 --enable-libopus
 --enable-decoder=libopus
 --enable-bsf=opus_metadata
 --enable-encoder=libopus
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-parser=flac
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-filter=scale
+--enable-parser=vp8
 --enable-libvpx
 --enable-decoder=libvpx_vp8
 --enable-libvpx

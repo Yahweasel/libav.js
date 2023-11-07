@@ -18,33 +18,33 @@ const cproc = require("child_process");
 const fs = require("fs");
 
 const configs = [
-    ["default", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "format-wav", "audio-filters"]],
-    ["lite", ["format-ogg", "codec-libopus", "format-flac", "codec-flac", "format-wav", "audio-filters"]],
-    ["fat", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-wavpack", "codec-alac", "format-wav", "audio-filters"]],
-    ["obsolete", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "audio-filters"]],
-    ["opus", ["format-ogg", "codec-libopus"]],
-    ["flac", ["format-flac", "codec-flac"]],
-    ["opus-flac", ["format-ogg", "codec-libopus", "format-flac", "codec-flac"]],
-    ["all-audio-cli", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "format-wav", "format-pcm_f32le", "codec-pcm_f32le", "audio-filters", "cli", "workerfs"]],
+    ["default", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "format-wav", "audio-filters"]],
+    ["lite", ["format-ogg", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "format-wav", "audio-filters"]],
+    ["fat", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "format-wavpack", "codec-alac", "format-wav", "audio-filters"]],
+    ["obsolete", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "audio-filters"]],
+    ["opus", ["format-ogg", "parser-opus", "codec-libopus"]],
+    ["flac", ["format-flac", "parser-flac", "codec-flac"]],
+    ["opus-flac", ["format-ogg", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac"]],
+    ["all-audio-cli", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "format-wav", "format-pcm_f32le", "codec-pcm_f32le", "audio-filters", "cli", "workerfs"]],
 
-    ["webm", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "format-wav", "audio-filters"]],
-    ["webm-opus-flac", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8"]],
-    ["mediarecorder-transcoder", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264"]],
-    ["open-media", ["format-ogg", "format-webm", "codec-libopus", "format-flac", "codec-flac", "codec-libvorbis", "swscale", "libvpx", "codec-libvpx_vp8", "codec-libvpx_vp9", "codec-libaom_av1"]],
-    ["rawvideo", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "format-rawvideo", "codec-rawvideo"]],
+    ["webm", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "format-wav", "audio-filters"]],
+    ["webm-opus-flac", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8"]],
+    ["mediarecorder-transcoder", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264"]],
+    ["open-media", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-vp9", "codec-libvpx_vp9", "parser-av1", "codec-libaom_av1"]],
+    ["rawvideo", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264", "format-rawvideo", "codec-rawvideo"]],
 
-    ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "codec-libopus", "codec-aac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "bsf-extract_extradata", "bsf-vp9_metadata", "bsf-h264_metadata", "bsf-hevc_metadata", "bsf-av1_metadata"]],
+    ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "parser-opus", "codec-libopus", "parser-aac", "codec-aac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "bsf-extract_extradata", "parser-vp9", "bsf-vp9_metadata", "parser-h264", "bsf-h264_metadata", "parser-hevc", "bsf-hevc_metadata", "bsf-av1_metadata"]],
 
     // These are mainly here so that "all" will have them for testing
-    ["images", ["format-webm", "format-image2", "codec-gif", "codec-mjpeg", "codec-png"]],
-    ["h265", ["format-mp4", "format-webm", "swscale", "decoder-hevc"]],
+    ["images", ["format-webm", "format-image2", "parser-gif", "codec-gif", "parser-mjpeg", "codec-mjpeg", "parser-png", "codec-png"]],
+    ["h265", ["format-mp4", "format-webm", "swscale", "parser-hevc", "decoder-hevc"]],
     ["prores", ["format-mp4", "format-webm", "swscale", "codec-prores"]],
     ["qtrle", ["format-mov", "swscale", "codec-qtrle"]],
     ["jsfetch", ["protocol-jsfetch"]],
     ["hls", ["format-hls"]],
 
     // Patent and/or license encumbered encoders
-    ["mediarecorder-openh264", ["format-ogg", "format-webm", "codec-libopus", "format-mp4", "codec-aac", "format-flac", "codec-flac", "swscale", "libvpx", "codec-libvpx_vp8", "decoder-h264", "codec-libopenh264"]],
+    ["mediarecorder-openh264", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264", "codec-libopenh264"]],
 
     ["empty", []],
     ["all", null]

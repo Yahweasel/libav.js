@@ -4,16 +4,19 @@
 --enable-muxer=ogg
 --enable-demuxer=matroska
 --enable-muxer=matroska --enable-muxer=webm
+--enable-parser=opus
 --enable-libopus
 --enable-decoder=libopus
 --enable-bsf=opus_metadata
 --enable-encoder=libopus
 --enable-demuxer=mov
 --enable-muxer=ipod
+--enable-parser=aac
 --enable-decoder=aac
 --enable-encoder=aac
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-parser=flac
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
@@ -27,6 +30,7 @@
 --enable-filter=bandpass --enable-filter=bandreject --enable-filter=dynaudnorm
 --enable-filter=equalizer --enable-filter=loudnorm --enable-filter=pan
 --enable-filter=amix --enable-filter=volume --enable-filter=anull
+--enable-parser=vorbis
 --enable-libvorbis
 --enable-decoder=libvorbis
 --enable-encoder=libvorbis
@@ -47,18 +51,22 @@
 --enable-encoder=pcm_f32le
 --enable-ffmpeg --enable-ffprobe
 --enable-filter=scale
+--enable-parser=vp8
 --enable-libvpx
 --enable-decoder=libvpx_vp8
 --enable-libvpx
 --enable-encoder=libvpx_vp8
+--enable-parser=h264
 --enable-decoder=h264
 --enable-bsf=h264_metadata
 --enable-bsf=extract_extradata
+--enable-parser=vp9
 --enable-libvpx
 --enable-decoder=libvpx_vp9
 --enable-bsf=vp9_metadata
 --enable-libvpx
 --enable-encoder=libvpx_vp9
+--enable-parser=av1
 --enable-libaom
 --enable-decoder=libaom_av1
 --enable-bsf=av1_metadata
@@ -71,14 +79,18 @@
 --enable-bsf=extract_extradata
 --enable-bsf=vp9_metadata
 --enable-bsf=h264_metadata
+--enable-parser=hevc
 --enable-bsf=hevc_metadata
 --enable-bsf=av1_metadata
 --enable-demuxer=image2
 --enable-muxer=image2
+--enable-parser=gif
 --enable-decoder=gif
 --enable-encoder=gif
+--enable-parser=mjpeg
 --enable-decoder=mjpeg
 --enable-encoder=mjpeg
+--enable-parser=png
 --enable-zlib
 --enable-decoder=png
 --enable-encoder=png

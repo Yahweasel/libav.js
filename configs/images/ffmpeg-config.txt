@@ -4,10 +4,13 @@
 --enable-muxer=matroska --enable-muxer=webm
 --enable-demuxer=image2
 --enable-muxer=image2
+--enable-parser=gif
 --enable-decoder=gif
 --enable-encoder=gif
+--enable-parser=mjpeg
 --enable-decoder=mjpeg
 --enable-encoder=mjpeg
+--enable-parser=png
 --enable-zlib
 --enable-decoder=png
 --enable-encoder=png

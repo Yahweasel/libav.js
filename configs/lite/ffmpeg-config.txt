@@ -2,12 +2,14 @@
 --enable-filter=aresample
 --enable-demuxer=ogg
 --enable-muxer=ogg
+--enable-parser=opus
 --enable-libopus
 --enable-decoder=libopus
 --enable-bsf=opus_metadata
 --enable-encoder=libopus
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-parser=flac
 --enable-decoder=flac
 --enable-encoder=flac
 --enable-decoder=pcm_s16le --enable-decoder=pcm_s24le

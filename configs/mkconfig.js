@@ -65,6 +65,7 @@ function addFragment(out, part) {
                    res[1] === "decoder" ||
                    res[1] === "encoder" ||
                    res[1] === "filter" ||
+                   res[1] === "parser" ||
                    res[1] === "bsf") {
             // Just add the ffmpeg config directly
             out["ffmpeg-config.txt"].write(

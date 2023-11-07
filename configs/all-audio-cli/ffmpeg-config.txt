@@ -4,18 +4,22 @@
 --enable-muxer=ogg
 --enable-demuxer=matroska
 --enable-muxer=matroska --enable-muxer=webm
+--enable-parser=opus
 --enable-libopus
 --enable-decoder=libopus
 --enable-bsf=opus_metadata
 --enable-encoder=libopus
 --enable-demuxer=mov
 --enable-muxer=ipod
+--enable-parser=aac
 --enable-decoder=aac
 --enable-encoder=aac
 --enable-demuxer=flac
 --enable-muxer=flac
+--enable-parser=flac
 --enable-decoder=flac
 --enable-encoder=flac
+--enable-parser=vorbis
 --enable-libvorbis
 --enable-decoder=libvorbis
 --enable-encoder=libvorbis
