@@ -27,6 +27,7 @@ const formatCodecs = {
     "mov": mp4,
     "mp3": [null, "libmp3lame"],
     "mp4": mp4,
+    "mpegts": mp4,
     "rawvideo": ["rawvideo", null, {nocheck: true}],
     "wav": [null, "pcm_s16le"],
     "wv": [null, "wavpack"]
