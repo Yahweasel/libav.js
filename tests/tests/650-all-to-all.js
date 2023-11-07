@@ -16,6 +16,7 @@
 // Convert between all (viable) formats and test that they all work
 
 const formatCodecs = {
+    "adts": [null, "aac"],
     "f32le": [null, "pcm_f32le", {nocheck: true}],
     "flac": [null, "flac"],
     "hls": [null, null],
@@ -23,6 +24,7 @@ const formatCodecs = {
     "ipod": ["libopenh264", "aac"],
     "mov": ["libopenh264", "aac"],
     "mp3": [null, "libmp3lame"],
+    "mp4": ["libopenh264", "aac"],
     "rawvideo": ["rawvideo", null, {nocheck: true}],
     "wav": [null, "pcm_s16le"],
     "wv": [null, "wavpack"]
