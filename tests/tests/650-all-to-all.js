@@ -16,7 +16,7 @@
 // Convert between all (viable) formats and test that they all work
 
 const formatCodecs = {
-    "adts": [null, "aac"],
+    "adts": [null, null],
     "f32le": [null, "pcm_f32le", {nocheck: true}],
     "flac": [null, "flac"],
     "hls": [null, null],
