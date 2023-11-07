@@ -15,16 +15,18 @@
 
 // Convert between all (viable) formats and test that they all work
 
+const mp4 = ["libopenh264", "aac"];
 const formatCodecs = {
     "adts": [null, null],
     "f32le": [null, "pcm_f32le", {nocheck: true}],
     "flac": [null, "flac"],
     "hls": [null, null],
     "image2": [null, null],
-    "ipod": ["libopenh264", "aac"],
-    "mov": ["libopenh264", "aac"],
+    "ipod": mp4,
+    "latm": [null, null],
+    "mov": mp4,
     "mp3": [null, "libmp3lame"],
-    "mp4": ["libopenh264", "aac"],
+    "mp4": mp4,
     "rawvideo": ["rawvideo", null, {nocheck: true}],
     "wav": [null, "pcm_s16le"],
     "wv": [null, "wavpack"]
