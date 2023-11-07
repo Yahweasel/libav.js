@@ -49,10 +49,10 @@ index 0000000..c2a8933
 +#include "../cmdutils.h"
 diff --git a/fftools/ffmpeg-5.1.3/ffmpeg.c b/fftools/ffmpeg-5.1.3/ffmpeg.c
 new file mode 100644
-index 0000000..70ef330
+index 0000000..1056c23
 --- /dev/null
 +++ b/fftools/ffmpeg-5.1.3/ffmpeg.c
-@@ -0,0 +1,4608 @@
+@@ -0,0 +1,4612 @@
 +/*
 + * Copyright (c) 2000-2003 Fabrice Bellard
 + *
@@ -4596,8 +4596,12 @@ index 0000000..70ef330
 +#endif
 +}
 +
++#ifdef __EMSCRIPTEN__
 +int ffmpeg_main(int argc, char **argv);
 +int ffmpeg_main(int argc, char **argv)
++#else
++int main(int argc, char **argv)
++#endif
 +{
 +    int i, ret;
 +    BenchmarkTimeStamps ti;
@@ -11555,7 +11559,7 @@ index 0000000..9d4ef61
 @@ -0,0 +1 @@
 +#include "../opt_common.h"
 diff --git a/fftools/ffmpeg.c b/fftools/ffmpeg.c
-index d721a5e..8469c1e 100644
+index d721a5e..92e53ab 100644
 --- a/fftools/ffmpeg.c
 +++ b/fftools/ffmpeg.c
 @@ -1,3 +1,6 @@
@@ -11599,17 +11603,20 @@ index d721a5e..8469c1e 100644
  }
  
  /* iterate over all output streams in all output files;
-@@ -4135,7 +4156,8 @@ static int64_t getmaxrss(void)
+@@ -4135,7 +4156,12 @@ static int64_t getmaxrss(void)
  #endif
  }
  
--int main(int argc, char **argv)
++#ifdef __EMSCRIPTEN__
 +int ffmpeg_main(int argc, char **argv);
 +int ffmpeg_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
  {
      int ret;
      BenchmarkTimeStamps ti;
-@@ -4194,3 +4216,4 @@ int main(int argc, char **argv)
+@@ -4194,3 +4220,4 @@ int main(int argc, char **argv)
      exit_program(received_nb_signals ? 255 : main_return_code);
      return main_return_code;
  }
@@ -11707,14 +11714,14 @@ index 055275d..4fea561 100644
  };
 +#endif
 diff --git a/fftools/ffprobe.c b/fftools/ffprobe.c
-index af927cb..b550b27 100644
+index af927cb..12cc546 100644
 --- a/fftools/ffprobe.c
 +++ b/fftools/ffprobe.c
 @@ -92,8 +92,11 @@ typedef struct InputFile {
      int       nb_streams;
  } InputFile;
  
-+#if 0
++#ifndef __EMSCRIPTEN__
 +/* Disabled so that we can have both mains in one program */
  const char program_name[] = "ffprobe";
  const int program_birth_year = 2007;
@@ -11827,7 +11834,7 @@ index af927cb..b550b27 100644
      return 0;
  }
  
-+#if 0
++#ifndef __EMSCRIPTEN__
 +/* Disabled so that we can have both mains in one program */
  void show_help_default(const char *opt, const char *arg)
  {
@@ -11840,17 +11847,20 @@ index af927cb..b550b27 100644
  
  /**
   * Parse interval specification, according to the format:
-@@ -4050,7 +4118,8 @@ static inline int check_section_show_entries(int section_id)
+@@ -4050,7 +4118,12 @@ static inline int check_section_show_entries(int section_id)
              do_show_##varname = 1;                                      \
      } while (0)
  
--int main(int argc, char **argv)
++#ifdef __EMSCRIPTEN__
 +int ffprobe_main(int argc, char **argv);
 +int ffprobe_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
  {
      const Writer *w;
      WriterContext *wctx;
-@@ -4201,5 +4270,6 @@ end:
+@@ -4201,5 +4274,6 @@ end:
  
      avformat_network_deinit();
  
@@ -11872,15 +11882,19 @@ index a1ab4ce..7c707b3 100644
  }
 +#endif
 diff --git a/libavcodec/libopenh264enc.c b/libavcodec/libopenh264enc.c
-index 8b4755f..da39340 100644
+index 8b4755f..9961b00 100644
 --- a/libavcodec/libopenh264enc.c
 +++ b/libavcodec/libopenh264enc.c
-@@ -378,7 +378,7 @@ static int svc_encode_frame(AVCodecContext *avctx, AVPacket *avpkt,
+@@ -378,7 +378,11 @@ static int svc_encode_frame(AVCodecContext *avctx, AVPacket *avpkt,
      sp.iPicHeight = avctx->height;
  
      if (frame->pict_type == AV_PICTURE_TYPE_I) {
 -        (*s->encoder)->ForceIntraFrame(s->encoder, true);
-+        (*s->encoder)->ForceIntraFrame(s->encoder, true, -1);
++        (*s->encoder)->ForceIntraFrame(s->encoder, true
++#ifdef __EMSCRIPTEN__
++            , -1
++#endif
++        );
      }
  
      encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);
@@ -11915,23 +11929,26 @@ index 47bbbbf..d44d398 100644
  OBJS-$(CONFIG_LIBAMQP_PROTOCOL)          += libamqp.o urldecode.o
  OBJS-$(CONFIG_LIBRIST_PROTOCOL)          += librist.o
 diff --git a/libavformat/file.c b/libavformat/file.c
-index cbdf48d..aeb3767 100644
+index cbdf48d..b45dd03 100644
 --- a/libavformat/file.c
 +++ b/libavformat/file.c
-@@ -41,6 +41,8 @@
+@@ -41,6 +41,10 @@
  #include "os_support.h"
  #include "url.h"
  
++#ifdef __EMSCRIPTEN__
 +#include <emscripten.h>
++#endif
 +
  /* Some systems may not have S_ISFIFO */
  #ifndef S_ISFIFO
  #  ifdef S_IFIFO
-@@ -135,12 +137,34 @@ static const AVClass fd_class = {
+@@ -135,12 +139,38 @@ static const AVClass fd_class = {
      .version    = LIBAVUTIL_VERSION_INT,
  };
  
 +/* libav.js */
++#ifdef __EMSCRIPTEN__
 +EM_JS(void, libavjs_wait_reader, (int fd), {
 +    return Asyncify.handleAsync(function() {
 +        return new Promise(function(res) {
@@ -11942,6 +11959,7 @@ index cbdf48d..aeb3767 100644
 +        });
 +    });
 +});
++#endif
 +/* /libav.js */
 +
  static int file_read(URLContext *h, unsigned char *buf, int size)
@@ -11952,11 +11970,13 @@ index cbdf48d..aeb3767 100644
      ret = read(c->fd, buf, size);
 +
 +    /* libav.js */
++#ifdef __EMSCRIPTEN__
 +    while (ret < 0 && errno == EAGAIN) {
 +        /* wait for more data */
 +        libavjs_wait_reader(c->fd);
 +        ret = read(c->fd, buf, size);
 +    }
++#endif
 +    /* /libav.js */
 +
      if (ret == 0 && c->follow)
@@ -11975,6 +11995,202 @@ index 8a96a37..ede65d6 100644
      } else
          return AVERROR_INVALIDDATA;
  
+diff --git a/libavformat/jsfetch.c b/libavformat/jsfetch.c
+new file mode 100644
+index 0000000..07bc47c
+--- /dev/null
++++ b/libavformat/jsfetch.c
+@@ -0,0 +1,190 @@
++/*
++ * JavaScript fetch metaprotocol for ffmpeg client
++ * Copyright (c) 2023 Yahweasel and contributors
++ *
++ * This file is part of FFmpeg in libav.js. The following license applies only
++ * to this file.
++ *
++ * Permission to use, copy, modify, and/or distribute this software for any
++ * purpose with or without fee is hereby granted.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
++ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
++ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
++ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++#include "config.h"
++#include "config_components.h"
++
++#include "libavutil/error.h"
++#include "libavutil/opt.h"
++
++#include "url.h"
++
++#ifdef __EMSCRIPTEN__
++#include <emscripten.h>
++#endif
++#include <errno.h>
++
++typedef struct JSFetchContext {
++    const AVClass *class;
++    // All of the real information is stored in a JavaScript structure
++    int idx;
++} JSFetchContext;
++
++static const AVOption options[] = {
++    { NULL }
++};
++
++#if CONFIG_JSFETCH_PROTOCOL
++static const AVClass jsfetch_context_class = {
++    .class_name = "jsfetch",
++    .item_name = av_default_item_name,
++    .option = options,
++    .version = LIBAVUTIL_VERSION_INT
++};
++
++/**
++ * Open a fetch connection (JavaScript side).
++ */
++EM_JS(int, jsfetch_open_js, (const char *url), {
++    return Asyncify.handleAsync(function() {
++        return Promise.all([]).then(function() {
++            url = UTF8ToString(url);
++            if (url.slice(0, 8) === "jsfetch:")
++                return fetch(url.slice(8));
++            else
++                return fetch(url);
++        }).then(function(response) {
++            if (!Module.libavjsJSFetch)
++                Module.libavjsJSFetch = {ctr: 1, fetches: {}};
++            var jsf = Module.libavjsJSFetch;
++            var idx = jsf.ctr++;
++            var reader = response.body.getReader();
++            var jsfo = jsf.fetches[idx] = {
++                url: url,
++                response: response,
++                reader: reader,
++                next: reader.read().then(function(res) {
++                    jsfo.buf = res;
++                }).catch(function(rej) {
++                    jsfo.rej = rej;
++                }),
++                buf: null,
++                rej: null
++            };
++            return idx;
++        }).catch(function(ex) {
++            Module.fsThrownError = ex;
++            console.error(ex);
++            return -11 /* ECANCELED */;
++        });
++    });
++});
++
++/**
++ * Open a fetch connection.
++ */
++static int jsfetch_open(URLContext *h, const char *url, int flags, AVDictionary **options)
++{
++    JSFetchContext *ctx = h->priv_data;
++    h->is_streamed = 1;
++    ctx->idx = jsfetch_open_js(url);
++    return (ctx->idx > 0) ? 0 : ctx->idx;
++}
++
++/**
++ * Read from a fetch connection (JavaScript side).
++ */
++EM_JS(int, jsfetch_read_js, (int idx, unsigned char *toBuf, int size), {
++    var jsfo = Module.libavjsJSFetch.fetches[idx];
++    return Asyncify.handleAsync(function() { return Promise.all([]).then(function() {
++        if (jsfo.buf || jsfo.rej) {
++            // Already have data
++            var fromBuf = jsfo.buf;
++            var rej = jsfo.rej;
++
++            if (fromBuf) {
++                if (fromBuf.done) {
++                    // EOF
++                    return -0x20464f45 /* AVERROR_EOF */;
++                }
++                if (fromBuf.value.length > size) {
++                    // Return some of the buffer
++                    Module.HEAPU8.set(fromBuf.value.subarray(0, size), toBuf);
++                    fromBuf.value = fromBuf.value.subarray(size);
++                    return size;
++                }
++
++                /* Otherwise, return the remainder of the buffer and start
++                 * the next read */
++                var ret = fromBuf.value.length;
++                Module.HEAPU8.set(fromBuf.value, toBuf);
++                jsfo.buf = jsfo.rej = null;
++                jsfo.next = jsfo.reader.read().then(function(res) {
++                    jsfo.buf = res;
++                }).catch(function(rej) {
++                    jsfo.rej = rej;
++                });
++                return ret;
++            }
++
++            // Otherwise, there was an error
++            Module.fsThrownError = rej;
++            console.error(rej);
++            return -11 /* ECANCELED */;
++        }
++
++        // The next data isn't available yet. Force them to wait.
++        return Promise.race([
++            jsfo.next,
++            new Promise(function(res) { setTimeout(res, 100); })
++        ]).then(function() { return -6 /* EAGAIN */; });
++    }); });
++});
++
++/**
++ * Read from a fetch connection.
++ */
++static int jsfetch_read(URLContext *h, unsigned char *buf, int size)
++{
++    JSFetchContext *ctx = h->priv_data;
++    return jsfetch_read_js(ctx->idx, buf, size);
++}
++
++/**
++ * Close a fetch connection (JavaScript side).
++ */
++EM_JS(void, jsfetch_close_js, (int idx), {
++    var jsfo = Module.libavjsJSFetch.fetches[idx];
++    if (jsfo) {
++        try { jsfo.reader.cancel(); } catch (ex) {}
++        delete Module.libavjsJSFetch.fetches[idx];
++    }
++});
++
++/**
++ * Close a fetch connection.
++ */
++static int jsfetch_close(URLContext *h)
++{
++    JSFetchContext *ctx = h->priv_data;
++    jsfetch_close_js(ctx->idx);
++    return 0;
++}
++
++const URLProtocol ff_jsfetch_protocol = {
++    .name               = "jsfetch",
++    .url_open2          = jsfetch_open,
++    .url_read           = jsfetch_read,
++    .url_close          = jsfetch_close,
++    .priv_data_size     = sizeof(JSFetchContext),
++    .priv_data_class    = &jsfetch_context_class,
++    .flags              = URL_PROTOCOL_FLAG_NETWORK,
++    .default_whitelist  = "jsfetch,http,https"
++};
++#endif
 diff --git a/libavformat/oggdec.c b/libavformat/oggdec.c
 index 3b19e0b..474d82d 100644
 --- a/libavformat/oggdec.c
