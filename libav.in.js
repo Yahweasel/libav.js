@@ -444,6 +444,10 @@
             ret.AVIO_FLAG_NONBLOCK = 8;
             ret.AVIO_FLAG_DIRECT = 0x8000;
 
+            // Useful AVFMT_FLAGs
+            ret.AVFMT_FLAG_NOBUFFER = 0x40;
+            ret.AVFMT_FLAG_FLUSH_PACKETS = 0x200;
+
             // AVSEEK_FLAGs
             ret.AVSEEK_FLAG_BACKWARD = 1;
             ret.AVSEEK_FLAG_BYTE = 2;

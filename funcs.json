@@ -62,6 +62,7 @@
         ["avformat_alloc_output_context2_js", "number", ["number", "string", "string"]],
         ["avformat_close_input", null, ["number"]],
         ["avformat_find_stream_info", "number", ["number", "number"], {"async": true, "returnsErrno": true}],
+        ["avformat_flush", "number", ["number"]],
         ["avformat_free_context", null, ["number"]],
         ["avformat_new_stream", "number", ["number", "number"]],
         ["avformat_open_input", "number", ["number", "string", "number", "number"], {"async": true, "returnsErrno": true}],
@@ -73,6 +74,7 @@
         ["avformat_write_header", "number", ["number", "number"]],
         ["avio_open2_js", "number", ["string", "number", "number", "number"]],
         ["avio_close", "number", ["number"]],
+        ["avio_flush", null, ["number"]],
         ["av_find_best_stream", "number", ["number", "number", "number", "number", "number", "number"]],
         ["av_get_sample_fmt_name", "string", ["number"]],
         ["av_grow_packet", "number", ["number", "number"]],
@@ -297,6 +299,7 @@
             "durationhi"
         ]],
         ["AVFormatContext", [
+            "flags",
             "nb_streams",
             "oformat",
             "pb",
