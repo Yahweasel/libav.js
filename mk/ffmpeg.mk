@@ -47,6 +47,10 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h
 	touch $(@)
 
+part-install-base-%: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) ; \
+	$(MAKE) install prefix="$(PWD)/build/inst/base"
+
 # wasm + threads
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
@@ -66,6 +70,10 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h
 	touch $(@)
+
+part-install-thr-%: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) ; \
+	$(MAKE) install prefix="$(PWD)/build/inst/thr"
 
 # wasm + simd
 
@@ -87,6 +95,10 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: \
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h
 	touch $(@)
 
+part-install-simd-%: build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) ; \
+	$(MAKE) install prefix="$(PWD)/build/inst/simd"
+
 # wasm + threads + simd
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: \
@@ -107,6 +119,13 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: \
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h
 	touch $(@)
 
+part-install-thrsimd-%: build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) ; \
+	$(MAKE) install prefix="$(PWD)/build/inst/thrsimd"
+
+
+install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
+	true
 
 extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c
 

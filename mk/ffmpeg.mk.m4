@@ -43,6 +43,10 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h
 	touch $(@)
+
+part-install-$1-%: build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/libavformat/libavformat.a
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
+	$(MAKE) install prefix="$(PWD)/build/inst/$1"
 ]]])
 
 # Base (asm.js and wasm)
@@ -53,6 +57,9 @@ buildrule(thr, [[[--enable-pthreads --arch=emscripten]]], [[[$(THRFLAGS)]]])
 buildrule(simd, [[[--disable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm]]], [[[$(SIMDFLAGS)]]])
 # wasm + threads + simd
 buildrule(thrsimd, [[[--enable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm --enable-cross-compile]]], [[[$(THRFLAGS) $(SIMDFLAGS)]]])
+
+install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
+	true
 
 extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c
 
