@@ -7,7 +7,7 @@
 LIBAOM_VERSION=8dfcccd1
 
 build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefile
-	cd build/libaom-$(LIBAOM_VERSION)/build-$* ; \
+	cd build/libaom-$(LIBAOM_VERSION)/build-$* && \
 		$(MAKE) install
 
 # General build rule for any target
@@ -18,7 +18,7 @@ build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefi
 
 build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/base/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-base
-	cd build/libaom-$(LIBAOM_VERSION)/build-base ; \
+	cd build/libaom-$(LIBAOM_VERSION)/build-base && \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/base" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/base/cflags.txt`" \
@@ -36,7 +36,7 @@ build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/libaom-$(LIBAOM_VERSIO
 
 build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/simd/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-simd
-	cd build/libaom-$(LIBAOM_VERSION)/build-simd ; \
+	cd build/libaom-$(LIBAOM_VERSION)/build-simd && \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/simd" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/simd/cflags.txt`" \
@@ -55,7 +55,7 @@ build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/libaom-$(LIBAOM_VERSIO
 
 build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/thr/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-thr
-	cd build/libaom-$(LIBAOM_VERSION)/build-thr ; \
+	cd build/libaom-$(LIBAOM_VERSION)/build-thr && \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thr" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/thr/cflags.txt`" \
@@ -73,7 +73,7 @@ build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/libaom-$(LIBAOM_VERSION
 
 build/libaom-$(LIBAOM_VERSION)/build-thrsimd/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/thrsimd/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-thrsimd
-	cd build/libaom-$(LIBAOM_VERSION)/build-thrsimd ; \
+	cd build/libaom-$(LIBAOM_VERSION)/build-thrsimd && \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thrsimd" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/thrsimd/cflags.txt`" \
@@ -92,12 +92,12 @@ build/libaom-$(LIBAOM_VERSION)/build-thrsimd/Makefile: build/libaom-$(LIBAOM_VER
 extract: build/libaom-$(LIBAOM_VERSION)/PATCHED
 
 build/libaom-$(LIBAOM_VERSION)/PATCHED: build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt
-	cd build/libaom-$(LIBAOM_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/libaom.diff )
+	cd build/libaom-$(LIBAOM_VERSION) && ( test -e PATCHED || patch -p1 -i ../../patches/libaom.diff )
 	touch $@
 
 build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt: build/libaom-$(LIBAOM_VERSION).tar.gz
 	mkdir -p build/libaom-$(LIBAOM_VERSION)
-	cd build/libaom-$(LIBAOM_VERSION) ; \
+	cd build/libaom-$(LIBAOM_VERSION) && \
 		tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
 	touch $@
 

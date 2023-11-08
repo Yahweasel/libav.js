@@ -1,19 +1,19 @@
 LIBVPX_VERSION=1.13.0
 
 build/inst/%/lib/pkgconfig/vpx.pc: build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile
-	-cd build/libvpx-$(LIBVPX_VERSION)/build-$* ; \
+	-cd build/libvpx-$(LIBVPX_VERSION)/build-$* && \
 		$(MAKE)
-	cd build/libvpx-$(LIBVPX_VERSION)/build-$* ; \
+	cd build/libvpx-$(LIBVPX_VERSION)/build-$* && \
 		for i in gtest vp9rc vpx vpxrc ; do \
 			emranlib lib$${i}_g.a ; \
 			cp lib$${i}_g.a lib$${i}.a ; \
 		done
-	cd build/libvpx-$(LIBVPX_VERSION)/build-$* ; \
+	cd build/libvpx-$(LIBVPX_VERSION)/build-$* && \
 		$(MAKE) install
 
 build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile: build/libvpx-$(LIBVPX_VERSION)/configure | build/inst/%/cflags.txt
 	mkdir -p build/libvpx-$(LIBVPX_VERSION)/build-$*
-	cd build/libvpx-$(LIBVPX_VERSION)/build-$* ; \
+	cd build/libvpx-$(LIBVPX_VERSION)/build-$* && \
 		emconfigure ../../libvpx-$(LIBVPX_VERSION)/configure \
 			--prefix="$(PWD)/build/inst/$*" \
 			--target=generic-gnu \
@@ -27,7 +27,7 @@ build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile: build/libvpx-$(LIBVPX_VERSION)/
 extract: build/libvpx-$(LIBVPX_VERSION)/configure
 
 build/libvpx-$(LIBVPX_VERSION)/configure: build/libvpx-$(LIBVPX_VERSION).tar.gz
-	cd build ; tar zxf libvpx-$(LIBVPX_VERSION).tar.gz
+	cd build && tar zxf libvpx-$(LIBVPX_VERSION).tar.gz
 	touch $@
 
 build/libvpx-$(LIBVPX_VERSION).tar.gz:

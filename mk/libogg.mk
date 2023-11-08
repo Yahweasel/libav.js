@@ -1,12 +1,12 @@
 LIBOGG_VERSION=1.3.5
 
 build/inst/%/lib/pkgconfig/ogg.pc: build/libogg-$(LIBOGG_VERSION)/build-%/config.h
-	cd build/libogg-$(LIBOGG_VERSION)/build-$* ; \
+	cd build/libogg-$(LIBOGG_VERSION)/build-$* && \
 		$(MAKE) install
 
 build/libogg-$(LIBOGG_VERSION)/build-%/config.h: build/libogg-$(LIBOGG_VERSION)/configure | build/inst/%/cflags.txt
 	mkdir -p build/libogg-$(LIBOGG_VERSION)/build-$*
-	cd build/libogg-$(LIBOGG_VERSION)/build-$* ; \
+	cd build/libogg-$(LIBOGG_VERSION)/build-$* && \
 		emconfigure ../../libogg-$(LIBOGG_VERSION)/configure \
 			--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
 			--disable-shared \
@@ -16,7 +16,7 @@ build/libogg-$(LIBOGG_VERSION)/build-%/config.h: build/libogg-$(LIBOGG_VERSION)/
 extract: build/libogg-$(LIBOGG_VERSION)/configure
 
 build/libogg-$(LIBOGG_VERSION)/configure: build/libogg-$(LIBOGG_VERSION).tar.xz
-	cd build ; tar Jxf libogg-$(LIBOGG_VERSION).tar.xz
+	cd build && tar Jxf libogg-$(LIBOGG_VERSION).tar.xz
 	touch $@
 
 build/libogg-$(LIBOGG_VERSION).tar.xz:

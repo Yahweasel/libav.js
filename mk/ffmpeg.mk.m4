@@ -21,7 +21,7 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-%/ffbuild/config.mak
-	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$* ; $(MAKE)
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$* && $(MAKE)
 
 # General build rule for any target
 # Use: buildrule(target name, configure flags, CFLAGS)
@@ -30,9 +30,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/$1/cflags.txt
-	test ! -e configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/$1/g' configs/$(*)/deps.txt`
-	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
-	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) ; \
+	test ! -s configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/$1/g' configs/$(*)/deps.txt`
+	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
+	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$1/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
                 $2 \
@@ -64,7 +64,7 @@ install-%: part-install-base-% part-install-thr-% part-install-simd-% part-insta
 extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c
 
 build/ffmpeg-$(FFMPEG_VERSION)/PATCHED: build/ffmpeg-$(FFMPEG_VERSION)/configure
-	cd build/ffmpeg-$(FFMPEG_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/ffmpeg.diff )
+	cd build/ffmpeg-$(FFMPEG_VERSION) && ( test -e PATCHED || patch -p1 -i ../../patches/ffmpeg.diff )
 	touch $@
 
 build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c: patches/jsfetch.c \
@@ -73,7 +73,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c: patches/jsfetch.c \
 	touch $@
 
 build/ffmpeg-$(FFMPEG_VERSION)/configure: build/ffmpeg-$(FFMPEG_VERSION).tar.xz
-	cd build ; tar Jxf ffmpeg-$(FFMPEG_VERSION).tar.xz
+	cd build && tar Jxf ffmpeg-$(FFMPEG_VERSION).tar.xz
 	touch $@
 
 build/ffmpeg-$(FFMPEG_VERSION).tar.xz:

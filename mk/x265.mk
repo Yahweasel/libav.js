@@ -1,14 +1,14 @@
 X265_VERSION=3.5
 
 build/inst/%/lib/pkgconfig/x265.pc: build/x265_$(X265_VERSION)/build-%/Makefile
-	cd build/x265_$(X265_VERSION)/build-$* ; \
+	cd build/x265_$(X265_VERSION)/build-$* && \
 		$(MAKE)
-	cd build/x265_$(X265_VERSION)/build-$* ; \
+	cd build/x265_$(X265_VERSION)/build-$* && \
 		$(MAKE) install
 
 build/x265_$(X265_VERSION)/build-%/Makefile: build/x265_$(X265_VERSION)/source/CMakeLists.txt | build/inst/%/cflags.txt
 	mkdir -p build/x265_$(X265_VERSION)/build-$*
-	cd build/x265_$(X265_VERSION)/build-$* ; \
+	cd build/x265_$(X265_VERSION)/build-$* && \
 		emcmake cmake ../../x265_$(X265_VERSION)/source \
 		-DCMAKE_TOOLCHAIN_FILE="$(PWD)/mk/x265.cmake" \
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/$*" \
@@ -19,7 +19,7 @@ build/x265_$(X265_VERSION)/build-%/Makefile: build/x265_$(X265_VERSION)/source/C
 extract: build/x265_$(X265_VERSION)/source/CMakeLists.txt
 
 build/x265_$(X265_VERSION)/source/CMakeLists.txt: build/x265_$(X265_VERSION).tar.gz
-	cd build ; tar zxf x265_$(X265_VERSION).tar.gz
+	cd build && tar zxf x265_$(X265_VERSION).tar.gz
 	touch $@
 
 build/x265_$(X265_VERSION).tar.gz:

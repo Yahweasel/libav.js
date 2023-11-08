@@ -51,7 +51,18 @@ const configs = [
 ];
 let all = Object.create(null);
 
-(async function() {
+// Process arguments
+let createOnes = false;
+for (const arg of process.argv.slice(2)) {
+    if (arg === "--create-ones")
+        createOnes = true;
+    else {
+        console.error(`Unrecognized argument ${arg}`);
+        process.exit(1);
+    }
+}
+
+async function main() {
     for (let [name, config] of configs) {
         if (name !== "all") {
             for (const fragment of config)
@@ -65,4 +76,14 @@ let all = Object.create(null);
         });
         await new Promise(res => p.on("close", res));
     }
-})();
+
+    if (createOnes) {
+        for (const fragment of Object.keys(all)) {
+            const p = cproc.spawn("./mkconfig.js", [
+                `one-${fragment}`, JSON.stringify([fragment])
+            ], {stdio: "inherit"});
+            await new Promise(res => p.on("close", res));
+        }
+    }
+}
+main();

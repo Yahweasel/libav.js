@@ -7,7 +7,7 @@ changequote(`[[[', `]]]')
 LIBAOM_VERSION=8dfcccd1
 
 build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefile
-	cd build/libaom-$(LIBAOM_VERSION)/build-$* ; \
+	cd build/libaom-$(LIBAOM_VERSION)/build-$* && \
 		$(MAKE) install
 
 # General build rule for any target
@@ -15,7 +15,7 @@ build/inst/%/lib/pkgconfig/aom.pc: build/libaom-$(LIBAOM_VERSION)/build-%/Makefi
 define([[[buildrule]]], [[[
 build/libaom-$(LIBAOM_VERSION)/build-$1/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/$1/cflags.txt
 	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-$1
-	cd build/libaom-$(LIBAOM_VERSION)/build-$1 ; \
+	cd build/libaom-$(LIBAOM_VERSION)/build-$1 && \
 		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/$1" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/$1/cflags.txt`" \
@@ -41,12 +41,12 @@ buildrule(thrsimd, [[[]]])
 extract: build/libaom-$(LIBAOM_VERSION)/PATCHED
 
 build/libaom-$(LIBAOM_VERSION)/PATCHED: build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt
-	cd build/libaom-$(LIBAOM_VERSION) ; ( test -e PATCHED || patch -p1 -i ../../patches/libaom.diff )
+	cd build/libaom-$(LIBAOM_VERSION) && ( test -e PATCHED || patch -p1 -i ../../patches/libaom.diff )
 	touch $@
 
 build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt: build/libaom-$(LIBAOM_VERSION).tar.gz
 	mkdir -p build/libaom-$(LIBAOM_VERSION)
-	cd build/libaom-$(LIBAOM_VERSION) ; \
+	cd build/libaom-$(LIBAOM_VERSION) && \
 		tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
 	touch $@
 

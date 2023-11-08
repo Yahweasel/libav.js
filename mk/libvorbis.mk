@@ -1,7 +1,7 @@
 LIBVORBIS_VERSION=1.3.7
 
 build/inst/%/lib/pkgconfig/vorbis.pc: build/libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h
-	cd build/libvorbis-$(LIBVORBIS_VERSION)/build-$* ; \
+	cd build/libvorbis-$(LIBVORBIS_VERSION)/build-$* && \
 		$(MAKE) install
 	# This .pc file assumes .so semantics :(
 	sed 's/-lvorbisenc/-lvorbisenc -lvorbis -logg/g' < build/inst/$*/lib/pkgconfig/vorbisenc.pc > build/inst/$*/lib/pkgconfig/vorbisenc.pc.tmp
@@ -11,7 +11,7 @@ build/libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h: build/inst/%/lib/pkgconfi
 	build/libvorbis-$(LIBVORBIS_VERSION)/configure \
 	| build/inst/%/cflags.txt
 	mkdir -p build/libvorbis-$(LIBVORBIS_VERSION)/build-$*
-	cd build/libvorbis-$(LIBVORBIS_VERSION)/build-$* ; \
+	cd build/libvorbis-$(LIBVORBIS_VERSION)/build-$* && \
 		emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$*/lib/pkgconfig" \
 			../../libvorbis-$(LIBVORBIS_VERSION)/configure \
 			--prefix="$(PWD)/build/inst/$*" --host=mipsel-sysv \
@@ -22,7 +22,7 @@ build/libvorbis-$(LIBVORBIS_VERSION)/build-%/config.h: build/inst/%/lib/pkgconfi
 extract: build/libvorbis-$(LIBVORBIS_VERSION)/configure
 
 build/libvorbis-$(LIBVORBIS_VERSION)/configure: build/libvorbis-$(LIBVORBIS_VERSION).tar.xz
-	cd build ; tar Jxf libvorbis-$(LIBVORBIS_VERSION).tar.xz
+	cd build && tar Jxf libvorbis-$(LIBVORBIS_VERSION).tar.xz
 	touch $@
 
 build/libvorbis-$(LIBVORBIS_VERSION).tar.xz:
