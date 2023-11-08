@@ -1,6 +1,3 @@
-diff --git a/PATCHED b/PATCHED
-new file mode 100644
-index 0000000..e69de29
 diff --git a/codec/api/wels/codec_api.h b/codec/api/wels/codec_api.h
 index a1326c8..7d57e0f 100644
 --- a/codec/api/wels/codec_api.h
@@ -29,7 +26,7 @@ index 4477e34..37f0adf 100644
  #define HW_NCPU_NAME "hw.logicalcpu"
  #else
 diff --git a/codec/decoder/core/src/wels_decoder_thread.cpp b/codec/decoder/core/src/wels_decoder_thread.cpp
-index d05aa45..e81e593 100644
+index d05aa45..7eafe90 100644
 --- a/codec/decoder/core/src/wels_decoder_thread.cpp
 +++ b/codec/decoder/core/src/wels_decoder_thread.cpp
 @@ -48,9 +48,6 @@
@@ -42,3 +39,14 @@ index d05aa45..e81e593 100644
  #ifdef __APPLE__
  #define HW_NCPU_NAME "hw.logicalcpu"
  #else
+@@ -249,8 +246,10 @@ int SemWait (SWelsDecSemphore* s, int32_t timeout) {
+ #if defined(__APPLE__)
+         rc = pthread_cond_timedwait (& (s->e), & (s->m), &ts);
+ #else
++#if !defined(__EMSCRIPTEN__) || defined(__EMSCRIPTEN_PTHREADS__)
+         rc = sem_timedwait (s->e, &ts);
+         if (rc != 0) rc = errno;
++#endif
+ #endif
+         if (rc != EINTR) {
+           // if timed out we return to the caller
