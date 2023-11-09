@@ -1625,19 +1625,29 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(fram
  */
 /// @types ff_frame_video_packed_size@sync(frame: number): @promise@Frame@
 var ff_frame_video_packed_size = Module.ff_frame_video_packed_size = function(frame) {
+    // FIXME: duplication
+    var width = AVFrame_width(frame);
     var height = AVFrame_height(frame);
     var format = AVFrame_format(frame);
     var desc = av_pix_fmt_desc_get(format);
+
+    // VERY simple bpp, assuming all components are 8-bit
+    var bpp = 1;
+    if (!(AVPixFmtDescriptor_flags(desc) & 0x10) /* planar */)
+        bpp *= AVPixFmtDescriptor_nb_components(desc);
 
     var dataSz = 0;
     for (var i = 0; i < 8 /* AV_NUM_DATA_POINTERS */; i++) {
         var linesize = AVFrame_linesize_a(frame, i);
         if (!linesize)
             break;
+        var w = width * bpp;
         var h = height;
-        if (i === 1 || i === 2)
+        if (i === 1 || i === 2) {
+            w >>= AVPixFmtDescriptor_log2_chroma_w(desc);
             h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
-        dataSz += linesize * h;
+        }
+        dataSz += w * h;
     }
 
     return dataSz;
@@ -1646,9 +1656,15 @@ var ff_frame_video_packed_size = Module.ff_frame_video_packed_size = function(fr
 /* Copy out just the packed data from this frame, into the given buffer. Used
  * internally. */
 var ff_copyout_frame_data_packed = Module.ff_copyout_frame_data_packed = function(data, frame) {
+    var width = AVFrame_width(frame);
     var height = AVFrame_height(frame);
     var format = AVFrame_format(frame);
     var desc = av_pix_fmt_desc_get(format);
+
+    // VERY simple bpp, assuming all components are 8-bit
+    var bpp = 1;
+    if (!(AVPixFmtDescriptor_flags(desc) & 0x10) /* planar */)
+        bpp *= AVPixFmtDescriptor_nb_components(desc);
 
     // Copy it out
     var dIdx = 0;
@@ -1657,15 +1673,19 @@ var ff_copyout_frame_data_packed = Module.ff_copyout_frame_data_packed = functio
         if (!linesize)
             break;
         var inData = AVFrame_data_a(frame, i);
+        var w = width * bpp;
         var h = height;
-        if (i === 1 || i === 2)
+        if (i === 1 || i === 2) {
+            w >>= AVPixFmtDescriptor_log2_chroma_w(desc);
             h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
+        }
         for (var y = 0; y < h; y++) {
+            var line = inData + y * linesize;
             data.set(
-                Module.HEAPU8.subarray(inData + y * linesize, inData + (y + 1) * linesize),
+                Module.HEAPU8.subarray(line, line + w),
                 dIdx
             );
-            dIdx += linesize;
+            dIdx += w;
         }
     }
 };

@@ -129,6 +129,7 @@ void AVFrame_sample_aspect_ratio_s(AVFrame *a, int n, int d) {
 
 /* AVPixFmtDescriptor */
 #define B(type, field) A(AVPixFmtDescriptor, type, field)
+B(uint64_t, flags)
 B(uint8_t, nb_components)
 B(uint8_t, log2_chroma_h)
 B(uint8_t, log2_chroma_w)

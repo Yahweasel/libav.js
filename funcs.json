@@ -211,6 +211,7 @@
             "width"
         ]],
         ["AVPixFmtDescriptor", [
+            "flags",
             "log2_chroma_h",
             "log2_chroma_w",
             "nb_components"
