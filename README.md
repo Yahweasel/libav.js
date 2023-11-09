@@ -305,21 +305,11 @@ derivative works. Built libraries have their correct license headers.
 
 Emscripten's implementation of an in-memory filesystem has severe limitations.
 You're recommended to use virtual devices, implemented by `libav.js`, for most
-I/O.
+I/O. See [IO.md](docs/IO.md) for more details.
 
 ffmpeg was never designed to work asynchronously, and was only designed to work
 with blocking I/O. Still, it's possible to use libav.js with asynchronous input
-through devices.
-
-The `mkreaderdev` function creates a reader device, which simply acts as a pipe.
-That device can be used as a file for reading.
-
-Initializing a demuxer is particularly troublesome: you must start initializing
-and save the promise aside, then so long as something is waiting on the device,
-feed it data. See `tests/test-demuxing-device.js` for an example.
-
-Output through writer devices is also possible. See
-`tests/test-muxing-device.js` for an example.
+through these devices.
 
 
 ## TypeScript
