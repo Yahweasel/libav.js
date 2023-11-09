@@ -78,9 +78,30 @@ async function main() {
     }
 
     if (createOnes) {
-        for (const fragment of Object.keys(all)) {
+        const allFragments = Object.keys(all).map(x => {
+            // Split up codecs and formats
+            const p = /^([^-]*)-(.*)$/.exec(x);
+            if (!p)
+                return [x];
+            if (p[1] === "codec")
+                return [`decoder-${p[2]}`, `encoder-${p[2]}`, x]
+            else if (p[1] === "format")
+                return [`demuxer-${p[2]}`, `muxer-${p[2]}`, x]
+            else
+                return [x];
+        }).reduce((a, b) => a.concat(b));
+
+        for (const fragment of allFragments) {
+            // Fix fragment dependencies
+            let fragments = [fragment];
+            if (fragment.indexOf("libvpx") >= 0)
+                fragments.unshift("libvpx");
+            if (fragment === "parser-aac")
+                fragments.push("parser-ac3");
+
+            // And make the variant
             const p = cproc.spawn("./mkconfig.js", [
-                `one-${fragment}`, JSON.stringify([fragment])
+                `one-${fragment}`, JSON.stringify(fragments)
             ], {stdio: "inherit"});
             await new Promise(res => p.on("close", res));
         }

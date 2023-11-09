@@ -189,6 +189,9 @@ clean: halfclean
 distclean: clean
 	-rm -rf build/
 
+print-version:
+	@printf '%s\n' "$(LIBAVJS_VERSION)"
+
 .PRECIOUS: \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a \
 	dist/libav-$(LIBAVJS_VERSION)-%.js \
