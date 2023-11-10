@@ -4,7 +4,7 @@
 # not the generated version!
 
 LIBAVJS_VERSION_SUFFIX=
-LIBAVJS_VERSION=4.6.6.0$(LIBAVJS_VERSION_SUFFIX)
+LIBAVJS_VERSION=4.6.6.0.1$(LIBAVJS_VERSION_SUFFIX)
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz
@@ -21,6 +21,7 @@ EFLAGS=\
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
+	-s INITIAL_MEMORY=25165824 \
 	-s ALLOW_MEMORY_GROWTH=1
 
 # For debugging:
