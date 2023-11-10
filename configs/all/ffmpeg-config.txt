@@ -82,8 +82,6 @@
 --enable-parser=hevc
 --enable-bsf=hevc_metadata
 --enable-bsf=av1_metadata
---enable-demuxer=webp
---enable-muxer=webp
 --enable-demuxer=image2
 --enable-muxer=image2
 --enable-parser=gif
@@ -96,6 +94,8 @@
 --enable-zlib
 --enable-decoder=png
 --enable-encoder=png
+--enable-parser=webp
+--enable-decoder=webp
 --enable-decoder=hevc
 --enable-bsf=hevc_metadata
 --enable-bsf=extract_extradata

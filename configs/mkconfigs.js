@@ -38,8 +38,8 @@ const configs = [
     // These are here so that "all" will have them for testing
     ["extras", [
         // Images
-        "format-webp", "format-image2", "parser-gif", "codec-gif",
-        "parser-mjpeg", "codec-mjpeg", "parser-png", "codec-png",
+        "format-image2", "parser-gif", "codec-gif", "parser-mjpeg",
+        "codec-mjpeg", "parser-png", "codec-png", "parser-webp", "decoder-webp",
 
         // H.265
         "parser-hevc", "decoder-hevc",
