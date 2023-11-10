@@ -1,3 +1,0 @@
-build/inst/@TARGET/lib/pkgconfig/opus.pc
-build/inst/@TARGET/lib/pkgconfig/vpx.pc
-build/inst/@TARGET/lib/pkgconfig/x265.pc

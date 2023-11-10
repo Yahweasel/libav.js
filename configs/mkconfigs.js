@@ -35,13 +35,21 @@ const configs = [
 
     ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "parser-opus", "codec-libopus", "parser-aac", "codec-aac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "bsf-extract_extradata", "parser-vp9", "bsf-vp9_metadata", "parser-h264", "bsf-h264_metadata", "parser-hevc", "bsf-hevc_metadata", "bsf-av1_metadata"]],
 
-    // These are mainly here so that "all" will have them for testing
-    ["images", ["format-webm", "format-image2", "parser-gif", "codec-gif", "parser-mjpeg", "codec-mjpeg", "parser-png", "codec-png"]],
-    ["h265", ["format-mp4", "format-webm", "swscale", "parser-hevc", "decoder-hevc"]],
-    ["prores", ["format-mp4", "format-webm", "swscale", "codec-prores"]],
-    ["qtrle", ["format-mov", "swscale", "codec-qtrle"]],
-    ["jsfetch", ["protocol-jsfetch"]],
-    ["hls", ["format-hls"]],
+    // These are here so that "all" will have them for testing
+    ["extras", [
+        // Images
+        "format-webp", "format-image2", "parser-gif", "codec-gif",
+        "parser-mjpeg", "codec-mjpeg", "parser-png", "codec-png",
+
+        // H.265
+        "parser-hevc", "decoder-hevc",
+
+        // Apple-y lossless
+        "codec-prores", "codec-qtrle",
+
+        // HLS
+        "format-hls", "protocol-jsfetch"
+    ]],
 
     // Patent and/or license encumbered encoders
     ["mediarecorder-openh264", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264", "codec-libopenh264"]],

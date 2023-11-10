@@ -82,6 +82,8 @@
 --enable-parser=hevc
 --enable-bsf=hevc_metadata
 --enable-bsf=av1_metadata
+--enable-demuxer=webp
+--enable-muxer=webp
 --enable-demuxer=image2
 --enable-muxer=image2
 --enable-parser=gif
@@ -100,13 +102,11 @@
 --enable-decoder=prores
 --enable-bsf=prores_metadata
 --enable-encoder=prores
---enable-demuxer=mov
---enable-muxer=mov
 --enable-decoder=qtrle
 --enable-encoder=qtrle
---enable-protocol=jsfetch
 --enable-demuxer=hls
 --enable-muxer=hls
+--enable-protocol=jsfetch
 --enable-libopenh264
 --enable-decoder=libopenh264
 --enable-encoder=libopenh264
