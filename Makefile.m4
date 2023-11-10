@@ -90,7 +90,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/$1/g ; s/@DBG/$2/g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \

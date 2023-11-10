@@ -93,7 +93,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/asm/g ; s/@DBG//g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -128,7 +128,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/asm/g ; s/@DBG/dbg./g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -164,7 +164,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/wasm/g ; s/@DBG//g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -199,7 +199,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/wasm/g ; s/@DBG/dbg./g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -235,7 +235,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thr/g ; s/@DBG//g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -270,7 +270,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thr/g ; s/@DBG/dbg./g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -306,7 +306,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.simd.js: build/ffmpeg-$(FFMPEG_VERSION)/build-si
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/simd/g ; s/@DBG//g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).simd.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).simd.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).simd.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -341,7 +341,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/simd/g ; s/@DBG/dbg./g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.simd.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.simd.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.simd.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -377,7 +377,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thrsimd/g ; s/@DBG//g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).thrsimd.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).thrsimd.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).thrsimd.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
@@ -412,7 +412,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js: build/ffmpeg-$(FFMPEG_VERSION)/b
 	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thrsimd/g ; s/@DBG/dbg./g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thrsimd.wasm.map ] ; then \
-		./adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thrsimd.wasm.map \
+		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thrsimd.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
