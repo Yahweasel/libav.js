@@ -57,8 +57,9 @@ include.
 
 Each configuration has the following files:
 
- * `deps.txt`: The library dependencies of this configuration, used to direct
-   building of libraries.
+ * `deps.mk`: The library dependencies of this configuration, used to direct
+   building of libraries. This is actually created from `deps.txt` in the
+   fragments.
 
  * `ffmpeg-config.txt`: The configuration options to ffmpeg.
 
