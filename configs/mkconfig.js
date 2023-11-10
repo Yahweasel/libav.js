@@ -17,7 +17,7 @@
 const fs = require("fs");
 const name = process.argv[2];
 const parts = JSON.parse(process.argv[3]);
-const files = ["deps.txt", "ffmpeg-config.txt", "libs.txt", "license.js", "link-flags.txt"];
+const files = ["ffmpeg-config.txt", "libs.txt", "license.js", "link-flags.txt"];
 
 try {
     fs.mkdirSync(name);
@@ -40,6 +40,21 @@ function addFragment(out, part) {
             if (exists(inF))
                 out[file].write(fs.readFileSync(inF));
         }
+
+        // Add any dependencies
+        try {
+            const deps = fs.readFileSync(`fragments/${part}/deps.txt`, "utf8").split("\n");
+            for (const target of ["base", "simd", "thr", "thrsimd"]) {
+                for (const dep of deps) {
+                    if (!dep) continue;
+                    out["deps.mk"].write(
+                        `build/ffmpeg-$(FFMPEG_VERSION)/build-${target}-${name}/ffbuild/config.mak: ` +
+                        dep.replace(/@TARGET/g, target) +
+                        "\n"
+                    );
+                }
+            }
+        } catch (ex) {}
 
     } else {
         // Look for meta options
@@ -84,7 +99,7 @@ function addFragment(out, part) {
 (function() {
     // Open the files
     const out = {};
-    for (const file of files)
+    for (const file of files.concat(["deps.mk"]))
         out[file] = fs.createWriteStream(`${name}/${file}`);
 
     // Start the license header

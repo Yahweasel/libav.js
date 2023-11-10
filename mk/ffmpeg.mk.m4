@@ -30,7 +30,6 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/$1/cflags.txt
-	test ! -s configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/$1/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$1/lib/pkgconfig" \
@@ -57,6 +56,9 @@ buildrule(thr, [[[--enable-pthreads --arch=emscripten]]], [[[$(THRFLAGS)]]])
 buildrule(simd, [[[--disable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm]]], [[[$(SIMDFLAGS)]]])
 # wasm + threads + simd
 buildrule(thrsimd, [[[--enable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm --enable-cross-compile]]], [[[$(THRFLAGS) $(SIMDFLAGS)]]])
+
+# All dependencies
+include configs/*/deps.mk
 
 install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
 	true

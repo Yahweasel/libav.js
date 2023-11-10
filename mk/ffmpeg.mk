@@ -33,7 +33,6 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/base/cflags.txt
-	test ! -s configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/base/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/base/lib/pkgconfig" \
@@ -57,7 +56,6 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/thr/cflags.txt
-	test ! -s configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/thr/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/thr/lib/pkgconfig" \
@@ -81,7 +79,6 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/simd/cflags.txt
-	test ! -s configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/simd/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/simd/lib/pkgconfig" \
@@ -105,7 +102,6 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/thrsimd/cflags.txt
-	test ! -s configs/$(*)/deps.txt || $(MAKE) `sed 's/@TARGET/thrsimd/g' configs/$(*)/deps.txt`
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/thrsimd/lib/pkgconfig" \
@@ -123,6 +119,9 @@ part-install-thrsimd-%: build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavform
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) ; \
 	$(MAKE) install prefix="$(PWD)/build/inst/thrsimd"
 
+
+# All dependencies
+include configs/*/deps.mk
 
 install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
 	true

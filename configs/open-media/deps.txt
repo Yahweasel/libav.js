@@ -1,4 +1,0 @@
-build/inst/@TARGET/lib/pkgconfig/opus.pc
-build/inst/@TARGET/lib/pkgconfig/vorbis.pc
-build/inst/@TARGET/lib/pkgconfig/vpx.pc
-build/inst/@TARGET/lib/pkgconfig/aom.pc
