@@ -491,6 +491,7 @@ clean: halfclean
 	-rm -rf build/openh264-$(OPENH264_VERSION)
 	-rm -rf build/ffmpeg-$(FFMPEG_VERSION)
 	-rm -rf build/x265_$(X265_VERSION)
+	-rm -rf build/zlib-$(ZLIB_VERSION)
 
 distclean: clean
 	-rm -rf build/
