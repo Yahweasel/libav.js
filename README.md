@@ -374,8 +374,6 @@ the box”, but are not included in libav.js distributions.
 | ----------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ------------------------- | ------------------------- | --------- |
 | all-audio-cli		| x		| x		| x		| x		| x		| x		| x		| x							|							| floating-point wav, mp3, vorbis. Note 2 |
 | rawvideo			| x		| x		| x		| x		| x		| x		| 		| 							| VP8, H.264 (decoding), rawvideo | |
-| h265				| x		| 		| x		| 		| 		| 		| 		| 							| H.265 (decoding)			| Note 3 |
-| prores			| x		| x		| 		| 		| 		| 		| 		| 							| ProRes					| |
 | mediarecorder-transcoder | x | x	| x		| x		| x		| x		| 		| 							| VP8, H.264				| Note 3 |
 | all				| x		| x		| x		| x		| x		| x		| x		| x							| (All)						| (All) |
 
