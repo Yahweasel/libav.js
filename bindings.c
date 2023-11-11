@@ -515,20 +515,22 @@ AVFormatContext *avformat_alloc_output_context2_js(AVOutputFormat *oformat,
 }
 
 AVFormatContext *avformat_open_input_js(const char *url, AVInputFormat *fmt,
-    AVDictionary **options)
+    AVDictionary *options)
 {
     AVFormatContext *ret = NULL;
-    int err = avformat_open_input(&ret, url, fmt, options);
+    AVDictionary** options_p = &options;
+    int err = avformat_open_input(&ret, url, fmt, options_p);
     if (err < 0)
         fprintf(stderr, "[avformat_open_input_js] %s\n", av_err2str(err));
     return ret;
 }
 
 AVIOContext *avio_open2_js(const char *url, int flags,
-    const AVIOInterruptCB *int_cb, AVDictionary **options)
+    const AVIOInterruptCB *int_cb, AVDictionary *options)
 {
     AVIOContext *ret = NULL;
-    int err = avio_open2(&ret, url, flags, int_cb, options);
+    AVDictionary** options_p = &options;
+    int err = avio_open2(&ret, url, flags, int_cb, options_p);
     if (err < 0)
         fprintf(stderr, "[avio_open2_js] %s\n", av_err2str(err));
     return ret;
