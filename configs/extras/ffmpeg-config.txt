@@ -2,6 +2,9 @@
 --enable-filter=aresample
 --enable-demuxer=image2
 --enable-muxer=image2
+--enable-demuxer=image_gif_pipe
+--enable-demuxer=image_jpeg_pipe
+--enable-demuxer=image_png_pipe
 --enable-parser=gif
 --enable-decoder=gif
 --enable-encoder=gif
