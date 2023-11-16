@@ -40,10 +40,10 @@ async function main() {
     libav.onblockread = async (name, pos, len) => {
         const rb = Buffer.allocUnsafe(len);
         const rd = await inH.read(rb, 0, len, pos);
-        if (rd === 0)
+        if (rd.bytesRead === 0)
             await libav.ff_block_reader_dev_send(name, pos, null);
         else
-            await libav.ff_block_reader_dev_send(name, pos, rb.slice(0, rd));
+            await libav.ff_block_reader_dev_send(name, pos, rb.slice(0, rd.bytesRead));
     };
 
     // Do it
