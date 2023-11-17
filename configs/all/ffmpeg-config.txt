@@ -11,6 +11,8 @@
 --enable-encoder=libopus
 --enable-demuxer=mov
 --enable-muxer=ipod
+--enable-muxer=mov
+--enable-muxer=mp4
 --enable-parser=aac
 --enable-decoder=aac
 --enable-encoder=aac
@@ -113,3 +115,17 @@
 --enable-libopenh264
 --enable-decoder=libopenh264
 --enable-encoder=libopenh264
+--enable-filter=aevalsrc
+--enable-filter=asetpts
+--enable-filter=color
+--enable-filter=fps
+--enable-filter=crop
+--enable-filter=setpts
+--enable-filter=overlay
+--enable-filter=loop
+--enable-filter=split
+--enable-filter=asplit
+--enable-filter=alphaextract
+--enable-filter=alphamerge
+--enable-muxer=mp4
+--enable-encoder=mpeg4

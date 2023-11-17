@@ -1,1 +1,3 @@
 --enable-muxer=ipod
+--enable-muxer=mov
+--enable-muxer=mp4
