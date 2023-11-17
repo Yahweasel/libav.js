@@ -180,8 +180,9 @@ async function main()
     src_filename = "bbb.mp4";
 
     /* open input file, and allocate format context */
+    const options = await libav.av_dict_set_js(0, "foobar", "123");
     fmt_ctx = await
-        libav.avformat_open_input_js(src_filename, 0, 0);
+        libav.avformat_open_input_js(src_filename, 0, options);
     if (!fmt_ctx) {
         throw new Error(
             "Could not open source file");
