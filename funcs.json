@@ -11,6 +11,8 @@
         ["av_frame_make_writable", "number", ["number"]],
         ["av_frame_ref", "number", ["number", "number"]],
         ["av_frame_unref", null, ["number"]],
+        ["av_log_get_level", "number", []],
+        ["av_log_set_level", null, ["number"]],
         ["av_packet_alloc", "number", []],
         ["av_packet_clone", "number", ["number"]],
         ["av_packet_free", null, ["number"]],

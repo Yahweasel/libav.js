@@ -463,6 +463,17 @@
             ret.AVDISCARD_NONKEY = 32;
             ret.AVDISCARD_ALL = 48;
 
+            // AV_LOG levels
+            ret.AV_LOG_QUIET = -8;
+            ret.AV_LOG_PANIC = 0;
+            ret.AV_LOG_FATAL = 8;
+            ret.AV_LOG_ERROR = 16;
+            ret.AV_LOG_WARNING = 24;
+            ret.AV_LOG_INFO = 32;
+            ret.AV_LOG_VERBOSE = 40;
+            ret.AV_LOG_DEBUG = 48;
+            ret.AV_LOG_TRACE = 56;
+
             // Errors
             enume(["E2BIG", "EPERM", "EADDRINUSE", "EADDRNOTAVAIL",
                 "EAFNOSUPPORT", "EAGAIN", "EALREADY", "EBADF", "EBADMSG",
