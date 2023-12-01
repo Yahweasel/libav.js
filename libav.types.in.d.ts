@@ -385,6 +385,15 @@ export interface LibAV {
     AVDISCARD_NONINTRA: number;
     AVDISCARD_NONKEY: number;
     AVDISCARD_ALL: number;
+    AV_LOG_QUIET: number;
+    AV_LOG_PANIC: number;
+    AV_LOG_FATAL: number;
+    AV_LOG_ERROR: number;
+    AV_LOG_WARNING: number;
+    AV_LOG_INFO: number;
+    AV_LOG_VERBOSE: number;
+    AV_LOG_DEBUG: number;
+    AV_LOG_TRACE: number;
     E2BIG: number;
     EPERM: number;
     EADDRINUSE: number;
