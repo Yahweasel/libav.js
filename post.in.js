@@ -836,9 +836,25 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
  *     config?: boolean | {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
- *         copyoutFrame?: string
+ *         copyoutFrame?: "default" | "video" | "video_packed"
  *     }
  * ): @promise@Frame[]@
+ * ff_decode_multi@sync(
+ *     ctx: number, pkt: number, frame: number, inPackets: (Packet | number)[],
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         ignoreErrors?: boolean,
+ *         copyoutFrame: "ptr"
+ *     }
+ * ): @promise@number[]@
+ * ff_decode_multi@sync(
+ *     ctx: number, pkt: number, frame: number, inPackets: (Packet | number)[],
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         ignoreErrors?: boolean,
+ *         copyoutFrame: "ImageData"
+ *     }
+ * ): @promise@ImageData[]@
  */
 var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPackets, config) {
     var outFrames = [];
@@ -1100,9 +1116,17 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  *         limit?: number, // OUTPUT limit, in bytes
  *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
  *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
- *         copyoutPacket?: string // Version of ff_copyout_packet to use
+ *         copyoutPacket?: "default" // Version of ff_copyout_packet to use
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
+ * ff_read_multi@sync(
+ *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ *         limit?: number, // OUTPUT limit, in bytes
+ *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
+ *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+ *         copyoutPacket: "ptr" // Version of ff_copyout_packet to use
+ *     }
+ * ): @promsync@[number, Record<number, number[]>]@
  */
 function ff_read_multi(fmt_ctx, pkt, devfile, opts) {
     var sz = 0;
