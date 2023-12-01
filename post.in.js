@@ -1377,16 +1377,44 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
  *     srcs: number, buffersink_ctx: number, framePtr: number,
  *     inFrames: (Frame | number)[], config?: boolean | {
  *         fin?: boolean,
- *         copyoutFrame?: string
+ *         copyoutFrame?: "default" | "video" | "video_packed"
  *     }
  * ): @promise@Frame[]@;
  * ff_filter_multi@sync(
  *     srcs: number[], buffersink_ctx: number, framePtr: number,
  *     inFrames: (Frame | number)[][], config?: boolean[] | {
  *         fin?: boolean,
- *         copyoutFrame?: string
+ *         copyoutFrame?: "default" | "video" | "video_packed"
  *     }[]
  * ): @promise@Frame[]@
+ * ff_filter_multi@sync(
+ *     srcs: number, buffersink_ctx: number, framePtr: number,
+ *     inFrames: (Frame | number)[], config?: boolean | {
+ *         fin?: boolean,
+ *         copyoutFrame: "ptr"
+ *     }
+ * ): @promise@number[]@;
+ * ff_filter_multi@sync(
+ *     srcs: number[], buffersink_ctx: number, framePtr: number,
+ *     inFrames: (Frame | number)[][], config?: boolean[] | {
+ *         fin?: boolean,
+ *         copyoutFrame: "ptr"
+ *     }[]
+ * ): @promise@number[]@
+ * ff_filter_multi@sync(
+ *     srcs: number, buffersink_ctx: number, framePtr: number,
+ *     inFrames: (Frame | number)[], config?: boolean | {
+ *         fin?: boolean,
+ *         copyoutFrame: "ImageData"
+ *     }
+ * ): @promise@ImageData[]@;
+ * ff_filter_multi@sync(
+ *     srcs: number[], buffersink_ctx: number, framePtr: number,
+ *     inFrames: (Frame | number)[][], config?: boolean[] | {
+ *         fin?: boolean,
+ *         copyoutFrame: "ImageData"
+ *     }[]
+ * ): @promise@ImageData[]@
  */
 var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, framePtr, inFrames, config) {
     var outFrames = [];
@@ -1469,9 +1497,27 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
  *     config?: boolean | {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
- *         copyoutFrame?: string
+ *         copyoutFrame?: "default" | "video" | "video_packed"
  *     }
  * ): @promise@Frame[]@
+ * ff_decode_filter_multi@sync(
+ *     ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
+ *     frame: number, inPackets: (Packet | number)[],
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         ignoreErrors?: boolean,
+ *         copyoutFrame: "ptr"
+ *     }
+ * ): @promise@number[]@
+ * ff_decode_filter_multi@sync(
+ *     ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
+ *     frame: number, inPackets: (Packet | number)[],
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         ignoreErrors?: boolean,
+ *         copyoutFrame: "ImageData"
+ *     }
+ * ): @promise@ImageData[]@
  */
 var ff_decode_filter_multi = Module.ff_decode_filter_multi = function(
     ctx, buffersrc_ctx, buffersink_ctx, pkt, frame, inPackets, config
