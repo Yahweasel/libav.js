@@ -447,7 +447,7 @@ build/inst/thrsimd/cflags.txt:
 	mkdir -p build/inst/thrsimd
 	echo $(THRFLAGS) $(SIMDFLAGS) -gsource-map > $@
 
-release:
+release: extract
 	mkdir libav.js-$(LIBAVJS_VERSION)
 	cp -a README.md docs libav.js-$(LIBAVJS_VERSION)/
 	mkdir libav.js-$(LIBAVJS_VERSION)/dist
