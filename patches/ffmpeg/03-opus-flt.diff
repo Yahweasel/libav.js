@@ -1,0 +1,15 @@
+Index: ffmpeg-6.0.1/libavcodec/libopusdec.c
+===================================================================
+--- ffmpeg-6.0.1.orig/libavcodec/libopusdec.c
++++ ffmpeg-6.0.1/libavcodec/libopusdec.c
+@@ -63,8 +63,8 @@ static av_cold int libopus_decode_init(A
+     }
+ 
+     avc->sample_rate    = 48000;
+-    avc->sample_fmt     = avc->request_sample_fmt == AV_SAMPLE_FMT_FLT ?
+-                          AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_S16;
++    avc->sample_fmt     = avc->request_sample_fmt == AV_SAMPLE_FMT_S16 ?
++                          AV_SAMPLE_FMT_S16 : AV_SAMPLE_FMT_FLT;
+     av_channel_layout_uninit(&avc->ch_layout);
+     if (channels > 8) {
+         avc->ch_layout.order       = AV_CHANNEL_ORDER_UNSPEC;

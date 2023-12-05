@@ -27,7 +27,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 # Use: buildrule(target name, configure flags, CFLAGS)
 define([[[buildrule]]], [[[
 build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/$1/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
@@ -63,15 +63,12 @@ include configs/*/deps.mk
 install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
 	true
 
-extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c
+extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED
 
 build/ffmpeg-$(FFMPEG_VERSION)/PATCHED: build/ffmpeg-$(FFMPEG_VERSION)/configure
-	cd build/ffmpeg-$(FFMPEG_VERSION) && ( test -e PATCHED || patch -p1 -i ../../patches/ffmpeg.diff )
-	touch $@
-
-build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c: patches/jsfetch.c \
-	build/ffmpeg-$(FFMPEG_VERSION)/configure
-	cp $< $@
+	cd build/ffmpeg-$(FFMPEG_VERSION) && \
+		( test -e PATCHED || \
+		cat ../../patches/ffmpeg/*.diff | patch -p1 )
 	touch $@
 
 build/ffmpeg-$(FFMPEG_VERSION)/configure: build/ffmpeg-$(FFMPEG_VERSION).tar.xz
@@ -95,5 +92,4 @@ ffmpeg-release:
 	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	build/ffmpeg-$(FFMPEG_VERSION)/configure

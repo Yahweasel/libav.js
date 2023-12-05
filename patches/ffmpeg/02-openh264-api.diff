@@ -1,0 +1,17 @@
+Index: ffmpeg-6.0.1/libavcodec/libopenh264enc.c
+===================================================================
+--- ffmpeg-6.0.1.orig/libavcodec/libopenh264enc.c
++++ ffmpeg-6.0.1/libavcodec/libopenh264enc.c
+@@ -378,7 +378,11 @@ static int svc_encode_frame(AVCodecConte
+     sp.iPicHeight = avctx->height;
+ 
+     if (frame->pict_type == AV_PICTURE_TYPE_I) {
+-        (*s->encoder)->ForceIntraFrame(s->encoder, true);
++        (*s->encoder)->ForceIntraFrame(s->encoder, true
++#ifdef __EMSCRIPTEN__
++            , -1
++#endif
++        );
+     }
+ 
+     encoded = (*s->encoder)->EncodeFrame(s->encoder, &sp, &fbi);

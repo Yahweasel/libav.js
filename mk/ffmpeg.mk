@@ -30,7 +30,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 # Base (asm.js and wasm)
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/base/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) && \
@@ -53,7 +53,7 @@ part-install-base-%: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/lib
 # wasm + threads
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/thr/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) && \
@@ -76,7 +76,7 @@ part-install-thr-%: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libav
 # wasm + simd
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/simd/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) && \
@@ -99,7 +99,7 @@ part-install-simd-%: build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/lib
 # wasm + threads + simd
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: \
-	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
+	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/%/ffmpeg-config.txt | \
 	build/inst/thrsimd/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) && \
@@ -126,15 +126,12 @@ include configs/*/deps.mk
 install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
 	true
 
-extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c
+extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED
 
 build/ffmpeg-$(FFMPEG_VERSION)/PATCHED: build/ffmpeg-$(FFMPEG_VERSION)/configure
-	cd build/ffmpeg-$(FFMPEG_VERSION) && ( test -e PATCHED || patch -p1 -i ../../patches/ffmpeg.diff )
-	touch $@
-
-build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c: patches/jsfetch.c \
-	build/ffmpeg-$(FFMPEG_VERSION)/configure
-	cp $< $@
+	cd build/ffmpeg-$(FFMPEG_VERSION) && \
+		( test -e PATCHED || \
+		cat ../../patches/ffmpeg/*.diff | patch -p1 )
 	touch $@
 
 build/ffmpeg-$(FFMPEG_VERSION)/configure: build/ffmpeg-$(FFMPEG_VERSION).tar.xz
@@ -158,5 +155,4 @@ ffmpeg-release:
 	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	build/ffmpeg-$(FFMPEG_VERSION)/libavformat/jsfetch.c \
 	build/ffmpeg-$(FFMPEG_VERSION)/configure

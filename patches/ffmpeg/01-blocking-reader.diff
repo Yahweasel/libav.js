@@ -1,0 +1,54 @@
+Index: ffmpeg-6.0.1/libavformat/file.c
+===================================================================
+--- ffmpeg-6.0.1.orig/libavformat/file.c
++++ ffmpeg-6.0.1/libavformat/file.c
+@@ -41,6 +41,10 @@
+ #include "os_support.h"
+ #include "url.h"
+ 
++#ifdef __EMSCRIPTEN__
++#include <emscripten.h>
++#endif
++
+ /* Some systems may not have S_ISFIFO */
+ #ifndef S_ISFIFO
+ #  ifdef S_IFIFO
+@@ -135,12 +139,38 @@ static const AVClass fd_class = {
+     .version    = LIBAVUTIL_VERSION_INT,
+ };
+ 
++/* libav.js */
++#ifdef __EMSCRIPTEN__
++EM_JS(void, libavjs_wait_reader, (int fd), {
++    return Asyncify.handleAsync(function() {
++        return new Promise(function(res) {
++            Module.ff_reader_dev_waiters.push(res);
++#ifdef __EMSCRIPTEN_PTHREADS__
++            postMessage({c: "libavjs_wait_reader", fd: fd});
++#endif
++        });
++    });
++});
++#endif
++/* /libav.js */
++
+ static int file_read(URLContext *h, unsigned char *buf, int size)
+ {
+     FileContext *c = h->priv_data;
+     int ret;
+     size = FFMIN(size, c->blocksize);
+     ret = read(c->fd, buf, size);
++
++    /* libav.js */
++#ifdef __EMSCRIPTEN__
++    while (ret < 0 && errno == EAGAIN) {
++        /* wait for more data */
++        libavjs_wait_reader(c->fd);
++        ret = read(c->fd, buf, size);
++    }
++#endif
++    /* /libav.js */
++
+     if (ret == 0 && c->follow)
+         return AVERROR(EAGAIN);
+     if (ret == 0)
