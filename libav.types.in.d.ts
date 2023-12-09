@@ -511,4 +511,5 @@ export interface LibAVWrapper {
      */
     LibAV(opts?: LibAVOpts & {noworker?: false}): Promise<LibAV>;
     LibAV(opts: LibAVOpts & {noworker: true}): Promise<LibAV & LibAVSync>;
+    LibAV(opts: LibAVOpts): Promise<LibAV | LibAV & LibAVSync>;
 }
