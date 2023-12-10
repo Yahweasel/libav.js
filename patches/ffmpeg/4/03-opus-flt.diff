@@ -1,0 +1,15 @@
+Index: ffmpeg-4.4.4/libavcodec/libopusdec.c
+===================================================================
+--- ffmpeg-4.4.4.orig/libavcodec/libopusdec.c
++++ ffmpeg-4.4.4/libavcodec/libopusdec.c
+@@ -61,8 +61,8 @@ static av_cold int libopus_decode_init(A
+     }
+ 
+     avc->sample_rate    = 48000;
+-    avc->sample_fmt     = avc->request_sample_fmt == AV_SAMPLE_FMT_FLT ?
+-                          AV_SAMPLE_FMT_FLT : AV_SAMPLE_FMT_S16;
++    avc->sample_fmt     = avc->request_sample_fmt == AV_SAMPLE_FMT_S16 ?
++                          AV_SAMPLE_FMT_S16 : AV_SAMPLE_FMT_FLT;
+     avc->channel_layout = avc->channels > 8 ? 0 :
+                           ff_vorbis_channel_layouts[avc->channels - 1];
+ 

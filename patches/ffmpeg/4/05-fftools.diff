@@ -1,0 +1,238 @@
+Index: ffmpeg-4.4.4/fftools/Makefile
+===================================================================
+--- ffmpeg-4.4.4.orig/fftools/Makefile
++++ ffmpeg-4.4.4/fftools/Makefile
+@@ -9,7 +9,15 @@ AVBASENAMES  = ffmpeg ffplay ffprobe
+ ALLAVPROGS   = $(AVBASENAMES:%=%$(PROGSSUF)$(EXESUF))
+ ALLAVPROGS_G = $(AVBASENAMES:%=%$(PROGSSUF)_g$(EXESUF))
+ 
+-OBJS-ffmpeg                        += fftools/ffmpeg_opt.o fftools/ffmpeg_filter.o fftools/ffmpeg_hw.o
++OBJS-ffmpeg                        += fftools/ffmpeg_opt.o fftools/ffmpeg_filter.o fftools/ffmpeg_hw.o \
++    fftools/ffmpeg_mux.o	\
++    fftools/ffmpeg_mux_init.o	\
++    fftools/ffmpeg_demux.o	\
++    fftools/opt_common.o	\
++    fftools/objpool.o		\
++    fftools/sync_queue.o	\
++    fftools/thread_queue.o
++
+ OBJS-ffmpeg-$(CONFIG_LIBMFX)       += fftools/ffmpeg_qsv.o
+ ifndef CONFIG_VIDEOTOOLBOX
+ OBJS-ffmpeg-$(CONFIG_VDA)          += fftools/ffmpeg_videotoolbox.o
+Index: ffmpeg-4.4.4/fftools/ffmpeg.c
+===================================================================
+--- ffmpeg-4.4.4.orig/fftools/ffmpeg.c
++++ ffmpeg-4.4.4/fftools/ffmpeg.c
+@@ -671,6 +671,34 @@ static void ffmpeg_cleanup(int ret)
+     }
+     term_exit();
+     ffmpeg_exited = 1;
++
++vstats_file = NULL;
++
++nb_frames_dup = 0;
++dup_warning = 1000;
++nb_frames_drop = 0;
++decode_error_stat[0] = 0;
++decode_error_stat[1] = 0;
++nb_output_dumped = 0;
++
++want_sdp = 1;
++
++progress_avio = NULL;
++
++subtitle_out = NULL;
++
++input_streams = NULL;
++nb_input_streams = 0;
++input_files   = NULL;
++nb_input_files   = 0;
++
++output_streams = NULL;
++nb_output_streams = 0;
++output_files   = NULL;
++nb_output_files   = 0;
++
++filtergraphs = NULL;
++nb_filtergraphs = 0;
+ }
+ 
+ void remove_avoptions(AVDictionary **a, AVDictionary *b)
+@@ -4956,7 +4984,12 @@ static void log_callback_null(void *ptr,
+ {
+ }
+ 
++#ifdef __EMSCRIPTEN__
++int ffmpeg_main(int argc, char **argv);
++int ffmpeg_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     int i, ret;
+     BenchmarkTimeStamps ti;
+Index: ffmpeg-4.4.4/fftools/ffprobe.c
+===================================================================
+--- ffmpeg-4.4.4.orig/fftools/ffprobe.c
++++ ffmpeg-4.4.4/fftools/ffprobe.c
+@@ -80,8 +80,11 @@ typedef struct InputFile {
+     int       nb_streams;
+ } InputFile;
+ 
++#ifndef __EMSCRIPTEN__
++/* Disabled so that we can have both mains in one program */
+ const char program_name[] = "ffprobe";
+ const int program_birth_year = 2007;
++#endif
+ 
+ static int do_bitexact = 0;
+ static int do_count_frames = 0;
+@@ -358,6 +361,65 @@ static void ffprobe_cleanup(int ret)
+ #if HAVE_THREADS
+     pthread_mutex_destroy(&log_mutex);
+ #endif
++
++do_bitexact = 0;
++do_count_frames = 0;
++do_count_packets = 0;
++do_read_frames  = 0;
++do_read_packets = 0;
++do_show_chapters = 0;
++do_show_error   = 0;
++do_show_format  = 0;
++do_show_frames  = 0;
++do_show_packets = 0;
++do_show_programs = 0;
++do_show_streams = 0;
++do_show_stream_disposition = 0;
++do_show_data    = 0;
++do_show_program_version  = 0;
++do_show_library_versions = 0;
++do_show_pixel_formats = 0;
++do_show_pixel_format_flags = 0;
++do_show_pixel_format_components = 0;
++do_show_log = 0;
++
++do_show_chapter_tags = 0;
++do_show_format_tags = 0;
++do_show_frame_tags = 0;
++do_show_program_tags = 0;
++do_show_stream_tags = 0;
++do_show_packet_tags = 0;
++
++show_value_unit              = 0;
++use_value_prefix             = 0;
++use_byte_value_binary_prefix = 0;
++use_value_sexagesimal_format = 0;
++show_private_data            = 1;
++
++print_format = NULL;
++stream_specifier = NULL;
++show_data_hash = NULL;
++
++read_intervals = NULL;
++read_intervals_nb = 0;
++
++find_stream_info  = 1;
++
++options = NULL;
++
++input_filename = NULL;
++print_input_filename = NULL;
++iformat = NULL;
++
++hash = NULL;
++
++nb_streams = 0;
++nb_streams_packets = NULL;
++nb_streams_frames = NULL;
++selected_streams = NULL;
++
++log_buffer = NULL;
++log_buffer_size = 0;
+ }
+ 
+ struct unit_value {
+@@ -2983,7 +3045,7 @@ static int open_input_file(InputFile *if
+     ifile->streams = av_mallocz_array(fmt_ctx->nb_streams,
+                                       sizeof(*ifile->streams));
+     if (!ifile->streams)
+-        exit(1);
++        exit_program(1);
+     ifile->nb_streams = fmt_ctx->nb_streams;
+ 
+     /* bind a decoder to each input stream */
+@@ -3014,11 +3076,11 @@ static int open_input_file(InputFile *if
+ 
+             ist->dec_ctx = avcodec_alloc_context3(codec);
+             if (!ist->dec_ctx)
+-                exit(1);
++                exit_program(1);
+ 
+             err = avcodec_parameters_to_context(ist->dec_ctx, stream->codecpar);
+             if (err < 0)
+-                exit(1);
++                exit_program(1);
+ 
+             if (do_show_log) {
+                 // For loging it is needed to disable at least frame threads as otherwise
+@@ -3032,7 +3094,7 @@ static int open_input_file(InputFile *if
+             if (avcodec_open2(ist->dec_ctx, codec, &opts) < 0) {
+                 av_log(NULL, AV_LOG_WARNING, "Could not open codec for input stream %d\n",
+                        stream->index);
+-                exit(1);
++                exit_program(1);
+             }
+ 
+             if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
+@@ -3381,6 +3443,8 @@ static int opt_print_filename(void *optc
+     return 0;
+ }
+ 
++#ifndef __EMSCRIPTEN__
++/* Disabled so that we can have both mains in one program */
+ void show_help_default(const char *opt, const char *arg)
+ {
+     av_log_set_callback(log_callback_help);
+@@ -3391,6 +3455,7 @@ void show_help_default(const char *opt,
+     show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+     show_help_children(avcodec_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+ }
++#endif
+ 
+ /**
+  * Parse interval specification, according to the format:
+@@ -3662,7 +3727,12 @@ static inline int check_section_show_ent
+             do_show_##varname = 1;                                      \
+     } while (0)
+ 
++#ifdef __EMSCRIPTEN__
++int ffprobe_main(int argc, char **argv);
++int ffprobe_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     const Writer *w;
+     WriterContext *wctx;
+@@ -3808,5 +3878,6 @@ end:
+ 
+     avformat_network_deinit();
+ 
++    exit_program(ret < 0);
+     return ret < 0;
+ }
+Index: ffmpeg-4.4.4/fftools/ffmpeg_mux.c
+===================================================================
+--- /dev/null
++++ ffmpeg-4.4.4/fftools/ffmpeg_mux.c
+@@ -0,0 +1,2 @@
++
++
+Index: ffmpeg-4.4.4/fftools/opt_common.c
+===================================================================
+--- /dev/null
++++ ffmpeg-4.4.4/fftools/opt_common.c
+@@ -0,0 +1,2 @@
++
++

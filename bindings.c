@@ -29,6 +29,7 @@
 #include "libavutil/avutil.h"
 #include "libavutil/opt.h"
 #include "libavutil/pixdesc.h"
+#include "libavutil/version.h"
 
 #define A(struc, type, field) \
     type struc ## _ ## field(struc *a) { return a->field; } \
@@ -71,8 +72,11 @@ B(int, width)
 #undef BL
 #undef BA
 
-// The following code should work also with older code
-#define CHL(struc)\
+/* Either way we expose the old channel layout API, but if the new channel
+ * layout API is available, we use it */
+#if LIBAVUTIL_VERSION_INT > AV_VERSION_INT(57, 23, 100)
+/* New API */
+#define CHL(struc) \
 void struc ## _channel_layoutmask_s(struc *a, uint32_t bl, uint32_t bh) { \
     uint64_t mask =  (((uint64_t) bl)) | (((uint64_t) bh) << 32); \
     av_channel_layout_uninit(&a->ch_layout); \
@@ -111,6 +115,46 @@ void struc ##_channel_layouthi_s(struc *a, uint32_t b) { \
     av_channel_layout_uninit(&a->ch_layout);\
     av_channel_layout_from_mask(&a->ch_layout, mask);\
 }
+
+#else
+/* Old API */
+#define CHL(struc) \
+void struc ## _channel_layoutmask_s(struc *a, uint32_t bl, uint32_t bh) { \
+    a->channel_layout = ((uint16_t) bh << 32) | bl; \
+} \
+uint64_t struc ## _channel_layoutmask(struc *a) { \
+    return a->channel_layout; \
+}\
+int struc ## _channels(struc *a) { \
+    return a->channels; \
+} \
+void struc ## _channels_s(struc *a, int b) { \
+    a->channels = b; \
+}\
+int struc ## _ch_layout_nb_channels(struc *a) { \
+    return a->channels; \
+}\
+void struc ## _ch_layout_nb_channels_s(struc *a, int b) { \
+    a->channels = b; \
+}\
+uint32_t struc ## _channel_layout(struc *a) { \
+    return a->channel_layout; \
+}\
+uint32_t struc ##_channel_layouthi(struc *a) { \
+    return a->channel_layout >> 32; \
+}\
+void struc ##_channel_layout_s(struc *a, uint32_t b) { \
+    a->channel_layout = \
+        (a->channel_layout & (0xFFFFFFFFull << 32)) | \
+        ((uint64_t) b); \
+}\
+void struc ##_channel_layouthi_s(struc *a, uint32_t b) { \
+    a->channel_layout = \
+        (((uint64_t) b) << 32) | \
+        (a->channel_layout & 0xFFFFFFFFull); \
+}
+
+#endif /* Channel layout API version */
 
 CHL(AVFrame)
 
@@ -410,6 +454,11 @@ int libavjs_with_swscale() {
 void sws_getContext() {}
 void sws_freeContext() {}
 void sws_scale_frame() {}
+
+#elif LIBAVUTIL_VERSION_INT <= AV_VERSION_INT(57, 4, 101)
+/* No sws_scale_frame in this version */
+void sws_scale_frame() {}
+
 #endif
 
 
