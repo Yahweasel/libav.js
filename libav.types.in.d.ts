@@ -302,6 +302,24 @@ export interface LibAV {
      */
     terminate(): void;
 
+    /**
+     * Convert a pair of 32-bit integers representing a single 64-bit integer
+     * into a 64-bit float. 64-bit floats are only sufficient for 53 bits of
+     * precision, so for very large values, this is lossy.
+     * @param lo  Low bits of the pair
+     * @param hi  High bits of the pair
+     */
+    i64tof64(lo: number, hi: number): number;
+
+    /**
+     * Convert a 64-bit floating-point number into a pair of 32-bit integers
+     * representing a single 64-bit integer. The 64-bit float must actually
+     * contain an integer value for this result to be accurate.
+     * @param val  Floating-point value to convert
+     * @returns [low bits, high bits]
+     */
+    f64toi64(val: number): [number, number];
+
     // Enumerations:
     AV_OPT_SEARCH_CHILDREN: number;
     AVMEDIA_TYPE_UNKNOWN: number;

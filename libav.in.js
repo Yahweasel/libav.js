@@ -390,6 +390,28 @@
 
             }
 
+            /* libav.js returns and takes 64-bit numbers as 32-bit pairs, so we
+             * need conversion functions to use those */
+            ret.i64tof64 = function(lo, hi) {
+                // Common positive case
+                if (!hi && lo >= 0) return lo;
+
+                // Common negative case
+                if (hi === -1 && lo < 0) return lo;
+
+                /* Lo bit negative numbers are really just the 32nd bit being
+                 * set, so we make up for that with an additional 2^32 */
+                return (
+                    hi * 0x100000000 +
+                    lo +
+                    ((lo < 0) ? 0x100000000 : 0)
+                );
+            }
+
+            ret.f64toi64 = function(val) {
+                return [~~val, Math.floor(val / 0x100000000)];
+            }
+
             // Some enumerations lifted directly from FFmpeg
             function enume(vals, first) {
                 if (typeof first === undefined)
