@@ -344,6 +344,11 @@ export interface LibAVStatic {
     AV_LOG_VERBOSE: number;
     AV_LOG_DEBUG: number;
     AV_LOG_TRACE: number;
+    AV_PKT_FLAG_KEY: number;
+    AV_PKT_FLAG_CORRUPT: number;
+    AV_PKT_FLAG_DISCARD: number;
+    AV_PKT_FLAG_TRUSTED: number;
+    AV_PKT_FLAG_DISPOSABLE: number;
     E2BIG: number;
     EPERM: number;
     EADDRINUSE: number;
