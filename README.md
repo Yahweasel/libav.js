@@ -399,6 +399,16 @@ needing to patch anything that already exists. See the existing variants'
 configuration files in `config` and the existing fragments in `mk` to
 understand how.
 
+You can also build against different versions of FFmpeg than the version built
+by default. To build against, for instance, FFmpeg 4.3.6, use `make
+FFMPEG_VERSION_MAJOR=4 FFMPEG_VERSION_MINREV=3.6`. Note that you *must* use
+`FFMPEG_VERSION_MAJOR` and `FFMPEG_VERSION_MINREV`, not just `FFMPEG_VERSION`,
+because `FFMPEG_VERSION_MAJOR` is used to direct the process of patching FFmpeg.
+libav.js should generally build against any version of FFmpeg in the 4, 5, or 6
+series, but is not heavily tested against older versions; you should use the
+default version unless you have some specific compatibility issue that forces
+you to use a different version.
+
 
 ## Size
 
