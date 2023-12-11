@@ -196,6 +196,14 @@
     libavStatics.AV_LOG_DEBUG = 48;
     libavStatics.AV_LOG_TRACE = 56;
 
+     // AV_PKT_FLAGs
+     ret.AV_PKT_FLAG_KEY = 0x0001;
+     ret.AV_PKT_FLAG_CORRUPT = 0x0002;
+     ret.AV_PKT_FLAG_DISCARD = 0x0004;
+     ret.AV_PKT_FLAG_TRUSTED = 0x0008;
+     ret.AV_PKT_FLAG_DISPOSABLE = 0x0010;
+
+
     // Errors
     enume(["E2BIG", "EPERM", "EADDRINUSE", "EADDRNOTAVAIL",
         "EAFNOSUPPORT", "EAGAIN", "EALREADY", "EBADF", "EBADMSG",
