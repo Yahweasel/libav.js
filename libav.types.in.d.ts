@@ -229,79 +229,11 @@ export interface AVCodecContextProps {
     width?: number;
 }
 
-export interface LibAV {
-    /**
-     * The operating mode of this libav.js instance. Each operating mode has
-     * different constraints.
-     */
-    libavjsMode: "direct" | "worker" | "threads";
-
-    /**
-     * If the operating mode is "worker", the worker itself.
-     */
-    worker?: Worker;
-
-@FUNCS
-@DECLS
-
-    // Declarations for things that use int64, so will be communicated incorrectly
-
-    /**
-     * Seek to timestamp ts, bounded by min_ts and max_ts. All 64-bit ints are
-     * in the form of low and high bits.
-     */
-    avformat_seek_file(
-        s: number, stream_index: number, min_tslo: number, min_tshi: number,
-        tslo: number, tshi: number, max_tslo: number, max_tshi: number,
-        flags: number
-    ): Promise<number>;
-
-    /**
-     * Seek to *at the earliest* the given timestamp.
-     */
-    avformat_seek_file_min(
-        s: number, stream_index: number, tslo: number, tshi: number,
-        flags: number
-    ): Promise<number>;
-
-    /**
-     * Seek to *at the latest* the given timestamp.
-     */
-    avformat_seek_file_max(
-        s: number, stream_index: number, tslo: number, tshi: number,
-        flags: number
-    ): Promise<number>;
-
-    /**
-     * Seek to as close to this timestamp as the format allows.
-     */
-    avformat_seek_file_approx(
-        s: number, stream_index: number, tslo: number, tshi: number,
-        flags: number
-    ): Promise<number>;
-
-    /**
-     * Get the depth of this component of this pixel format.
-     */
-    AVPixFmtDescriptor_comp_depth(fmt: number, comp: number): Promise<number>;
-
-
-    /**
-     * Callback when writes occur. Set by the user.
-     */
-    onwrite?: (filename: string, position: number, buffer: Uint8Array | Int8Array) => void;
-
-    /**
-     * Callback for bock reader devices. Set by the user.
-     */
-    onblockread?: (filename: string, pos: number, length: number)  => void;
-
-    /**
-     * Terminate the worker associated with this libav.js instance, rendering
-     * it inoperable and freeing its memory.
-     */
-    terminate(): void;
-
+/**
+ * Static properties that are accessible both on the LibAV wrapper and on each
+ * libav instance.
+ */
+export interface LibAVStatic {
     /**
      * Convert a pair of 32-bit integers representing a single 64-bit integer
      * into a 64-bit float. 64-bit floats are only sufficient for 53 bits of
@@ -459,11 +391,94 @@ export interface LibAV {
     AVERROR_EOF: number;
 }
 
+/**
+ * A LibAV instance, created by LibAV.LibAV (*not* the LibAV wrapper itself)
+ */
+export interface LibAV extends LibAVStatic {
+    /**
+     * The operating mode of this libav.js instance. Each operating mode has
+     * different constraints.
+     */
+    libavjsMode: "direct" | "worker" | "threads";
+
+    /**
+     * If the operating mode is "worker", the worker itself.
+     */
+    worker?: Worker;
+
+@FUNCS
+@DECLS
+
+    // Declarations for things that use int64, so will be communicated incorrectly
+
+    /**
+     * Seek to timestamp ts, bounded by min_ts and max_ts. All 64-bit ints are
+     * in the form of low and high bits.
+     */
+    avformat_seek_file(
+        s: number, stream_index: number, min_tslo: number, min_tshi: number,
+        tslo: number, tshi: number, max_tslo: number, max_tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to *at the earliest* the given timestamp.
+     */
+    avformat_seek_file_min(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to *at the latest* the given timestamp.
+     */
+    avformat_seek_file_max(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Seek to as close to this timestamp as the format allows.
+     */
+    avformat_seek_file_approx(
+        s: number, stream_index: number, tslo: number, tshi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
+     * Get the depth of this component of this pixel format.
+     */
+    AVPixFmtDescriptor_comp_depth(fmt: number, comp: number): Promise<number>;
+
+
+    /**
+     * Callback when writes occur. Set by the user.
+     */
+    onwrite?: (filename: string, position: number, buffer: Uint8Array | Int8Array) => void;
+
+    /**
+     * Callback for bock reader devices. Set by the user.
+     */
+    onblockread?: (filename: string, pos: number, length: number) => void;
+
+    /**
+     * Terminate the worker associated with this libav.js instance, rendering
+     * it inoperable and freeing its memory.
+     */
+    terminate(): void;
+}
+
+/**
+ * Synchronous functions, available on non-worker libav.js instances.
+ */
 export interface LibAVSync {
 @SYNCFUNCS
 @SYNCDECLS
 }
 
+/**
+ * Options to create a libav.js instance.
+ */
 export interface LibAVOpts {
     /**
      * Don't create a worker.
@@ -507,7 +522,10 @@ export interface LibAVOpts {
     variant?: string;
 }
 
-export interface LibAVWrapper {
+/**
+ * The main wrapper for libav.js, typically named "LibAV".
+ */
+export interface LibAVWrapper extends LibAVStatic {
     /**
      * URL base from which load workers and modules.
      */

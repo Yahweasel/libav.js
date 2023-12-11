@@ -87,6 +87,131 @@
     libav.CONFIG = "@CONFIG";
     libav.DBG = "@DBG";
 
+    // Statics that are provided both by LibAV and by libav instances
+    var libavStatics = {};
+
+    /* libav.js returns and takes 64-bit numbers as 32-bit pairs, so we
+     * need conversion functions to use those */
+    libavStatics.i64tof64 = function(lo, hi) {
+        // Common positive case
+        if (!hi && lo >= 0) return lo;
+
+        // Common negative case
+        if (hi === -1 && lo < 0) return lo;
+
+        /* Lo bit negative numbers are really just the 32nd bit being
+         * set, so we make up for that with an additional 2^32 */
+        return (
+            hi * 0x100000000 +
+            lo +
+            ((lo < 0) ? 0x100000000 : 0)
+        );
+    }
+
+    libavStatics.f64toi64 = function(val) {
+        return [~~val, Math.floor(val / 0x100000000)];
+    }
+
+    // Some enumerations lifted directly from FFmpeg
+    function enume(vals, first) {
+        if (typeof first === undefined)
+            first = 0;
+        var i = first;
+        vals.forEach(function(val) {
+            libavStatics[val] = i++;
+        });
+    }
+
+    // AV_OPT
+    libavStatics.AV_OPT_SEARCH_CHILDREN = 1;
+
+    // AVMediaType
+    enume(["AVMEDIA_TYPE_UNKNOWN", "AVMEDIA_TYPE_VIDEO",
+        "AVMEDIA_TYPE_AUDIO", "AVMEDIA_TYPE_DATA", "AVMEDIA_TYPE_SUBTITLE",
+        "AVMEDIA_TYPE_ATTACHMENT"], -1);
+
+    // AVSampleFormat
+    enume(["AV_SAMPLE_FMT_NONE", "AV_SAMPLE_FMT_U8", "AV_SAMPLE_FMT_S16",
+        "AV_SAMPLE_FMT_S32", "AV_SAMPLE_FMT_FLT", "AV_SAMPLE_FMT_DBL",
+        "AV_SAMPLE_FMT_U8P", "AV_SAMPLE_FMT_S16P", "AV_SAMPLE_FMT_S32P",
+        "AV_SAMPLE_FMT_FLTP", "AV_SAMPLE_FMT_DBLP", "AV_SAMPLE_FMT_S64",
+        "AV_SAMPLE_FMT_S64P", "AV_SAMPLE_FMT_NB"], -1);
+
+    // AVPixelFormat
+    enume(["AV_PIX_FMT_NONE", "AV_PIX_FMT_YUV420P",
+        "AV_PIX_FMT_YUYV422", "AV_PIX_FMT_RGB24", "AV_PIX_FMT_BGR24",
+        "AV_PIX_FMT_YUV422P", "AV_PIX_FMT_YUV444P",
+        "AV_PIX_FMT_YUV410P", "AV_PIX_FMT_YUV411P", "AV_PIX_FMT_GRAY8",
+        "AV_PIX_FMT_MONOWHITE", "AV_PIX_FMT_MONOBLACK",
+        "AV_PIX_FMT_PAL8", "AV_PIX_FMT_YUVJ420P",
+        "AV_PIX_FMT_YUVJ422P", "AV_PIX_FMT_YUVJ444P",
+        "AV_PIX_FMT_UYVY422", "AV_PIX_FMT_UYYVYY411",
+        "AV_PIX_FMT_BGR8", "AV_PIX_FMT_BGR4", "AV_PIX_FMT_BGR4_BYTE",
+        "AV_PIX_FMT_RGB8", "AV_PIX_FMT_RGB4", "AV_PIX_FMT_RGB4_BYTE",
+        "AV_PIX_FMT_NV12", "AV_PIX_FMT_NV21", "AV_PIX_FMT_ARGB",
+        "AV_PIX_FMT_RGBA", "AV_PIX_FMT_ABGR", "AV_PIX_FMT_BGRA",
+        "AV_PIX_FMT_GRAY16BE", "AV_PIX_FMT_GRAY16LE",
+        "AV_PIX_FMT_YUV440P", "AV_PIX_FMT_YUVJ440P",
+        "AV_PIX_FMT_YUVA420P", "AV_PIX_FMT_RGB48BE",
+        "AV_PIX_FMT_RGB48LE", "AV_PIX_FMT_RGB565BE",
+        "AV_PIX_FMT_RGB565LE", "AV_PIX_FMT_RGB555BE",
+        "AV_PIX_FMT_RGB555LE", "AV_PIX_FMT_BGR565BE",
+        "AV_PIX_FMT_BGR565LE", "AV_PIX_FMT_BGR555BE",
+        "AV_PIX_FMT_BGR555LE"], -1);
+
+    // AVIO_FLAGs
+    libavStatics.AVIO_FLAG_READ = 1;
+    libavStatics.AVIO_FLAG_WRITE = 2;
+    libavStatics.AVIO_FLAG_READ_WRITE = 3;
+    libavStatics.AVIO_FLAG_NONBLOCK = 8;
+    libavStatics.AVIO_FLAG_DIRECT = 0x8000;
+
+    // Useful AVFMT_FLAGs
+    libavStatics.AVFMT_FLAG_NOBUFFER = 0x40;
+    libavStatics.AVFMT_FLAG_FLUSH_PACKETS = 0x200;
+
+    // AVSEEK_FLAGs
+    libavStatics.AVSEEK_FLAG_BACKWARD = 1;
+    libavStatics.AVSEEK_FLAG_BYTE = 2;
+    libavStatics.AVSEEK_FLAG_ANY = 4;
+    libavStatics.AVSEEK_FLAG_FRAME = 8;
+
+    // AVDISCARDs
+    libavStatics.AVDISCARD_NONE = -16;
+    libavStatics.AVDISCARD_DEFAULT = 0;
+    libavStatics.AVDISCARD_NONREF = 8;
+    libavStatics.AVDISCARD_BIDIR = 16;
+    libavStatics.AVDISCARD_NONINTRA = 24;
+    libavStatics.AVDISCARD_NONKEY = 32;
+    libavStatics.AVDISCARD_ALL = 48;
+
+    // AV_LOG levels
+    libavStatics.AV_LOG_QUIET = -8;
+    libavStatics.AV_LOG_PANIC = 0;
+    libavStatics.AV_LOG_FATAL = 8;
+    libavStatics.AV_LOG_ERROR = 16;
+    libavStatics.AV_LOG_WARNING = 24;
+    libavStatics.AV_LOG_INFO = 32;
+    libavStatics.AV_LOG_VERBOSE = 40;
+    libavStatics.AV_LOG_DEBUG = 48;
+    libavStatics.AV_LOG_TRACE = 56;
+
+    // Errors
+    enume(["E2BIG", "EPERM", "EADDRINUSE", "EADDRNOTAVAIL",
+        "EAFNOSUPPORT", "EAGAIN", "EALREADY", "EBADF", "EBADMSG",
+        "EBUSY", "ECANCELED", "ECHILD", "ECONNABORTED", "ECONNREFUSED",
+        "ECONNRESET", "EDEADLOCK", "EDESTADDRREQ", "EDOM", "EDQUOT",
+        "EEXIST", "EFAULT", "EFBIG", "EHOSTUNREACH", "EIDRM", "EILSEQ",
+        "EINPROGRESS", "EINTR", "EINVAL", "EIO", "EISCONN", "EISDIR",
+        "ELOOP", "EMFILE", "EMLINK", "EMSGSIZE", "EMULTIHOP",
+        "ENAMETOOLONG", "ENETDOWN", "ENETRESET", "ENETUNREACH",
+        "ENFILE", "ENOBUFS", "ENODEV", "ENOENT"], 1);
+    libavStatics.AVERROR_EOF = -0x20464f45;
+
+    // Apply the statics to LibAV
+    Object.assign(libav, libavStatics);
+
+
     // Now start making our instance generating function
     libav.LibAV = function(opts) {
         opts = opts || {};
@@ -390,123 +515,8 @@
 
             }
 
-            /* libav.js returns and takes 64-bit numbers as 32-bit pairs, so we
-             * need conversion functions to use those */
-            ret.i64tof64 = function(lo, hi) {
-                // Common positive case
-                if (!hi && lo >= 0) return lo;
-
-                // Common negative case
-                if (hi === -1 && lo < 0) return lo;
-
-                /* Lo bit negative numbers are really just the 32nd bit being
-                 * set, so we make up for that with an additional 2^32 */
-                return (
-                    hi * 0x100000000 +
-                    lo +
-                    ((lo < 0) ? 0x100000000 : 0)
-                );
-            }
-
-            ret.f64toi64 = function(val) {
-                return [~~val, Math.floor(val / 0x100000000)];
-            }
-
-            // Some enumerations lifted directly from FFmpeg
-            function enume(vals, first) {
-                if (typeof first === undefined)
-                    first = 0;
-                var i = first;
-                vals.forEach(function(val) {
-                    ret[val] = i++;
-                });
-            }
-
-            // AV_OPT
-            ret.AV_OPT_SEARCH_CHILDREN = 1;
-
-            // AVMediaType
-            enume(["AVMEDIA_TYPE_UNKNOWN", "AVMEDIA_TYPE_VIDEO",
-                "AVMEDIA_TYPE_AUDIO", "AVMEDIA_TYPE_DATA", "AVMEDIA_TYPE_SUBTITLE",
-                "AVMEDIA_TYPE_ATTACHMENT"], -1);
-
-            // AVSampleFormat
-            enume(["AV_SAMPLE_FMT_NONE", "AV_SAMPLE_FMT_U8", "AV_SAMPLE_FMT_S16",
-                "AV_SAMPLE_FMT_S32", "AV_SAMPLE_FMT_FLT", "AV_SAMPLE_FMT_DBL",
-                "AV_SAMPLE_FMT_U8P", "AV_SAMPLE_FMT_S16P", "AV_SAMPLE_FMT_S32P",
-                "AV_SAMPLE_FMT_FLTP", "AV_SAMPLE_FMT_DBLP", "AV_SAMPLE_FMT_S64",
-                "AV_SAMPLE_FMT_S64P", "AV_SAMPLE_FMT_NB"], -1);
-
-            // AVPixelFormat
-            enume(["AV_PIX_FMT_NONE", "AV_PIX_FMT_YUV420P",
-                "AV_PIX_FMT_YUYV422", "AV_PIX_FMT_RGB24", "AV_PIX_FMT_BGR24",
-                "AV_PIX_FMT_YUV422P", "AV_PIX_FMT_YUV444P",
-                "AV_PIX_FMT_YUV410P", "AV_PIX_FMT_YUV411P", "AV_PIX_FMT_GRAY8",
-                "AV_PIX_FMT_MONOWHITE", "AV_PIX_FMT_MONOBLACK",
-                "AV_PIX_FMT_PAL8", "AV_PIX_FMT_YUVJ420P",
-                "AV_PIX_FMT_YUVJ422P", "AV_PIX_FMT_YUVJ444P",
-                "AV_PIX_FMT_UYVY422", "AV_PIX_FMT_UYYVYY411",
-                "AV_PIX_FMT_BGR8", "AV_PIX_FMT_BGR4", "AV_PIX_FMT_BGR4_BYTE",
-                "AV_PIX_FMT_RGB8", "AV_PIX_FMT_RGB4", "AV_PIX_FMT_RGB4_BYTE",
-                "AV_PIX_FMT_NV12", "AV_PIX_FMT_NV21", "AV_PIX_FMT_ARGB",
-                "AV_PIX_FMT_RGBA", "AV_PIX_FMT_ABGR", "AV_PIX_FMT_BGRA",
-                "AV_PIX_FMT_GRAY16BE", "AV_PIX_FMT_GRAY16LE",
-                "AV_PIX_FMT_YUV440P", "AV_PIX_FMT_YUVJ440P",
-                "AV_PIX_FMT_YUVA420P", "AV_PIX_FMT_RGB48BE",
-                "AV_PIX_FMT_RGB48LE", "AV_PIX_FMT_RGB565BE",
-                "AV_PIX_FMT_RGB565LE", "AV_PIX_FMT_RGB555BE",
-                "AV_PIX_FMT_RGB555LE", "AV_PIX_FMT_BGR565BE",
-                "AV_PIX_FMT_BGR565LE", "AV_PIX_FMT_BGR555BE",
-                "AV_PIX_FMT_BGR555LE"], -1);
-
-            // AVIO_FLAGs
-            ret.AVIO_FLAG_READ = 1;
-            ret.AVIO_FLAG_WRITE = 2;
-            ret.AVIO_FLAG_READ_WRITE = 3;
-            ret.AVIO_FLAG_NONBLOCK = 8;
-            ret.AVIO_FLAG_DIRECT = 0x8000;
-
-            // Useful AVFMT_FLAGs
-            ret.AVFMT_FLAG_NOBUFFER = 0x40;
-            ret.AVFMT_FLAG_FLUSH_PACKETS = 0x200;
-
-            // AVSEEK_FLAGs
-            ret.AVSEEK_FLAG_BACKWARD = 1;
-            ret.AVSEEK_FLAG_BYTE = 2;
-            ret.AVSEEK_FLAG_ANY = 4;
-            ret.AVSEEK_FLAG_FRAME = 8;
-
-            // AVDISCARDs
-            ret.AVDISCARD_NONE = -16;
-            ret.AVDISCARD_DEFAULT = 0;
-            ret.AVDISCARD_NONREF = 8;
-            ret.AVDISCARD_BIDIR = 16;
-            ret.AVDISCARD_NONINTRA = 24;
-            ret.AVDISCARD_NONKEY = 32;
-            ret.AVDISCARD_ALL = 48;
-
-            // AV_LOG levels
-            ret.AV_LOG_QUIET = -8;
-            ret.AV_LOG_PANIC = 0;
-            ret.AV_LOG_FATAL = 8;
-            ret.AV_LOG_ERROR = 16;
-            ret.AV_LOG_WARNING = 24;
-            ret.AV_LOG_INFO = 32;
-            ret.AV_LOG_VERBOSE = 40;
-            ret.AV_LOG_DEBUG = 48;
-            ret.AV_LOG_TRACE = 56;
-
-            // Errors
-            enume(["E2BIG", "EPERM", "EADDRINUSE", "EADDRNOTAVAIL",
-                "EAFNOSUPPORT", "EAGAIN", "EALREADY", "EBADF", "EBADMSG",
-                "EBUSY", "ECANCELED", "ECHILD", "ECONNABORTED", "ECONNREFUSED",
-                "ECONNRESET", "EDEADLOCK", "EDESTADDRREQ", "EDOM", "EDQUOT",
-                "EEXIST", "EFAULT", "EFBIG", "EHOSTUNREACH", "EIDRM", "EILSEQ",
-                "EINPROGRESS", "EINTR", "EINVAL", "EIO", "EISCONN", "EISDIR",
-                "ELOOP", "EMFILE", "EMLINK", "EMSGSIZE", "EMULTIHOP",
-                "ENAMETOOLONG", "ENETDOWN", "ENETRESET", "ENETUNREACH",
-                "ENFILE", "ENOBUFS", "ENODEV", "ENOENT"], 1);
-            ret.AVERROR_EOF = -0x20464f45;
+            // Apply the statics
+            Object.assign(ret, libavStatics);
 
             return ret;
         });
@@ -514,5 +524,4 @@
 
     if (nodejs)
         module.exports = libav;
-
 })();
