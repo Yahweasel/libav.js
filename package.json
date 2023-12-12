@@ -1,8 +1,8 @@
 {
   "name": "libav.js",
-  "version": "4.7.6",
+  "version": "4.8.6",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
-  "main": "dist/libav-4.7.6.0.1-default.js",
+  "main": "dist/libav-4.8.6.0.1-default.js",
   "types": "dist/libav.types.d.ts",
   "directories": {
     "test": "tests"
