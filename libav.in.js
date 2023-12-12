@@ -106,11 +106,24 @@
             lo +
             ((lo < 0) ? 0x100000000 : 0)
         );
-    }
+    };
 
     libavStatics.f64toi64 = function(val) {
         return [~~val, Math.floor(val / 0x100000000)];
-    }
+    };
+
+    libavStatics.i64ToBigInt = function(lo, hi) {
+        var dv = new DataView(new ArrayBuffer(8));
+        dv.setInt32(0, lo, true);
+        dv.setInt32(4, hi, true);
+        return dv.getBigInt64(0, true);
+    };
+
+    libavStatics.bigIntToi64 = function(val) {
+        var dv = new DataView(new ArrayBuffer(8));
+        dv.setBigInt64(0, val, true);
+        return [dv.getInt32(0, true), dv.getInt32(4, true)];
+    };
 
     // Some enumerations lifted directly from FFmpeg
     function enume(vals, first) {

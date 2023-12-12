@@ -252,6 +252,22 @@ export interface LibAVStatic {
      */
     f64toi64(val: number): [number, number];
 
+    /**
+     * Convert a pair of 32-bit integers representing a single 64-bit integer
+     * into a BigInt. Requires BigInt support, of course.
+     * @param lo  Low bits of the pair
+     * @param hi  High bits of the pair
+     */
+    i64ToBigInt(lo: number, hi: number): BigInteger;
+
+    /**
+     * Convert a (64-bit) BigInt into a pair of 32-bit integers. Requires BigInt
+     * support, of course.
+     * @param val  BigInt value to convert
+     * @returns [low bits, high bits]
+     */
+    bigIntToi64(val: BigInteger): [number, number];
+
     // Enumerations:
     AV_OPT_SEARCH_CHILDREN: number;
     AVMEDIA_TYPE_UNKNOWN: number;
