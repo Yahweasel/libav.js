@@ -15,6 +15,9 @@
 
 // Check for reentrancy issues by trying to do two files at once
 
+if (h.libAVOpts && h.libAVOpts.yesthreads)
+    throw new Error("Known bug: test 616 does not work with threads.");
+
 const libav = await h.LibAV();
 const buf = await h.readCachedFile("bbb.webm");
 
