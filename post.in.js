@@ -646,7 +646,9 @@ Module.readerDevReady = function(fd) {
 /* @types
  * ff_init_encoder@sync(
  *     name: string, opts?: {
- *         ctx?: AVCodecContextProps, options?: Record<string, string>
+ *         ctx?: AVCodecContextProps,
+ *         time_base?: [number, number],
+ *         options?: Record<string, string>
  *     }
  * ): @promise@[number, number, number, number, number]@
  */
