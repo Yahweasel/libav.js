@@ -24,7 +24,7 @@ export interface Frame {
      * an array of typed arrays, one per line (because of how libav buffers
      * lines).
      */
-    data: any[];
+    data: any;
 
     /**
      * Sample format or pixel format.
