@@ -16,16 +16,16 @@ build/zlib-$(ZLIB_VERSION)/build-%/config.h: build/zlib-$(ZLIB_VERSION)/configur
 
 extract: build/zlib-$(ZLIB_VERSION)/configure
 
-build/zlib-$(ZLIB_VERSION)/configure: build/zlib-$(ZLIB_VERSION).tar.xz
-	cd build && tar Jxf zlib-$(ZLIB_VERSION).tar.xz
+build/zlib-$(ZLIB_VERSION)/configure: build/zlib-$(ZLIB_VERSION).tar.gz
+	cd build && tar zxf zlib-$(ZLIB_VERSION).tar.gz
 	touch $@
 
-build/zlib-$(ZLIB_VERSION).tar.xz:
+build/zlib-$(ZLIB_VERSION).tar.gz:
 	mkdir -p build
-	curl https://www.zlib.net/zlib-$(ZLIB_VERSION).tar.xz -L -o $@
+	curl https://www.zlib.net/fossils/zlib-$(ZLIB_VERSION).tar.gz -L -o $@
 
 zlib-release:
-	cp build/zlib-$(ZLIB_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/zlib-$(ZLIB_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/zlib.pc \
