@@ -7,7 +7,9 @@ FFMPEG_VERSION_MAJOR=6
 FFMPEG_VERSION_MINREV=0.1
 FFMPEG_VERSION=$(FFMPEG_VERSION_MAJOR).$(FFMPEG_VERSION_MINREV)
 LIBAVJS_VERSION_SUFFIX=
-LIBAVJS_VERSION=4.8.$(FFMPEG_VERSION)$(LIBAVJS_VERSION_SUFFIX)
+LIBAVJS_VERSION_BASE=4.8
+LIBAVJS_VERSION=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION)$(LIBAVJS_VERSION_SUFFIX)
+LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz
@@ -152,6 +154,7 @@ release: extract
 		webm-opus-flac mediarecorder-transcoder open-media webcodecs; \
 	do \
 		$(MAKE) build-$$v; \
+		$(MAKE) release-$$v; \
 		cp dist/libav-$(LIBAVJS_VERSION)-$$v.* \
 			libav.js-$(LIBAVJS_VERSION)/dist; \
 	done
@@ -165,6 +168,19 @@ release: extract
 	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
 	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
 	rm -rf libav.js-$(LIBAVJS_VERSION)
+
+release-%: libav.js-$(LIBAVJS_VERSION)-%-release
+	true
+
+libav.js-$(LIBAVJS_VERSION)-%-release: build-%
+	mkdir $(@)
+	mkdir $(@)/dist
+	cp dist/libav-$(LIBAVJS_VERSION)-$(*).* \
+		dist/libav.types.d.ts \
+		$(@)/dist
+	rm -f $(@)/dist/*.dbg.*
+	sed 's/@VARIANT/$(*)/g ; s/@VERSION/$(LIBAVJS_VERSION)/g ; s/@VER/$(LIBAVJS_VERSION_SHORT)/g' \
+		package-one-variant.json > $(@)/package.json
 
 publish:
 	unzip libav.js-$(LIBAVJS_VERSION).zip
@@ -198,6 +214,7 @@ print-version:
 	@printf '%s\n' "$(LIBAVJS_VERSION)"
 
 .PRECIOUS: \
+	libav.js-$(LIBAVJS_VERSION)-%-release \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a \
 	dist/libav-$(LIBAVJS_VERSION)-%.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \

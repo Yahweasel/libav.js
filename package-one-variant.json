@@ -1,15 +1,11 @@
 {
-  "name": "libav.js",
-  "version": "4.8.6",
+  "name": "@libav.js/@VARIANT",
+  "version": "@VER",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
-  "main": "dist/libav-4.8.6.0.1-default.js",
+  "main": "dist/libav-@VERSION-@VARIANT.js",
   "types": "dist/libav.types.d.ts",
   "directories": {
     "test": "tests"
-  },
-  "scripts": {
-    "build": "make -j9 && make build-all -j9",
-    "test": "npm run build && cd tests && node node-test.js --include-slow"
   },
   "repository": {
     "type": "git",
@@ -32,9 +28,5 @@
   "bugs": {
     "url": "https://github.com/Yahweasel/libav.js/issues"
   },
-  "homepage": "https://github.com/Yahweasel/libav.js#readme",
-  "devDependencies": {
-    "fast-xml-parser": "^4.2.2",
-    "uglify-js": "^3.14.3"
-  }
+  "homepage": "https://github.com/Yahweasel/libav.js#readme"
 }
