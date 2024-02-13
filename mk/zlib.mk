@@ -1,4 +1,4 @@
-ZLIB_VERSION=1.3
+ZLIB_VERSION=1.3.1
 
 build/inst/%/lib/pkgconfig/zlib.pc: build/zlib-$(ZLIB_VERSION)/build-%/config.h
 	cd build/zlib-$(ZLIB_VERSION)/build-$* && \

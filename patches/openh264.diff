@@ -11,35 +11,11 @@ index a1326c8..7d57e0f 100644
  
  int (*SetOption) (ISVCEncoder*, ENCODER_OPTION eOptionId, void* pOption);
  int (*GetOption) (ISVCEncoder*, ENCODER_OPTION eOptionId, void* pOption);
-diff --git a/codec/common/src/WelsThreadLib.cpp b/codec/common/src/WelsThreadLib.cpp
-index 4477e34..37f0adf 100644
---- a/codec/common/src/WelsThreadLib.cpp
-+++ b/codec/common/src/WelsThreadLib.cpp
-@@ -48,9 +48,6 @@
- #include <sys/types.h>
- #include <sys/param.h>
- #include <unistd.h>
--#ifndef __Fuchsia__
--#include <sys/sysctl.h>
--#endif
- #ifdef __APPLE__
- #define HW_NCPU_NAME "hw.logicalcpu"
- #else
 diff --git a/codec/decoder/core/src/wels_decoder_thread.cpp b/codec/decoder/core/src/wels_decoder_thread.cpp
-index d05aa45..7eafe90 100644
+index fdf4b4d..37a4c1a 100644
 --- a/codec/decoder/core/src/wels_decoder_thread.cpp
 +++ b/codec/decoder/core/src/wels_decoder_thread.cpp
-@@ -48,9 +48,6 @@
- #include <sys/types.h>
- #include <sys/param.h>
- #include <unistd.h>
--#ifndef __Fuchsia__
--#include <sys/sysctl.h>
--#endif
- #ifdef __APPLE__
- #define HW_NCPU_NAME "hw.logicalcpu"
- #else
-@@ -249,8 +246,10 @@ int SemWait (SWelsDecSemphore* s, int32_t timeout) {
+@@ -230,8 +230,10 @@ int SemWait (SWelsDecSemphore* s, int32_t timeout) {
  #if defined(__APPLE__)
          rc = pthread_cond_timedwait (& (s->e), & (s->m), &ts);
  #else
