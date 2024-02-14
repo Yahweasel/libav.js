@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 Yahweasel and contributors
+ * Copyright (C) 2019-2024 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
