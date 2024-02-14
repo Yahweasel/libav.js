@@ -579,8 +579,9 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) 
  */
 var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, pos, data, opts) {
     opts = opts || {};
+    var idata;
     if (!(name in Module.blockReadBuffers)) {
-        Module.blockReadBuffers[name] = {
+        idata = Module.blockReadBuffers[name] = {
             position: pos,
             buf: data,
             ready: true,
@@ -588,7 +589,7 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
             error: null
         };
     } else {
-        var idata = Module.blockReadBuffers[name];
+        idata = Module.blockReadBuffers[name];
         idata.position = pos;
         idata.buf = data;
         idata.ready = true;
