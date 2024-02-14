@@ -41,7 +41,7 @@ of using libav.js from a CDN:
 <html>
     <body>
         <script type="text/javascript">LibAV = {base: "https://cdn.jsdelivr.net/npm/@libav.js/variant-default@4.8.6/dist"};</script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@libav.js/variant-default@4.8.6/dist/libav-4.8.6.0.1-default.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@libav.js/variant-default@4.8.6/dist/libav-4.8.6.1.1-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -64,7 +64,7 @@ Here's a better example, using libav.js locally:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript" src="libav-4.8.6.0.1-default.js"></script>
+        <script type="text/javascript" src="libav-4.8.6.1.1-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV();
             await libav.writeFile("tmp.opus", new Uint8Array(
