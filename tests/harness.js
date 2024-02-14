@@ -175,6 +175,8 @@ LibAVTestHarness = {
 
         this.printStatus("");
         this.printErr(`Complete. ${fails} tests failed.`);
+
+        return fails;
     }
 };
 

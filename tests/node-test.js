@@ -38,10 +38,10 @@ async function main() {
         process.stderr.write("\x1b[K" + x + "\r");
     };
     await harness.loadTests(require("./suite.json"));
-    await harness.runTests([
+    process.exit(await harness.runTests([
         null,
         {nosimd: true},
         {nowasm: true}
-    ]);
+    ]) ? 1 : 0);
 }
 main();
