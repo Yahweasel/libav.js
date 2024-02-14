@@ -1221,8 +1221,9 @@ Module.ff_read_multi = function() {
  * ): @promise@[number, number[], number[]]@
  */
 var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, input, output) {
-    var abuffersrc, abuffersink, filter_graph, tmp_src_ctx, tmp_sink_ctx,
-        src_ctxs, sink_ctxs, io_outputs, io_inputs, int32s, int64s;
+    var buffersrc, abuffersrc, buffersink, abuffersink, filter_graph,
+        tmp_src_ctx, tmp_sink_ctx, src_ctxs, sink_ctxs, io_outputs, io_inputs,
+        int32s, int64s;
     var instr, outstr;
 
     var multiple_inputs = !!input.length;
@@ -1233,13 +1234,10 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
     sink_ctxs = [];
 
     try {
+        buffersrc = avfilter_get_by_name("buffer");
         abuffersrc = avfilter_get_by_name("abuffer");
-        if (abuffersrc === 0)
-            throw new Error("Failed to load abuffer filter");
-
+        buffersink = avfilter_get_by_name("buffersink");
         abuffersink = avfilter_get_by_name("abuffersink");
-        if (abuffersink === 0)
-            throw new Error("Failed to load abuffersink filter");
 
         filter_graph = avfilter_graph_alloc();
         if (filter_graph === 0)
@@ -1258,14 +1256,43 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
 
             // Now create our input filter
             var nm = "in" + (multiple_inputs?ii:"");
-            tmp_src_ctx = avfilter_graph_create_filter_js(abuffersrc, nm,
-                "time_base=1/" + (input.sample_rate?input.sample_rate:48000) +
-                ":sample_rate=" + (input.sample_rate?input.sample_rate:48000) +
-                ":sample_fmt=" + (input.sample_fmt?input.sample_fmt:3/*FLT*/) +
-                ":channel_layout=" + (input.channel_layout?input.channel_layout:4/*MONO*/),
-                null, filter_graph);
+            if (input.type === 0 /* AVMEDIA_TYPE_VIDEO */) {
+                if (buffersrc === 0)
+                    throw new Error("Failed to load buffer filter");
+                var frame_rate = input.frame_rate;
+                var time_base = input.time_base;
+                if (typeof frame_rate === "undefined")
+                    frame_rate = 30;
+                if (typeof time_base === "undefined")
+                    time_base = [1, frame_rate];
+                tmp_src_ctx = avfilter_graph_create_filter_js(buffersrc, nm,
+                    "time_base=" + time_base[0] + "/" + time_base[1] +
+                    ":frame_rate=" + frame_rate +
+                    ":pix_fmt=" + (input.pix_fmt?input.pix_fmt:0/*YUV420P*/) +
+                    ":width=" + (input.width?input.width:640) +
+                    ":height=" + (input.height?input.height:360),
+                    null, filter_graph);
+
+            } else { // audio filter
+                if (abuffersrc === 0)
+                    throw new Error("Failed to load abuffer filter");
+                var sample_rate = input.sample_rate;
+                var time_base = input.time_base;
+                if (typeof sample_rate === "undefined")
+                    sample_rate = 48000;
+                if (typeof time_base === "undefined")
+                    time_base = [1, sample_rate];
+                tmp_src_ctx = avfilter_graph_create_filter_js(abuffersrc, nm,
+                    "time_base=" + time_base[0] + "/" + time_base[1] +
+                    ":sample_rate=" + sample_rate +
+                    ":sample_fmt=" + (input.sample_fmt?input.sample_fmt:3/*FLT*/) +
+                    ":channel_layout=" + (input.channel_layout?input.channel_layout:4/*MONO*/),
+                    null, filter_graph);
+
+            }
+
             if (tmp_src_ctx === 0)
-                throw new Error("Cannot create audio buffer source");
+                throw new Error("Cannot create buffer source");
             src_ctxs.push(tmp_src_ctx);
 
             // Configure the inout
@@ -1294,32 +1321,74 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
 
             // Create the output filter
             var nm = "out" + (multiple_outputs?oi:"");
-            tmp_sink_ctx = avfilter_graph_create_filter_js(abuffersink, nm, null, null,
-                    filter_graph);
+            if (output.type === 0 /* AVMEDIA_TYPE_VIDEO */) {
+                if (buffersink === 0)
+                    throw new Error("Failed to load buffersink filter");
+                tmp_sink_ctx = avfilter_graph_create_filter_js(
+                    buffersink, nm, null, null, filter_graph);
+            } else { // audio
+                tmp_sink_ctx = avfilter_graph_create_filter_js(abuffersink, nm,
+                    null, null, filter_graph);
+            }
             if (tmp_sink_ctx === 0)
-                throw new Error("Cannot create audio buffer sink");
+                throw new Error("Cannot create buffer sink");
             sink_ctxs.push(tmp_sink_ctx);
 
-            // Allocate space to transfer our options
-            int32s = ff_malloc_int32_list([output.sample_fmt?output.sample_fmt:3/*FLT*/, -1, output.sample_rate?output.sample_rate:48000, -1]);
-            int64s = ff_malloc_int64_list([output.channel_layout?output.channel_layout:4/*MONO*/, -1]);
-            outstr = av_strdup(nm);
-            if (int32s === 0 || int64s === 0 || outstr === 0)
-                throw new Error("Failed to transfer parameters");
+            if (output.type === 0 /* AVMEDIA_TYPE_VIDEO */) {
+                // Allocate space to transfer our options
+                int32s = ff_malloc_int32_list([
+                    output.pix_fmt?output.pix_fmt:0 /* YUV420P */, -1
+                ]);
+                if (int32s === 0)
+                    throw new Error("Failed to transfer parameters");
 
-            if (
-                av_opt_set_int_list_js(tmp_sink_ctx, "sample_fmts", 4, int32s, -1, 1 /* AV_OPT_SEARCH_CHILDREN */) < 0 ||
-                av_opt_set_int_list_js(tmp_sink_ctx, "channel_layouts", 8, int64s, -1, 1) < 0 ||
-                av_opt_set_int_list_js(tmp_sink_ctx, "sample_rates", 4, int32s + 8, -1, 1) < 0)
-            {
-                throw new Error("Failed to set filter parameters");
+                if (
+                    av_opt_set_int_list_js(
+                        tmp_sink_ctx, "pix_fmts", 4, int32s, -1, 1
+                    ) < 0
+                ) {
+                    throw new Error("Failed to set filter parameters");
+                }
+                free(int32s);
+                int32s = 0;
+
+            } else { // audio
+                // Allocate space to transfer our options
+                int32s = ff_malloc_int32_list([
+                    output.sample_fmt?output.sample_fmt:3/*FLT*/, -1,
+                    output.sample_rate?output.sample_rate:48000, -1
+                ]);
+                int64s = ff_malloc_int64_list([
+                    output.channel_layout?output.channel_layout:4/*MONO*/, -1
+                ]);
+                if (int32s === 0 || int64s === 0)
+                    throw new Error("Failed to transfer parameters");
+
+                if (
+                    av_opt_set_int_list_js(
+                        tmp_sink_ctx, "sample_fmts", 4, int32s, -1, 1 /* AV_OPT_SEARCH_CHILDREN */
+                    ) < 0 ||
+                    av_opt_set_int_list_js(
+                        tmp_sink_ctx, "channel_layouts", 8, int64s, -1, 1
+                    ) < 0 ||
+                    av_opt_set_int_list_js(
+                        tmp_sink_ctx, "sample_rates", 4, int32s + 8, -1, 1
+                    ) < 0
+                )
+                {
+                    throw new Error("Failed to set filter parameters");
+                }
+                free(int32s);
+                int32s = 0;
+                free(int64s);
+                int64s = 0;
+
             }
-            free(int32s);
-            int32s = 0;
-            free(int64s);
-            int64s = 0;
 
             // Configure it
+            outstr = av_strdup(nm);
+            if (outstr === 0)
+                throw new Error("Failed to transfer parameters");
             AVFilterInOut_name_s(io_inputs, outstr);
             outstr = 0;
             AVFilterInOut_filter_ctx_s(io_inputs, tmp_sink_ctx);

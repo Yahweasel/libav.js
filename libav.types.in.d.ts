@@ -177,14 +177,46 @@ export interface Stream {
  */
 export interface FilterIOSettings {
     /**
+     * Type of filterchain, as an AVMEDIA_TYPE_*. If unset, defaults to
+     * AVMEDIA_TYPE_AUDIO.
+     */
+    type?: number;
+
+    /**
+     * The timebase for this filterchain. If unset, [1, frame_rate] or [1,
+     * sample_rate] will be used.
+     */
+    time_base?: [number, number];
+
+    /**
+     * Video only. Framerate of the input.
+     */
+    frame_rate?: number;
+
+    /**
      * Audio only. Sample rate of the input.
      */
     sample_rate?: number;
 
     /**
+     * Video only. Pixel format of the input.
+     */
+    pix_fmt?: number;
+
+    /**
      * Audio only. Sample format of the input.
      */
     sample_fmt?: number;
+
+    /**
+     * Video only. Width of the input.
+     */
+    width?: number;
+
+    /**
+     * Video only. Height of the input.
+     */
+    height?: number;
 
     /**
      * Audio only. Channel layout of the input. Note that there is no
