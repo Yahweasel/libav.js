@@ -40,8 +40,8 @@ of using libav.js from a CDN:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript">LibAV = {base: "https://unpkg.com/libav.js@4.8.6/dist"};</script>
-        <script type="text/javascript" src="https://unpkg.com/libav.js@4.8.6/dist/libav-4.8.6.0.1-default.js"></script>
+        <script type="text/javascript">LibAV = {base: "https://cdn.jsdelivr.net/npm/@libav.js/variant-default@4.8.6/dist"};</script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@libav.js/variant-default@4.8.6/dist/libav-4.8.6.0.1-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -226,6 +226,10 @@ Note that, independently of what files are available to end users, *you are
 contractually obligated to release the source code of libav.js and all of its
 dependencies* if you provide the compiled version. If you are using a compiled,
 released version, it is sufficient to provide the `sources` directory.
+
+libav.js is published to NPM as `libav.js`, and each released variant is
+published in a much smaller NPM package as `@libav.js/variant-<variant>`. The
+CDN example above uses the `@libav.js/variant-default` package, for example.
 
 
 ## Bundlers
