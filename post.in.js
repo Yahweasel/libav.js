@@ -91,7 +91,7 @@ var blockReaderCallbacks = {
     },
 
     close: function(stream) {
-        delete Module.readBuffers[stream.node.name];
+        delete Module.blockReadBuffers[stream.node.name];
     },
 
     read: function(stream, buffer, offset, length, position) {
