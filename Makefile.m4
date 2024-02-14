@@ -146,12 +146,15 @@ build/inst/thrsimd/cflags.txt:
 	mkdir -p build/inst/thrsimd
 	echo $(THRFLAGS) $(SIMDFLAGS) -gsource-map > $@
 
+RELEASE_VARIANTS=\
+	default lite fat obsolete opus flac opus-flac webm webm-opus-flac \
+	mediarecorder-transcoder open-media webcodecs
+
 release: extract
 	mkdir libav.js-$(LIBAVJS_VERSION)
 	cp -a README.md docs libav.js-$(LIBAVJS_VERSION)/
 	mkdir libav.js-$(LIBAVJS_VERSION)/dist
-	for v in default lite fat obsolete opus flac opus-flac webm \
-		webm-opus-flac mediarecorder-transcoder open-media webcodecs; \
+	for v in $(RELEASE_VARIANTS); \
 	do \
 		$(MAKE) build-$$v; \
 		$(MAKE) release-$$v; \
@@ -189,6 +192,10 @@ publish:
 	  rm -f dist/*.dbg.* && \
 	  npm publish )
 	rm -rf libav.js-$(LIBAVJS_VERSION)
+	for v in $(RELEASE_VARIANTS); \
+	do \
+		( cd libav.js-$(LIBAVJS_VERSION)-$$v-release && npm publish ) \
+	done
 
 halfclean:
 	-rm -rf dist/
