@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Yahweasel and contributors
+ * Copyright (C) 2023, 2024 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -13,7 +13,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Decode and filter without copying intervening data out
+// Decoding and filtering video
+
+if (!h.options.includeSlow)
+    return;
 
 const libav = await h.LibAV();
 
