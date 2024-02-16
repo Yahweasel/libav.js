@@ -91,7 +91,8 @@ var blockReaderCallbacks = {
     },
 
     close: function(stream) {
-        delete Module.blockReadBuffers[stream.node.name];
+        // FIXME
+        //delete Module.blockReadBuffers[stream.node.name];
     },
 
     read: function(stream, buffer, offset, length, position) {
