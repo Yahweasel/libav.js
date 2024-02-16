@@ -52,7 +52,7 @@ if (typeof packets[streamIdx][0] !== "number")
 
 // Get a filter graph that won't really do anything
 const [filter_graph, buffersrc_ctx, buffersink_ctx] =
-    await libav.ff_init_filter_graph("scale=1920:1080,scale=1280:720", {
+    await libav.ff_init_filter_graph("scale=1920:1080,fps=120,fps=60,scale=1280:720", {
         type: libav.AVMEDIA_TYPE_VIDEO,
         time_base: [1, 1000],
         frame_rate: 60,
