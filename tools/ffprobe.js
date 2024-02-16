@@ -14,7 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-const LibAV = require("../dist/libav-4.9.6.1.1-all.js");
+const LibAV = require("../dist/libav-4.10.6.1.1-all.js");
 const fs = require("fs/promises");
 
 async function main() {
