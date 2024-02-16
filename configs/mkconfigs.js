@@ -27,13 +27,13 @@ const configs = [
     ["opus-flac", ["format-ogg", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac"]],
     ["all-audio-cli", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "format-wav", "format-pcm_f32le", "codec-pcm_f32le", "audio-filters", "cli", "workerfs"]],
 
-    ["webm", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "format-wav", "audio-filters"]],
+    ["webm", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "format-wav", "audio-filters", "video-filters"]],
     ["webm-opus-flac", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8"]],
     ["mediarecorder-transcoder", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264"]],
     ["open-media", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-vp9", "codec-libvpx_vp9", "parser-av1", "codec-libaom_av1"]],
     ["rawvideo", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264", "format-rawvideo", "codec-rawvideo"]],
 
-    ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "parser-opus", "codec-libopus", "parser-aac", "codec-aac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "bsf-extract_extradata", "parser-vp9", "bsf-vp9_metadata", "parser-h264", "bsf-h264_metadata", "parser-hevc", "bsf-hevc_metadata", "bsf-av1_metadata"]],
+    ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "parser-opus", "codec-libopus", "parser-aac", "codec-aac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "bsf-extract_extradata", "parser-vp9", "bsf-vp9_metadata", "parser-h264", "bsf-h264_metadata", "parser-hevc", "bsf-hevc_metadata", "bsf-av1_metadata", "swscale", "audio-filters", "video-filters"]],
 
     // These are here so that "all" will have them for testing
     ["extras", [
