@@ -421,7 +421,7 @@ usually between 1.5 and 3 MiB for fairly complete builds, and the asm.js is abou
 double that.
 
 You can estimate the size of variants based on the size of the constituent
-fragments. As of version 4.6.6.0, an empty build is approximately 579KiB
+fragments. As of version 4.10.6.1.1, an empty build is approximately 589KiB
 (WebAssembly). The sizes of each additional fragment can be found in
 [fragment-sizes.csv](tools/fragment-sizes.csv). The data in that CSV file can be
 recreated by `tools/fragment-sizes.sh`, but note that the CSV file in the
@@ -431,7 +431,7 @@ subtracting away the empty size).
 The asm.js versions are much bigger, but will not be loaded on
 WebAssembly-capable clients.
 
-The wrapper (“glue”) code is about 288KiB, but is highly compressible.
+The wrapper (“glue”) code is about 304KiB, but is highly compressible.
 
 
 ## Performance
