@@ -232,43 +232,6 @@ published in a much smaller NPM package as `@libav.js/variant-<variant>`. The
 CDN example above uses the `@libav.js/variant-default` package, for example.
 
 
-## Bundlers
-
-Generally speaking, because libav.js needs to adjust its loading procedure based
-on the environment it's being loaded in, it's not a good idea to bundle
-libav.js. However, if you have to bundle it, it can be done if necessary.
-Bundlers such as WebPack, esbuild, Vite, Rollup, etc., may change the names and
-location of the LibAV's JavaScript and WebAssembly files or even turn them into
-modules.  In these cases, the location of the JavaScript and WebAssembly file of
-a LibAV variant can be overridden by options set on the `LibAV` object after
-loading libav.js, similar to `LibAV.base`.  `LibAV.toImport` and `LibAV.wasmurl`
-override the URL of the used JavaScript and WebAssembly file respectively. These
-are usually located in the libav.js directory and follow the scheme
-`libav-VER-CONFIGDBG.TARGET.js` and `libav-VER-CONFIGDBG.TARGET.wasm`,
-respectively.  The version (`VER`), variant (`CONFIG`) and debug (`DBG`) string
-are exposed as `LibAV.VER`, `LibAV.CONFIG` and `LibAV.DBG` respectively after
-loading LibAV.  However, you can generally successfully load a different variant
-or debuggability level, so these are provided to allow you to verify what your
-bundler actually bundled.  The target corresponds to the browser features
-available, and can vary between different browsers or other environments. As
-such, it should be determined at runtime, which can be done by calling
-`LibAV.target()`. For instance, a possible way to retrieve the URL in a module
-can be ``new
-URL(`node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.wasm`,
-import.meta.url).href``, but be sure to consult the documentation of your
-bundler. Note the variant `opus` is hard-coded in this case to prevent the
-bundler from including all variants.
-
-Some bundlers turn LibAV code from a CommonJS module to an ECMAScript 6 module,
-which will if loaded in a worker interfere with LibAV's loading code.  In this
-case, LibAV's JavaScript code needs to be imported manually before calling the
-factory function of the LibAV instance: ``await
-import(`../node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.js`)``.
-Note that dynamically importing ECMAScript 6 modules is supported by all major
-browsers, but at the time of this wriging, on Firefox, is protected by a flag
-that most users will not have enabled.
-
-
 ## API
 
 The API exposed by libav.js is more-or-less exactly the functions exposed by
@@ -340,12 +303,9 @@ With all of its bells and whistles enabled, FFmpeg is pretty large. So, I
 disable most bells and most whistles and build specific versions with specific
 features.
 
-The default build, libav-`version`-default.js, includes supports for all of the
-most important audio formats for the web: Opus in WebM or ogg containers, AAC
-in the M4A container, and FLAC and 16- or 24-bit wav in their respective
-containers. Also supported are all valid combinations of those formats and
-containers, e.g. any codec in Matroska (since WebM is Matroska), FLAC in ogg,
-etc.
+The default variant, libav-`<version>`-default.js, includes support for the most
+important (and timeless) audio codecs and formats: Opus, FLAC, and wav, in WebM,
+ogg, FLAC, or wav containers. It also has a set of common audio filters.
 
 Built-in variants are created by combining “configuration fragments”. You can
 find more on configuration fragments or making your own variants in
@@ -354,54 +314,75 @@ find more on configuration fragments or making your own variants in
 Use `make build-variant`, replacing `variant` with the variant name, to build
 another variant.
 
-libav.js includes several other variants, listed here by feature:
+Most of the variants provided in the repository are also built and available in
+NPM and as binary releases. The notable exception is all variants that include
+codecs controlled by the Misanthropic Patent Extortion Gang (MPEG). They are not
+built by default, and if you have any sense, you should not use them. MPEG is a
+cancer on digital media.
 
-| Variant Name		| mp4	| ogg	| webm	| aac	| flac	| opus	| wav	| Standard audio filters	| Video						| Others	|
-| ----------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ------------------------- | ------------------------- | --------- |
-| default			| x		| x		| x		| 		| x		| x		| x		| x							|							| |
-| lite				| 		| x		| 		| 		| x		| x		| x		| x							|							| |
-| fat				| x		| x		| 		| x		| x		| x		| x		| x							|							| vorbis, alac, wavpack |
-| obsolete			| x		| x		| x		| x		| x		| x		| 		| x							|							| mp3, vorbis |
-| opus				| 		| x		| 		| 		| 		| x		| 		| 							|							| |
-| flac				| 		| 		| 		| 		| x		| 		| 		| 							|							| |
-| opus-flac			| 		| x		| 		| 		| x		| x		| 		| 							|							| |
-| webm				| x		| x		| x		| x		| x		| x		| x		| x							| VP8						| |
-| webm-opus-flac	| 		| x		| x		| 		| x		| x		| 		| 							| VP8						| |
-| mediarecorder-transcoder | x | x	| x		| x		| x		| x		| 		| 							| VP8, H.264 (decoding)		| |
-| open-media		| 		| x		| x		| 		| x		| x		| 		| 							| VP8, VP9, AV1				| vorbis |
-| webcodecs			| x		| x		| x		| x		| x		| x		| 		| 							| VP8						| Note 1 |
+The included variants are:
 
-The following variants have defined configurations, and so can be built “out of
-the box”, but are not included in libav.js distributions.
+ * default, default-cli: Opus (via libopus), FLAC, and wav in ogg, WebM, FLAC,
+   and wav containers, plus audio filters. The `-cli` subvariant additionally
+   includes the CLI (`ffmpeg` and `ffprobe` functions).
 
-| Variant Name		| mp4	| ogg	| webm	| aac	| flac	| opus	| wav	| Standard audio filters	| Video						| Others	|
-| ----------------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ------------------------- | ------------------------- | --------- |
-| all-audio-cli		| x		| x		| x		| x		| x		| x		| x		| x							|							| floating-point wav, mp3, vorbis. Note 2 |
-| rawvideo			| x		| x		| x		| x		| x		| x		| 		| 							| VP8, H.264 (decoding), rawvideo | |
-| mediarecorder-transcoder | x | x	| x		| x		| x		| x		| 		| 							| VP8, H.264				| Note 3 |
-| all				| x		| x		| x		| x		| x		| x		| x		| x							| (All)						| (All) |
+ * opus, opus-af: Opus in ogg or WebM. `-af` additionally includes audio
+   filters.
 
-Note 1: Also includes bitstream data extractors for VP9, AV1, H.264, and H.265.
-This makes the `webcodecs` variant ideal for pairing with WebCodecs, using
-WebCodecs to do the actual decoding.
+ * flac, flac-af: FLAC in ogg or FLAC. `-af` additionally includes audio
+   filters.
 
-Note 2: Also includes the CLI (`ffmpeg` and `ffprobe` functions).
+ * wav, wav-af: PCM wav (16-bit or 24-bit) in wav. `-af` additionally includes
+   audio filters.
 
-Note 3: Includes technologies patented by the Misanthropic Patent Extortion
-Gang (MPEG). You should not use these builds, and you should not support this
-organization which works actively against the common good.
+ * obsolete: Same as default with the addition of two obsolete codecs, Vorbis
+   (via libvorbis) and MPEG-1 Layer 3 (MP3) (via libmp3lame). Also includes the
+   MP3 container format.
 
-To create a variant from configuration fragments, run `./mkconfig.js` in the
-`configs` directory. The first argument is the name of the variant to make, and
-the second argument is the JSON array of fragments to include.
+ * webm, webm-vp9, webm-cli, webm-vp9-cli: Same as default with the addition of
+   VP8 (via libvpx) and video filters. `-vp9` additionally includes VP9, `-cli`
+   additionally includes the CLI. `-vp9` is separated due to the rather
+   significant size of the VP9 codec.
 
-To create other variants, simply create the configuration for them in
-subdirectories of `configs` and, if necessary, add Makefile fragments to `mk`.
+ * webcodecs, webcodecs-avf: Designed to serve as a demuxer/muxer for codecs
+   supported by WebCodecs. Pairs well with
+   [libavjs-webcodecs-bridge](https://github.com/Yahweasel/libavjs-webcodecs-bridge).
+   Includes codecs for Opus, FLAC, wav, and VP8. Includes *parsers* (but not
+   codecs) for AAC, VP9, AV1, H.264, and H.265. Includes the ogg, WebM, MP4,
+   FLAC, and wav formats. This means that it can demux files including, e.g.,
+   H.264, but cannot decode the frames. If your WebCodecs supports H.264, you
+   can then use it to decode. `-avf` additionally includes audio and video
+   filters.
 
-This is intentionally designed so that you can add new configurations without
-needing to patch anything that already exists. See the existing variants'
-configuration files in `config` and the existing fragments in `mk` to
-understand how.
+ * vp8-opus, vp8-opus-avf: VP8 and Opus in WebM (or ogg). `-avf` additionally
+   includes audio and video filters.
+
+ * vp9-opus, vp9-opus-avf: VP9 and Opus in WebM (or ogg). `-avf` additionally
+   includes audio and video filters.
+
+ * av1-opus, av1-opus-avf: AV1 (via libaom) and Opus in WebM (or ogg). Note that
+   AV1 support is currently so slow in WebAssembly even with threads that these
+   variants are effectively unusable. `-avf` additionally includes audio and
+   video filters.
+
+ * aac¹, aac-af¹: Reprobate codec AAC in MP4 or AAC/ADTS. `-af` additionally
+   includes audio filters.
+
+ * h264-aac¹, h264-aac-avf¹: Reprobate codec H.264 (via libopenh264) in MP4 (or
+   AAC/ADTS). `-avf` additionally includes audio and video filters.
+
+ * hevc-aac¹, hevc-aac-avf¹: Reprobate codec H.265 (decoding only) in MP4 (or
+   AAC/ADTS). `-avf` additionally includes audio and video filters.
+
+¹ Includes technologies patented by the Misanthropic Patent Extortion Gang
+  (MPEG). You should not build these, you should not use these builds, and you
+  should not support this organization which works actively against the common
+  good.
+
+
+This is intentionally designed so that you can add new variants without needing
+to patch anything that already exists. If you want to create your own variants,
+see [CONFIG.md](docs/CONFIG.md).
 
 You can also build against different versions of FFmpeg than the version built
 by default. To build against, for instance, FFmpeg 4.3.6, use `make
@@ -478,3 +459,40 @@ connect it to WebCodecs:
    formats. This makes it easy to use libav.js for demuxing and WebCodecs for
    decoding, or WebCodecs for encoding and libav.js for muxing. Of course, the
    WebCodecs used with the bridge can easily be the polyfill if needed.
+
+
+## Bundlers
+
+Generally speaking, because libav.js needs to adjust its loading procedure based
+on the environment it's being loaded in, it's not a good idea to bundle
+libav.js. However, if you have to bundle it, it can be done if necessary.
+Bundlers such as WebPack, esbuild, Vite, Rollup, etc., may change the names and
+location of the LibAV's JavaScript and WebAssembly files or even turn them into
+modules.  In these cases, the location of the JavaScript and WebAssembly file of
+a LibAV variant can be overridden by options set on the `LibAV` object after
+loading libav.js, similar to `LibAV.base`.  `LibAV.toImport` and `LibAV.wasmurl`
+override the URL of the used JavaScript and WebAssembly file respectively. These
+are usually located in the libav.js directory and follow the scheme
+`libav-VER-CONFIGDBG.TARGET.js` and `libav-VER-CONFIGDBG.TARGET.wasm`,
+respectively.  The version (`VER`), variant (`CONFIG`) and debug (`DBG`) string
+are exposed as `LibAV.VER`, `LibAV.CONFIG` and `LibAV.DBG` respectively after
+loading LibAV.  However, you can generally successfully load a different variant
+or debuggability level, so these are provided to allow you to verify what your
+bundler actually bundled.  The target corresponds to the browser features
+available, and can vary between different browsers or other environments. As
+such, it should be determined at runtime, which can be done by calling
+`LibAV.target()`. For instance, a possible way to retrieve the URL in a module
+can be ``new
+URL(`node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.wasm`,
+import.meta.url).href``, but be sure to consult the documentation of your
+bundler. Note the variant `opus` is hard-coded in this case to prevent the
+bundler from including all variants.
+
+Some bundlers turn LibAV code from a CommonJS module to an ECMAScript 6 module,
+which will if loaded in a worker interfere with LibAV's loading code.  In this
+case, LibAV's JavaScript code needs to be imported manually before calling the
+factory function of the LibAV instance: ``await
+import(`../node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.js`)``.
+Note that dynamically importing ECMAScript 6 modules is supported by all major
+browsers, but at the time of this wriging, on Firefox, is protected by a flag
+that most users will not have enabled.

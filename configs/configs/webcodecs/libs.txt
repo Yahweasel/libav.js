@@ -1,0 +1,2 @@
+build/inst/@TARGET/lib/libopus.a
+build/inst/@TARGET/lib/libvpx.a

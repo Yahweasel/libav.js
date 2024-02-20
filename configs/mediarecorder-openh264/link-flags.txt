@@ -1,2 +1,0 @@
--DLIBAVJS_WITH_SWSCALE=1
--lstdc++ -lm -lpthread -s ERROR_ON_UNDEFINED_SYMBOLS=0

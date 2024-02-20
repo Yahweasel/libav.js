@@ -26,7 +26,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 define([[[buildrule]]], [[[
 build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	configs/%/ffmpeg-config.txt | \
+	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/$1/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
@@ -36,7 +36,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/$1/include $3" \
 		--extra-ldflags="-L$(PWD)/build/inst/$1/lib $3" \
-		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h
 	touch $(@)
@@ -56,7 +56,7 @@ buildrule(simd, [[[--disable-pthreads --arch=x86_32 --disable-inline-asm --disab
 buildrule(thrsimd, [[[--enable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm --enable-cross-compile]]], [[[$(THRFLAGS) $(SIMDFLAGS)]]])
 
 # All dependencies
-include configs/*/deps.mk
+include configs/configs/*/deps.mk
 
 install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
 	true

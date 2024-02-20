@@ -1,5 +1,0 @@
-build/inst/@TARGET/lib/libopus.a
-build/inst/@TARGET/lib/libvorbis.a
-build/inst/@TARGET/lib/libvorbisenc.a
-build/inst/@TARGET/lib/libogg.a
-build/inst/@TARGET/lib/libmp3lame.a

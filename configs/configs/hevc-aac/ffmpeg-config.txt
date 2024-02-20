@@ -1,0 +1,16 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=mov
+--enable-muxer=ipod
+--enable-muxer=mov
+--enable-muxer=mp4
+--enable-demuxer=aac
+--enable-demuxer=matroska
+--enable-muxer=matroska --enable-muxer=webm
+--enable-parser=aac
+--enable-decoder=aac
+--enable-encoder=aac
+--enable-parser=hevc
+--enable-decoder=hevc
+--enable-bsf=hevc_metadata
+--enable-bsf=extract_extradata

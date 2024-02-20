@@ -1,1 +1,2 @@
 --enable-filter=crop --enable-filter=fps --enable-filter=split
+--enable-filter=trim

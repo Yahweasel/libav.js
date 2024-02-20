@@ -20,7 +20,10 @@ const parts = JSON.parse(process.argv[3]);
 const files = ["ffmpeg-config.txt", "libs.txt", "license.js", "link-flags.txt"];
 
 try {
-    fs.mkdirSync(name);
+    fs.mkdirSync("configs");
+} catch (ex) {}
+try {
+    fs.mkdirSync(`configs/${name}`);
 } catch (ex) {}
 
 function exists(f) {
@@ -100,7 +103,7 @@ function addFragment(out, part) {
     // Open the files
     const out = {};
     for (const file of files.concat(["deps.mk"]))
-        out[file] = fs.createWriteStream(`${name}/${file}`);
+        out[file] = fs.createWriteStream(`configs/${name}/${file}`);
 
     // Start the license header
     out["license.js"].write(fs.readFileSync("fragments/default/license-head.js"));

@@ -29,7 +29,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	configs/%/ffmpeg-config.txt | \
+	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/base/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) && \
@@ -39,7 +39,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/base/include " \
 		--extra-ldflags="-L$(PWD)/build/inst/base/lib " \
-		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h
 	touch $(@)
@@ -52,7 +52,7 @@ part-install-base-%: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/lib
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	configs/%/ffmpeg-config.txt | \
+	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/thr/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) && \
@@ -62,7 +62,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/thr/include $(THRFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS)" \
-		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h
 	touch $(@)
@@ -75,7 +75,7 @@ part-install-thr-%: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libav
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	configs/%/ffmpeg-config.txt | \
+	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/simd/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*) && \
@@ -85,7 +85,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak: \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/simd/include $(SIMDFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/simd/lib $(SIMDFLAGS)" \
-		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-simd-$(*)/config.h
 	touch $(@)
@@ -98,7 +98,7 @@ part-install-simd-%: build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/lib
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
-	configs/%/ffmpeg-config.txt | \
+	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/thrsimd/cflags.txt
 	mkdir -p build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) && \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*) && \
@@ -108,7 +108,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak: \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/thrsimd/include $(THRFLAGS) $(SIMDFLAGS)" \
 		--extra-ldflags="-L$(PWD)/build/inst/thrsimd/lib $(THRFLAGS) $(SIMDFLAGS)" \
-		`cat ../../../configs/$(*)/ffmpeg-config.txt`
+		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-$(*)/config.h
 	touch $(@)
@@ -119,7 +119,7 @@ part-install-thrsimd-%: build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavform
 
 
 # All dependencies
-include configs/*/deps.mk
+include configs/configs/*/deps.mk
 
 install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
 	true

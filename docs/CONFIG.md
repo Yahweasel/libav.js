@@ -71,9 +71,9 @@ Each configuration has the following files:
 
 Configuration fragments contain the same files, and they are concatenated
 together to create the configurations. The build uses these files, and expects
-to find them in `config/<variant>` when you run `make build-<variant>`.
+to find them in `configs/configs/<variant>` when you run `make build-<variant>`.
 
-Configuration fragments are in `config/fragments`.
+Configuration fragments are in `configs/fragments`.
 
 For protocols, formats, demuxers, muxers, codecs, decoders, encoders, parsers,
 filters, or bsfs (bitstream filters) that can be enabled with only the relevant

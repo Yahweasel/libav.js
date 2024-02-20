@@ -73,9 +73,9 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 	mkdir -p dist
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) $4 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*) \
-		`test ! -e configs/$(*)/link-flags.txt || cat configs/$(*)/link-flags.txt` \
+		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
-		`grep LIBAVJS_WITH_CLI configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
+		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg.o \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_demux.o \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_filter.o \
@@ -92,8 +92,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/libavdevice/libavdevice.a \
 		'` \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/*/lib*.a \
-		`test ! -e configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/$(*)/libs.txt` -o $(@)
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/$1/g ; s/@DBG/$2/g" $(@) | cat configs/$(*)/license.js - > $(@).tmp
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/configs/$(*)/libs.txt` -o $(@)
+	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/$1/g ; s/@DBG/$2/g" $(@) | cat configs/configs/$(*)/license.js - > $(@).tmp
 	mv $(@).tmp $(@)
 	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
@@ -147,8 +147,9 @@ build/inst/thrsimd/cflags.txt:
 	echo $(THRFLAGS) $(SIMDFLAGS) -gsource-map > $@
 
 RELEASE_VARIANTS=\
-	default lite fat obsolete opus flac opus-flac webm webm-opus-flac \
-	mediarecorder-transcoder open-media webcodecs
+	default default-cli opus opus-af flac flac-af wav wav-af obsolete webm \
+	webm-cli webm-vp9 webm-vp9-cli vp8-opus vp8-opus-avf, vp9-opus \
+	vp9-opus-avf av1-opus av1-opus-avf webcodecs webcodecs-avf
 
 release: extract
 	mkdir libav.js-$(LIBAVJS_VERSION)
@@ -211,7 +212,6 @@ clean: halfclean
 	-rm -rf build/lame-$(LAME_VERSION)
 	-rm -rf build/openh264-$(OPENH264_VERSION)
 	-rm -rf build/ffmpeg-$(FFMPEG_VERSION)
-	-rm -rf build/x265_$(X265_VERSION)
 	-rm -rf build/zlib-$(ZLIB_VERSION)
 
 distclean: clean

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Copyright (C) 2021-2023 Yahweasel and contributors
+ * Copyright (C) 2021-2024 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -17,23 +17,83 @@
 const cproc = require("child_process");
 const fs = require("fs");
 
-const configs = [
-    ["default", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "format-wav", "audio-filters"]],
-    ["lite", ["format-ogg", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "format-wav", "audio-filters"]],
-    ["fat", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "format-wavpack", "codec-alac", "format-wav", "audio-filters"]],
-    ["obsolete", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "audio-filters"]],
-    ["opus", ["format-ogg", "parser-opus", "codec-libopus"]],
-    ["flac", ["format-flac", "parser-flac", "codec-flac"]],
-    ["opus-flac", ["format-ogg", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac"]],
-    ["all-audio-cli", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "format-mp3", "decoder-mp3", "encoder-libmp3lame", "format-wav", "format-pcm_f32le", "codec-pcm_f32le", "audio-filters", "cli", "workerfs"]],
+const opus = ["parser-opus", "codec-libopus"];
+const flac = ["format-flac", "parser-flac", "codec-flac"];
+const mp3 = ["format-mp3", "decoder-mp3", "encoder-libmp3lame"];
+const vp8 = ["parser-vp8", "codec-libvpx_vp8"];
+const vp9 = ["parser-vp9", "codec-libvpx_vp9"];
+// Hopefully, a faster AV1 encoder will become an option soon...
+const av1 = ["parser-av1", "codec-libaom_av1"];
 
-    ["webm", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "format-wav", "audio-filters", "video-filters"]],
-    ["webm-opus-flac", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8"]],
-    ["mediarecorder-transcoder", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264"]],
-    ["open-media", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac", "parser-vorbis", "codec-libvorbis", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-vp9", "codec-libvpx_vp9", "parser-av1", "codec-libaom_av1"]],
-    ["rawvideo", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264", "format-rawvideo", "codec-rawvideo"]],
+// Misanthropic Patent Extortion Gang (formats/codecs by reprobates)
+const aac = ["parser-aac", "codec-aac"];
+const h264 = ["parser-h264", "decoder-h264", "codec-libopenh264"];
+const hevc = ["parser-hevc", "decoder-hevc"];
 
-    ["webcodecs", ["format-ogg", "format-webm", "format-mp4", "format-flac", "parser-opus", "codec-libopus", "parser-aac", "codec-aac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "bsf-extract_extradata", "parser-vp9", "bsf-vp9_metadata", "parser-h264", "bsf-h264_metadata", "parser-hevc", "bsf-hevc_metadata", "bsf-av1_metadata", "swscale", "audio-filters", "video-filters"]],
+const configsRaw = [
+    // Audio sensible:
+    ["default", [
+        "format-ogg", "format-webm",
+        opus, flac, "format-wav",
+        "format-wav",
+        "audio-filters"
+    ], {cli: true}],
+
+    ["opus", ["format-ogg", "format-webm", opus], {af: true}],
+    ["flac", ["format-ogg", flac], {af: true}],
+    ["wav", ["format-wav"], {af: true}],
+
+    // Audio silly:
+    ["obsolete", [
+        // Modern:
+        "format-ogg", "format-webm",
+        opus, flac,
+
+        // Timeless:
+        "format-wav",
+
+        // Obsolete:
+        "codec-libvorbis", mp3,
+
+        // (and filters)
+        "audio-filters"
+    ]],
+
+    // Audio reprobate:
+    ["aac", ["format-mp4", "format-aac", "format-webm", aac], {af: true}],
+
+    // Video sensible:
+    ["webm", [
+        "format-ogg", "format-webm",
+        opus, flac, "format-wav",
+        "audio-filters",
+
+        "libvpx", vp8,
+        "swscale", "video-filters"
+    ], {vp9: true, cli: true}],
+
+    ["vp8-opus", ["format-ogg", "format-webm", opus, "libvpx", vp8], {avf: true}],
+    ["vp9-opus", ["format-ogg", "format-webm", opus, "libvpx", vp9], {avf: true}],
+    ["av1-opus", ["format-ogg", "format-webm", opus, av1], {avf: true}],
+
+    // Video reprobate:
+    ["h264-aac", ["format-mp4", "format-aac", "format-webm", aac, h264], {avf: true}],
+    ["hevc-aac", ["format-mp4", "format-aac", "format-webm", aac, hevc], {avf: true}],
+
+    // Mostly parsing:
+    ["webcodecs", [
+        "format-ogg", "format-webm", "format-mp4",
+        opus, flac, "format-wav",
+        "parser-aac",
+
+        "libvpx", vp8,
+        "parser-vp9", "parser-av1",
+        "parser-h264", "parser-hevc",
+
+        "bsf-extract_extradata",
+        "bsf-vp9_metadata", "bsf-av1_metadata",
+        "bsf-h264_metadata", "bsf-hevc_metadata"
+    ], {avf: true}],
 
     // These are here so that "all" will have them for testing
     ["extras", [
@@ -43,23 +103,54 @@ const configs = [
         "parser-gif", "codec-gif", "parser-mjpeg",
         "codec-mjpeg", "parser-png", "codec-png", "parser-webp", "decoder-webp",
 
-        // H.265
-        "parser-hevc", "decoder-hevc",
-
-        // Apple-y lossless
-        "codec-prores", "codec-qtrle",
+        // Apple-flavored lossless
+        "codec-alac", "codec-prores", "codec-qtrle",
 
         // HLS
         "format-hls", "protocol-jsfetch"
     ]],
 
-    // Patent and/or license encumbered encoders
-    ["mediarecorder-openh264", ["format-ogg", "format-webm", "parser-opus", "codec-libopus", "format-mp4", "parser-aac", "codec-aac", "format-flac", "parser-flac", "codec-flac", "swscale", "libvpx", "parser-vp8", "codec-libvpx_vp8", "parser-h264", "decoder-h264", "codec-libopenh264"]],
-
     ["empty", []],
     ["all", null]
 ];
 let all = Object.create(null);
+
+function configGroup(configs, nameExt, parts) {
+    const toAdd = configs.map(config =>
+        [`${config[0]}-${nameExt}`, config[1].concat(parts)]
+    );
+    configs.push.apply(configs, toAdd);
+}
+
+// Process the configs into groups
+const configs = [];
+for (const config of configsRaw) {
+    const [name, inParts, extra] = config;
+
+    // Expand the parts
+    const parts = inParts ? [] : null;
+    if (inParts) {
+        for (const part of inParts) {
+            if (part instanceof Array)
+                parts.push.apply(parts, part);
+            else
+                parts.push(part);
+        }
+    }
+
+    // Expand the extras
+    const toAdd = [[name, parts]];
+    if (extra && extra.vp9)
+        configGroup(toAdd, "vp9", vp9);
+    if (extra && extra.af)
+        configGroup(toAdd, "af", ["audio-filters"]);
+    if (extra && extra.avf)
+        configGroup(toAdd, "avf", ["audio-filters", "swscale", "video-filters"]);
+    if (extra && extra.cli)
+        configGroup(toAdd, "cli", ["cli"]);
+
+    configs.push.apply(configs, toAdd);
+}
 
 // Process arguments
 let createOnes = false;

@@ -1,0 +1,9 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=ogg
+--enable-muxer=ogg
+--enable-demuxer=flac
+--enable-muxer=flac
+--enable-parser=flac
+--enable-decoder=flac
+--enable-encoder=flac
