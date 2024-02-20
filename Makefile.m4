@@ -13,7 +13,6 @@ LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz
-SIMDFLAGS=-msimd128
 THRFLAGS=-pthread
 EFLAGS=\
 	--memory-init-file 0 \
@@ -50,12 +49,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.simd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js \
 	node_modules/.bin/uglifyjs
 	mkdir -p dist
 	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
@@ -112,12 +107,6 @@ buildrule(wasm, dbg., base, [[[-gsource-map]]])
 # wasm + threads
 buildrule(thr, [[[]]], thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
 buildrule(thr, dbg., thr, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
-# wasm + simd
-buildrule(simd, [[[]]], simd, [[[$(SIMDFLAGS)]]])
-buildrule(simd, dbg., simd, [[[-gsource-map $(SIMDFLAGS)]]])
-# wasm + threads + simd
-buildrule(thrsimd, [[[]]], thrsimd, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
-buildrule(thrsimd, dbg., thrsimd, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency $(SIMDFLAGS)]]])
 
 build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json apply-funcs.js
 	mkdir -p build dist
@@ -137,14 +126,6 @@ build/inst/base/cflags.txt:
 build/inst/thr/cflags.txt:
 	mkdir -p build/inst/thr
 	echo $(THRFLAGS) -gsource-map > $@
-
-build/inst/simd/cflags.txt:
-	mkdir -p build/inst/simd
-	echo $(SIMDFLAGS) -gsource-map > $@
-
-build/inst/thrsimd/cflags.txt:
-	mkdir -p build/inst/thrsimd
-	echo $(THRFLAGS) $(SIMDFLAGS) -gsource-map > $@
 
 RELEASE_VARIANTS=\
 	default default-cli opus opus-af flac flac-af wav wav-af obsolete webm \
@@ -230,8 +211,4 @@ print-version:
 	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
 	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.simd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.simd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.thrsimd.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thrsimd.js
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js

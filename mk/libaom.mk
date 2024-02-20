@@ -33,24 +33,6 @@ build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/libaom-$(LIBAOM_VERSIO
                 -DCONFIG_MULTITHREAD=0
 	touch $(@)
 
-
-build/libaom-$(LIBAOM_VERSION)/build-simd/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/simd/cflags.txt
-	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-simd
-	cd build/libaom-$(LIBAOM_VERSION)/build-simd && \
-		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
-		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/simd" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/simd/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/simd/cflags.txt`" \
-		-DAOM_TARGET_CPU=generic \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DENABLE_DOCS=0 \
-		-DENABLE_TESTS=0 \
-		-DENABLE_EXAMPLES=0 \
-		-DCONFIG_RUNTIME_CPU_DETECT=0 \
-		-DCONFIG_WEBM_IO=0 \
-                -DCONFIG_MULTITHREAD=0
-	touch $(@)
-
 # Threaded
 
 build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/thr/cflags.txt
@@ -60,24 +42,6 @@ build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/libaom-$(LIBAOM_VERSION
 		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thr" \
 		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/thr/cflags.txt`" \
 		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/thr/cflags.txt`" \
-		-DAOM_TARGET_CPU=generic \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DENABLE_DOCS=0 \
-		-DENABLE_TESTS=0 \
-		-DENABLE_EXAMPLES=0 \
-		-DCONFIG_RUNTIME_CPU_DETECT=0 \
-		-DCONFIG_WEBM_IO=0 \
-                
-	touch $(@)
-
-
-build/libaom-$(LIBAOM_VERSION)/build-thrsimd/Makefile: build/libaom-$(LIBAOM_VERSION)/PATCHED | build/inst/thrsimd/cflags.txt
-	mkdir -p build/libaom-$(LIBAOM_VERSION)/build-thrsimd
-	cd build/libaom-$(LIBAOM_VERSION)/build-thrsimd && \
-		emcmake cmake ../../libaom-$(LIBAOM_VERSION) \
-		-DCMAKE_INSTALL_PREFIX="$(PWD)/build/inst/thrsimd" \
-		-DCMAKE_C_FLAGS="-Oz `cat $(PWD)/build/inst/thrsimd/cflags.txt`" \
-		-DCMAKE_CXX_FLAGS="-Oz `cat $(PWD)/build/inst/thrsimd/cflags.txt`" \
 		-DAOM_TARGET_CPU=generic \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_DOCS=0 \

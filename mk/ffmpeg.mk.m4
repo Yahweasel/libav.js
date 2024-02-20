@@ -50,15 +50,11 @@ part-install-$1-%: build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/libavformat/libavfo
 buildrule(base, [[[--disable-pthreads --arch=emscripten]]], [[[]]])
 # wasm + threads
 buildrule(thr, [[[--enable-pthreads --arch=emscripten]]], [[[$(THRFLAGS)]]])
-# wasm + simd
-buildrule(simd, [[[--disable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm]]], [[[$(SIMDFLAGS)]]])
-# wasm + threads + simd
-buildrule(thrsimd, [[[--enable-pthreads --arch=x86_32 --disable-inline-asm --disable-x86asm --enable-cross-compile]]], [[[$(THRFLAGS) $(SIMDFLAGS)]]])
 
 # All dependencies
 include configs/configs/*/deps.mk
 
-install-%: part-install-base-% part-install-thr-% part-install-simd-% part-install-thrsimd-%
+install-%: part-install-base-% part-install-thr-%
 	true
 
 extract: build/ffmpeg-$(FFMPEG_VERSION)/PATCHED
@@ -89,9 +85,5 @@ ffmpeg-release:
 	build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak \
-	build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/libavformat/libavformat.a \
-	build/ffmpeg-$(FFMPEG_VERSION)/build-simd-%/ffbuild/config.mak \
-	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/libavformat/libavformat.a \
-	build/ffmpeg-$(FFMPEG_VERSION)/build-thrsimd-%/ffbuild/config.mak \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	build/ffmpeg-$(FFMPEG_VERSION)/configure

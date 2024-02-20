@@ -544,11 +544,6 @@ export interface LibAVOpts {
     nowasm?: boolean;
 
     /**
-     * Don't use WebAssembly SIMD.
-     */
-    nosimd?: boolean;
-
-    /**
      * Use threads. If threads ever become reliable, this flag will disappear,
      * and you will need to use nothreads.
      */

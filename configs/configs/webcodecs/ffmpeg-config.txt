@@ -18,12 +18,12 @@
 --enable-parser=flac
 --enable-decoder=flac
 --enable-encoder=flac
+--enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
+--enable-demuxer=wav
+--enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
+--enable-muxer=wav
 --enable-parser=aac
 --enable-parser=vp8
---enable-libvpx
---enable-decoder=libvpx_vp8
---enable-libvpx
---enable-encoder=libvpx_vp8
 --enable-parser=vp9
 --enable-parser=av1
 --enable-parser=h264

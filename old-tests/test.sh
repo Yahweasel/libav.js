@@ -5,7 +5,7 @@ do
     if [ -e correct/$b.txt ]
     then
         printf '%s\n' "$t" >&2
-        for target in asm.js wasm simd
+        for target in asm.js wasm
         do
             node --experimental-wasm-threads $t $target > tmp.txt 2> /dev/null
             diff -u tmp.txt correct/$b.txt

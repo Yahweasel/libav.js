@@ -3,8 +3,7 @@ const version = "4.10.6.1.1";
 function load(variant = "default") {
     const opts = {
         nowasm: false,
-        nothreads: true,
-        nosimd: true
+        nothreads: true
     };
     for (let ai = 2; ai < process.argv.length; ai++) {
         const arg = process.argv[ai];
@@ -13,16 +12,10 @@ function load(variant = "default") {
         else if (arg === "threads") {
             opts.yesthreads = true;
             opts.nothreads = false;
-        } else if (arg === "simd")
-            opts.nosimd = false;
+        }
     }
-    const target = opts.nowasm ? "asm" : (
-        opts.nothreads ? (
-            opts.nosimd ? "wasm" : "simd"
-        ) : (
-            opts.nosimd ? "thr" : "thrsimd"
-        )
-    );
+    const target = opts.nowasm ? "asm"
+        : (opts.nothreads ? "wasm" : "thr");
     const LibAV = require(`../dist/libav-${version}-${variant}.js`);
     LibAV.opts = opts;
     const actual = LibAV.target(opts);

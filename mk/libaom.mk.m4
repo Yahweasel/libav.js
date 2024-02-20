@@ -33,10 +33,8 @@ build/libaom-$(LIBAOM_VERSION)/build-$1/Makefile: build/libaom-$(LIBAOM_VERSION)
 
 # Non-threaded
 buildrule(base, [[[-DCONFIG_MULTITHREAD=0]]])
-buildrule(simd, [[[-DCONFIG_MULTITHREAD=0]]])
 # Threaded
 buildrule(thr, [[[]]])
-buildrule(thrsimd, [[[]]])
 
 extract: build/libaom-$(LIBAOM_VERSION)/PATCHED
 

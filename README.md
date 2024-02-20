@@ -28,13 +28,17 @@ files:
 
 ## Using libav.js
 
-Include dist/libav-`version`-`variant`.js to use libav.js. The variants are
-discussed below.
+libav.js builds are available on
+[GitHub](https://github.com/Yahweasel/libav.js/releases) and in NPM. Include
+dist/libav-`version`-`variant`.js to use libav.js. The variants are discussed
+below.
 
-The simplest way to use libav.js is to include it from a CDN, but this is not
-recommended, as libav.js uses Web Workers by default, and Web Workers cannot be
-loaded from a different origin. Nonetheless, the following is a simple example
-of using libav.js from a CDN:
+The simplest way to use libav.js is to include it from a CDN. libav.js uses Web
+Workers by default, and Web Workers cannot be loaded from a different origin, so
+if you load it from a CDN, you must disable its own loading of workers. As such,
+it's only recommended to use libav.js from a CDN if you're already *in* a
+worker, and thus don't need sub-workers. Nonetheless, the following is a simple
+example of using libav.js from a CDN in the browser thread:
 
 ```html
 <!doctype html>
@@ -110,17 +114,14 @@ are:
     "nowasm": false,
     "yesthreads": false,
     "nothreads": false,
-    "nosimd": false,
     "base": LibAV.base,
     "wasmurl": undefined,
     "variant": undefined
 }
 ```
-`nowasm` and `nosimd` affect what forms of code libav.js is allowed to load. By
-default it will load SIMD WebAssembly if the browser supports it, non-SIMD
-WebAssembly if the browser supports WebAssembly but not SIMD, and asm.js if the
-browser supports no WebAssembly. These are overridable here for testing purposes
-only.
+`nowasm` forces libav.js to load only asm.js code, not WebAssembly code. By
+default, it will determine what the browser supports and choose accordingly, so
+this is overridable here for testing purposes only.
 
 The other no/yes options affect the execution mode of libav.js. libav.js can run
 in one of three modes: `"direct"` (synchronous), `"worker"`, or `"threads"`.
@@ -148,14 +149,13 @@ separate threads as long as workers are used, regardless of the value of
 `yesthreads`, and thus `yesthreads` is only needed if you need concurrency
 *within* a libav.js instance.
 
-libav.js automatically detects which WebAssembly features are available, so
-even if you set `yesthreads` to `true` and don't set `nosimd`, a version with
-neither feature may be loaded. To know which version will be loaded, call
-`LibAV.target`. It will return `"asm"` if only asm.js is used, `"wasm"` for
-baseline, or `"thr"`, `"simd"`, or `"thrsimd"` for versions with extensions
-activated. These strings correspond to the filenames to be loaded, so you can
-use them to preload and cache the large WebAssembly files. `LibAV.target` takes
-the same optional argument as `LibAV.LibAV`.
+libav.js automatically detects which WebAssembly features are available, so even
+if you set `yesthreads` to `true`, a version without threads may be loaded. To
+know which version will be loaded, call `LibAV.target`. It will return `"asm"`
+if only asm.js is used, `"wasm"` for baseline, or `"thr"` for threads. These
+strings correspond to the filenames to be loaded, so you can use them to preload
+and cache the large WebAssembly files. `LibAV.target` takes the same optional
+argument as `LibAV.LibAV`.
 
 The `base` option can be used in these options in place of `LibAV.base`, and
 will override `LibAV.base` if set.
@@ -169,8 +169,11 @@ variant to decode the data in that file), as the frontend is otherwise the same
 and uses global variables.
 
 The tests used to determine which features are available are also exported, as
-`LibAV.isWebAssemblySupported`, `LibAV.isThreadingSupported`, and
-`LibAV.isSIMDSupported`.
+`LibAV.isWebAssemblySupported` and `LibAV.isThreadingSupported`.
+
+NOTE: libav.js used to have a SIMD build as well. This was dropped because none
+of the constituent libraries actually support WebAssembly SIMD, so it
+substantially increased the size and time of builds to no benefit.
 
 
 ## Which files do I need?
@@ -185,38 +188,25 @@ original, but it is not required.
 
 That entry file will load a target based on the environment it's loaded in and
 the options used to load it, as described above. The supported targets are
-asm.js, plain WebAssembly, SIMD WebAssembly, threaded WebAssembly, and
-threaded+SIMD WebAssembly. It is harmless to include all of them, as users will
-not download all of them, only the ones they use. But, you may also include only
-those you intend to use. In every case, there is a `.dbg.js` equivalent which is
-only needed if you intend to use debug mode.
+asm.js, plain WebAssembly, and threaded WebAssembly. It is harmless to include
+all of them, as users will not download all of them, only the ones they use.
+But, you may also include only those you intend to use. In every case, there is
+a `.dbg.js` equivalent which is only needed if you intend to use debug mode.
 
  * asm.js: Named `libav-<version>-<variant>.asm.js`. No modern browser excludes
    support for WebAssembly, so this is probably not necessary.
 
  * Plain WebAssembly: Named `libav-<version>-<variant>.wasm.js` and
-   `libav-<version>-<variant>.wasm.wasm`. Since most browsers support SIMD, this
-   is actually rarely used in practice, but if you want to reduce the number of
-   builds, it's better to set `nosimd` and *only* use this version.
-
- * SIMD WebAssembly: Named `libav-<version>-<variant>.simd.js` (and
-   `.simd.wasm`). Used in most situations.
+   `libav-<version>-<variant>.wasm.wasm`. Used in most situations.
 
  * Threaded WebAssembly: Named `libav-<version>-<variant>.thr.js` (and
    `.thr.wasm`). Used only when threading is supported by the browser *and*
    `yesthreads` is set. If you don't intend to use threads (set `yesthreads`),
-   it is safe to exclude this. Like with unthreaded WebAssembly, most real
-   browsers will load the SIMD version, but you can set `nosimd` to always load
-   this version and thus reduce the number of files you need to distribute.
-
- * Threaded+SIMD WebAssembly: Named `libav-<version>-<variant>.thrsimd.js` (and
-   `.thrsimd.wasm`). Used in most threaded situations.
+   it is safe to exclude this. Used in most threaded situations.
 
 At a minimum, it is usually sufficient to include only the `.js`, `.wasm.js`,
-and `.wasm.wasm` files, if you always set `nosimd`. To include SIMD support, you
-must also include `.simd.js` and `.simd.wasm`. Similarly, to include threads,
-you must include `.thr.js` and `.thr.wasm`, and to include both, `.thrsimd.js`,
-`.thrsimd.wasm`.
+and `.wasm.wasm` files. To include threads, you must also include `.thr.js` and
+`.thr.wasm`.
 
 The file `libav.types.d.ts` is a TypeScript types definition file, and is only
 needed to compile TypeScript code with support for libav.js's types. It should
@@ -347,12 +337,11 @@ The included variants are:
  * webcodecs, webcodecs-avf: Designed to serve as a demuxer/muxer for codecs
    supported by WebCodecs. Pairs well with
    [libavjs-webcodecs-bridge](https://github.com/Yahweasel/libavjs-webcodecs-bridge).
-   Includes codecs for Opus, FLAC, wav, and VP8. Includes *parsers* (but not
-   codecs) for AAC, VP9, AV1, H.264, and H.265. Includes the ogg, WebM, MP4,
-   FLAC, and wav formats. This means that it can demux files including, e.g.,
-   H.264, but cannot decode the frames. If your WebCodecs supports H.264, you
-   can then use it to decode. `-avf` additionally includes audio and video
-   filters.
+   Includes codecs for Opus, FLAC, and wav. Includes *parsers* (but not codecs)
+   for AAC, VP8, VP9, AV1, H.264, and H.265. Includes the ogg, WebM, MP4, FLAC,
+   and wav formats. This means that it can demux files including, e.g., H.264,
+   but cannot decode the frames. If your WebCodecs supports H.264, you can then
+   use it to decode. `-avf` additionally includes audio and video filters.
 
  * vp8-opus, vp8-opus-avf: VP8 and Opus in WebM (or ogg). `-avf` additionally
    includes audio and video filters.

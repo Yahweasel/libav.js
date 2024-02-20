@@ -86,8 +86,7 @@ const configsRaw = [
         opus, flac, "format-wav",
         "parser-aac",
 
-        "libvpx", vp8,
-        "parser-vp9", "parser-av1",
+        "parser-vp8", "parser-vp9", "parser-av1",
         "parser-h264", "parser-hevc",
 
         "bsf-extract_extradata",

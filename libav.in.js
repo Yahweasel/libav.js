@@ -36,12 +36,6 @@
         return false;
     }
 
-    function isSIMDSupported() {
-        return isWebAssemblySupported([0x0, 0x61, 0x73, 0x6d, 0x1, 0x0, 0x0,
-            0x0, 0x1, 0x5, 0x1, 0x60, 0x0, 0x1, 0x7b, 0x3, 0x2, 0x1, 0x0, 0xa,
-            0xa, 0x1, 0x8, 0x0, 0x41, 0x0, 0xfd, 0xf, 0xfd, 0x62, 0xb]);
-    }
-
     /* Source: Jason Miller on Twitter. Returns true if we're in an ES6 module
      * in a worker. */
     function isModule() {
@@ -66,7 +60,6 @@
     // Proxy our detection functions
     libav.isWebAssemblySupported = isWebAssemblySupported;
     libav.isThreadingSupported = isThreadingSupported;
-    libav.isSIMDSupported = isSIMDSupported;
     libav.isModule = isModule;
 
     // Get the target that will load, given these options
@@ -74,13 +67,12 @@
         opts = opts || {};
         var wasm = !opts.nowasm && isWebAssemblySupported();
         var thr = opts.yesthreads && wasm && !opts.nothreads && isThreadingSupported();
-        var simd = wasm && !opts.nosimd && isSIMDSupported();
         if (!wasm)
             return "asm";
-        else if (!thr && !simd)
-            return "wasm";
+        else if (thr)
+            return "thr";
         else
-            return (thr ? "thr" : "") + (simd ? "simd" : "");
+            return "wasm";
     }
     libav.target = target;
     libav.VER = "@VER";

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Copyright (C) 2021-2023 Yahweasel
+ * Copyright (C) 2021-2024 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -47,7 +47,7 @@ function addFragment(out, part) {
         // Add any dependencies
         try {
             const deps = fs.readFileSync(`fragments/${part}/deps.txt`, "utf8").split("\n");
-            for (const target of ["base", "simd", "thr", "thrsimd"]) {
+            for (const target of ["base", "thr"]) {
                 for (const dep of deps) {
                     if (!dep) continue;
                     out["deps.mk"].write(
