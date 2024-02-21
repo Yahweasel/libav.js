@@ -308,7 +308,7 @@ Most of the variants provided in the repository are also built and available in
 NPM and as binary releases. The notable exception is all variants that include
 codecs controlled by the Misanthropic Patent Extortion Gang (MPEG). They are not
 built by default, and if you have any sense, you should not use them. MPEG is a
-cancer on digital media.
+cancer on the digital media ecosystem.
 
 The included variants are:
 
@@ -329,9 +329,9 @@ The included variants are:
    (via libvorbis) and MPEG-1 Layer 3 (MP3) (via libmp3lame). Also includes the
    MP3 container format.
 
- * webm, webm-vp9, webm-cli, webm-vp9-cli: Same as default with the addition of
-   VP8 (via libvpx) and video filters. `-vp9` additionally includes VP9, `-cli`
-   additionally includes the CLI. `-vp9` is separated due to the rather
+ * webm, webm-vp9¹, webm-cli, webm-vp9-cli¹: Same as default with the addition
+   of VP8 (via libvpx) and video filters. `-vp9` additionally includes VP9,
+   `-cli` additionally includes the CLI. `-vp9` is separated due to the rather
    significant size of the VP9 codec.
 
  * webcodecs, webcodecs-avf: Designed to serve as a demuxer/muxer for codecs
@@ -346,24 +346,30 @@ The included variants are:
  * vp8-opus, vp8-opus-avf: VP8 and Opus in WebM (or ogg). `-avf` additionally
    includes audio and video filters.
 
- * vp9-opus, vp9-opus-avf: VP9 and Opus in WebM (or ogg). `-avf` additionally
+ * vp9-opus¹, vp9-opus-avf¹: VP9 and Opus in WebM (or ogg). `-avf` additionally
    includes audio and video filters.
 
- * av1-opus, av1-opus-avf: AV1 (via libaom) and Opus in WebM (or ogg). Note that
-   AV1 support is currently so slow in WebAssembly even with threads that these
-   variants are effectively unusable. `-avf` additionally includes audio and
-   video filters.
+ * av1-opus¹, av1-opus-avf¹: AV1 (via libaom) and Opus in WebM (or ogg). Note
+   that AV1 support is currently so slow in WebAssembly even with threads that
+   these variants are effectively unusable. `-avf` additionally includes audio
+   and video filters.
 
- * aac¹, aac-af¹: Reprobate codec AAC in MP4 or AAC/ADTS. `-af` additionally
+ * aac², aac-af²: Reprobate codec AAC in MP4 or AAC/ADTS. `-af` additionally
    includes audio filters.
 
- * h264-aac¹, h264-aac-avf¹: Reprobate codec H.264 (via libopenh264) in MP4 (or
-   AAC/ADTS). `-avf` additionally includes audio and video filters.
+ * h264-aac², h264-aac-avf²: Reprobate codec H.264 (via libopenh264) and
+   reprobate codec AAC in MP4 (or AAC/ADTS). `-avf` additionally includes audio
+   and video filters.
 
- * hevc-aac¹, hevc-aac-avf¹: Reprobate codec H.265 (decoding only) in MP4 (or
-   AAC/ADTS). `-avf` additionally includes audio and video filters.
+ * hevc-aac², hevc-aac-avf²: Reprobate codec H.265 (decoding only) and reprobate
+   codec AAC in MP4 (or AAC/ADTS). `-avf` additionally includes audio and video
+   filters.
 
-¹ Includes technologies patented by the Misanthropic Patent Extortion Gang
+¹ These builds are not included in the full NPM release for space reasons, but are
+  included in GitHub releases, and are available on NPM as
+  @libav.js/variant-`<variant>`, e.g. `@libav.js/variant-vp9-opus`.
+
+² Includes technologies patented by the Misanthropic Patent Extortion Gang
   (MPEG). You should not build these, you should not use these builds, and you
   should not support this organization which works actively against the common
   good.

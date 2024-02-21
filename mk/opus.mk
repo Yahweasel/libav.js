@@ -24,7 +24,7 @@ build/opus-$(OPUS_VERSION).tar.gz:
 	curl https://downloads.xiph.org/releases/opus/opus-$(OPUS_VERSION).tar.gz -L -o $@
 
 opus-release:
-	cp build/opus-$(OPUS_VERSION).tar.gz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/opus-$(OPUS_VERSION).tar.gz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/opus.pc \

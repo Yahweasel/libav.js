@@ -24,7 +24,7 @@ build/libogg-$(LIBOGG_VERSION).tar.xz:
 	curl https://downloads.xiph.org/releases/ogg/libogg-$(LIBOGG_VERSION).tar.xz -L -o $@
 
 libogg-release:
-	cp build/libogg-$(LIBOGG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/libogg-$(LIBOGG_VERSION).tar.xz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/ogg.pc \

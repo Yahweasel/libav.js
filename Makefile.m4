@@ -133,33 +133,33 @@ RELEASE_VARIANTS=\
 	vp9-opus-avf av1-opus av1-opus-avf webcodecs webcodecs-avf
 
 release: extract
-	mkdir libav.js-$(LIBAVJS_VERSION)
-	cp -a README.md docs libav.js-$(LIBAVJS_VERSION)/
-	mkdir libav.js-$(LIBAVJS_VERSION)/dist
+	mkdir -p dist/release
+	mkdir dist/release/libav.js-$(LIBAVJS_VERSION)
+	cp -a README.md docs dist/release/libav.js-$(LIBAVJS_VERSION)/
+	mkdir dist/release/libav.js-$(LIBAVJS_VERSION)/dist
 	for v in $(RELEASE_VARIANTS); \
 	do \
 		$(MAKE) build-$$v; \
 		$(MAKE) release-$$v; \
 		cp dist/libav-$(LIBAVJS_VERSION)-$$v.* \
-			libav.js-$(LIBAVJS_VERSION)/dist; \
+			dist/release/libav.js-$(LIBAVJS_VERSION)/dist; \
 	done
-	cp dist/libav.types.d.ts libav.js-$(LIBAVJS_VERSION)/dist/
-	mkdir libav.js-$(LIBAVJS_VERSION)/sources
+	cp dist/libav.types.d.ts dist/release/libav.js-$(LIBAVJS_VERSION)/dist/
+	mkdir dist/release/libav.js-$(LIBAVJS_VERSION)/sources
 	for t in ffmpeg lame libaom libogg libvorbis libvpx opus zlib; \
 	do \
 		$(MAKE) $$t-release; \
 	done
-	git archive HEAD -o libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
-	xz libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
-	zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
-	rm -rf libav.js-$(LIBAVJS_VERSION)
+	git archive HEAD -o dist/release/libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
+	xz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/libav.js.tar
+	cd dist/release && zip -r libav.js-$(LIBAVJS_VERSION).zip libav.js-$(LIBAVJS_VERSION)
+	rm -rf dist/release/libav.js-$(LIBAVJS_VERSION)
 
-release-%: libav.js-$(LIBAVJS_VERSION)-%-release
+release-%: dist/release/libav.js-$(LIBAVJS_VERSION)-%
 	true
 
-libav.js-$(LIBAVJS_VERSION)-%-release: build-%
-	mkdir $(@)
-	mkdir $(@)/dist
+dist/release/libav.js-$(LIBAVJS_VERSION)-%: build-%
+	mkdir -p $(@)/dist
 	cp dist/libav-$(LIBAVJS_VERSION)-$(*).* \
 		dist/libav.types.d.ts \
 		$(@)/dist
@@ -167,16 +167,16 @@ libav.js-$(LIBAVJS_VERSION)-%-release: build-%
 	sed 's/@VARIANT/$(*)/g ; s/@VERSION/$(LIBAVJS_VERSION)/g ; s/@VER/$(LIBAVJS_VERSION_SHORT)/g' \
 		package-one-variant.json > $(@)/package.json
 
-publish:
-	unzip libav.js-$(LIBAVJS_VERSION).zip
-	( cd libav.js-$(LIBAVJS_VERSION) && \
-	  cp ../package.json . && \
-	  rm -f dist/*.dbg.* && \
-	  npm publish )
-	rm -rf libav.js-$(LIBAVJS_VERSION)
+npm-publish:
+	cd dist/release && unzip libav.js-$(LIBAVJS_VERSION).zip
+	cd dist/release/libav.js-$(LIBAVJS_VERSION) && \
+	  cp ../../../package.json . && \
+	  rm -f dist/*.dbg.* dist/*-av1* dist/*-vp9* && \
+	  npm publish
+	rm -rf dist/release/libav.js-$(LIBAVJS_VERSION)
 	for v in $(RELEASE_VARIANTS); \
 	do \
-		( cd libav.js-$(LIBAVJS_VERSION)-$$v-release && npm publish ) \
+		( cd dist/release/libav.js-$(LIBAVJS_VERSION)-$$v && npm publish ) \
 	done
 
 halfclean:

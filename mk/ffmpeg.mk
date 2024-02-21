@@ -99,7 +99,7 @@ build/ffmpeg-$(FFMPEG_VERSION).tar.xz:
 	curl https://ffmpeg.org/releases/ffmpeg-$(FFMPEG_VERSION).tar.xz -o $@
 
 ffmpeg-release:
-	cp build/ffmpeg-$(FFMPEG_VERSION).tar.xz libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/ffmpeg-$(FFMPEG_VERSION).tar.xz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
