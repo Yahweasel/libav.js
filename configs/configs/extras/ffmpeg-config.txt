@@ -17,6 +17,10 @@
 --enable-encoder=png
 --enable-parser=webp
 --enable-decoder=webp
+--enable-demuxer=rawvideo
+--enable-muxer=rawvideo
+--enable-decoder=rawvideo
+--enable-encoder=rawvideo
 --enable-demuxer=pcm_f32le
 --enable-muxer=pcm_f32le
 --enable-decoder=pcm_f32le
