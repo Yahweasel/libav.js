@@ -230,11 +230,12 @@
         opts = opts || {};
         var base = opts.base || libav.base;
         var t = target(opts);
-        var toImport = libav.toImport ||  base + "/libav-@VER-@CONFIG@DBG." + t + ".js";
+        var toImport = opts.toImport || libav.toImport ||
+            base + "/libav-@VER-@CONFIG@DBG." + t + ".js";
         var ret;
 
         var mode = "direct";
-        if (t.indexOf("thr") === 0)
+        if (t === "thr")
             mode = "threads";
         else if (!nodejs && !opts.noworker && typeof Worker !== "undefined")
             mode = "worker";

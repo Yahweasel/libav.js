@@ -102,6 +102,9 @@ const configsRaw = [
         "parser-gif", "codec-gif", "parser-mjpeg",
         "codec-mjpeg", "parser-png", "codec-png", "parser-webp", "decoder-webp",
 
+        // Raw float32
+        "format-pcm_f32le", "codec-pcm_f32le",
+
         // Apple-flavored lossless
         "codec-alac", "codec-prores", "codec-qtrle",
 
