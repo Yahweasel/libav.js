@@ -470,7 +470,7 @@ Module.mountwriterfs = function(mountpoint) {
 }
 
 // Users waiting to read
-Module.ff_reader_dev_waiters = [];
+Module.ff_reader_dev_waiters = Object.create(null);
 
 /**
  * Make a workerfs file. Returns the filename that it's mounted to.
@@ -548,8 +548,8 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) 
         idata.error = opts.error;
 
     // Wake up waiters
-    var waiters = Module.ff_reader_dev_waiters;
-    Module.ff_reader_dev_waiters = [];
+    var waiters = Module.ff_reader_dev_waiters[name] || [];
+    delete Module.ff_reader_dev_waiters[name];
     for (var i = 0; i < waiters.length; i++)
         waiters[i]();
 };
@@ -601,10 +601,9 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
     if (opts.error)
         idata.error = opts.error;
 
-    /* Wake up waiters (FIXME: make this file-specific so we don't get weird
-     * loops) */
-    var waiters = Module.ff_reader_dev_waiters;
-    Module.ff_reader_dev_waiters = [];
+    // Wake up waiters
+    var waiters = Module.ff_reader_dev_waiters[name] || [];
+    delete Module.ff_reader_dev_waiters[name];
     for (var i = 0; i < waiters.length; i++)
         waiters[i]();
 };
@@ -613,11 +612,15 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
  * Metafunction to determine whether any device has any waiters. This can be
  * used to determine whether more data needs to be sent before a previous step
  * will be fully resolved.
+ * @param name  Optional name of file to check for waiters
  */
-/// @types ff_reader_dev_waiting@sync(): @promise@boolean@
-var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function() {
+/// @types ff_reader_dev_waiting@sync(name?: string): @promise@boolean@
+var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function(name) {
     return ff_nothing().then(function() {
-        return !!Module.ff_reader_dev_waiters.length;
+        if (name)
+            return !!Module.ff_reader_dev_waiters[name];
+        else
+            return !!Object.keys(Module.ff_reader_dev_waiters).length;
     });
 };
 
@@ -632,6 +635,13 @@ Module.readerDevReady = function(fd) {
     else if (stream in Module.blockReadBuffers)
         return Module.blockReadBuffers[stream].ready;
     return false;
+};
+
+/**
+ * Internal function to get the name of a file being read by an FD.
+ */
+Module.fdName = function(fd) {
+    return FS.streams[fd].node.name;
 };
 
 /**

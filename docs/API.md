@@ -94,12 +94,11 @@ Note that there's no equivalent of `ff_free_muxer`, because
 `avformat_close_input_js`.
 
 
-### `ff_read_multi`
+### `ff_read_frame_multi`
 ```
-ff_read_multi(
-    fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ff_read_frame_multi(
+    fmt_ctx: number, pkt: number, opts?: {
         limit?: number, // OUTPUT limit, in bytes
-        devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
         copyoutPacket?: string // Version of ff_copyout_packet to use
     }
@@ -113,12 +112,12 @@ By default, this will read as much as it can, which is typically the entire
 file. If using a device in this default mode, you will need to feed it data, and
 won't get anything back until it's done.
 
-To limit how much data is sent, either use `limit`, or use `devfile` and
-`devLimit` (`devfile` is not part of `opts` for historical reasons). `limit`
-limits how much data `ff_read_multi` outputs to one packet more than the number
-of bytes you request. If you set `devfile` and `devLimit`, then it only reads
-until the device file is down to `devLimit` bytes. Note that to use `opts`
-without `devfile`, you must set `devfile` to `null`; you cannot skip it.
+To limit how much data is sent, use the `limit` option. `limit` limits how much
+data `ff_read_frame_multi` outputs to one packet more than the number of bytes
+you request.
+
+For reading from a reader device, see also `ff_reader_dev_waiting` and
+`ff_reader_dev_send`.
 
 Returns `[result, packets]`. The result is the result code from the underlying
 read; `0` is success, but you can also expect `-libav.EAGAIN` (if you hit a
@@ -149,14 +148,14 @@ The `ff_copyout_packet_ptr` function is also available, and copies the packet
 into a separate `AVPacket` pointer, instead of actually copying out any data.
 This is a good compromise if you're building pipelines, e.g. reading then
 decoding, to avoid copying data back and forth when that data is just going back
-into libav.js. Be careful, though! `ff_read_multi` reads from every stream, and
-if you're only using data from one of them, copied packets using
+into libav.js. Be careful, though! `ff_read_frame_multi` reads from every
+stream, and if you're only using data from one of them, copied packets using
 `ff_copyout_packet_ptr` will leak memory! Use `ff_copyout_packet_ptr` carefully.
 
-Metafunctions that use `ff_copyout_packet` internally, namely `ff_read_multi`,
-have a configuration option, `copyoutPacket`, to specify which version of
-`ff_copyout_packet` to use. It is a string option, accepting the following
-values: `"default", "ptr"`.
+Metafunctions that use `ff_copyout_packet` internally, namely
+`ff_read_frame_multi`, have a configuration option, `copyoutPacket`, to specify
+which version of `ff_copyout_packet` to use. It is a string option, accepting
+the following values: `"default", "ptr"`.
 
 
 ### `ff_copyin_packet`
@@ -454,13 +453,16 @@ position specified for the data.
 
 ### `ff_reader_dev_waiting`
 ```
-ff_reader_dev_waiting(): Promise<boolean>
+ff_reader_dev_waiting(name?: string): Promise<boolean>
 ```
 
 Returns `true` if one or more reader or block reader devices are waiting for
-data. Typically, this is used along with `ff_init_demuxer_file` and
-`ff_read_multi` to feed in data. If instead of awaiting those promises, you
-store the promises aside, you can loop with `while (await
+data. Give the filename to check if a *specific* reader device is waiting, or no
+name to check if *any* reader device is waiting.
+
+Typically, this is used along with `ff_init_demuxer_file` and
+`ff_read_frame_multi` to feed in data. If instead of awaiting those promises,
+you store the promises aside, you can loop with `while (await
 libav.ff_reader_dev_waiting())` and send data, *then* await the file-reading
 promise. In this way, you can control the transfer of input data without having
 to send entire files or predict how much data might be needed.

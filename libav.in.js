@@ -429,10 +429,25 @@
                             }
                         } else if (e.data && e.data.c === "libavjs_wait_reader") {
                             if (ret.readerDevReady(e.data.fd)) {
-                                worker.postMessage({c: "libavjs_wait_reader"});
+                                worker.postMessage({
+                                    c: "libavjs_wait_reader",
+                                    fd: e.data.fd,
+                                    name: e.data.name
+                                });
                             } else {
-                                ret.ff_reader_dev_waiters.push(function() {
-                                    worker.postMessage({c: "libavjs_wait_reader"});
+                                var waiters =
+                                    ret.ff_reader_dev_waiters[e.data.name];
+                                if (!waiters) {
+                                    waiters =
+                                        ret.ff_reader_dev_waiters[e.data.name] =
+                                        [];
+                                }
+                                waiters.push(function() {
+                                    worker.postMessage({
+                                        c: "libavjs_wait_reader",
+                                        fd: e.data.fd,
+                                        name: e.data.name
+                                    });
                                 });
                             }
                         } else if (e.data && e.data.c === "libavjs_ready") {
