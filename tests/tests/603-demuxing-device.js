@@ -23,7 +23,7 @@ const buf = await h.readCachedFile("bbb.webm");
 await libav.mkreaderdev("tmp.webm");
 let rd = 0;
 
-// Doing it this way to show blocking reads
+// Blocking read
 let initPromise = libav.ff_init_demuxer_file("tmp.webm");
 while (await libav.ff_reader_dev_waiting()) {
     let rdp = rd;
@@ -51,25 +51,24 @@ await libav.AVCodecContext_sample_fmt_s(c, libav.AV_SAMPLE_FMT_FLT);
 
 let packets = [];
 while (true) {
-    const [res, rdPackets] =
-        await libav.ff_read_multi(fmt_ctx, pkt, "tmp.webm", {devLimit: 128*1024});
-
-    if (audio_stream_idx in rdPackets)
-        packets = packets.concat(rdPackets[audio_stream_idx]);
-
-    if (res === -libav.EAGAIN) {
-        // Send more data
+    const rdPromise = libav.ff_read_frame_multi(fmt_ctx, pkt, {limit: 1024});
+    while (await libav.ff_reader_dev_waiting()) {
         let rdp = rd;
         rd += 1024;
         await libav.ff_reader_dev_send("tmp.webm", buf.slice(rdp, rd));
         if (rd >= buf.length)
             await libav.ff_reader_dev_send("tmp.webm", null);
+    }
+    const [res, rdPackets] = await rdPromise;
 
-    } else if (res === libav.AVERROR_EOF) {
+    if (audio_stream_idx in rdPackets)
+        packets = packets.concat(rdPackets[audio_stream_idx]);
+
+    if (res === libav.AVERROR_EOF) {
         // Done!
         break;
 
-    } else if (res !== 0) {
+    } else if (res < 0 && res !== -libav.EAGAIN) {
         throw new Error("Error reading: " + res);
 
     }

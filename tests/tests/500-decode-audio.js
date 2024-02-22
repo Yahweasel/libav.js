@@ -119,7 +119,7 @@ async function main() {
     }
 
     /* decode until eof */
-    const [, packets] = await libav.ff_read_multi(fmt_ctx, pkt);
+    const [, packets] = await libav.ff_read_frame_multi(fmt_ctx, pkt);
     let decoded_frame;
     for (const packet of packets[streamIdx]) {
         if (!decoded_frame) {

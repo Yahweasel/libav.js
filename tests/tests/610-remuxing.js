@@ -35,7 +35,7 @@ let video_stream_idx = stream.index;
 
 const pkt = await libav.av_packet_alloc();
 
-const [res, allPackets] = await libav.ff_read_multi(fmt_ctx, pkt);
+const [res, allPackets] = await libav.ff_read_frame_multi(fmt_ctx, pkt);
 
 if (res !== libav.AVERROR_EOF)
     throw new Error("Error reading: " + res);

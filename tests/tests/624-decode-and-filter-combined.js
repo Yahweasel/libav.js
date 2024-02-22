@@ -31,7 +31,7 @@ const stream = streams[streamIdx];
 
 const [, c, pkt, frame] = await libav.ff_init_decoder(
     "libopus", streams[streamIdx].codecpar);
-const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt, null, {
+const [res, packets] = await libav.ff_read_frame_multi(fmt_ctx, pkt, {
     copyoutPacket: "ptr"
 });
 if (res !== libav.AVERROR_EOF)

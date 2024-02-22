@@ -55,7 +55,7 @@ try {
         await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
     console.error(c);
 
-    let [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt);
+    let [res, packets] = await libav.ff_read_frame_multi(fmt_ctx, pkt);
 
     if (res !== libav.AVERROR_EOF)
         throw new Error("Error reading: " + res);

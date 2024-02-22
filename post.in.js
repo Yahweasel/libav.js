@@ -36,9 +36,7 @@ var readerCallbacks = {
         }
     },
 
-    close: function(stream) {
-        delete Module.readBuffers[stream.node.name];
-    },
+    close: function() {},
 
     read: function(stream, buffer, offset, length, position) {
         var data = Module.readBuffers[stream.node.name];
@@ -90,10 +88,7 @@ var blockReaderCallbacks = {
             throw new FS.ErrnoError(ERRNO_CODES.EPERM);
     },
 
-    close: function(stream) {
-        // FIXME
-        //delete Module.blockReadBuffers[stream.node.name];
-    },
+    close: function() {},
 
     read: function(stream, buffer, offset, length, position) {
         var data = Module.blockReadBuffers[stream.node.name];
@@ -1110,50 +1105,38 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  * stream number in which each element is an array of packets from that stream.
  * @param fmt_ctx  AVFormatContext
  * @param pkt  AVPacket
- * @param devfile  Name of the device file being read from, if applicable. Used
- *                 to set limits on when to read based on available data.
  * @param opts  Other options
  */
 /* @types
- * ff_read_multi@sync(
- *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ * ff_read_frame_multi@sync(
+ *     fmt_ctx: number, pkt: number, opts?: {
  *         limit?: number, // OUTPUT limit, in bytes
- *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
  *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
  *         copyoutPacket?: "default" // Version of ff_copyout_packet to use
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
- * ff_read_multi@sync(
- *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ * ff_read_frame_multi@sync(
+ *     fmt_ctx: number, pkt: number, opts?: {
  *         limit?: number, // OUTPUT limit, in bytes
- *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
  *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
  *         copyoutPacket: "ptr" // Version of ff_copyout_packet to use
  *     }
  * ): @promsync@[number, Record<number, number[]>]@
  */
-function ff_read_multi(fmt_ctx, pkt, devfile, opts) {
+function ff_read_frame_multi(fmt_ctx, pkt, opts) {
     var sz = 0;
     var outPackets = {};
-    var dev = Module.readBuffers[devfile];
 
     if (typeof opts === "number")
         opts = {limit: opts};
     if (typeof opts === "undefined")
         opts = {};
-    var devLimit = 32*1024;
-    if (opts.devLimit)
-        devLimit = opts.devLimit;
     var unify = !!opts.unify;
     var copyoutPacket = ff_copyout_packet;
     if (opts.copyoutPacket)
         copyoutPacket = ff_copyout_packet_versions[opts.copyoutPacket];
 
     function step() {
-        // If we risk running past the end of the currently-read data, stop now
-        if (dev && !dev.eof && dev.buf.length < devLimit)
-            return [-6 /* EAGAIN */, outPackets];
-
         return Promise.all([]).then(function() {
             // Read the frame
             return av_read_frame(fmt_ctx, pkt);
@@ -1179,12 +1162,46 @@ function ff_read_multi(fmt_ctx, pkt, devfile, opts) {
 
     return Promise.all([]).then(step);
 }
-Module.ff_read_multi = function() {
+Module.ff_read_frame_multi = function() {
     var args = arguments;
     Module.serializationPromise = Module.serializationPromise.catch(function(){}).then(function() {
-        return ff_read_multi.apply(void 0, args);
+        return ff_read_frame_multi.apply(void 0, args);
     });
     return Module.serializationPromise;
+};
+
+/**
+ * @deprecated
+ * DEPRECATED. Use `ff_read_frame_multi`.
+ * Read many packets at once. This older API is now deprecated. The devfile
+ * parameter is unused and unsupported. Dev files should be used via the normal
+ * `ff_reader_dev_waiting` API, rather than counting on device file limits, as
+ * this function used to.
+ * @param fmt_ctx  AVFormatContext
+ * @param pkt  AVPacket
+ * @param devfile  Unused
+ * @param opts  Other options
+ */
+/* @types
+ * ff_read_multi@sync(
+ *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ *         limit?: number, // OUTPUT limit, in bytes
+ *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+ *         copyoutPacket?: "default" // Version of ff_copyout_packet to use
+ *     }
+ * ): @promsync@[number, Record<number, Packet[]>]@
+ * ff_read_multi@sync(
+ *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ *         limit?: number, // OUTPUT limit, in bytes
+ *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
+ *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
+ *         copyoutPacket: "ptr" // Version of ff_copyout_packet to use
+ *     }
+ * ): @promsync@[number, Record<number, number[]>]@
+ */
+Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts) {
+    console.log("[libav.js] ff_read_multi is deprecated. Use ff_read_frame_multi.");
+    return Module.ff_read_frame_multi(fmt_ctx, pkt, opts);
 };
 
 /**

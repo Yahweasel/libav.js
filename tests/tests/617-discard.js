@@ -32,7 +32,7 @@ const stream = streams[streamIdx];
 
 const [, c, pkt, frame] = await libav.ff_init_decoder(
     "libopus", streams[streamIdx].codecpar);
-const [res, packets] = await libav.ff_read_multi(fmt_ctx, pkt);
+const [res, packets] = await libav.ff_read_frame_multi(fmt_ctx, pkt);
 if (res !== libav.AVERROR_EOF)
     throw new Error("Failed to read packets");
 await libav.avformat_close_input_js(fmt_ctx);
