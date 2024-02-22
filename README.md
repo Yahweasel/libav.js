@@ -2,8 +2,9 @@
 
 This is a compilation of the libraries associated with handling audio and video
 in FFmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for
-WebAssembly and asm.js, and thus the web. It is compiled via emscripten and is
-highly customizable.
+WebAssembly and asm.js, and thus the web, as well as the `ffmpeg` and `ffprobe`
+CLIs themselves. It is compiled via emscripten, is highly customizable, and has
+a ruthless commitment to correct licensing.
 
 In short, this is a pure JavaScript and WebAssembly system for low-level audio
 and video encoding, decoding, muxing, demuxing, and filtering.
