@@ -1,5 +1,3 @@
-const version = "4.10.6.1.1";
-
 function load(variant = "default") {
     const opts = {
         nowasm: false,
@@ -16,7 +14,7 @@ function load(variant = "default") {
     }
     const target = opts.nowasm ? "asm"
         : (opts.nothreads ? "wasm" : "thr");
-    const LibAV = require(`../dist/libav-${version}-${variant}.js`);
+    const LibAV = require(`../dist/libav-${variant}.js`);
     LibAV.opts = opts;
     const actual = LibAV.target(opts);
     if (target !== actual)

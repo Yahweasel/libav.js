@@ -13,6 +13,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+@E6 let LibAV;
+
 (function() {
     function isWebAssemblySupported(module) {
         module = module || [0x0, 0x61, 0x73, 0x6d, 0x1, 0x0, 0x0, 0x0];
@@ -36,16 +38,6 @@
         return false;
     }
 
-    /* Source: Jason Miller on Twitter. Returns true if we're in an ES6 module
-     * in a worker. */
-    function isModule() {
-        try {
-            importScripts("data:text/javascript,0");
-            return false;
-        } catch(e) {}
-        return true;
-    }
-
     var libav;
     var nodejs = (typeof process !== "undefined");
 
@@ -54,13 +46,24 @@
         LibAV = {};
     libav = LibAV;
 
-    if (!libav.base)
-        libav.base = ".";
+    if (!libav.base) {
+@E6     libav.base = import.meta.url;
+@E5     if (typeof __dirname === "string") {
+@E5         libav.base = __dirname;
+@E5     } else {
+@E5         if (typeof document !== "undefined" && document && document.currentScript)
+@E5             libav.base = document.currentScript.src;
+@E5         else if (typeof self !== "undefined" && self && self.location)
+@E5             libav.base = self.location.href;
+@E5         else
+@E5             libav.base = "./.";
+            libav.base = libav.base.replace(/\/[^\/]*$/, "");
+@E5     }
+    }
 
     // Proxy our detection functions
     libav.isWebAssemblySupported = isWebAssemblySupported;
     libav.isThreadingSupported = isThreadingSupported;
-    libav.isModule = isModule;
 
     // Get the target that will load, given these options
     function target(opts) {
@@ -78,6 +81,7 @@
     libav.VER = "@VER";
     libav.CONFIG = "@CONFIG";
     libav.DBG = "@DBG";
+    libav.factories = {};
 
     // Statics that are provided both by LibAV and by libav instances
     var libavStatics = {};
@@ -230,8 +234,20 @@
         opts = opts || {};
         var base = opts.base || libav.base;
         var t = target(opts);
+        var variant = "@CONFIG";
+        if (t === "asm") {
+            // In asm.js, we can't load alternate wasm
+            variant = opts.variant || libav.variant || "@CONFIG";
+        }
+
+        // Determine the file to import
+@E6     var useES6 = true;
+@E6     if (useES6 && (opts.noes6 || libav.noes6))
+@E6         useES6 = false;
         var toImport = opts.toImport || libav.toImport ||
-            base + "/libav-@VER-@CONFIG@DBG." + t + ".js";
+            base + "/libav-@VER-" + variant + "@DBG." + t + "." +
+@E6        (useES6?"mjs":"js");
+@E5        "js";
         var ret;
 
         var mode = "direct";
@@ -242,57 +258,57 @@
 
         return Promise.all([]).then(function() {
             // Step one: Get LibAV loaded
-            if (!libav.LibAVFactory) {
-                if (nodejs) {
-                    // Node.js: Load LibAV now
-                    libav.LibAVFactory = require(toImport);
+            if (opts.factory || libav.factory)
+                return opts.factory || libav.factory;
+            if (libav.factories[toImport])
+                return libav.factories[toImport];
 
-                } else if (mode === "worker") {
-                    // Worker: Nothing to load now
+            if (mode === "worker") {
+                // Worker: Nothing to load now
 
-                } else if (typeof importScripts !== "undefined") {
-                    // Worker scope. Import it.
-                    if (!isModule()) {
-                        importScripts(toImport);
-                        libav.LibAVFactory = LibAVFactory;
-                    } else {
-                        var gt;
-                        if (typeof globalThis !== "undefined") gt = globalThis;
-                        else if (typeof self !== "undefined") gt = self;
-                        else gt = window;
-                        libav.LibAVFactory = gt.LibAVFactory;
+@E6         } else if (useES6) {
+@E6             // Load via ES6 module
+@E6             return import(toImport).then(function(laf) {
+@E6                 libav.factories[toImport] = laf.default;
+@E6                 return laf.default;
+@E6             });
 
-                        if (gt.LibAVFactory)
-                            return gt.LibAVFactory;
-                        else
-                            throw new Error("If in an ES6 module, you need to import " + toImport + " yourself before loading libav.js.");
-                    }
+            } else if (nodejs) {
+                // Node.js: Load LibAV now
+                return libav.factories[toImport] = require(toImport);
 
-                } else {
-                    // Web: Load the script
-                    return new Promise(function(res, rej) {
-                        var scr = document.createElement("script");
-                        scr.src = toImport;
-                        scr.addEventListener("load", res);
-                        scr.addEventListener("error", rej);
-                        scr.async = true;
-                        document.body.appendChild(scr);
-                    }).then(function() {
-                        libav.LibAVFactory = LibAVFactory;
+            } else if (typeof importScripts !== "undefined") {
+                // Worker scope. Import it.
+                importScripts(toImport);
+                return libav.factories[toImport] = LibAVFactory;
 
-                    });
+            } else {
+                // Web: Load the script
+                return new Promise(function(res, rej) {
+                    var scr = document.createElement("script");
+                    scr.src = toImport;
+                    scr.addEventListener("load", res);
+                    scr.addEventListener("error", rej);
+                    scr.async = true;
+                    document.body.appendChild(scr);
+                }).then(function() {
+                    return libav.factories[toImport] = LibAVFactory;
 
-                }
+                });
+
             }
 
-        }).then(function() {
+        }).then(function(factory) {
+
             // Step two: Create the underlying instance
             if (mode === "worker") {
                 // Worker thread
                 ret = {};
 
                 // Load the worker
-                ret.worker = new Worker(toImport);
+                ret.worker = new Worker(toImport
+@E6                 , {type: useES6 ? "module" : "classic"}
+                );
 
                 ret.worker.postMessage({
                     config: {
@@ -363,17 +379,12 @@
             } else if (mode === "threads") {
                 /* Worker through Emscripten's own threads. Start with a real
                  * instance. */
-                var libavVariant = libav.variant;
-                var libavWasmurl = libav.wasmurl;
                 return Promise.all([]).then(function() {
-                    if (opts.variant)
-                        libav.variant = opts.variant;
-                    if (opts.wasmurl)
-                        libav.wasmurl = opts.wasmurl;
-                    return libav.LibAVFactory();
+                    return factory({
+                        wasmurl: opts.warmurl || libav.wasmurl,
+                        variant: opts.variant || libav.variant
+                    });
                 }).then(function(x) {
-                    libav.variant = libavVariant;
-                    libav.wasmurl = libavWasmurl;
                     ret = x;
 
                     // Get the worker
@@ -445,17 +456,12 @@
 
             } else { // Direct mode
                 // Start with a real instance
-                var libavVariant = libav.variant;
-                var libavWasmurl = libav.wasmurl;
                 return Promise.all([]).then(function() {
-                    if (opts.variant)
-                        libav.variant = opts.variant;
-                    if (opts.wasmurl)
-                        libav.wasmurl = opts.wasmurl;
-                    return libav.LibAVFactory();
+                    return factory({
+                        wasmurl: opts.wasmurl || libav.wasmurl,
+                        variant: opts.variant || libav.variant
+                    });
                 }).then(function(x) {
-                    libav.variant = libavVariant;
-                    libav.wasmurl = libavWasmurl;
                     ret = x;
                     ret.worker = false;
 
@@ -536,6 +542,8 @@
         });
     }
 
-    if (nodejs)
-        module.exports = libav;
+@E5 if (nodejs)
+@E5     module.exports = libav;
 })();
+
+@E6 export default LibAV;

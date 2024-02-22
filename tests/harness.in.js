@@ -13,7 +13,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+@E6 import * as fs from "fs/promises";
 
+@E6 let LibAVTestHarness;
+@E6 let LibAV;
 
 LibAVTestHarness = {
     tests: [],
@@ -32,7 +35,8 @@ LibAVTestHarness = {
         for (const test of list) {
             let js;
             if (typeof process !== "undefined") {
-                js = await (require("fs/promises").readFile(`tests/${test}`, "utf8"));
+@E6             js = await fs.readFile(`tests/${test}`, "utf8");
+@E5             js = await (require("fs/promises").readFile(`tests/${test}`, "utf8"));
             } else {
                 const resp = await fetch(`tests/${test}`);
                 const ab = await resp.arrayBuffer();
@@ -50,7 +54,8 @@ LibAVTestHarness = {
 
     readFile: async function(name) {
         if (typeof process !== "undefined") {
-            return require("fs/promises").readFile(name);
+@E6         return fs.readFile(name);
+@E5         return require("fs/promises").readFile(name);
         }
 
         const resp = await fetch(name);
@@ -70,22 +75,24 @@ LibAVTestHarness = {
         if (typeof LibAV === "undefined") {
             // Load a variant
             const toImport = `../dist/libav-all.dbg.` +
-                "js";
-            LibAV = {};
-            if (typeof process !== "undefined")
-                require(toImport);
-            else if (typeof importScripts !== "undefined")
-                importScripts(toImport);
-            else {
-                // Assume web
-                await new Promise(function(res, rej) {
-                    const scr = document.createElement("script");
-                    scr.src = toImport;
-                    scr.onload = res;
-                    scr.onerror = rej;
-                    document.body.appendChild(scr);
-                });
-            }
+@E6             "mjs";
+@E5             "js";
+@E6         LibAV = (await import(toImport)).default;
+@E5         LibAV = {};
+@E5         if (typeof process !== "undefined")
+@E5             require(toImport);
+@E5         else if (typeof importScripts !== "undefined")
+@E5             importScripts(toImport);
+@E5         else {
+@E5             // Assume web
+@E5             await new Promise(function(res, rej) {
+@E5                 const scr = document.createElement("script");
+@E5                 scr.src = toImport;
+@E5                 scr.onload = res;
+@E5                 scr.onerror = rej;
+@E5                 document.body.appendChild(scr);
+@E5             });
+@E5         }
 
             if (this.libav) {
                 this.libav.terminate();
@@ -180,5 +187,6 @@ LibAVTestHarness = {
     }
 };
 
-    if (typeof module !== "undefined")
-        module.exports = LibAVTestHarness;
+@E6 export default LibAVTestHarness;
+@E5 if (typeof module !== "undefined")
+@E5     module.exports = LibAVTestHarness;

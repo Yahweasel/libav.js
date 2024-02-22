@@ -2,7 +2,11 @@
   "name": "@libav.js/variant-@VARIANT",
   "version": "@VER",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
-  "main": "dist/libav-@VERSION-@VARIANT.js",
+  "main": "dist/libav-@VARIANT.js",
+  "exports": {
+    "import": "./dist/libav-@VARIANT.mjs",
+    "default": "./dist/libav-@VARIANT.js"
+  },
   "types": "dist/libav.types.d.ts",
   "directories": {
     "test": "tests"

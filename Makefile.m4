@@ -14,6 +14,7 @@ EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz
 THRFLAGS=-pthread
+ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
 	--memory-init-file 0 \
 	--pre-js pre.js \
@@ -40,32 +41,57 @@ all: build-default
 include mk/*.mk
 
 
-build-%: dist/libav-$(LIBAVJS_VERSION)-%.js
+build-%: \
+	dist/libav-$(LIBAVJS_VERSION)-%.js \
+	dist/libav-%.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.mjs \
+	dist/libav-%.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
+	dist/libav-%.dbg.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.mjs \
+	dist/libav-%.dbg.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs \
+	dist/libav.types.d.ts
 	true
 
-dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
+# Generic rule for frontend builds
+# Use: febuildrule(debug infix, target extension, minifier)
+define([[[febuildrule]]], [[[
+dist/libav-$(LIBAVJS_VERSION)-%$1.$2: build/libav-$(LIBAVJS_VERSION).$2 \
+	dist/libav-$(LIBAVJS_VERSION)-%$1.wasm.$2 \
 	node_modules/.bin/uglifyjs
 	mkdir -p dist
-	sed "s/@CONFIG/$*/g ; s/@DBG//g" < $< | $(MINIFIER) > $@
-	-chmod a-x dist/*.wasm
+	sed "s/@CONFIG/$(*)/g ; s/@DBG/$1/g" < $< | $3 > $(@)
 
-dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js
-	mkdir -p dist
-	sed "s/@CONFIG/$*/g ; s/@DBG/.dbg/g" < $< > $@
+dist/libav-%$1.$2: dist/libav-$(LIBAVJS_VERSION)-%$1.$2
+	cp $(<) $(@)
+]]])
+
+febuildrule([[[]]], js, [[[$(MINIFIER)]]])
+febuildrule([[[]]], mjs, [[[$(MINIFIER)]]])
+febuildrule(.dbg, js, cat)
+febuildrule(.dbg, mjs, cat)
+
+dist/libav.types.d.ts: build/libav.types.d.ts
+	cp $< $@
 
 # General build rule for any target
-# Use: buildrule(target file name, debug infix, target inst name, CFLAGS)
+# Use: buildrule(target file name, debug infix, target inst name, CFLAGS, target file suffix)
 define([[[buildrule]]], [[[
-dist/libav-$(LIBAVJS_VERSION)-%.$2$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$3-%/libavformat/libavformat.a \
+dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
-	mkdir -p dist
+	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) $4 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
@@ -87,32 +113,41 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.js: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/libavdevice/libavdevice.a \
 		'` \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/*/lib*.a \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/configs/$(*)/libs.txt` -o $(@)
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/$1/g ; s/@DBG/$2/g" $(@) | cat configs/configs/$(*)/license.js - > $(@).tmp
-	mv $(@).tmp $(@)
-	if [ -e dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map ] ; then \
-		./tools/adjust-sourcemap.js dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/configs/$(*)/libs.txt` -o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
+	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map ] ; then \
+		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
+	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/$1/g ; s/@DBG/$2/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5 | cat configs/configs/$(*)/license.js - > $(@)
+	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
+	-chmod a-x $(@).d/*.wasm
+	-mv $(@).d/* dist/
+	rmdir $(@).d
 ]]])
 
 # asm.js version
-buildrule(asm, [[[]]], base, [[[-s WASM=0]]])
-buildrule(asm, dbg., base, [[[-g2 -s WASM=0]]])
+buildrule(asm, [[[]]], base, [[[-s WASM=0]]], js)
+buildrule(asm, [[[]]], base, [[[$(ES6FLAGS) -s WASM=0]]], mjs)
+buildrule(asm, dbg., base, [[[-g2 -s WASM=0]]], js)
+buildrule(asm, dbg., base, [[[-g2 $(ES6FLAGS) -s WASM=0]]], mjs)
 # wasm version with no added features
-buildrule(wasm, [[[]]], base, [[[]]])
-buildrule(wasm, dbg., base, [[[-gsource-map]]])
+buildrule(wasm, [[[]]], base, [[[]]], js)
+buildrule(wasm, [[[]]], base, [[[$(ES6FLAGS)]]], mjs)
+buildrule(wasm, dbg., base, [[[-gsource-map]]], js)
+buildrule(wasm, dbg., base, [[[-gsource-map $(ES6FLAGS)]]], mjs)
 # wasm + threads
-buildrule(thr, [[[]]], thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
-buildrule(thr, dbg., thr, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]])
+buildrule(thr, [[[]]], thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
+buildrule(thr, [[[]]], thr, [[[$(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
+buildrule(thr, dbg., thr, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
+buildrule(thr, dbg., thr, [[[-gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
 
-build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json apply-funcs.js
+build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json tools/apply-funcs.js
 	mkdir -p build dist
-	./apply-funcs.js $(LIBAVJS_VERSION)
+	./tools/apply-funcs.js $(LIBAVJS_VERSION)
 
-build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
+build/libav.types.d.ts build/libav-$(LIBAVJS_VERSION).mjs build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
 	touch $@
 
 node_modules/.bin/uglifyjs:
@@ -129,7 +164,7 @@ build/inst/thr/cflags.txt:
 
 RELEASE_VARIANTS=\
 	default default-cli opus opus-af flac flac-af wav wav-af obsolete webm \
-	webm-cli webm-vp9 webm-vp9-cli vp8-opus vp8-opus-avf, vp9-opus \
+	webm-cli webm-vp9 webm-vp9-cli vp8-opus vp8-opus-avf vp9-opus \
 	vp9-opus-avf av1-opus av1-opus-avf webcodecs webcodecs-avf
 
 release: extract
@@ -202,13 +237,25 @@ print-version:
 	@printf '%s\n' "$(LIBAVJS_VERSION)"
 
 .PRECIOUS: \
-	libav.js-$(LIBAVJS_VERSION)-%-release \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a \
+	dist/libav.types.d.ts \
 	dist/libav-$(LIBAVJS_VERSION)-%.js \
+	dist/libav-%.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.mjs \
+	dist/libav-%.mjs \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.js \
+	dist/libav-%.dbg.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.mjs \
+	dist/libav-%.dbg.mjs \
 	dist/libav-$(LIBAVJS_VERSION)-%.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs \
 	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs \
 	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs \
 	dist/libav-$(LIBAVJS_VERSION)-%.thr.js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js
+	dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js \
+	dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs

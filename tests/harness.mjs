@@ -13,7 +13,10 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+    import * as fs from "fs/promises";
 
+    let LibAVTestHarness;
+    let LibAV;
 
 LibAVTestHarness = {
     tests: [],
@@ -32,7 +35,7 @@ LibAVTestHarness = {
         for (const test of list) {
             let js;
             if (typeof process !== "undefined") {
-                js = await (require("fs/promises").readFile(`tests/${test}`, "utf8"));
+                js = await fs.readFile(`tests/${test}`, "utf8");
             } else {
                 const resp = await fetch(`tests/${test}`);
                 const ab = await resp.arrayBuffer();
@@ -50,7 +53,7 @@ LibAVTestHarness = {
 
     readFile: async function(name) {
         if (typeof process !== "undefined") {
-            return require("fs/promises").readFile(name);
+            return fs.readFile(name);
         }
 
         const resp = await fetch(name);
@@ -70,22 +73,8 @@ LibAVTestHarness = {
         if (typeof LibAV === "undefined") {
             // Load a variant
             const toImport = `../dist/libav-all.dbg.` +
-                "js";
-            LibAV = {};
-            if (typeof process !== "undefined")
-                require(toImport);
-            else if (typeof importScripts !== "undefined")
-                importScripts(toImport);
-            else {
-                // Assume web
-                await new Promise(function(res, rej) {
-                    const scr = document.createElement("script");
-                    scr.src = toImport;
-                    scr.onload = res;
-                    scr.onerror = rej;
-                    document.body.appendChild(scr);
-                });
-            }
+                "mjs";
+            LibAV = (await import(toImport)).default;
 
             if (this.libav) {
                 this.libav.terminate();
@@ -180,5 +169,4 @@ LibAVTestHarness = {
     }
 };
 
-    if (typeof module !== "undefined")
-        module.exports = LibAVTestHarness;
+    export default LibAVTestHarness;

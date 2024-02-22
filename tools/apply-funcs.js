@@ -290,13 +290,13 @@ function decls(f, meta) {
     }
     outp = inp.replace("@DECLS", outp).replace("@SYNCDECLS", syncp);
 
-    fs.writeFileSync("dist/libav.types.d.ts", outp);
+    fs.writeFileSync("build/libav.types.d.ts", outp);
 })();
 
-// libav.js
+// libav.js, libav.mjs
 (function() {
     var ver = process.argv[2];
-    var inp = fs.readFileSync("libav.in.js", "utf8");
+    let inp = fs.readFileSync("libav.in.js", "utf8");
 
     var normalFuncs = [];
     var localFuncs = [];
@@ -307,12 +307,21 @@ function decls(f, meta) {
             normalFuncs.push(decl);
     }, true);
 
-    outp = inp
+    inp = inp
         .replace("@FUNCS", s(normalFuncs))
         .replace("@LOCALFUNCS", s(localFuncs))
         .replace(/@VER/g, ver);
 
-    fs.writeFileSync("build/libav-" + ver + ".js", outp);
+    const outpJS = inp
+        .replace(/\n@E5 /g, "\n")
+        .replace(/\n(@E6.*\n)+/g, "\n");
+
+    const outpMJS = inp
+        .replace(/\n(@E5.*\n)+/g, "\n")
+        .replace(/\n@E6 /g, "\n");
+
+    fs.writeFileSync(`build/libav-${ver}.js`, outpJS);
+    fs.writeFileSync(`build/libav-${ver}.mjs`, outpMJS);
 })();
 
 // exports.json

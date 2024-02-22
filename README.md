@@ -44,7 +44,6 @@ example of using libav.js from a CDN in the browser thread:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript">LibAV = {base: "https://cdn.jsdelivr.net/npm/@libav.js/variant-default@4.10.6/dist"};</script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@libav.js/variant-default@4.10.6/dist/libav-4.10.6.1.1-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
@@ -89,17 +88,19 @@ It's also possible to use libav.js from Node.js, though this isn't a good idea,
 since you can presumably use a native version of FFmpeg's libraries. The Node
 interface is only provided for internal testing.
 
-Use `.dbg.js` instead of `.js` for a non-minified, more debuggable version.
+Use `.dbg.js` instead of `.js` for a non-minified, more debuggable version. Use
+`.mjs` for the ES6 module version. Use `.dbg.mjs` for both. You don't need any
+combination; e.g., if you only intend to use imports, you do not need any `.js`
+files.
 
-libav.js exposes a global variable, LibAV, for all API access. If LibAV is set
-before loading the library, libav.js does *not* replace it, but extends it.
-This gives you an opportunity to pass in values critical for loading. In
-particular, if the base directory (directory in which libav's files are
-located) isn't ".", then you must set `LibAV.base` to the correct base
-directory, as in the CDN example above. `LibAV.base` does not need to be a full
-URL, but should be if loading from another origin. You can set `LibAV.base`
-after loading libav.js; it's set up so that you can do it before to make it
-easier to avoid race conditions.
+libav.js exposes a global variable, `LibAV`, for all API access. If importing as a
+module, `LibAV` is the default export.
+
+For certain unusual loading situations, you can set the `LibAV` global variable
+before importing. In particular, if the base directory (directory in which
+libav's files are located) can't be detected for some reason, then you must set
+`LibAV.base` to the correct base. `LibAV.base` does not need to be a full URL,
+but should be if loading from another origin.
 
 Bundlers have further concerns. To use libav.js with a bundler, see the section
 on bundlers below.
@@ -220,6 +221,15 @@ released version, it is sufficient to provide the `sources` directory.
 libav.js is published to NPM as `libav.js`, and each released variant is
 published in a much smaller NPM package as `@libav.js/variant-<variant>`. The
 CDN example above uses the `@libav.js/variant-default` package, for example.
+
+### Why the version number in the filenames?
+
+Caching is Hell.
+
+`libav-<variant>.*` is also available in the releases and repository, but you're
+highly recommended *not* to use this name on any web installation, as caching
+will cause strange nonsense to happen. Use a full version name to avoid caching
+madness.
 
 
 ## API
@@ -461,33 +471,33 @@ connect it to WebCodecs:
 Generally speaking, because libav.js needs to adjust its loading procedure based
 on the environment it's being loaded in, it's not a good idea to bundle
 libav.js. However, if you have to bundle it, it can be done if necessary.
-Bundlers such as WebPack, esbuild, Vite, Rollup, etc., may change the names and
-location of the LibAV's JavaScript and WebAssembly files or even turn them into
-modules.  In these cases, the location of the JavaScript and WebAssembly file of
-a LibAV variant can be overridden by options set on the `LibAV` object after
-loading libav.js, similar to `LibAV.base`.  `LibAV.toImport` and `LibAV.wasmurl`
-override the URL of the used JavaScript and WebAssembly file respectively. These
-are usually located in the libav.js directory and follow the scheme
-`libav-VER-CONFIGDBG.TARGET.js` and `libav-VER-CONFIGDBG.TARGET.wasm`,
-respectively.  The version (`VER`), variant (`CONFIG`) and debug (`DBG`) string
-are exposed as `LibAV.VER`, `LibAV.CONFIG` and `LibAV.DBG` respectively after
-loading LibAV.  However, you can generally successfully load a different variant
-or debuggability level, so these are provided to allow you to verify what your
-bundler actually bundled.  The target corresponds to the browser features
-available, and can vary between different browsers or other environments. As
-such, it should be determined at runtime, which can be done by calling
-`LibAV.target()`. For instance, a possible way to retrieve the URL in a module
-can be ``new
-URL(`node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.wasm`,
-import.meta.url).href``, but be sure to consult the documentation of your
-bundler. Note the variant `opus` is hard-coded in this case to prevent the
-bundler from including all variants.
 
-Some bundlers turn LibAV code from a CommonJS module to an ECMAScript 6 module,
-which will if loaded in a worker interfere with LibAV's loading code.  In this
-case, LibAV's JavaScript code needs to be imported manually before calling the
-factory function of the LibAV instance: ``await
-import(`../node_modules/libav.js/libav-${globalThis.LibAV.VER}-opus.${target}.js`)``.
-Note that dynamically importing ECMAScript 6 modules is supported by all major
-browsers, but at the time of this wriging, on Firefox, is protected by a flag
-that most users will not have enabled.
+libav.js has a frontend (`libav-<version>-<variant>.js`), a factory
+(`libav-<version>-<variant>.wasm.js` or `.thr.js`), and, if using WebAssembly, a
+backend (`libav-<version>-<variant>.wasm.wasm` or `.thr.wasm`). Any of these can
+be overridden, and any of them can be object URLs to bundle everything, though
+this will destroy libav.js's ability to load the correct version for the system.
+
+To override the frontend, simply load a different frontend!
+
+To override the factory, you have two choices:
+
+ * Pass `toImport`, a string, to `LibAV.LibAV`'s options, e.g.,
+   `LibAV.LibAV({toImport: "libav-but-better.wasm.js"})`.
+
+ * Load the factory yourself, and pass the factory function as the `factory`
+   option to `LibAV.LibAV`, e.g., `LibAV.LibAV({factory: LibAVFactory})`. By
+   default, the factory function is exported as `LibAVFactory`, or for ES6
+   modules, it is the default export of the module.
+
+To override the backend, you can pass the full URL (or object URL) to the
+WebAssembly as the option `wasmurl` to `LibAV.LibAV`, e.g.,
+`LibAV.LibAV({wasmurl: URL.createObjectURL(...)})`.
+
+Be careful about which versions of things you bundle. The ES6 module version of
+libav.js assumes that it will actually *be* an ES6 module, and so will be able
+to use, e.g., `import`. If your bundler transforms it into a non-ES6 module, you
+must explicitly tell it to import some other way by passing the option `noes6`
+to `LibAV.LibAV`, e.g., `LibAV.LibAV({noes6: true})`. Also, if your bundler
+converts the ES6 frontend to non-ES6 and you intend to explicitly specify
+`toImport`, you must specify the *non-ES6* factory.

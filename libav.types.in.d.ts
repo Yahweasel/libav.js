@@ -555,40 +555,41 @@ export interface LibAVOpts {
     nothreads?: boolean;
 
     /**
+     * Don't use ES6 modules for loading, even if libav.js was compiled as an
+     * ES6 module.
+     */
+    noes6?: boolean;
+
+    /**
      * URL base from which to load workers and modules.
      */
     base?: string;
 
     /**
-     * The full URL from which to load the .wasm file.
+     * URL from which to load the module factory.
      */
-    wasmurl?: string;
+    toImport?: string;
+
+    /**
+     * The module factory to use itself.
+     */
+    factory?: any;
 
     /**
      * The variant to load (instead of whichever variant was compiled)
      */
     variant?: string;
+
+    /**
+     * The full URL from which to load the .wasm file.
+     */
+    wasmurl?: string;
 }
 
 /**
  * The main wrapper for libav.js, typically named "LibAV".
  */
-export interface LibAVWrapper extends LibAVStatic {
-    /**
-     * URL base from which load workers and modules.
-     */
-    base: string;
-
-    /**
-     * The full URL from which to load the .wasm file.
-     */
-    wasmurl?: string;
-
-    /**
-     * The variant to load (instead of whichever variant was compiled)
-     */
-    variant?: string;
-
+export interface LibAVWrapper extends LibAVOpts, LibAVStatic {
     /**
      * Create a LibAV instance.
      * @param opts  Options
@@ -597,3 +598,9 @@ export interface LibAVWrapper extends LibAVStatic {
     LibAV(opts: LibAVOpts & {noworker: true}): Promise<LibAV & LibAVSync>;
     LibAV(opts: LibAVOpts): Promise<LibAV | LibAV & LibAVSync>;
 }
+
+/**
+ * If using ES6, the main export.
+ */
+declare const LibAV: LibAVWrapper;
+export default LibAV;

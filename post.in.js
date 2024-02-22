@@ -209,7 +209,7 @@ streamWriterCallbacks.llseek = function() {
 var streamWriterFS = Object.create(MEMFS);
 
 streamWriterFS.mount = function(mount) {
-    return streamWriterFS.createNode(null, "/", 0x4000 /* S_IFDIR */ | 0x1FF /* 0777 */, 0);
+    return streamWriterFS.createNode(null, "/", 0x4000 /* S_IFDIR */ | 0x1FF, 0);
 }
 
 streamWriterFS.createNode = function() {
@@ -313,7 +313,7 @@ fsBinding("createLazyFile");
  */
 /// @types mkreaderdev@sync(name: string, mode?: number): @promise@void@
 Module.mkreaderdev = function(loc, mode) {
-    FS.mkdev(loc, mode?mode:0777, readerDev);
+    FS.mkdev(loc, mode?mode:0x1FF, readerDev);
     return 0;
 };
 
@@ -443,7 +443,7 @@ Module.unlinkreadaheadfile = function(name) {
  */
 /// @types mkwriterdev@sync(name: string, mode?: number): @promise@void@
 Module.mkwriterdev = function(loc, mode) {
-    FS.mkdev(loc, mode?mode:0777, writerDev);
+    FS.mkdev(loc, mode?mode:0x1FF, writerDev);
     return 0;
 };
 
@@ -455,7 +455,7 @@ Module.mkwriterdev = function(loc, mode) {
  */
 /// @types mkstreamwriterdev@sync(name: string, mode?: number): @promise@void@
 Module.mkstreamwriterdev = function(loc, mode) {
-    FS.mkdev(loc, mode?mode:0777, streamWriterDev);
+    FS.mkdev(loc, mode?mode:0x1FF, streamWriterDev);
     return 0;
 };
 
@@ -987,7 +987,7 @@ var ff_init_muxer = Module.ff_init_muxer = function(opts, streamCtxs) {
 
     // Set up the device if requested
     if (opts.device)
-        FS.mkdev(opts.filename, 0777, writerDev);
+        FS.mkdev(opts.filename, 0x1FF, writerDev);
 
     // Open the actual file if requested
     var pb = null;

@@ -34,18 +34,19 @@ async function main() {
         let res = orig;
 
         if (
-            orig === "../bindings.c" ||
-            /^\.\.\/build/.test(orig)
+            orig === "../../bindings.c" ||
+            /^\.\.\/\.\.\/build/.test(orig)
         ) {
             // Already a full path
+            res = orig.slice(3);
 
         } else if (
-            /^\.\.\/src\/ff/.test(orig) ||
-            /^\.\.\/src\/libav/.test(orig) ||
-            /^\.\.\/src\/libsw[rs]/.test(orig)
+            /^\.\.\/\.\.\/src\/ff/.test(orig) ||
+            /^\.\.\/\.\.\/src\/libav/.test(orig) ||
+            /^\.\.\/\.\.\/src\/libsw[rs]/.test(orig)
         ) {
             // In ffmpeg
-            res = `../build/ffmpeg-${version("ffmpeg")}/` + orig.slice(7);
+            res = `../build/ffmpeg-${version("ffmpeg")}/` + orig.slice(10);
 
         } else if (
             /^(\.\.\/)*(opus|libvorbis|libogg|lame|libvpx|openh264|zlib)-/.test(orig)
@@ -54,13 +55,13 @@ async function main() {
              * the ..s for build */
             res = orig.replace(/^(\.\.\/)*/, "../build/");
 
-        } else if (/^\.\.\/vp[89x]_/.test(orig)) {
+        } else if (/^\.\.\/\.\.\/vp[89x]_/.test(orig)) {
             // VPX-specific hack
-            res = `../build/libvpx-${version("libvpx")}/` + orig.slice(3);
+            res = `../build/libvpx-${version("libvpx")}/` + orig.slice(6);
 
-        } else if (/^\.\.\/config\/(aom|av1)/.test(orig)) {
+        } else if (/^\.\.\/\.\.\/config\/(aom|av1)/.test(orig)) {
             // AOM-specific hack
-            res = `../build/libaom-${version("libaom")}/` + orig.slice(3);
+            res = `../build/libaom-${version("libaom")}/` + orig.slice(6);
 
         } else if (
             /cache\/sysroot/.test(orig) ||

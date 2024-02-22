@@ -13,15 +13,6 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-function LibAVGlobe() {
-    if (typeof globalThis !== "undefined") return globalThis;
-    else if (typeof self !== "undefined") return self;
-    return window;
-}
-
-if (typeof LibAVFactory !== "undefined")
-    LibAVGlobe().LibAVFactory = LibAVFactory;
-
 if (/* We're in a worker */
     typeof importScripts !== "undefined" &&
     /* We're not being loaded with noworker from the main code */
@@ -29,7 +20,6 @@ if (/* We're in a worker */
     /* We're not being loaded as a thread */
     typeof Module === "undefined"
     ) (function() {
-    var globe = LibAVGlobe();
     var libav;
 
     Promise.all([]).then(function() {
@@ -38,12 +28,10 @@ if (/* We're in a worker */
         return new Promise(function(res, rej) {
             onmessage = function(e) {
                 if (e && e.data && e.data.config) {
-                    if (!globe.LibAV) globe.LibAV = {};
-                    if (e.data.config.variant)
-                        globe.LibAV.variant = e.data.config.variant;
-                    if (e.data.config.wasmurl)
-                        globe.LibAV.wasmurl = e.data.config.wasmurl;
-                    LibAVFactory().then(res).catch(rej);
+                    LibAVFactory({
+                        wasmurl: e.data.config.wasmurl,
+                        variant: e.data.config.variant
+                    }).then(res).catch(rej);
                 }
             };
         });

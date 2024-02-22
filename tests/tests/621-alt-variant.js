@@ -30,7 +30,9 @@ let data;
 }
 
 // Load the default variant, which doesn't have Vorbis support
-const libav = await h.LibAV({variant: "default"});
+const opts = {variant: "default"};
+if (h.libAVOpts) Object.assign(opts, h.libAVOpts);
+const libav = await h.LibAV(opts);
 await libav.writeFile("tmp.ogg", data);
 
 const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("tmp.ogg");
