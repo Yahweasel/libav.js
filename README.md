@@ -13,6 +13,11 @@ FFmpeg is released under the LGPL. Therefore, if you distribute this library,
 you must provide sources. The sources are included in the `sources/` directory
 of the compiled version of libav.js.
 
+In order to reduce license-header Hell, the small amount of wrapper functions
+provided by libav.js are all released under the so-called “0-clause BSD”
+license, which does not require that the license text itself appear in
+derivative works. Built libraries have their correct license headers.
+
 This file is the main README for using and building libav.js, and should be
 sufficient for many users. More detail on specific concepts is provided in other
 files:
@@ -107,75 +112,8 @@ Bundlers have further concerns. To use libav.js with a bundler, see the section
 on bundlers below.
 
 `LibAV.LibAV` is a factory function which returns a promise which resolves to a
-ready instance of libav. `LibAV.LibAV` takes an optional argument in which
-loading options may be provided. The loading options and their default values
-are:
-```
-{
-    "noworker": false,
-    "nowasm": false,
-    "yesthreads": false,
-    "nothreads": false,
-    "base": LibAV.base,
-    "wasmurl": undefined,
-    "variant": undefined
-}
-```
-`nowasm` forces libav.js to load only asm.js code, not WebAssembly code. By
-default, it will determine what the browser supports and choose accordingly, so
-this is overridable here for testing purposes only.
-
-The other no/yes options affect the execution mode of libav.js. libav.js can run
-in one of three modes: `"direct"` (synchronous), `"worker"`, or `"threads"`.
-After creating a libav.js instance, the mode can be found in
-`libav.libavjsMode`. By default, libav.js will use the `"worker"` mode if
-Web Workers are available, and `"direct"` otherwise. libav.js never uses the
-`"threads"` mode by default, though this may change in the future.
-
-If `noworker` is set or Web Workers are not available, Web Workers will be
-disabled, so libav.js will run in the main thread (i.e., will run in `"direct"`
-mode). This is synchronous, so usually undesirable.  Note that if you're loading
-libav.js *in* a worker, it may be reasonable to set `noworker`, and make
-libav.js synchronous with your worker thread.
-
-If `yesthreads` is set (and `nothreads` is not set) and threads are supported
-(see
-https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
-), then a threaded version of libav.js will be loaded. This will significantly
-improve the performance of some encoders and decoders. However, threads are
-disabled by default, as their benefit or otherwise depends on the precise
-behavior of your code, and some browsers have a fairly low limit to the number
-of worker threads an entire page is allowed to have. Note that separate
-instances of libav.js, created by separate calls to `LibAV.LibAV`, will be in
-separate threads as long as workers are used, regardless of the value of
-`yesthreads`, and thus `yesthreads` is only needed if you need concurrency
-*within* a libav.js instance.
-
-libav.js automatically detects which WebAssembly features are available, so even
-if you set `yesthreads` to `true`, a version without threads may be loaded. To
-know which version will be loaded, call `LibAV.target`. It will return `"asm"`
-if only asm.js is used, `"wasm"` for baseline, or `"thr"` for threads. These
-strings correspond to the filenames to be loaded, so you can use them to preload
-and cache the large WebAssembly files. `LibAV.target` takes the same optional
-argument as `LibAV.LibAV`.
-
-The `base` option can be used in these options in place of `LibAV.base`, and
-will override `LibAV.base` if set.
-
-The `wasmurl` option can be used to override the *full* URL from which to load
-the WebAssembly (if there is WebAssembly), or the `variant` option can be used
-to override the variant loaded to be different from the variant that libav.js
-was compiled with. Setting `variant` is useful if you need multiple variants
-(e.g., one variant to determine what kind of file you have, and then another
-variant to decode the data in that file), as the frontend is otherwise the same
-and uses global variables.
-
-The tests used to determine which features are available are also exported, as
-`LibAV.isWebAssemblySupported` and `LibAV.isThreadingSupported`.
-
-NOTE: libav.js used to have a SIMD build as well. This was dropped because none
-of the constituent libraries actually support WebAssembly SIMD, so it
-substantially increased the size and time of builds to no benefit.
+ready instance of libav. The factory function and libav instance methods are
+documented in [API.md](docs/API.md).
 
 
 ## Which files do I need?
@@ -186,7 +124,8 @@ files, but you should probably include several others.
 The main entry file is named as follows: `libav-<version>-<variant>.js`. You
 only need the variant you intend to use. The debug version is named
 `libav-<version>-<variant>.dbg.js`, and you can use that in place of the
-original, but it is not required.
+original, but it is not required. If using ES6 modules, use `mjs` in place of
+`js`.
 
 That entry file will load a target based on the environment it's loaded in and
 the options used to load it, as described above. The supported targets are
@@ -204,11 +143,12 @@ a `.dbg.js` equivalent which is only needed if you intend to use debug mode.
  * Threaded WebAssembly: Named `libav-<version>-<variant>.thr.js` (and
    `.thr.wasm`). Used only when threading is supported by the browser *and*
    `yesthreads` is set. If you don't intend to use threads (set `yesthreads`),
-   it is safe to exclude this. Used in most threaded situations.
+   it is safe to exclude this. Used only when threads are activated and
+   supported.
 
 At a minimum, it is usually sufficient to include only the `.js`, `.wasm.js`,
 and `.wasm.wasm` files. To include threads, you must also include `.thr.js` and
-`.thr.wasm`.
+`.thr.wasm`. Again, use `mjs` instead of `js` if using ES6 imports.
 
 The file `libav.types.d.ts` is a TypeScript types definition file, and is only
 needed to compile TypeScript code with support for libav.js's types. It should
@@ -229,51 +169,17 @@ Caching is Hell.
 
 `libav-<variant>.*` is also available in the releases and repository, but you're
 highly recommended *not* to use this name on any web installation, as caching
-will cause strange nonsense to happen. Use a full version name to avoid caching
-madness.
-
-
-## API
-
-The API exposed by libav.js is more-or-less exactly the functions exposed by
-the libav libraries, using promises. Because of the promise-based design, the
-interface is identical whether Web Workers are used or not.
-
-For an exact list of the functions, see `funcs.json` or `libav.types.d.ts`.
-
-Most structs are exposed as raw pointers (numbers), and their parts can be
-accessed using accessor functions named `Struct_member` and `Struct_member_s`.
-For instance, to read `frame_size` from an `AVCodecContext`, use `await
-AVCodecContext_frame_size(ctx)`, and to write it, use `await
-AVCodecContext_frame_size_s(ctx, frame_size)`. There are also libav.js-specific
-JavaScript objects for many of them, documented in `libav.types.d.ts`.
-
-Some libav functions take double-pointers so that they can return both an
-allocated pointer value and (if applicable) an error code, and where possible
-these are wrapped in `_js` versions which simply return a pointer. For
-instance, `avfilter_graph_create_filter`, which takes an `AVFilterContext **`
-as its first argument, is exposed as `avfilter_graph_create_filter_js`, which
-elides the first argument and returns an `AVFilterContext *`.
-
-Some common sequences of functions are combined into `ff_` metafunctions. See
-[API.md](docs/API.md) for how to use them.
-
-Further examples are available in the `samples` directory of
-https://github.com/ennuicastr/libavjs-webcodecs-polyfill , which uses libav.js
-along with WebCodecs (or its own polyfill of WebCodecs), so shows how to marry
-these two technologies.
-
-In order to reduce license-header Hell, the small amount of wrapper functions
-provided by libav.js are all released under the so-called “0-clause BSD”
-license, which does not require that the license text itself appear in
-derivative works. Built libraries have their correct license headers.
+will cause strange nonsense to happen. Use a full versioned name to avoid
+caching madness.
 
 
 ## Devices and asynchrony
 
 Emscripten's implementation of an in-memory filesystem has severe limitations.
 You're recommended to use virtual devices, implemented by `libav.js`, for most
-I/O. See [IO.md](docs/IO.md) for more details.
+I/O. See [IO.md](docs/IO.md) for more details. libav.js itself imposes no
+restriction on file sizes so long as you use asynchronous, device-backed I/O
+(thus, the only restriction to size is JavaScript's number type).
 
 ffmpeg was never designed to work asynchronously, and was only designed to work
 with blocking I/O. Still, it's possible to use libav.js with asynchronous input
@@ -298,13 +204,13 @@ declare let LibAV: LibAVJS.LibAVWrapper;
 ```
 
 
-## Variants
+## Variants and Building libav.js
 
 With all of its bells and whistles enabled, FFmpeg is pretty large. So, I
 disable most bells and most whistles and build specific versions with specific
 features.
 
-The default variant, libav-`<version>`-default.js, includes support for the most
+The default variant, `libav-<version>-default.js`, includes support for the most
 important (and timeless) audio codecs and formats: Opus, FLAC, and wav, in WebM,
 ogg, FLAC, or wav containers. It also has a set of common audio filters.
 
@@ -312,8 +218,8 @@ Built-in variants are created by combining “configuration fragments”. You ca
 find more on configuration fragments or making your own variants in
 [CONFIG.md](docs/CONFIG.md).
 
-Use `make build-variant`, replacing `variant` with the variant name, to build
-another variant.
+Use `make build-<variant>`, replacing `<variant>` with the variant name, to
+build another variant.
 
 Most of the variants provided in the repository are also built and available in
 NPM and as binary releases. The notable exception is all variants that include
@@ -321,7 +227,7 @@ codecs controlled by the Misanthropic Patent Extortion Gang (MPEG). They are not
 built by default, and if you have any sense, you should not use them. MPEG is a
 cancer on the digital media ecosystem.
 
-The included variants are:
+The included variants and their codecs and formats are:
 
  * default, default-cli: Opus (via libopus), FLAC, and wav in ogg, WebM, FLAC,
    and wav containers, plus audio filters. The `-cli` subvariant additionally

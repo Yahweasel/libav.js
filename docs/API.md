@@ -1,13 +1,107 @@
+# Factory Function
+
+LibAV instances are created by an asynchronous factory function, `LibAV.LibAV`.
+In many cases, it can be called with no option, e.g., `libav = await
+LibAV.LibAV()`. `LibAV.LibAV` takes an optional argument in which loading
+options may be provided. The loading options and their default values are:
+```
+{
+    "noworker": false,
+    "nowasm": false,
+    "yesthreads": false,
+    "nothreads": false,
+    "base": <automatically detected>,
+    "toImport": <automatically computed>,
+    "factory": <automatically imported>,
+    "variant": <specified by libav.js filename>,
+    "wasmurl": <automatically computed>
+}
+```
+`nowasm` forces libav.js to load only asm.js code, not WebAssembly code. By
+default, it will determine what the browser supports and choose accordingly, so
+this is overridable here mainly for testing purposes.
+
+The other no/yes options affect the execution mode of libav.js. libav.js can run
+in one of three modes: `"direct"` (synchronous), `"worker"`, or `"threads"`.
+After creating a libav.js instance, the mode can be found in
+`libav.libavjsMode`. By default, libav.js will use the `"worker"` mode if
+Web Workers are available, and `"direct"` otherwise. libav.js never uses the
+`"threads"` mode by default, though this may change in the future.
+
+If `noworker` is set or Web Workers are not available, Web Workers will be
+disabled, so libav.js will run in the main thread (i.e., will run in `"direct"`
+mode). This is synchronous, so usually undesirable.  Note that if you're loading
+libav.js *in* a worker, it may be reasonable to set `noworker`, and make
+libav.js synchronous with your worker thread.
+
+If `yesthreads` is set (and `nothreads` is not set) and threads are supported
+(see
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+), then a threaded version of libav.js will be loaded. This will significantly
+improve the performance of some encoders and decoders. However, threads are
+disabled by default, as their benefit or otherwise depends on the precise
+behavior of your code, and some browsers have a fairly low limit to the number
+of worker threads an entire page is allowed to have. Note that separate
+instances of libav.js, created by separate calls to `LibAV.LibAV`, will be in
+separate threads as long as workers are used, regardless of the value of
+`yesthreads`, and thus `yesthreads` is only needed if you need concurrency
+*within* a libav.js instance.
+
+libav.js automatically detects which WebAssembly features are available, so even
+if you set `yesthreads` to `true`, a version without threads may be loaded. To
+know which version will be loaded, call `LibAV.target`. It will return `"asm"`
+if only asm.js is used, `"wasm"` for baseline, or `"thr"` for threads. These
+strings correspond to the filenames to be loaded, so you can use them to preload
+and cache the large WebAssembly files. `LibAV.target` takes the same optional
+argument as `LibAV.LibAV`.
+
+The `base` option can be used in these options in place of `LibAV.base`, and
+will override `LibAV.base` if set.
+
+The `variant` option can be set to load a different variant than the one given
+by the URL you loaded libav.js itself from, which in turn can be used to load
+multiple variants at the same time.
+
+The `toImport`, `factory`, and `wasmurl` options are documented in the
+“bundlers” section of the [main README](../README.md), as they are mainly of
+interest to bundlers.
+
+The tests used to determine which features are available are also exported, as
+`LibAV.isWebAssemblySupported` and `LibAV.isThreadingSupported`.
+
+NOTE: libav.js used to have a SIMD build as well. This was dropped because none
+of the constituent libraries actually support WebAssembly SIMD, so it
+substantially increased the size and time of builds to no benefit.
+
+The `LibAV.LibAV` factory returns (a promise resolving to) a libav instance,
+which is an object exposing libav and libav.js's API as methods.
+
+
+# libav Instance Methods
+
 Most of libav.js's API is libav's API, and for such functions, you can consult
-FFmpeg's documentation. Not every function is exposed, of course; see funcs.json
-for a list of exposed functions or to add new functions.
+FFmpeg's documentation. Not every function is exposed, of course; see
+[funcs.json](../funcs.json) for a list of exposed functions or to add new
+functions.
 
 Functions that use double-pointers are exposed as `_js` metafunctions that
-return single pointers.
+take and return single pointers.
+
+Most structs are exposed as raw pointers (numbers), and their parts can be
+accessed using accessor functions named `Struct_member` and `Struct_member_s`.
+For instance, to read `frame_size` from an `AVCodecContext`, use `await
+AVCodecContext_frame_size(ctx)`, and to write it, use `await
+AVCodecContext_frame_size_s(ctx, frame_size)`. There are also libav.js-specific
+JavaScript objects for many of them, documented in libav.types.d.ts.
+
+Further examples are available in the `samples` directory of
+https://github.com/ennuicastr/libavjs-webcodecs-polyfill , which uses libav.js
+along with WebCodecs (or its own polyfill of WebCodecs), so shows how to marry
+these two technologies.
 
 The following additional functionality is provided by libav.js itself, divided
-here by the libav component it belongs to. Please read `libav.types.in.d.ts` for
-type declarations.
+here by the libav component it belongs to. Please read
+[../libav.types.in.d.ts](libav.types.in.d.ts) for type declarations.
 
 
 # AVFormat 
