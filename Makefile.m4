@@ -206,7 +206,7 @@ npm-publish:
 	cd dist/release && unzip libav.js-$(LIBAVJS_VERSION).zip
 	cd dist/release/libav.js-$(LIBAVJS_VERSION) && \
 	  cp ../../../package.json . && \
-	  rm -f dist/*.dbg.* dist/*-av1* dist/*-vp9* && \
+	  rm -f dist/*.dbg.* dist/*-av1* dist/*-vp9* dist/*.asm.mjs && \
 	  npm publish
 	rm -rf dist/release/libav.js-$(LIBAVJS_VERSION)
 	for v in $(RELEASE_VARIANTS); \
