@@ -1,9 +1,9 @@
 libav.js's test suite is in the `tests/` directory. To run the test suite, you
 must first build the `all` variant with `make build-all` (the tests use the all
-variant), then, from the `tests/` directory, run `node node-test.js`.
-Alternatively or additionally, you can expose the entire libav.js directory with
-a web server, then access `tests/web-test.html` to run the same tests in a web
-browser.
+variant), then, from the `tests/` directory, run `node node-test.js` or `node
+node-test.mjs`. Alternatively or additionally, you can expose the entire
+libav.js directory with a web server, then access `tests/web-test.html` to run
+the same tests in a web browser.
 
 The `node-test.js` program takes two optional arguments:
 
@@ -28,9 +28,15 @@ configuration and setup, rather than tests per se.
 
 New tests can be added by creating a file and adding it to suite.json.
 
-Each test is run as an `async function`, with `h` as the harness (defined in
-`tests/harness.js`). The test should throw an exception to indicate failure.
-Tests can output for other reasons using `h.print` and/or `h.printErr`.
+Each test is run as an `async function`, with `h` as the harness. The test
+should throw an exception to indicate failure. Tests can output for other
+reasons using `h.print` and/or `h.printErr`.
+
+## Test harness
+
+The test harness is defined in `harness.js` (pre-ES6) or `harness.mjs` (ES6),
+both of which are generated from `harness.in.js`. Other than whether ES6 modules
+are used, both versions are identical.
 
 ## Using libav.js
 
