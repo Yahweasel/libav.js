@@ -173,6 +173,7 @@
         "ff_free_muxer",
         "ff_init_demuxer_file",
         "ff_write_multi",
+        "ff_read_frame_multi",
         "ff_read_multi",
         "ff_init_filter_graph",
         "ff_filter_multi",
