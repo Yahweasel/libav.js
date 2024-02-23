@@ -431,22 +431,21 @@
                             if (ret.readerDevReady(e.data.fd)) {
                                 worker.postMessage({
                                     c: "libavjs_wait_reader",
-                                    fd: e.data.fd,
-                                    name: e.data.name
+                                    fd: e.data.fd
                                 });
                             } else {
+                                var name = ret.fdName(e.data.fd);
                                 var waiters =
-                                    ret.ff_reader_dev_waiters[e.data.name];
+                                    ret.ff_reader_dev_waiters[name];
                                 if (!waiters) {
                                     waiters =
-                                        ret.ff_reader_dev_waiters[e.data.name] =
+                                        ret.ff_reader_dev_waiters[name] =
                                         [];
                                 }
                                 waiters.push(function() {
                                     worker.postMessage({
                                         c: "libavjs_wait_reader",
-                                        fd: e.data.fd,
-                                        name: e.data.name
+                                        fd: e.data.fd
                                     });
                                 });
                             }

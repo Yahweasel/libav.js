@@ -120,8 +120,9 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/$1/g ; s/@DBG/$2/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5 | cat configs/configs/$(*)/license.js - > $(@)
+	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/$1/g ; s/@DBG/$2/g ; s/\\.worker\\.js/.worker.$5/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5 | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
+	[ "$3" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.worker.$5
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
 	rmdir $(@).d

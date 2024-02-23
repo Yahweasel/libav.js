@@ -140,11 +140,11 @@ a `.dbg.js` equivalent which is only needed if you intend to use debug mode.
  * Plain WebAssembly: Named `libav-<version>-<variant>.wasm.js` and
    `libav-<version>-<variant>.wasm.wasm`. Used in most situations.
 
- * Threaded WebAssembly: Named `libav-<version>-<variant>.thr.js` (and
-   `.thr.wasm`). Used only when threading is supported by the browser *and*
-   `yesthreads` is set. If you don't intend to use threads (set `yesthreads`),
-   it is safe to exclude this. Used only when threads are activated and
-   supported.
+ * Threaded WebAssembly: Named `libav-<version>-<variant>.thr.js`, `.thr.wasm`,
+   and `.thr.worker.js`. Used only when threading is supported by the browser
+   *and* `yesthreads` is set. If you don't intend to use threads (set
+   `yesthreads`), it is safe to exclude this. Used only when threads are
+   activated and supported.
 
 At a minimum, it is usually sufficient to include only the `.js`, `.wasm.js`,
 and `.wasm.wasm` files. To include threads, you must also include `.thr.js` and

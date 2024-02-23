@@ -13,7 +13,7 @@ Index: ffmpeg-6.1.1/libavformat/file.c
  /* Some systems may not have S_ISFIFO */
  #ifndef S_ISFIFO
  #  ifdef S_IFIFO
-@@ -135,12 +139,42 @@ static const AVClass fd_class = {
+@@ -135,12 +139,46 @@ static const AVClass fd_class = {
      .version    = LIBAVUTIL_VERSION_INT,
  };
  
@@ -22,13 +22,17 @@ Index: ffmpeg-6.1.1/libavformat/file.c
 +EM_JS(void, libavjs_wait_reader, (int fd), {
 +    return Asyncify.handleAsync(function() {
 +        return new Promise(function(res) {
++#ifndef __EMSCRIPTEN_PTHREADS__
 +            var name = Module.fdName(fd);
++#else
++            var name = "" + fd;
++#endif
 +            var waiters = Module.ff_reader_dev_waiters[name];
 +            if (!waiters)
 +                waiters = Module.ff_reader_dev_waiters[name] = [];
 +            waiters.push(res);
 +#ifdef __EMSCRIPTEN_PTHREADS__
-+            postMessage({c: "libavjs_wait_reader", fd: fd, name: name});
++            postMessage({c: "libavjs_wait_reader", fd: fd});
 +#endif
 +        });
 +    });

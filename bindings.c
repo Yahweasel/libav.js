@@ -522,8 +522,9 @@ EM_JS(void *, libavjs_main_thread, (void *ignore), {
             }
 
         } else if (ev.data && ev.data.c === "libavjs_wait_reader") {
-            var waiters = Module.ff_reader_dev_waiters[ev.data.name] || [];
-            delete Module.ff_reader_dev_waiters[ev.data.name];
+            var name = "" + ev.data.fd;
+            var waiters = Module.ff_reader_dev_waiters[name] || [];
+            delete Module.ff_reader_dev_waiters[name];
             for (var i = 0; i < waiters.length; i++)
                 waiters[i]();
 
