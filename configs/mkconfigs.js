@@ -23,7 +23,8 @@ const mp3 = ["format-mp3", "decoder-mp3", "encoder-libmp3lame"];
 const vp8 = ["parser-vp8", "codec-libvpx_vp8"];
 const vp9 = ["parser-vp9", "codec-libvpx_vp9"];
 // Hopefully, a faster AV1 encoder will become an option soon...
-const av1 = ["parser-av1", "codec-libaom_av1"];
+const aomav1 = ["parser-av1", "codec-libaom_av1"];
+const aomsvtav1 = ["parser-av1", "decoder-libaom_av1", "encoder-libsvtav1"];
 
 // Misanthropic Patent Extortion Gang (formats/codecs by reprobates)
 const aac = ["parser-aac", "codec-aac"];
@@ -74,7 +75,7 @@ const configsRaw = [
 
     ["vp8-opus", ["format-ogg", "format-webm", opus, "libvpx", vp8], {avf: true}],
     ["vp9-opus", ["format-ogg", "format-webm", opus, "libvpx", vp9], {avf: true}],
-    ["av1-opus", ["format-ogg", "format-webm", opus, av1], {avf: true}],
+    ["av1-opus", ["format-ogg", "format-webm", opus, aomav1], {avf: true}],
 
     // Video reprobate:
     ["h264-aac", ["format-mp4", "format-aac", "format-webm", aac, h264], {avf: true}],
@@ -105,6 +106,9 @@ const configsRaw = [
         // Raw data
         "format-rawvideo", "codec-rawvideo",
         "format-pcm_f32le", "codec-pcm_f32le",
+
+        // AV1 alt
+        aomsvtav1,
 
         // Apple-flavored lossless
         "codec-alac", "codec-prores", "codec-qtrle",

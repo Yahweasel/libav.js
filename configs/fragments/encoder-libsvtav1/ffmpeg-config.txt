@@ -1,0 +1,2 @@
+--enable-libsvtav1
+--enable-encoder=libsvtav1

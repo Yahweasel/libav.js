@@ -1,0 +1,86 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 69a6468..bb87785 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -329,8 +329,8 @@ else()
+     if(MINGW)
+         check_both_flags_add(-mxsave -fno-asynchronous-unwind-tables)
+     else()
+-        check_both_flags_add(-fstack-protector-strong)
+-        check_both_flags_add(PREPEND -fno-stack-clash-protection)
++        #check_both_flags_add(-fstack-protector-strong)
++        #check_both_flags_add(PREPEND -fno-stack-clash-protection)
+     endif()
+     check_both_flags_add(-mno-avx)
+ endif()
+@@ -476,8 +476,8 @@ endif()
+ include_directories(.)
+ 
+ # Find out if we have threading available
+-set(CMAKE_THREAD_PREFER_PTHREADS ON)
+-find_package(Threads)
++#set(CMAKE_THREAD_PREFER_PTHREADS ON)
++#find_package(Threads)
+ 
+ string(TOLOWER "${SANITIZER}" SANITIZER)
+ 
+diff --git a/Source/Lib/Decoder/CMakeLists.txt b/Source/Lib/Decoder/CMakeLists.txt
+index de416b9..bf4d242 100644
+--- a/Source/Lib/Decoder/CMakeLists.txt
++++ b/Source/Lib/Decoder/CMakeLists.txt
+@@ -22,9 +22,10 @@ if(UNIX)
+         if(M_LIB)
+             list(APPEND PLATFORM_LIBS m)
+         endif()
+-        list(APPEND PLATFORM_LIBS Threads::Threads)
++        #list(APPEND PLATFORM_LIBS Threads::Threads)
+     endif()
+-    set(LIBS_PRIVATE "-lpthread -lm")
++    #set(LIBS_PRIVATE "-lpthread -lm")
++    set(LIBS_PRIVATE "-lm")
+ endif()
+ 
+ if(COVERAGE)
+diff --git a/Source/Lib/Decoder/Codec/EbDecHandle.c b/Source/Lib/Decoder/Codec/EbDecHandle.c
+index 62cb554..9da422f 100644
+--- a/Source/Lib/Decoder/Codec/EbDecHandle.c
++++ b/Source/Lib/Decoder/Codec/EbDecHandle.c
+@@ -76,7 +76,7 @@ EbErrorType svt_aom_decode_multiple_obu(EbDecHandle *dec_handle_ptr, uint8_t **d
+                                         uint32_t is_annexb);
+ 
+ static void dec_switch_to_real_time() {
+-#if !defined(_WIN32)
++#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
+     if (!geteuid())
+         (void)pthread_setschedparam(pthread_self(), SCHED_FIFO, &(struct sched_param){.sched_priority = 99});
+ #endif
+diff --git a/Source/Lib/Encoder/CMakeLists.txt b/Source/Lib/Encoder/CMakeLists.txt
+index bc1e91b..91a77d1 100644
+--- a/Source/Lib/Encoder/CMakeLists.txt
++++ b/Source/Lib/Encoder/CMakeLists.txt
+@@ -23,9 +23,10 @@ if(UNIX)
+         if(M_LIB)
+             list(APPEND PLATFORM_LIBS m)
+         endif()
+-        list(APPEND PLATFORM_LIBS Threads::Threads)
++        #list(APPEND PLATFORM_LIBS Threads::Threads)
+     endif()
+-    set(LIBS_PRIVATE "-lpthread -lm")
++    #set(LIBS_PRIVATE "-lpthread -lm")
++    set(LIBS_PRIVATE "-lm")
+ endif()
+ 
+ if(COVERAGE)
+diff --git a/Source/Lib/Encoder/Globals/EbEncHandle.c b/Source/Lib/Encoder/Globals/EbEncHandle.c
+index 119ed92..cce7833 100644
+--- a/Source/Lib/Encoder/Globals/EbEncHandle.c
++++ b/Source/Lib/Encoder/Globals/EbEncHandle.c
+@@ -318,7 +318,7 @@ void svt_aom_init_intra_predictors_internal(void);
+ void svt_av1_init_me_luts(void);
+ 
+ static void enc_switch_to_real_time(){
+-#if !defined(_WIN32)
++#if !defined(_WIN32) && !defined(__EMSCRIPTEN__)
+     if (!geteuid())
+         (void)pthread_setschedparam(
+             pthread_self(), SCHED_FIFO, &(struct sched_param){.sched_priority = 99});

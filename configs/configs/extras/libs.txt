@@ -1,1 +1,3 @@
 build/inst/@TARGET/lib/libz.a
+build/inst/@TARGET/lib/libaom.a
+build/inst/@TARGET/lib/libSvtAv1Enc.a

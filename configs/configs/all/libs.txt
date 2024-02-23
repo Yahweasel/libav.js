@@ -7,3 +7,5 @@ build/inst/@TARGET/lib/libvpx.a
 build/inst/@TARGET/lib/libaom.a
 build/inst/@TARGET/lib/libopenh264.a
 build/inst/@TARGET/lib/libz.a
+build/inst/@TARGET/lib/libaom.a
+build/inst/@TARGET/lib/libSvtAv1Enc.a
