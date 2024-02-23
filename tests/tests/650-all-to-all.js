@@ -129,11 +129,7 @@ for (const cv of encoders.video) {
         break;
 
     // Even in slow-mode, skip VP9 and AV1, because they're just too slow!
-    if (libav.libavjsMode !== "threads" && (cv === "libvpx-vp9" || cv === "libaom-av1"))
-        continue;
-
-    // libsvtav1 seems crashy, even with threads
-    if (cv === "libsvtav1")
+    if (cv === "libvpx-vp9" || cv === "libaom-av1" || cv === "libsvtav1")
         continue;
 
     // Transcode this
