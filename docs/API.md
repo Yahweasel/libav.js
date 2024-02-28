@@ -379,13 +379,22 @@ Copy a frame out of internal libav memory (`frame`) as a libav.js object.
 `ff_copyout_frame` supports video frames, but if you know a frame is a video
 frame, you can bypass the check by using `ff_copyout_frame_video` instead.
 
-The format of video frames as `Frame`s is complicated by how they're stored
-internally in libav. For a simpler, packed format, in which all pixels are in a
-single `Uint8Array`, use `ff_copyout_frame_video_packed`. Or, to copy out video
-frames directly as `ImageData` objects instead of libav.js `Frame`s at all, use
-`ff_copyout_frame_video_imagedata`. `ImageData` is only available in browsers.
-Further, `ff_copyout_frame_video_imagedata` does *not* convert the image format,
-so video frames must already be in RGBA (*not* RGB32!) format to use it.
+When video frames are copied out as `Frame`s, the frame's data is copied as a
+single `Uint8Array`, and the layout of the pixel data within that data is given
+by a `layout` array. Each frame in the layout is an element of the array (a
+PlaneLayout), and each PlaneLayout consists of an `offset` and a `stride`. The
+offset is the location of this plane in the data, and the stride is the number
+of bytes between lines, which can be fairly arbitrary for memory alignment
+reasons.
+
+`ff_copyout_frame_video_packed` copies out the same as `ff_copyout_frame_video`,
+but with all the data packed (i.e., with the minimum possible stride).
+
+To copy out video frames directly as `ImageData` objects instead of libav.js
+`Frame`s at all, use `ff_copyout_frame_video_imagedata`. `ImageData` is only
+available in browsers. Further, `ff_copyout_frame_video_imagedata` does *not*
+convert the image format, so video frames must already be in RGBA (*not* RGB32!)
+format to use it.
 
 The `ff_copyout_frame_ptr` function is also available, and copies the frame into
 a separate `AVFrame` pointer, instead of actually copying out any data. This is

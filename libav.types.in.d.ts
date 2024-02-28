@@ -20,9 +20,8 @@ export interface Frame {
     /**
      * The actual frame data. For non-planar audio data, this is a typed array.
      * For planar audio data, this is an array of typed arrays, one per plane.
-     * For video data, this is an array of planes, where each plane is in turn
-     * an array of typed arrays, one per line (because of how libav buffers
-     * lines).
+     * For video data, this is a single Uint8Array, and its layout is described
+     * by the layout field.
      */
     data: any;
 
@@ -30,6 +29,13 @@ export interface Frame {
      * Sample format or pixel format.
      */
     format: number;
+
+    /**
+     * Video only. Layout of each plane within the data array. `offset` is the
+     * base offset of the plane, and `stride` is what libav calls `linesize`.
+     * This layout format is from WebCodecs.
+     */
+    layout?: {offset: number, stride: number}[];
 
     /**
      * Presentation timestamp for this frame. Units depends on surrounding
@@ -69,6 +75,11 @@ export interface Frame {
      * Video only. Height of frame.
      */
     height?: number;
+
+    /**
+     * Video only. Cropping rectangle of the frame.
+     */
+    crop?: {top: number, bottom: number, left: number, right: number};
 
     /**
      * Video only. Sample aspect ratio (pixel aspect ratio), as a numerator and

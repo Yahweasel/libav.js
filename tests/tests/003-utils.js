@@ -123,11 +123,20 @@ h.utils.videoYUV = async function(file) {
             // Gather together the planar data
             const parts = [];
             for (const frame of file) {
-                let lineWidth = frame.width;
-                for (const plane of frame.data) {
-                    for (const line of plane)
-                        parts.push(line.subarray(0, lineWidth));
-                    lineWidth = frame.width / 2;
+                for (let pi = 0; pi < frame.layout.length; pi++) {
+                    const plane = frame.layout[pi];
+                    let w = frame.width;
+                    let h = frame.height;
+                    if (pi === 1 || pi === 2) {
+                        w >>= 1;
+                        h >>= 1;
+                    }
+                    for (let y = 0; y < h; y++) {
+                        parts.push(frame.data.subarray(
+                            plane.offset + y * plane.stride,
+                            plane.offset + y * plane.stride + w
+                        ));
+                    }
                 }
             }
             file = new Blob(parts);

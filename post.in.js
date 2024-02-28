@@ -1748,16 +1748,24 @@ var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame) {
 
 // Copy out a video frame. Used internally by ff_copyout_frame.
 var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(frame, width) {
-    var data = [];
     var height = AVFrame_height(frame);
     var format = AVFrame_format(frame);
     var desc = av_pix_fmt_desc_get(format);
+    var log2ch = AVPixFmtDescriptor_log2_chroma_h(desc);
+    var layout = [];
     var transfer = [];
     var outFrame = {
-        data: data,
+        data: null,
+        layout: layout,
         libavjsTransfer: transfer,
         width: width,
         height: height,
+        crop: {
+            top: AVFrame_crop_top(frame),
+            bottom: AVFrame_crop_bottom(frame),
+            left: AVFrame_crop_left(frame),
+            right: AVFrame_crop_right(frame)
+        },
         format: AVFrame_format(frame),
         key_frame: AVFrame_key_frame(frame),
         pict_type: AVFrame_pict_type(frame),
@@ -1769,21 +1777,38 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(fram
         ]
     };
 
-    for (var i = 0; i < 8 /* AV_NUM_DATA_POINTERS */; i++) {
-        var linesize = AVFrame_linesize_a(frame, i);
+    // Figure out the data range
+    var dataLo = 1/0;
+    var dataHi = 0;
+    for (var p = 0; p < 8 /* AV_NUM_DATA_POINTERS */; p++) {
+        var linesize = AVFrame_linesize_a(frame, p);
         if (!linesize)
             break;
-        var inData = AVFrame_data_a(frame, i);
-        var plane = [];
+        var plane = AVFrame_data_a(frame, p);
+        if (plane < dataLo)
+            dataLo = plane;
         var h = height;
-        if (i === 1 || i === 2)
-            h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
-        for (var y = 0; y < h; y++) {
-            var line = copyout_u8(inData + y * linesize, linesize);
-            plane.push(line);
-            transfer.push(line.buffer);
-        }
-        data.push(plane);
+        if (p === 1 || p === 2)
+            h >>= log2ch;
+        plane += linesize * h;
+        if (plane > dataHi)
+            dataHi = plane;
+    }
+
+    // Copy out that segment of data
+    outFrame.data = Module.HEAPU8.slice(dataLo, dataHi);
+    transfer.push(outFrame.data.buffer);
+
+    // And describe the layout
+    for (var p = 0; p < 8; p++) {
+        var linesize = AVFrame_linesize_a(frame, p);
+        if (!linesize)
+            break;
+        var plane = AVFrame_data_a(frame, p);
+        layout.push({
+            offset: plane - dataLo,
+            stride: linesize
+        });
     }
 
     return outFrame;
@@ -1825,7 +1850,7 @@ var ff_frame_video_packed_size = Module.ff_frame_video_packed_size = function(fr
 
 /* Copy out just the packed data from this frame, into the given buffer. Used
  * internally. */
-var ff_copyout_frame_data_packed = Module.ff_copyout_frame_data_packed = function(data, frame) {
+function ff_copyout_frame_data_packed(data, layout, frame) {
     var width = AVFrame_width(frame);
     var height = AVFrame_height(frame);
     var format = AVFrame_format(frame);
@@ -1849,6 +1874,10 @@ var ff_copyout_frame_data_packed = Module.ff_copyout_frame_data_packed = functio
             w >>= AVPixFmtDescriptor_log2_chroma_w(desc);
             h >>= AVPixFmtDescriptor_log2_chroma_h(desc);
         }
+        layout.push({
+            offset: dIdx,
+            stride: w
+        });
         for (var y = 0; y < h; y++) {
             var line = inData + y * linesize;
             data.set(
@@ -1867,7 +1896,8 @@ var ff_copyout_frame_data_packed = Module.ff_copyout_frame_data_packed = functio
 /// @types ff_copyout_frame_video_packed@sync(frame: number): @promise@Frame@
 var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = function(frame) {
     var data = new Uint8Array(ff_frame_video_packed_size(frame));
-    ff_copyout_frame_data_packed(data, frame);
+    var layout = [];
+    ff_copyout_frame_data_packed(data, layout, frame);
 
     var outFrame = {
         data: data,
@@ -2048,6 +2078,16 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
         AVFrame_sample_aspect_ratio_s(framePtr, frame.sample_aspect_ratio[0],
             frame.sample_aspect_ratio[1]);
     }
+    if ("crop" in frame) {
+        AVFrame_crop_top_s(framePtr, frame.crop.top);
+        AVFrame_crop_bottom_s(framePtr, frame.crop.bottom);
+        AVFrame_crop_left_s(framePtr, frame.crop.left);
+        AVFrame_crop_right_s(framePtr, frame.crop.right);
+    }
+
+    var desc = av_pix_fmt_desc_get(frame.format);
+    var log2cw = AVPixFmtDescriptor_log2_chroma_w(desc);
+    var log2ch = AVPixFmtDescriptor_log2_chroma_h(desc);
 
     // We may or may not need to actually allocate
     if (av_frame_make_writable(framePtr) < 0) {
@@ -2056,14 +2096,53 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
             throw new Error("Failed to allocate frame buffers: " + ff_error(ret));
     }
 
+    // If layout is not provided, assume packed
+    var layout = frame.layout;
+    if (!layout) {
+        layout = [];
+
+        // VERY simple bpp, assuming all components are 8-bit
+        var bpp = 1;
+        if (!(AVPixFmtDescriptor_flags(desc) & 0x10) /* planar */)
+            bpp *= AVPixFmtDescriptor_nb_components(desc);
+
+        var off = 0;
+        for (var p = 0; p < 8 /* AV_NUM_DATA_POINTERS */; p++) {
+            var linesize = AVFrame_linesize_a(framePtr, p);
+            if (!linesize)
+                break;
+            var w = frame.width;
+            var h = frame.height;
+            if (p === 1 || p === 2) {
+                w >>= log2cw;
+                h >>= log2ch;
+            }
+            layout.push({
+                offset: off,
+                stride: w * bpp
+            });
+            off += w * h * bpp;
+        }
+    }
+
     // Copy it in
-    for (var i = 0; i < 8 /* AV_NUM_DATA_POINTERS */; i++) {
-        var inData = frame.data[i];
-        if (inData) {
-            var linesize = AVFrame_linesize_a(framePtr, i);
-            var data = AVFrame_data_a(framePtr, i);
-            for (var y = 0; y < inData.length; y++)
-                copyin_u8(data + y * linesize, inData[y].subarray(0, linesize));
+    for (var p = 0; p < layout.length; p++) {
+        var lplane = layout[p];
+        var linesize = AVFrame_linesize_a(framePtr, p);
+        var data = AVFrame_data_a(framePtr, p);
+        var h = frame.height;
+        if (p === 1 || p === 2)
+            h >>= log2ch;
+        var ioff = lplane.offset;
+        var ooff = 0;
+        var stride = Math.min(lplane.stride, linesize);
+        for (var y = 0; y < h; y++) {
+            copyin_u8(
+                data + ooff,
+                frame.data.subarray(ioff, ioff + stride)
+            );
+            ooff += linesize;
+            ioff += lplane.stride;
         }
     }
 };
