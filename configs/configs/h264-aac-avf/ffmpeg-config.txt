@@ -26,5 +26,5 @@
 --enable-filter=pan --enable-filter=amix --enable-filter=volume
 --enable-filter=anull
 --enable-filter=scale
---enable-filter=crop --enable-filter=fps --enable-filter=split
---enable-filter=trim
+--enable-filter=crop --enable-filter=fps --enable-filter=null
+--enable-filter=split --enable-filter=trim
