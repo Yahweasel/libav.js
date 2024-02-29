@@ -21,11 +21,11 @@
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix
---enable-filter=apad --enable-filter=asplit --enable-filter=atempo
---enable-filter=atrim --enable-filter=bandpass --enable-filter=bandreject
---enable-filter=dynaudnorm --enable-filter=equalizer --enable-filter=loudnorm
---enable-filter=pan --enable-filter=amix --enable-filter=volume
---enable-filter=anull
+--enable-filter=apad --enable-filter=asettb --enable-filter=asplit
+--enable-filter=atempo --enable-filter=atrim --enable-filter=bandpass
+--enable-filter=bandreject --enable-filter=dynaudnorm --enable-filter=equalizer
+--enable-filter=loudnorm --enable-filter=pan --enable-filter=amix
+--enable-filter=volume --enable-filter=anull
 --enable-ffmpeg --enable-ffprobe
 --enable-libvorbis
 --enable-decoder=libvorbis
@@ -50,7 +50,7 @@
 --enable-encoder=libvpx_vp8
 --enable-filter=scale
 --enable-filter=crop --enable-filter=fps --enable-filter=null
---enable-filter=split --enable-filter=trim
+--enable-filter=settb --enable-filter=split --enable-filter=trim
 --enable-parser=vp9
 --enable-libvpx
 --enable-decoder=libvpx_vp9
