@@ -18,20 +18,21 @@ VERSION="$(make print-version)"
 make extract
 make dist/libav-$VERSION-all.wasm.js -j9
 cd configs
-test -e one-cli || ./mkconfigs.js --create-ones
+test -e configs/one-cli || ./mkconfigs.js --create-ones
 
+cd configs
 targets=dist/libav-$VERSION-empty.wasm.js
 for i in empty one-*
 do
     targets="$targets dist/libav-$VERSION-$i.wasm.js"
 done
 
-cd ..
+cd ../..
 make $targets -j9 -k
 
-cd configs
+cd configs/configs
 for i in empty one-*
 do
     printf '%s,' "$i"
-    wc -c < ../dist/libav-$VERSION-$i.wasm.wasm
-done | sed 's/^one-//' > ../tools/fragment-sizes.csv
+    wc -c < ../../dist/libav-$VERSION-$i.wasm.wasm
+done | sed 's/^one-//' > ../../tools/fragment-sizes.csv
