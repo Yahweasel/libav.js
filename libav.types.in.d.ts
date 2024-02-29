@@ -14,9 +14,20 @@
  */
 
 /**
+ * Things in libav.js with Worker transfer characteristics.
+ */
+export interface LibAVTransferable {
+    /**
+     * The elements to pass as transfers when passing this object to/from
+     * workers.
+     */
+    libavjsTransfer?: Transferable[];
+}
+
+/**
  * Frames, as taken/given by libav.js.
  */
-export interface Frame {
+export interface Frame extends LibAVTransferable {
     /**
      * The actual frame data. For non-planar audio data, this is a typed array.
      * For planar audio data, this is an array of typed arrays, one per plane.
@@ -101,7 +112,7 @@ export interface Frame {
 /**
  * Packets, as taken/given by libav.js.
  */
-export interface Packet {
+export interface Packet extends LibAVTransferable {
     /**
      * The actual data represented by this packet.
      */

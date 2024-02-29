@@ -349,11 +349,16 @@
                     // And passthru functions
                     ret.c = function() {
                         var msg = Array.prototype.slice.call(arguments);
+                        var transfer = [];
+                        for (var i = 0; i < msg.length; i++) {
+                            if (msg[i] && msg[i].libavjsTransfer)
+                                transfer.push.apply(transfer, msg[i].libavjs_create_main_thread);
+                        }
                         return new Promise(function(res, rej) {
                             var id = ret.on++;
                             msg = [id].concat(msg);
                             ret.handlers[id] = [res, rej];
-                            ret.worker.postMessage(msg);
+                            ret.worker.postMessage(msg, transfer);
                         });
                     };
                     function onworkermessage(e) {

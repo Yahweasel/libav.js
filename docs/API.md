@@ -104,6 +104,24 @@ here by the libav component it belongs to. Please read
 [../libav.types.in.d.ts](libav.types.in.d.ts) for type declarations.
 
 
+# Data types
+
+libav frames and packets can be represented as numbers, pointers to actual
+`AVFrame` or `AVPacket` instances, but most functions will instead copy out
+their data into libav.js `Frame` or `Packet` objects.
+
+One important similarity in `Frame` and `Packet` objects is the
+`libavjsTransfer` member. If you send a `Frame` or `Packet` into libav.js (and
+it happens to be running a worker), then any ArrayBuffers given in the
+`libavjsTransfer` array will be transferred. By default, all included
+ArrayBuffers are in `libavjsTransfer`, so all will be transferred. This works in
+both directions, so if you get a `Frame` from libav.js and then send it back
+again, you will lose access to its underlying data.
+
+For the rest of the details of these types, see the TypeScript type
+documentation.
+
+
 # AVFormat 
 
 ## Muxing
