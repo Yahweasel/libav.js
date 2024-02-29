@@ -1,7 +1,7 @@
 {
   "name": "libav.js",
-  "//version": "The major and minor are our own versioning, while the revision is FFmpeg's major. When updating the version, make sure you update it here (both in version and main), in the Makefile.m4 and Makefile, and in the README.",
-  "version": "5.0pre1",
+  "//version": "The major and minor are our own versioning, while the revision is FFmpeg's major. When updating the version, make sure you update it here, in the Makefile.m4 and Makefile, and in the README.",
+  "version": "5.0.6",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
   "main": "dist/libav-default.js",
   "exports": {
