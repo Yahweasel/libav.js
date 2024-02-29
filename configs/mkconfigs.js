@@ -107,9 +107,6 @@ const configsRaw = [
         "format-rawvideo", "codec-rawvideo",
         "format-pcm_f32le", "codec-pcm_f32le",
 
-        // AV1 alt
-        aomsvtav1,
-
         // Apple-flavored lossless
         "codec-alac", "codec-prores", "codec-qtrle",
 

@@ -1,0 +1,5 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-zlib
+--enable-decoder=png
+--enable-encoder=png

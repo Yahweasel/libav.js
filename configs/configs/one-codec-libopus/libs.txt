@@ -1,0 +1,1 @@
+build/inst/@TARGET/lib/libopus.a

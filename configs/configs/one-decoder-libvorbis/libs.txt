@@ -1,0 +1,3 @@
+build/inst/@TARGET/lib/libvorbis.a
+build/inst/@TARGET/lib/libvorbisenc.a
+build/inst/@TARGET/lib/libogg.a

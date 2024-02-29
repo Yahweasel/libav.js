@@ -1,0 +1,4 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-libvpx
+--enable-encoder=libvpx_vp9

@@ -1,0 +1,5 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-decoder=prores
+--enable-bsf=prores_metadata
+--enable-encoder=prores

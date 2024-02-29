@@ -1,0 +1,4 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-libopenh264
+--enable-decoder=libopenh264

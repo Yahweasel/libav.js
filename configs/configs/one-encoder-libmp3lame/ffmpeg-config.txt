@@ -1,0 +1,4 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-libmp3lame
+--enable-encoder=libmp3lame

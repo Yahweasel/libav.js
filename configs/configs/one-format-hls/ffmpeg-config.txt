@@ -1,0 +1,4 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=hls
+--enable-muxer=hls

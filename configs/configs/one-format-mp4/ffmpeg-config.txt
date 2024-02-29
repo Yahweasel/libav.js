@@ -1,0 +1,6 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-demuxer=mov
+--enable-muxer=ipod
+--enable-muxer=mov
+--enable-muxer=mp4

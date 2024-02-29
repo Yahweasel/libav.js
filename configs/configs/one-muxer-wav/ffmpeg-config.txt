@@ -1,0 +1,4 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
+--enable-muxer=wav

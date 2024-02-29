@@ -1,0 +1,5 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-libvorbis
+--enable-decoder=libvorbis
+--enable-encoder=libvorbis

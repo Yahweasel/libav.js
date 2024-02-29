@@ -1,0 +1,7 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-libaom
+--enable-decoder=libaom_av1
+--enable-bsf=av1_metadata
+--enable-bsf=extract_extradata
+--enable-encoder=libaom_av1
