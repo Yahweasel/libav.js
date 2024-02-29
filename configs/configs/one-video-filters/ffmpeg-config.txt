@@ -1,4 +1,0 @@
---enable-protocol=data --enable-protocol=file
---enable-filter=aresample
---enable-filter=crop --enable-filter=fps --enable-filter=null
---enable-filter=settb --enable-filter=split --enable-filter=trim

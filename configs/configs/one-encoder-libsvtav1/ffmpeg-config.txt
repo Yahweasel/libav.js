@@ -1,4 +1,0 @@
---enable-protocol=data --enable-protocol=file
---enable-filter=aresample
---enable-libsvtav1
---enable-encoder=libsvtav1

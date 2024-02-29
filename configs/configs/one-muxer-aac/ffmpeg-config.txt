@@ -1,2 +1,0 @@
---enable-protocol=data --enable-protocol=file
---enable-filter=aresample

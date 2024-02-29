@@ -1,5 +1,0 @@
---enable-protocol=data --enable-protocol=file
---enable-filter=aresample
---enable-libopus
---enable-decoder=libopus
---enable-bsf=opus_metadata
