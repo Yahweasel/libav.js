@@ -99,19 +99,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_demux.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_filter.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_hw.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_mux.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_mux_init.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffmpeg_opt.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/ffprobe.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/cmdutils.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/objpool.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/opt_common.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/sync_queue.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/thread_queue.o \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/*.o \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/libavdevice/libavdevice.a \
 		'` \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/*/lib*.a \
