@@ -2074,16 +2074,17 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, fr
         if (key in frame)
             CAccessors["AVFrame_" + key + "_s"](framePtr, frame[key]);
     });
+
     if ("sample_aspect_ratio" in frame) {
         AVFrame_sample_aspect_ratio_s(framePtr, frame.sample_aspect_ratio[0],
             frame.sample_aspect_ratio[1]);
     }
-    if ("crop" in frame) {
-        AVFrame_crop_top_s(framePtr, frame.crop.top);
-        AVFrame_crop_bottom_s(framePtr, frame.crop.bottom);
-        AVFrame_crop_left_s(framePtr, frame.crop.left);
-        AVFrame_crop_right_s(framePtr, frame.crop.right);
-    }
+
+    var crop = frame.crop || {top: 0, bottom: 0, left: 0, right: 0};
+    AVFrame_crop_top_s(framePtr, crop.top);
+    AVFrame_crop_bottom_s(framePtr, crop.bottom);
+    AVFrame_crop_left_s(framePtr, crop.left);
+    AVFrame_crop_right_s(framePtr, crop.right);
 
     var desc = av_pix_fmt_desc_get(frame.format);
     var log2cw = AVPixFmtDescriptor_log2_chroma_w(desc);
