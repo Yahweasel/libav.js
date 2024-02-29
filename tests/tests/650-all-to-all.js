@@ -48,12 +48,7 @@ async function stdoutFile(libav) {
 }
 
 async function getStdout(libav) {
-    try {
     return await libav.readFile("stdout", {encoding: "utf8"});
-    } catch (ex) {
-        console.log(ex);
-        throw ex;
-    }
 }
 
 // First, we need a list of all encoders

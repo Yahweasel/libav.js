@@ -53,7 +53,6 @@ let succeeded = false;
 try {
     let [, c, pkt, frame] =
         await libav.ff_init_decoder(stream.codec_id, stream.codecpar);
-    console.error(c);
 
     let [res, packets] = await libav.ff_read_frame_multi(fmt_ctx, pkt);
 
