@@ -316,7 +316,7 @@ double that.
 You can estimate the size of variants based on the size of the constituent
 fragments. As of version 4.10.6.1.1, an empty build is approximately 589KiB
 (WebAssembly). The sizes of each additional fragment can be found in
-[fragment-sizes.csv](tools/fragment-sizes.csv). The data in that CSV file can be
+[fragment-sizes.csv](docs/fragment-sizes.csv). The data in that CSV file can be
 recreated by `tools/fragment-sizes.sh`, but note that the CSV file in the
 repository is after further processing (in particular, normalizing to KiB and
 subtracting away the empty size).

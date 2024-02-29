@@ -35,4 +35,4 @@ for i in empty one-*
 do
     printf '%s,' "$i"
     wc -c < ../../dist/libav-$VERSION-$i.wasm.wasm
-done | sed 's/^one-//' > ../../tools/fragment-sizes.csv
+done | sed 's/^one-//' > ../../docs/fragment-sizes.csv
