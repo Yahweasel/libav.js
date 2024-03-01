@@ -200,7 +200,7 @@ npm-publish:
 	rm -rf dist/release/libav.js-$(LIBAVJS_VERSION)
 	for v in $(RELEASE_VARIANTS); \
 	do \
-		( cd dist/release/libav.js-$(LIBAVJS_VERSION)-$$v && npm publish ) \
+		( cd dist/release/libav.js-$(LIBAVJS_VERSION)-$$v && npm publish --access=public ) \
 	done
 
 halfclean:
