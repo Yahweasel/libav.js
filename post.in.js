@@ -1933,7 +1933,8 @@ var ff_copyout_frame_video_imagedata = Module.ff_copyout_frame_video_imagedata =
     var width = AVFrame_width(frame);
     var height = AVFrame_height(frame);
     var id = new ImageData(width, height);
-    ff_copyout_frame_data_packed(id.data, frame);
+    var layout = [];
+    ff_copyout_frame_data_packed(id.data, layout, frame);
     id.libavjsTransfer = [id.data.buffer];
     return id;
 };
