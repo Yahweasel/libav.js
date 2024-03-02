@@ -479,6 +479,7 @@ release: extract
 		$(MAKE) build-$$v; \
 		$(MAKE) release-$$v; \
 		cp dist/libav-$(LIBAVJS_VERSION)-$$v.* \
+			dist/libav-$$v.* \
 			dist/release/libav.js-$(LIBAVJS_VERSION)/dist; \
 	done
 	cp dist/libav.types.d.ts dist/release/libav.js-$(LIBAVJS_VERSION)/dist/
