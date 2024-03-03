@@ -186,6 +186,7 @@ release-%: dist/release/libav.js-$(LIBAVJS_VERSION)-%
 dist/release/libav.js-$(LIBAVJS_VERSION)-%: build-%
 	mkdir -p $(@)/dist
 	cp dist/libav-$(LIBAVJS_VERSION)-$(*).* \
+		dist/libav-$(*).* \
 		dist/libav.types.d.ts \
 		$(@)/dist
 	rm -f $(@)/dist/*.dbg.*
