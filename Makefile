@@ -138,7 +138,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/asm/g ; s/@DBG//g ; s/\\.worker\\.js/.worker.js/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/asm/g ; \
+		s/@DBG//g ; \
+		s/@JS/js/g ; \
+		s/\\.worker\\.js/.worker.js/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).asm.worker.js
 	-chmod a-x $(@).d/*.wasm
@@ -165,7 +173,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/asm/g ; s/@DBG//g ; s/\\.worker\\.js/.worker.mjs/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/asm/g ; \
+		s/@DBG//g ; \
+		s/@JS/mjs/g ; \
+		s/\\.worker\\.js/.worker.mjs/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).asm.worker.mjs
 	-chmod a-x $(@).d/*.wasm
@@ -192,7 +208,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/asm/g ; s/@DBG/dbg./g ; s/\\.worker\\.js/.worker.js/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/asm/g ; \
+		s/@DBG/dbg./g ; \
+		s/@JS/js/g ; \
+		s/\\.worker\\.js/.worker.js/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.worker.js
 	-chmod a-x $(@).d/*.wasm
@@ -219,7 +243,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/asm/g ; s/@DBG/dbg./g ; s/\\.worker\\.js/.worker.mjs/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/asm/g ; \
+		s/@DBG/dbg./g ; \
+		s/@JS/mjs/g ; \
+		s/\\.worker\\.js/.worker.mjs/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.worker.mjs
 	-chmod a-x $(@).d/*.wasm
@@ -247,7 +279,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/wasm/g ; s/@DBG//g ; s/\\.worker\\.js/.worker.js/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/wasm/g ; \
+		s/@DBG//g ; \
+		s/@JS/js/g ; \
+		s/\\.worker\\.js/.worker.js/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).wasm.worker.js
 	-chmod a-x $(@).d/*.wasm
@@ -274,7 +314,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/wasm/g ; s/@DBG//g ; s/\\.worker\\.js/.worker.mjs/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/wasm/g ; \
+		s/@DBG//g ; \
+		s/@JS/mjs/g ; \
+		s/\\.worker\\.js/.worker.mjs/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).wasm.worker.mjs
 	-chmod a-x $(@).d/*.wasm
@@ -301,7 +349,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/wasm/g ; s/@DBG/dbg./g ; s/\\.worker\\.js/.worker.js/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/wasm/g ; \
+		s/@DBG/dbg./g ; \
+		s/@JS/js/g ; \
+		s/\\.worker\\.js/.worker.js/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.worker.js
 	-chmod a-x $(@).d/*.wasm
@@ -328,7 +384,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/wasm/g ; s/@DBG/dbg./g ; s/\\.worker\\.js/.worker.mjs/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/wasm/g ; \
+		s/@DBG/dbg./g ; \
+		s/@JS/mjs/g ; \
+		s/\\.worker\\.js/.worker.mjs/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs
 	[ "base" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.worker.mjs
 	-chmod a-x $(@).d/*.wasm
@@ -356,7 +420,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thr/g ; s/@DBG//g ; s/\\.worker\\.js/.worker.js/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/thr/g ; \
+		s/@DBG//g ; \
+		s/@JS/js/g ; \
+		s/\\.worker\\.js/.worker.js/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js
 	[ "thr" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).thr.worker.js
 	-chmod a-x $(@).d/*.wasm
@@ -383,7 +455,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thr/g ; s/@DBG//g ; s/\\.worker\\.js/.worker.mjs/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/thr/g ; \
+		s/@DBG//g ; \
+		s/@JS/mjs/g ; \
+		s/\\.worker\\.js/.worker.mjs/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs
 	[ "thr" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).thr.worker.mjs
 	-chmod a-x $(@).d/*.wasm
@@ -410,7 +490,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thr/g ; s/@DBG/dbg./g ; s/\\.worker\\.js/.worker.js/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/thr/g ; \
+		s/@DBG/dbg./g ; \
+		s/@JS/js/g ; \
+		s/\\.worker\\.js/.worker.js/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js
 	[ "thr" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.worker.js
 	-chmod a-x $(@).d/*.wasm
@@ -437,7 +525,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
-	sed 's/^\/\/.*include:.*// ; '"s/@VER/$(LIBAVJS_VERSION)/g ; s/@TARGET/thr/g ; s/@DBG/dbg./g ; s/\\.worker\\.js/.worker.mjs/g" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs | cat configs/configs/$(*)/license.js - > $(@)
+	sed " \
+		s/^\/\/.*include:.*// ; \
+		s/@VER/$(LIBAVJS_VERSION)/g ; \
+		s/@VARIANT/$(*)/g ; \
+		s/@TARGET/thr/g ; \
+		s/@DBG/dbg./g ; \
+		s/@JS/mjs/g ; \
+		s/\\.worker\\.js/.worker.mjs/g \
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs
 	[ "thr" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.worker.mjs
 	-chmod a-x $(@).d/*.wasm

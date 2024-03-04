@@ -16,7 +16,7 @@
 // Import LibAV.base if applicable
 if (typeof _scriptDir === "undefined") {
     if (typeof LibAV === "object" && LibAV && LibAV.base)
-        _scriptDir = LibAV.base + "/";
+        _scriptDir = LibAV.base + "/libav-@VER-@VARIANT.@DBG@TARGET.@JS";
     else if (typeof self && self && self.location)
         _scriptDir = self.location.href;
 }
