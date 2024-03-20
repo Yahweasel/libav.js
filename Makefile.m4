@@ -16,7 +16,6 @@ OPTFLAGS=-Oz
 THRFLAGS=-pthread
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
-	--memory-init-file 0 \
 	--pre-js pre.js \
 	--post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
@@ -114,11 +113,9 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		s/@VARIANT/$(*)/g ; \
 		s/@TARGET/$1/g ; \
 		s/@DBG/$2/g ; \
-		s/@JS/$5/g ; \
-		s/\\.worker\\.js/.worker.$5/g \
+		s/@JS/$5/g \
 	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5 | cat configs/configs/$(*)/license.js - > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
-	[ "$3" != "thr" ] || mv $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.worker.js dist/libav-$(LIBAVJS_VERSION)-$(*).$2$1.worker.$5
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
 	rmdir $(@).d
