@@ -17,6 +17,12 @@ configuration fragments to include. The order of the fragments in the array is
 essentially irrelevant (it will affect the order that things are built in, and
 the order that license text appears in headers, but nothing else).
 
+If there's a built-in variant that's close to what you need, use its
+`config.json` file as a starting point for the fragments argument. e.g.,
+`configs/default/config.json` contains `["format-ogg", "format-webm",
+"parser-opus", "codec-libopus", "format-flac", "parser-flac", "codec-flac",
+"format-wav", "audio-filters"]`.
+
 Most configuration fragments have FFmpeg-specific, but otherwise predictable,
 names. For instance, `codec-libopus` enables the libopus codec. Fragments can be
 named `protocol-*`, `format-*`, `demuxer-*`, `muxer-*`, `codec-*`, `decoder-*`,

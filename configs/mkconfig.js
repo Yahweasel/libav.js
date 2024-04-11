@@ -100,6 +100,9 @@ function addFragment(out, part) {
 
 
 (function() {
+    // Save the parts list
+    fs.writeFileSync(`configs/${name}/config.json`, JSON.stringify(parts) + "\n");
+
     // Open the files
     const out = {};
     for (const file of files.concat(["deps.mk"]))

@@ -1,0 +1,1 @@
+["format-image2","demuxer-image_gif_pipe","demuxer-image_jpeg_pipe","demuxer-image_png_pipe","parser-gif","codec-gif","parser-mjpeg","codec-mjpeg","parser-png","codec-png","parser-webp","decoder-webp","format-rawvideo","codec-rawvideo","format-pcm_f32le","codec-pcm_f32le","codec-alac","codec-prores","codec-qtrle","format-hls","protocol-jsfetch"]

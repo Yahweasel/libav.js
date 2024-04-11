@@ -36,7 +36,6 @@ const configsRaw = [
     ["default", [
         "format-ogg", "format-webm",
         opus, flac, "format-wav",
-        "format-wav",
         "audio-filters"
     ], {cli: true}],
 
