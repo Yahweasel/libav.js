@@ -323,7 +323,27 @@ B(int, sample_rate)
 #undef B
 
 CHL(AVCodecParameters)
-#undef CHL
+
+int AVCodecParameters_framerate_num(AVCodecParameters *a) {
+    return a->framerate.num;
+}
+
+int AVCodecParameters_framerate_den(AVCodecParameters *a) {
+    return a->framerate.den;
+}
+
+void AVCodecParameters_framerate_num_s(AVCodecParameters *a, int b) {
+    a->framerate.num = b;
+}
+
+void AVCodecParameters_framerate_den_s(AVCodecParameters *a, int b) {
+    a->framerate.den = b;
+}
+
+void AVCodecParameters_framerate_s(AVCodecParameters *a, int n, int d) {
+    a->framerate.num = n;
+    a->framerate.den = d;
+}
 
 /* AVPacket */
 #define B(type, field) A(AVPacket, type, field)
