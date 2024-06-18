@@ -45,6 +45,13 @@
     type struc ## _ ## field ## _a(struc *a, size_t c) { return a->field[c]; } \
     void struc ## _ ## field ## _a_s(struc *a, size_t c, type b) { ((type *) a->field)[c] = b; }
 
+#define RAT(struc, field) \
+    int struc ## _ ## field ## _num(struc *a) { return a->field.num; } \
+    int struc ## _ ## field ## _den(struc *a) { return a->field.den; } \
+    void struc ## _ ## field ## _num_s(struc *a, int b) { a->field.num = b; } \
+    void struc ## _ ## field ## _den_s(struc *a, int b) { a->field.den = b; } \
+    void struc ## _ ## field ## _s(struc *a, int n, int d) { a->field.num = n; a->field.den = d; }
+
 
 /* Not part of libav, just used to ensure a round trip to C for async purposes */
 void ff_nothing() {}
@@ -75,6 +82,9 @@ B(int, width)
 #undef B
 #undef BL
 #undef BA
+
+RAT(AVFrame, sample_aspect_ratio)
+RAT(AVFrame, time_base)
 
 /* Either way we expose the old channel layout API, but if the new channel
  * layout API is available, we use it */
@@ -162,18 +172,6 @@ void struc ##_channel_layouthi_s(struc *a, uint32_t b) { \
 
 CHL(AVFrame)
 
-int AVFrame_sample_aspect_ratio_num(AVFrame *a) {
-    return a->sample_aspect_ratio.num;
-}
-
-int AVFrame_sample_aspect_ratio_den(AVFrame *a) {
-    return a->sample_aspect_ratio.den;
-}
-
-void AVFrame_sample_aspect_ratio_s(AVFrame *a, int n, int d) {
-    a->sample_aspect_ratio.num = n;
-    a->sample_aspect_ratio.den = d;
-}
 
 /* AVPixFmtDescriptor */
 #define B(type, field) A(AVPixFmtDescriptor, type, field)
@@ -242,54 +240,11 @@ B(int, width)
 #undef B
 #undef BL
 
+RAT(AVCodecContext, framerate)
+RAT(AVCodecContext, sample_aspect_ratio)
+RAT(AVCodecContext, time_base)
 CHL(AVCodecContext)
 
-int AVCodecContext_framerate_num(AVCodecContext *a) {
-    return a->framerate.num;
-}
-
-int AVCodecContext_framerate_den(AVCodecContext *a) {
-    return a->framerate.den;
-}
-
-void AVCodecContext_framerate_num_s(AVCodecContext *a, int b) {
-    a->framerate.num = b;
-}
-
-void AVCodecContext_framerate_den_s(AVCodecContext *a, int b) {
-    a->framerate.den = b;
-}
-
-void AVCodecContext_framerate_s(AVCodecContext *a, int n, int d) {
-    a->framerate.num = n;
-    a->framerate.den = d;
-}
-
-int AVCodecContext_sample_aspect_ratio_num(AVCodecContext *a) {
-    return a->sample_aspect_ratio.num;
-}
-
-int AVCodecContext_sample_aspect_ratio_den(AVCodecContext *a) {
-    return a->sample_aspect_ratio.den;
-}
-
-void AVCodecContext_sample_aspect_ratio_num_s(AVCodecContext *a, int b) {
-    a->sample_aspect_ratio.num = b;
-}
-
-void AVCodecContext_sample_aspect_ratio_den_s(AVCodecContext *a, int b) {
-    a->sample_aspect_ratio.den = b;
-}
-
-void AVCodecContext_sample_aspect_ratio_s(AVCodecContext *a, int n, int d) {
-    a->sample_aspect_ratio.num = n;
-    a->sample_aspect_ratio.den = d;
-}
-
-void AVCodecContext_time_base_s(AVCodecContext *a, int n, int d) {
-    a->time_base.num = n;
-    a->time_base.den = d;
-}
 
 /* AVCodecDescriptor */
 #define B(type, field) A(AVCodecDescriptor, type, field)
@@ -322,28 +277,9 @@ B(enum AVChromaLocation, chroma_location)
 B(int, sample_rate)
 #undef B
 
+RAT(AVCodecParameters, framerate)
 CHL(AVCodecParameters)
 
-int AVCodecParameters_framerate_num(AVCodecParameters *a) {
-    return a->framerate.num;
-}
-
-int AVCodecParameters_framerate_den(AVCodecParameters *a) {
-    return a->framerate.den;
-}
-
-void AVCodecParameters_framerate_num_s(AVCodecParameters *a, int b) {
-    a->framerate.num = b;
-}
-
-void AVCodecParameters_framerate_den_s(AVCodecParameters *a, int b) {
-    a->framerate.den = b;
-}
-
-void AVCodecParameters_framerate_s(AVCodecParameters *a, int n, int d) {
-    a->framerate.num = n;
-    a->framerate.den = d;
-}
 
 /* AVPacket */
 #define B(type, field) A(AVPacket, type, field)
@@ -360,6 +296,8 @@ B(int, size)
 B(int, stream_index)
 #undef B
 #undef BL
+
+RAT(AVPacket, time_base)
 
 
 /* AVPacketSideData uses special accessors because it's usually an array */
@@ -417,18 +355,7 @@ BL(int64_t, duration)
 #undef B
 #undef BL
 
-int AVStream_time_base_num(AVStream *a) {
-    return a->time_base.num;
-}
-
-int AVStream_time_base_den(AVStream *a) {
-    return a->time_base.den;
-}
-
-void AVStream_time_base_s(AVStream *a, int n, int d) {
-    a->time_base.num = n;
-    a->time_base.den = d;
-}
+RAT(AVStream, time_base)
 
 int avformat_seek_file_min(
     AVFormatContext *s, int stream_index, int64_t ts, int flags

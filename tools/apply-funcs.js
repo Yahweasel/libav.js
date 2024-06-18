@@ -25,8 +25,10 @@ function s(x) {
 function accessors(f) {
     funcs.accessors.forEach((type) => {
         type[1].forEach((field) => {
-            if (typeof field === "object")
+            if (field && field.array)
                 f(type[0] + "_" + field.name + "_a", field);
+            else if (typeof field === "object")
+                f(type[0] + "_" + field.name, field);
             else
                 f(type[0] + "_" + field, null);
         });
@@ -37,9 +39,17 @@ function decls(f, meta) {
     funcs.functions.forEach((decl) => {
         f(decl[0], "func");
     });
-    accessors((decl) => {
-        f(decl, "getter");
-        f(decl+"_s", "setter");
+    accessors((decl, field) => {
+        if (field && field.rational) {
+            f(`${decl}_num`, "getter");
+            f(`${decl}_num_s`, "setter");
+            f(`${decl}_den`, "getter");
+            f(`${decl}_den_s`, "setter");
+            f(`${decl}_s`, "setter");
+        } else {
+            f(decl, "getter");
+            f(decl+"_s", "setter");
+        }
     });
     if (meta) {
         funcs.fs.forEach((decl) => {
@@ -107,6 +117,22 @@ function decls(f, meta) {
                 `CAccessors.${decl} = ` +
                 `Module.cwrap(${s(decl)}, "number", ["number", "number"]);\n` +
                 `var ${decl}_s = ` +
+                `Module.${decl}_s = ` +
+                `CAccessors.${decl}_s = ` +
+                `Module.cwrap(${s(decl+"_s")}, null, ["number", "number", "number"]);\n`;
+
+        } else if (field && field.rational) {
+            for (const part of ["num", "den"]) {
+                outp += `var ${decl}_${part} = ` +
+                    `Module.${decl}_${part} = ` +
+                    `CAccessors.${decl}_${part} = ` +
+                    `Module.cwrap(${s(decl+"_"+part)}, "number", ["number"]);\n` +
+                    `var ${decl}_${part}_s = ` +
+                    `Module.${decl}_${part}_s = ` +
+                    `CAccessors.${decl}_${part}_s = ` +
+                    `Module.cwrap(${s(decl+"_"+part+"_s")}, null, ["number", "number"]);\n`;
+            }
+            outp += `var ${decl}_s = ` +
                 `Module.${decl}_s = ` +
                 `CAccessors.${decl}_s = ` +
                 `Module.cwrap(${s(decl+"_s")}, null, ["number", "number", "number"]);\n`;
@@ -228,6 +254,12 @@ function decls(f, meta) {
             signature(decl, "ptr: number, idx: number", "number");
             signature(`${decl}_s`, "ptr: number, idx: number, val: number",
                 "void");
+        } else if (field && field.rational) {
+            for (const part of ["num", "den"]) {
+                signature(`${decl}_${part}`, "ptr: number", "number");
+                signature(`${decl}_${part}_s`, "ptr: number, val: number", "void");
+            }
+            signature(`${decl}_s`, "ptr: number, num: number, den: number", "void");
         } else {
             signature(decl, "ptr: number", "number");
             signature(`${decl}_s`, "ptr: number, val: number", "void");

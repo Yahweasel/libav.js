@@ -107,6 +107,11 @@ export interface Frame extends LibAVTransferable {
      * Picture type (libav-specific value)
      */
     pict_type?: number;
+
+    /**
+     * Time base that pts is in, as [num, den]. Absent or [0, 1] for unknown.
+     */
+    time_base?: [number, number];
 }
 
 /**
@@ -147,6 +152,11 @@ export interface Packet extends LibAVTransferable {
      * Side data. Codec-specific.
      */
     side_data?: any;
+
+    /**
+     * Time base that pts and dts are in, as [num, den]. Absent or [0, 1] for unknown.
+     */
+    time_base?: [number, number];
 }
 
 /**
