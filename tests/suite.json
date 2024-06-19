@@ -43,5 +43,6 @@
  "623-decode-and-filter.js",
  "624-decode-and-filter-combined.js",
  "625-filtering-video.js",
+ "626-time-base.js",
  "650-all-to-all.js"
 ]
