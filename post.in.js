@@ -942,8 +942,6 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
             var outFrame = copyoutFrame(frame);
 
             if (typeof outFrame === "object" && !outFrame.time_base_num) {
-                if (tbNum < 0) {
-                }
                 outFrame.time_base_num = tbNum;
                 outFrame.time_base_den = tbDen;
             }
