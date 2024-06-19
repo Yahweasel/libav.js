@@ -26,6 +26,7 @@
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavfilter/avfilter.h"
+#include "libavfilter/buffersink.h"
 #include "libavutil/avutil.h"
 #include "libavutil/opt.h"
 #include "libavutil/pixdesc.h"
@@ -172,6 +173,19 @@ void struc ##_channel_layouthi_s(struc *a, uint32_t b) { \
 
 CHL(AVFrame)
 
+/* This isn't in libav because there's only one property to scale, but this
+ * scaling is sufficiently painful in JavaScript that it's worth wrapping this
+ * up in a helper. */
+void ff_frame_rescale_ts_js(
+    AVFrame *frame,
+    int tb_src_num, int tb_src_den,
+    int tb_dst_num, int tb_dst_den
+) {
+    AVRational tb_src = {tb_src_num, tb_src_den},
+               tb_dst = {tb_dst_num, tb_dst_den};
+    if (frame->pts != AV_NOPTS_VALUE)
+        frame->pts = av_rescale_q(frame->pts, tb_src, tb_dst);
+}
 
 /* AVPixFmtDescriptor */
 #define B(type, field) A(AVPixFmtDescriptor, type, field)
@@ -387,6 +401,15 @@ B(char *, name)
 B(AVFilterInOut *, next)
 B(int, pad_idx)
 #undef B
+
+/* Buffer sink */
+int av_buffersink_get_time_base_num(const AVFilterContext *ctx) {
+    return av_buffersink_get_time_base(ctx).num;
+}
+
+int av_buffersink_get_time_base_den(const AVFilterContext *ctx) {
+    return av_buffersink_get_time_base(ctx).den;
+}
 
 
 /****************************************************************

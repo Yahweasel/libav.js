@@ -11,6 +11,7 @@
         ["av_frame_make_writable", "number", ["number"]],
         ["av_frame_ref", "number", ["number", "number"]],
         ["av_frame_unref", null, ["number"]],
+        ["ff_frame_rescale_ts_js", null, ["number", "number", "number", "number", "number"]],
         ["av_log_get_level", "number", []],
         ["av_log_set_level", null, ["number"]],
         ["av_packet_alloc", "number", []],
@@ -23,6 +24,8 @@
         ["av_strdup", "number", ["string"]],
 
         ["av_buffersink_get_frame", "number", ["number", "number"]],
+        ["av_buffersink_get_time_base_num", "number", ["number"]],
+        ["av_buffersink_get_time_base_den", "number", ["number"]],
         ["av_buffersink_set_frame_size", null, ["number", "number"]],
         ["av_buffersrc_add_frame_flags", "number", ["number", "number", "number"]],
         ["avfilter_free", null, ["number"]],
