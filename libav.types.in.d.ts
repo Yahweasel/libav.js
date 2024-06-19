@@ -56,6 +56,11 @@ export interface Frame extends LibAVTransferable {
     pts?: number, ptshi?: number;
 
     /**
+     * Base for timestamps of this frame.
+     */
+    time_base_num: number, time_base_den: number;
+
+    /**
      * Audio only. Channel layout. It is possible for only one of this and
      * channels to be set.
      */
@@ -107,11 +112,6 @@ export interface Frame extends LibAVTransferable {
      * Picture type (libav-specific value)
      */
     pict_type?: number;
-
-    /**
-     * Time base that pts is in, as [num, den]. Absent or [0, 1] for unknown.
-     */
-    time_base?: [number, number];
 }
 
 /**
@@ -134,6 +134,11 @@ export interface Packet extends LibAVTransferable {
     dts?: number, dtshi?: number;
 
     /**
+     * Base for timestamps of this packet.
+     */
+    time_base_num: number, time_base_den: number;
+
+    /**
      * Index of this stream within a surrounding muxer/demuxer.
      */
     stream_index?: number;
@@ -152,11 +157,6 @@ export interface Packet extends LibAVTransferable {
      * Side data. Codec-specific.
      */
     side_data?: any;
-
-    /**
-     * Time base that pts and dts are in, as [num, den]. Absent or [0, 1] for unknown.
-     */
-    time_base?: [number, number];
 }
 
 /**
