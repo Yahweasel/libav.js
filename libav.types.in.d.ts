@@ -58,7 +58,7 @@ export interface Frame extends LibAVTransferable {
     /**
      * Base for timestamps of this frame.
      */
-    time_base_num: number, time_base_den: number;
+    time_base_num?: number, time_base_den?: number;
 
     /**
      * Audio only. Channel layout. It is possible for only one of this and
@@ -136,7 +136,7 @@ export interface Packet extends LibAVTransferable {
     /**
      * Base for timestamps of this packet.
      */
-    time_base_num: number, time_base_den: number;
+    time_base_num?: number, time_base_den?: number;
 
     /**
      * Index of this stream within a surrounding muxer/demuxer.
