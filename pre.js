@@ -14,11 +14,11 @@
  */
 
 // Import LibAV.base if applicable
-if (typeof _scriptDir === "undefined") {
+if (typeof _scriptName === "undefined") {
     if (typeof LibAV === "object" && LibAV && LibAV.base)
-        _scriptDir = LibAV.base + "/libav-@VER-@VARIANT.@DBG@TARGET.@JS";
+        _scriptName = LibAV.base + "/libav-@VER-@VARIANT.@DBG@TARGET.@JS";
     else if (typeof self && self && self.location)
-        _scriptDir = self.location.href;
+        _scriptName = self.location.href;
 }
 
 Module.locateFile = function(path, prefix) {
