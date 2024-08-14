@@ -20,7 +20,7 @@ EFLAGS=\
 	--post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
-	-s "EXPORTED_RUNTIME_METHODS=['cwrap']" \
+	-s "EXPORTED_RUNTIME_METHODS=['cwrap', 'PThread']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
