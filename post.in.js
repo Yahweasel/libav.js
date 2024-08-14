@@ -2352,6 +2352,71 @@ var ff_copyin_side_data = Module.ff_copyin_side_data = function(pktPtr, side_dat
 };
 
 /**
+ * Copy out codec parameters.
+ * @param codecpar  AVCodecParameters
+ */
+/// @types ff_copyout_codecpar@sync(codecpar: number): @promise@CodecParameters@
+var ff_copyout_codecpar = Module.ff_copyout_codecpar = function(codecpar) {
+    return {
+        bit_rate: AVCodecParameters_bit_rate(codecpar),
+        channel_layoutmask: AVCodecParameters_channel_layoutmask(codecpar),
+        channels: AVCodecParameters_channels(codecpar),
+        chroma_location: AVCodecParameters_chroma_location(codecpar),
+        codec_id: AVCodecParameters_codec_id(codecpar),
+        codec_tag: AVCodecParameters_codec_tag(codecpar),
+        codec_type: AVCodecParameters_codec_type(codecpar),
+        color_primaries: AVCodecParameters_color_primaries(codecpar),
+        color_range: AVCodecParameters_color_range(codecpar),
+        color_space: AVCodecParameters_color_space(codecpar),
+        color_trc: AVCodecParameters_color_trc(codecpar),
+        format: AVCodecParameters_format(codecpar),
+        height: AVCodecParameters_height(codecpar),
+        level: AVCodecParameters_level(codecpar),
+        profile: AVCodecParameters_profile(codecpar),
+        sample_rate: AVCodecParameters_sample_rate(codecpar),
+        width: AVCodecParameters_width(codecpar),
+        extradata: ff_copyout_codecpar_extradata(codecpar)
+    };
+};
+
+// Copy out codec parameter extradata. Used internally by ff_copyout_codecpar.
+var ff_copyout_codecpar_extradata = Module.ff_copyout_codecpar_extradata = function(codecpar) {
+    var extradata = AVCodecParameters_extradata(codecpar);
+    var extradata_size = AVCodecParameters_extradata_size(codecpar);
+    if (!extradata || !extradata_size) return null;
+    return copyout_u8(extradata, extradata_size);
+};
+
+/**
+ * Copy in codec parameters.
+ * @param codecparPtr  AVCodecParameters
+ * @param codecpar  Codec parameters to copy in.
+ */
+/// @types ff_copyin_codecpar@sync(codecparPtr: number, codecpar: CodecParameters): @promise@void@
+var ff_copyin_codecpar = Module.ff_copyin_codecpar = function(codecparPtr, codecpar) {
+    [
+        "bit_rate", "channel_layoutmask", "channels", "chroma_location",
+        "codec_id", "codec_tag", "codec_type", "color_primaries", "color_range",
+        "color_space", "color_trc", "format", "height", "level", "profile",
+        "sample_rate", "width"
+    ].forEach(function(key) {
+        if (key in codecpar)
+            CAccessors["AVCodecParameters_" + key + "_s"](codecparPtr, codecpar[key]);
+    });
+
+    if (codecpar.extradata)
+        ff_copyin_codecpar_extradata(codecparPtr, codecpar.extradata);
+};
+
+// Copy in codec parameter extradata. Used internally by ff_copyin_codecpar.
+var ff_copyin_codecpar_extradata = Module.ff_copyin_codecpar_extradata = function(codecparPtr, extradata) {
+    var extradataPtr = malloc(extradata.length);
+    copyin_u8(extradataPtr, extradata);
+    AVCodecParameters_extradata_s(extradataPtr);
+    AVCodecParameters_extradata_size_s(extradata.length);
+};
+
+/**
  * Allocate and copy in a 32-bit int list.
  * @param list  List of numbers to copy in
  */

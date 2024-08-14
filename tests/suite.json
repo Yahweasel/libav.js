@@ -27,6 +27,7 @@
  "607-filtering-audio.js",
  "608-muxing-device.js",
  "609-muxing.js",
+ "610-remuxing-copy-codecpars.js",
  "610-remuxing.js",
  "611-transcode-video.js",
  "612-find.js",
