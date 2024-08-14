@@ -19,8 +19,8 @@ if (/* We're in a worker */
     typeof LibAV === "undefined" &&
     /* We're not being loaded as a thread */
     (
-        (typeof self === "undefined" && typeof Module === "undefined")
-        || self.name !== "em-pthread"
+        (typeof self === "undefined" && typeof Module === "undefined") ||
+        (typeof self !== "undefined" && self.name !== "em-pthread")
     )
     ) (function() {
     var libav;
