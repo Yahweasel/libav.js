@@ -127,6 +127,10 @@ for (const cv of encoders.video) {
     if (cv === "libvpx-vp9" || cv === "libaom-av1" || cv === "libsvtav1")
         continue;
 
+    // We skip libvpx because its default is time-sensitive
+    if (cv === "libvpx")
+        continue;
+
     // Transcode this
     h.printStatus(`-c:v ${cv}`);
     let format = codecFormats[cv];
