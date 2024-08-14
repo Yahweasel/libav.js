@@ -426,6 +426,7 @@ Module.mkreadaheadfile = function(name, file) {
  * Unlink a readahead file. Also gets rid of the File reference.
  * @param name  Filename to unlink.
  */
+/// @types unlinkreadaheadfile@sync(name: string): @promise@void@
 Module.unlinkreadaheadfile = function(name) {
     FS.unlink(name);
     delete readaheads[name];
