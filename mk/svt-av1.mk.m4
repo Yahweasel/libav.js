@@ -30,7 +30,7 @@ buildrule(base, [[[]]])
 # Threaded
 buildrule(thr, [[[]]])
 
-extract: build/SVT-AV1-v$(SVT_AV1_VERSION)/PATCHED
+#extract: build/SVT-AV1-v$(SVT_AV1_VERSION)/PATCHED
 
 build/SVT-AV1-v$(SVT_AV1_VERSION)/PATCHED: build/SVT-AV1-v$(SVT_AV1_VERSION)/CMakeLists.txt
 	cd build/SVT-AV1-v$(SVT_AV1_VERSION) && ( test -e PATCHED || patch -p1 -i ../../patches/svt-av1.diff )
