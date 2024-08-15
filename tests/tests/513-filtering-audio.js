@@ -193,8 +193,6 @@ function main() {
     }).then(function() {
         return libav.unlink("tmp.ogg");
 
-    }).catch(function(err) {
-        print(err + "\n" + err.stack);
     });
 }
 
