@@ -55,6 +55,11 @@ let codec;
             pix_fmt: frames[0].format,
             width: frames[0].width,
             height: frames[0].height
+        },
+        options: {
+            "quality": "good",
+            "cpu-used": "0",
+            "deadline": "0"
         }
     });
 
