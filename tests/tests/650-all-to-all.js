@@ -28,8 +28,10 @@ const formatCodecs = {
     "mp3": [null, "libmp3lame"],
     "mp4": mp4,
     "mpegts": mp4,
+    "ogg": [null, "libopus"],
     "rawvideo": ["rawvideo", null, {nocheck: true}],
     "wav": [null, "pcm_s16le"],
+    "webm": [null, null],
     "wv": [null, "wavpack"]
 };
 
@@ -123,12 +125,8 @@ for (const cv of encoders.video) {
     if (!h.options.includeSlow)
         break;
 
-    // Even in slow-mode, skip VP9 and AV1, because they're just too slow!
-    if (cv === "libvpx-vp9" || cv === "libaom-av1" || cv === "libsvtav1")
-        continue;
-
-    // We skip libvpx because its default is time-sensitive
-    if (cv === "libvpx")
+    // Even in slow-mode, skip VP8, VP9, and AV1, because they're just too slow!
+    if (cv === "libvpx" || cv === "libvpx-vp9" || cv === "libaom-av1" || cv === "libsvtav1")
         continue;
 
     // Transcode this
@@ -182,7 +180,7 @@ for (const f of formats) {
         video = fc[0];
         audio = fc[1];
     } else {
-        video = "libvpx";
+        video = "libopenh264";
         audio = "libopus";
     }
 
