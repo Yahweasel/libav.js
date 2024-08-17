@@ -15,7 +15,7 @@
 
 // Convert between all (viable) formats and test that they all work
 
-const mp4 = ["libvpx", "aac"];
+const mp4 = ["libopenh264", "aac"];
 const formatCodecs = {
     "adts": [null, null],
     "f32le": [null, "pcm_f32le", {nocheck: true}],
