@@ -110,6 +110,7 @@ dist/libav-%.dbg.mjs: dist/libav-$(LIBAVJS_VERSION)-%.dbg.mjs
 
 
 dist/libav.types.d.ts: build/libav.types.d.ts
+	mkdir -p dist
 	cp $< $@
 
 # General build rule for any target

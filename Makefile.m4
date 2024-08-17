@@ -83,6 +83,7 @@ febuildrule(.dbg, js, cat)
 febuildrule(.dbg, mjs, cat)
 
 dist/libav.types.d.ts: build/libav.types.d.ts
+	mkdir -p dist
 	cp $< $@
 
 # General build rule for any target
