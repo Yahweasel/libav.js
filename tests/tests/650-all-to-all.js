@@ -15,7 +15,7 @@
 
 // Convert between all (viable) formats and test that they all work
 
-const mp4 = ["libopenh264", "aac"];
+const mp4 = ["libvpx", "aac"];
 const formatCodecs = {
     "adts": [null, null],
     "f32le": [null, "pcm_f32le", {nocheck: true}],
@@ -28,10 +28,8 @@ const formatCodecs = {
     "mp3": [null, "libmp3lame"],
     "mp4": mp4,
     "mpegts": mp4,
-    "ogg": [null, "libopus"],
     "rawvideo": ["rawvideo", null, {nocheck: true}],
     "wav": [null, "pcm_s16le"],
-    "webm": [null, null],
     "wv": [null, "wavpack"]
 };
 
@@ -125,8 +123,8 @@ for (const cv of encoders.video) {
     if (!h.options.includeSlow)
         break;
 
-    // Even in slow-mode, skip VP8, VP9, and AV1, because they're just too slow!
-    if (cv === "libvpx" || cv === "libvpx-vp9" || cv === "libaom-av1" || cv === "libsvtav1")
+    // Even in slow-mode, skip VP9, and AV1, because they're just too slow!
+    if (cv === "libvpx-vp9" || cv === "libaom-av1" || cv === "libsvtav1")
         continue;
 
     // Transcode this

@@ -49,7 +49,7 @@ await libav.avformat_close_input_js(fmt_ctx);
 
 let codec;
 [codec, c, frame, pkt] =
-    await libav.ff_init_encoder("libopenh264", {
+    await libav.ff_init_encoder("libvpx", {
         ctx: {
             bit_rate: 10000000,
             pix_fmt: frames[0].format,
@@ -59,7 +59,7 @@ let codec;
     });
 
 const [oc, fmt, pb, st] = await libav.ff_init_muxer(
-    {filename: "tmp.mp4", open: true}, [[c, 1, 1000]]);
+    {filename: "tmp.webm", open: true}, [[c, 1, 1000]]);
 
 await libav.avformat_write_header(oc, 0);
 
@@ -73,4 +73,4 @@ await libav.av_write_trailer(oc);
 await libav.ff_free_muxer(oc, pb);
 await libav.ff_free_encoder(c, frame, pkt);
 
-await h.utils.compareVideo("bbb.webm", "tmp.mp4");
+await h.utils.compareVideo("bbb.webm", "tmp.webm");
