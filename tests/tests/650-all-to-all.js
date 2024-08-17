@@ -178,7 +178,7 @@ for (const f of formats) {
         video = fc[0];
         audio = fc[1];
     } else {
-        video = "libopenh264";
+        video = "libvpx";
         audio = "libopus";
     }
 
