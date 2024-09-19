@@ -2412,8 +2412,8 @@ var ff_copyin_codecpar = Module.ff_copyin_codecpar = function(codecparPtr, codec
 var ff_copyin_codecpar_extradata = Module.ff_copyin_codecpar_extradata = function(codecparPtr, extradata) {
     var extradataPtr = malloc(extradata.length);
     copyin_u8(extradataPtr, extradata);
-    AVCodecParameters_extradata_s(extradataPtr);
-    AVCodecParameters_extradata_size_s(extradata.length);
+    AVCodecParameters_extradata_s(codecparPtr, extradataPtr);
+    AVCodecParameters_extradata_size_s(codecparPtr, extradata.length);
 };
 
 /**
