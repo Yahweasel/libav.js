@@ -1,0 +1,147 @@
+<!doctype html>
+<!--
+ * Copyright (C) 2019-2024 Yahweasel and contributors
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>LibAV.JS FileSystemFileHandle writer demo</title>
+    </head>
+    <body>
+        <script type="text/javascript">(async function() {
+            try {
+                const dce = document.createElement.bind(document);
+                const main = dce("div");
+                document.body.appendChild(main);
+
+                const variant = await new Promise(res => {
+                    const label = dce("label");
+                    label.innerHTML = "Variant:&nbsp;";
+                    label.htmlFor = "variant";
+                    main.appendChild(label);
+                    const vbox = dce("input");
+                    vbox.type = "text";
+                    vbox.id = "variant";
+                    vbox.value = "webm";
+                    main.appendChild(vbox);
+                    const ok = dce("button");
+                    ok.innerHTML = "Load";
+                    main.appendChild(ok);
+
+                    vbox.focus();
+                    vbox.select();
+
+                    vbox.onkeypress = ev => {
+                        if (ev.key === "Enter")
+                            res(vbox.value);
+                    };
+                    ok.onclick = ev => {
+                        res(vbox.value);
+                    };
+                });
+                main.innerHTML = "Loading...";
+
+                // Load libav.js
+                LibAV = {base: "../dist"};
+                await new Promise(res => {
+                    const scr = dce("script");
+                    scr.src = `../dist/libav-${variant}.js?${Math.random()}`;
+                    scr.onload = res;
+                    scr.onerror = () => {
+                        alert("Failed to load variant!");
+                    };
+                    document.body.appendChild(scr);
+                });
+                const libav = await LibAV.LibAV();
+
+                // Load the file
+                const file = await new Promise(res => {
+                    main.innerHTML = "";
+                    const label = dce("label");
+                    label.innerHTML = "File:&nbsp;";
+                    label.htmlFor = "load-file";
+                    main.appendChild(label);
+                    const picker = dce("input");
+                    picker.type = "file";
+                    picker.id = "load-file";
+                    main.appendChild(picker);
+
+                    picker.focus();
+
+                    picker.onchange = () => {
+                        if (picker.files.length > 0)
+                            res(picker.files[0]);
+                    };
+                });
+                main.innerHTML = "Loading...";
+
+                // Initial read
+                await libav.mkreadaheadfile("input", file);
+                const [fmt_ctx, streams] =
+                    await libav.ff_init_demuxer_file("input");
+
+                // Create the writer
+                const fsfh = await showSaveFilePicker({
+                    suggestedName: "out.mkv"
+                });
+                await libav.mkfsfhfile("out.mkv", fsfh);
+
+                // Get the codec parameters
+                const ostreams = streams.map(s => [
+                    s.codecpar, s.time_base_num, s.time_base_den
+                ]);
+
+                // And the muxer
+                const [oc, , pb] = await libav.ff_init_muxer({
+                    filename: "out.mkv",
+                    open: true,
+                    codecpars: true
+                }, ostreams);
+                await libav.avformat_write_header(oc, 0);
+
+                const pkt = await libav.av_packet_alloc();
+
+                main.innerHTML = "Remuxing...";
+
+                // And read
+                while (true) {
+                    // Read some packets
+                    const [res, packets] = await libav.ff_read_frame_multi(fmt_ctx, pkt, {
+                        limit: 1024 * 1024,
+                        unify: true
+                    });
+
+                    // And write them out
+                    if (packets[0])
+                        await libav.ff_write_multi(oc, pkt, packets[0]);
+
+                    if (res === libav.AVERROR_EOF)
+                        break;
+                }
+
+                await libav.av_write_trailer(oc);
+                await libav.unlinkfsfhfile("out.mkv");
+
+                await libav.ff_free_muxer(oc, pb);
+                await libav.av_packet_free_js(pkt);
+                await libav.avformat_close_input_js(fmt_ctx);
+
+                main.innerHTML = "Done.";
+            } catch (ex) {
+                alert(ex + "");
+            }
+        })();
+        </script>
+    </body>
+</html>
