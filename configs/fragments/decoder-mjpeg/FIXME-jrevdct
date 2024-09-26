@@ -1,0 +1,1 @@
+jrevdct is used by various decoders, but mjpeg and prores seem like the only ones anyone is likely to use nowadays, which is why the license text for it lives here.

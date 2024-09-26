@@ -4,28 +4,89 @@
   "version": "5.4.6",
   "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web.",
   "main": "dist/libav-default.js",
+  "types": "dist/libav.types.d.ts",
   "exports": {
     ".": {
       "import": "./dist/libav-default.mjs",
-      "default": "./dist/libav-default.js"
+      "default": "./dist/libav-default.js",
+      "types": "./dist/libav.types.d.ts"
     },
-    "./default": { "import": "./dist/libav-default.mjs", "default": "./dist/libav-default.js" },
-    "./default-cli": { "import": "./dist/libav-default-cli.mjs", "default": "./dist/libav-default-cli.js" },
-    "./opus": { "import": "./dist/libav-opus.mjs", "default": "./dist/libav-opus.js" },
-    "./opus-af": { "import": "./dist/libav-opus-af.mjs", "default": "./dist/libav-opus-af.js" },
-    "./flac": { "import": "./dist/libav-flac.mjs", "default": "./dist/libav-flac.js" },
-    "./flac-af": { "import": "./dist/libav-flac-af.mjs", "default": "./dist/libav-flac-af.js" },
-    "./wav": { "import": "./dist/libav-wav.mjs", "default": "./dist/libav-wav.js" },
-    "./wav-af": { "import": "./dist/libav-wav-af.mjs", "default": "./dist/libav-wav-af.js" },
-    "./obsolete": { "import": "./dist/libav-obsolete.mjs", "default": "./dist/libav-obsolete.js" },
-    "./webm": { "import": "./dist/libav-webm.mjs", "default": "./dist/libav-webm.js" },
-    "./webm-cli": { "import": "./dist/libav-webm-cli.mjs", "default": "./dist/libav-webm-cli.js" },
-    "./vp8-opus": { "import": "./dist/libav-vp8-opus.mjs", "default": "./dist/libav-vp8-opus.js" },
-    "./vp8-opus-avf": { "import": "./dist/libav-vp8-opus-avf.mjs", "default": "./dist/libav-vp8-opus-avf.js" },
-    "./webcodecs": { "import": "./dist/libav-webcodecs.mjs", "default": "./dist/libav-webcodecs.js" },
-    "./webcodecs-avf": { "import": "./dist/libav-webcodecs-avf.mjs", "default": "./dist/libav-webcodecs-avf.js" }
+    "./default": {
+      "import": "./dist/libav-default.mjs",
+      "default": "./dist/libav-default.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./default-cli": {
+      "import": "./dist/libav-default-cli.mjs",
+      "default": "./dist/libav-default-cli.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./opus": {
+      "import": "./dist/libav-opus.mjs",
+      "default": "./dist/libav-opus.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./opus-af": {
+      "import": "./dist/libav-opus-af.mjs",
+      "default": "./dist/libav-opus-af.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./flac": {
+      "import": "./dist/libav-flac.mjs",
+      "default": "./dist/libav-flac.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./flac-af": {
+      "import": "./dist/libav-flac-af.mjs",
+      "default": "./dist/libav-flac-af.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./wav": {
+      "import": "./dist/libav-wav.mjs",
+      "default": "./dist/libav-wav.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./wav-af": {
+      "import": "./dist/libav-wav-af.mjs",
+      "default": "./dist/libav-wav-af.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./obsolete": {
+      "import": "./dist/libav-obsolete.mjs",
+      "default": "./dist/libav-obsolete.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./webm": {
+      "import": "./dist/libav-webm.mjs",
+      "default": "./dist/libav-webm.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./webm-cli": {
+      "import": "./dist/libav-webm-cli.mjs",
+      "default": "./dist/libav-webm-cli.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./vp8-opus": {
+      "import": "./dist/libav-vp8-opus.mjs",
+      "default": "./dist/libav-vp8-opus.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./vp8-opus-avf": {
+      "import": "./dist/libav-vp8-opus-avf.mjs",
+      "default": "./dist/libav-vp8-opus-avf.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./webcodecs": {
+      "import": "./dist/libav-webcodecs.mjs",
+      "default": "./dist/libav-webcodecs.js",
+      "types": "./dist/libav.types.d.ts"
+    },
+    "./webcodecs-avf": {
+      "import": "./dist/libav-webcodecs-avf.mjs",
+      "default": "./dist/libav-webcodecs-avf.js",
+      "types": "./dist/libav.types.d.ts"
+    }
   },
-  "types": "dist/libav.types.d.ts",
   "directories": {
     "test": "tests"
   },

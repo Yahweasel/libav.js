@@ -140,6 +140,8 @@
         "mkwriterdev",
         "mkstreamwriterdev",
         "mountwriterfs",
+        "mkfsfhfile",
+        "unlinkfsfhfile",
         "mkworkerfsfile",
         "unlinkworkerfsfile"
     ],

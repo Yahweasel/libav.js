@@ -357,7 +357,7 @@ var preReadaheadOnBlockRead = null;
 function readaheadOnBlockRead(name, position, length) {
     if (!(name in readaheads)) {
         if (preReadaheadOnBlockRead)
-            preReadaheadOnBlockRead(name, position, length);
+            return preReadaheadOnBlockRead(name, position, length);
         return;
     }
 
@@ -438,7 +438,7 @@ Module.unlinkreadaheadfile = function(name) {
  * @param mode  Unix permissions
  */
 /// @types mkwriterdev@sync(name: string, mode?: number): @promise@void@
-Module.mkwriterdev = function(loc, mode) {
+var mkwriterdev = Module.mkwriterdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0x1FF, writerDev);
     return 0;
 };
@@ -497,6 +497,94 @@ Module.unlinkworkerfsfile = function(name) {
     FS.unmount("/" + name + ".d");
     FS.rmdir("/" + name + ".d");
 };
+
+// FileSystemFileHandle devices
+var fsfhs = {};
+
+// Original onwrite
+var preFSFHOnWrite = null;
+
+// Passthru for FSFH writing.
+function fsfhOnWrite(name, position, buffer) {
+    if (!(name in fsfhs)) {
+        if (preFSFHOnWrite)
+            return preFSFHOnWrite(name, position, buffer);
+        return;
+    }
+
+    var h = fsfhs[name];
+    buffer = buffer.slice(0);
+
+    if (h.syncHandle) {
+        h.syncHandle.write(buffer.buffer, {
+            at: position
+        });
+        return;
+    }
+
+    var p = h.promise.then(function() {
+        return h.handle.write({
+            type: "write",
+            position: position,
+            data: buffer
+        });
+    });
+
+    h.promise = p.catch(console.error);
+    return p;
+}
+
+/**
+ * Make a FileSystemFileHandle device. This writes via a FileSystemFileHandle,
+ * synchronously if possible. Note that this overrides onwrite, so if you want
+ * to support both kinds of files, make sure you set onwrite before calling
+ * this.
+ * @param name  Filename to create.
+ * @param fsfh  FileSystemFileHandle corresponding to this filename.
+ */
+/// @types mkfsfhfile(name: string, fsfh: FileSystemFileHandle): Promise<void>
+Module.mkfsfhfile = function(name, fsfh) {
+    if (Module.onwrite !== fsfhOnWrite) {
+        preFSFHOnWrite = Module.onwrite;
+        Module.onwrite = fsfhOnWrite;
+    }
+
+    mkwriterdev(name);
+
+    var h = fsfhs[name] = {
+        promise: Promise.all([])
+    };
+    h.promise = h.promise.then(function() {
+        return fsfh.createSyncAccessHandle();
+    }).then(function(syncHandle) {
+        h.syncHandle = syncHandle;
+    }).catch(function() {
+        return fsfh.createWritable();
+    }).then(function(handle) {
+        h.handle = handle;
+    });
+    return h.promise;
+};
+
+/**
+ * Unlink a FileSystemFileHandle file. Also closes the file handle.
+ * @param name  Filename to unlink.
+ */
+/// @types unlinkfsfhfile(name: string): Promise<void>
+Module.unlinkfsfhfile = function(name) {
+    FS.unlink(name);
+    var h = fsfhs[name];
+    delete fsfhs[name];
+
+    if (h.syncHandle) {
+        h.syncHandle.close();
+        return Promise.all([]);
+    }
+
+    return h.promise.then(function() {
+        return h.handle.close();
+    });
+}
 
 /**
  * Send some data to a reader device. To indicate EOF, send null. To indicate an
@@ -2412,8 +2500,8 @@ var ff_copyin_codecpar = Module.ff_copyin_codecpar = function(codecparPtr, codec
 var ff_copyin_codecpar_extradata = Module.ff_copyin_codecpar_extradata = function(codecparPtr, extradata) {
     var extradataPtr = malloc(extradata.length);
     copyin_u8(extradataPtr, extradata);
-    AVCodecParameters_extradata_s(extradataPtr);
-    AVCodecParameters_extradata_size_s(extradata.length);
+    AVCodecParameters_extradata_s(codecparPtr, extradataPtr);
+    AVCodecParameters_extradata_size_s(codecparPtr, extradata.length);
 };
 
 /**

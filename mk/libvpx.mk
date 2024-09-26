@@ -12,6 +12,7 @@ build/inst/%/lib/pkgconfig/vpx.pc: build/libvpx-$(LIBVPX_VERSION)/build-%/Makefi
 		$(MAKE) install
 
 build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile: build/libvpx-$(LIBVPX_VERSION)/configure | build/inst/%/cflags.txt
+	tools/libvpx-emcc-version-check.sh
 	mkdir -p build/libvpx-$(LIBVPX_VERSION)/build-$*
 	cd build/libvpx-$(LIBVPX_VERSION)/build-$* && \
 		emconfigure ../../libvpx-$(LIBVPX_VERSION)/configure \

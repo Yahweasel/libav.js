@@ -14,7 +14,8 @@ jobs:
 
       - uses: mymindstorm/setup-emsdk@v12
         with:
-          version: 3.1.60
+          # Versions beyond 3.1.50 currently build bad libvpx
+          version: 3.1.50
           actions-cache-folder: 'cache-emsdk'
 
       - uses: actions/cache@v3

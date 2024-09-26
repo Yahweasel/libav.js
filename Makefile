@@ -16,6 +16,7 @@ OPTFLAGS=-Oz
 THRFLAGS=-pthread
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
+	`tools/memory-init-file-emcc.sh` \
 	--pre-js pre.js \
 	--post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
@@ -110,6 +111,7 @@ dist/libav-%.dbg.mjs: dist/libav-$(LIBAVJS_VERSION)-%.dbg.mjs
 
 
 dist/libav.types.d.ts: build/libav.types.d.ts
+	mkdir -p dist
 	cp $< $@
 
 # General build rule for any target

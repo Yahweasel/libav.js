@@ -17,7 +17,7 @@
 if (typeof _scriptName === "undefined") {
     if (typeof LibAV === "object" && LibAV && LibAV.base)
         _scriptName = LibAV.base + "/libav-@VER-@VARIANT.@DBG@TARGET.@JS";
-    else if (typeof self && self && self.location)
+    else if (typeof self === "object" && self && self.location)
         _scriptName = self.location.href;
 }
 

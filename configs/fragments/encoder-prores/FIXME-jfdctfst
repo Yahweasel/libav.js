@@ -1,0 +1,1 @@
+jfdctfst is used by various encoders, but prores seems like the only one anyone is likely to use nowadays, which is why the license text for it lives here.
