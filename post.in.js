@@ -1553,15 +1553,16 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
                 ]);
                 if (int32s === 0)
                     throw new Error("Failed to transfer parameters");
+                var ch_layout = output.channel_layout?output.channel_layout:4;
+                var ch_layout_i64 = [~~ch_layout, Math.floor(ch_layout / 0x100000000)];
 
                 if (
                     av_opt_set_int_list_js(
                         tmp_sink_ctx, "sample_fmts", 4, int32s, -1, 1 /* AV_OPT_SEARCH_CHILDREN */
                     ) < 0 ||
-                    av_opt_set(
-                        tmp_sink_ctx, "ch_layouts",
-                        "0x" + (output.channel_layout?output.channel_layout:4).toString(16),
-                        1
+                    ff_buffersink_set_ch_layout(
+                        tmp_sink_ctx,
+                        ch_layout_i64[0], ch_layout_i64[1]
                     ) < 0 ||
                     av_opt_set_int_list_js(
                         tmp_sink_ctx, "sample_rates", 4, int32s + 8, -1, 1

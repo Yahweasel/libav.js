@@ -53,6 +53,13 @@
     void struc ## _ ## field ## _den_s(struc *a, int b) { a->field.den = b; } \
     void struc ## _ ## field ## _s(struc *a, int n, int d) { a->field.num = n; a->field.den = d; }
 
+#define RAT_FAKE(struc, field, num, den) \
+    int struc ## _ ## field ## _num(struc *a) { (void) a; return num; } \
+    int struc ## _ ## field ## _den(struc *a) { (void) a; return den; } \
+    void struc ## _ ## field ## _num_s(struc *a, int b) { (void) a; (void) b; } \
+    void struc ## _ ## field ## _den_s(struc *a, int b) { (void) a; (void) b; } \
+    void struc ## _ ## field ## _s(struc *a, int n, int d) { (void) a; (void) n; (void) d; }
+
 
 /* Not part of libav, just used to ensure a round trip to C for async purposes */
 void ff_nothing() {}
@@ -85,7 +92,12 @@ B(int, width)
 #undef BA
 
 RAT(AVFrame, sample_aspect_ratio)
+
+#if LIBAVUTIL_VERSION_INT > AV_VERSION_INT(57, 10, 101)
 RAT(AVFrame, time_base)
+#else
+RAT_FAKE(AVFrame, time_base, 1, 1000)
+#endif
 
 /* Either way we expose the old channel layout API, but if the new channel
  * layout API is available, we use it */
@@ -294,11 +306,7 @@ B(int, sample_rate)
 #if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(60, 10, 100)
 RAT(AVCodecParameters, framerate)
 #else
-int AVCodecParameters_framerate_num(AVCodecParameters *a) { (void) a; return 1; }
-int AVCodecParameters_framerate_den(AVCodecParameters *a) { (void) a; return 1000; }
-void AVCodecParameters_framerate_num_s(AVCodecParameters *a, int b) { (void) a; (void) b; }
-void AVCodecParameters_framerate_den_s(AVCodecParameters *a, int b) { (void) a; (void) b; }
-void AVCodecParameters_framerate_s(AVCodecParameters *a, int n, int d) { (void) a; (void) n; (void) d; }
+RAT_FAKE(AVCodecParameters, framerate, 60, 1)
 #endif
 
 CHL(AVCodecParameters)
@@ -320,7 +328,11 @@ B(int, stream_index)
 #undef B
 #undef BL
 
+#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(59, 4, 100)
 RAT(AVPacket, time_base)
+#else
+RAT_FAKE(AVPacket, time_base, 1, 1000)
+#endif
 
 
 /* AVPacketSideData uses special accessors because it's usually an array */
@@ -400,7 +412,7 @@ int avformat_seek_file_approx(
 
 
 /****************************************************************
- * avfilter
+ * libavfilter
  ***************************************************************/
 
 /* AVFilterInOut */
@@ -419,6 +431,23 @@ int av_buffersink_get_time_base_num(const AVFilterContext *ctx) {
 int av_buffersink_get_time_base_den(const AVFilterContext *ctx) {
     return av_buffersink_get_time_base(ctx).den;
 }
+
+#if LIBAVFILTER_VERSION_INT > AV_VERSION_INT(8, 27, 100)
+int ff_buffersink_set_ch_layout(AVFilterContext *ctx, unsigned int layoutlo, unsigned int layouthi) {
+    uint64_t layout;
+    char layoutStr[20];
+    layout = ((uint64_t) layouthi << 32) | ((uint64_t) layoutlo);
+    sprintf(layoutStr, "0x%x", layout);
+    return av_opt_set(ctx, "ch_layouts", layoutStr, AV_OPT_SEARCH_CHILDREN);
+}
+#else
+int ff_buffersink_set_ch_layout(AVFilterContext *ctx, unsigned int layoutlo, unsigned int layouthi) {
+    uint64_t layout[2];
+    layout[0] = ((uint64_t) layouthi << 32) | ((uint64_t) layoutlo);
+    layout[1] = -1;
+    return av_opt_set_int_list(ctx, "channel_layouts", layout, -1, AV_OPT_SEARCH_CHILDREN);
+}
+#endif
 
 
 /****************************************************************
