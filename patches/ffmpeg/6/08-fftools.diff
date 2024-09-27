@@ -1,0 +1,370 @@
+Index: ffmpeg-6.1.2/fftools/ffmpeg.c
+===================================================================
+--- ffmpeg-6.1.2.orig/fftools/ffmpeg.c
++++ ffmpeg-6.1.2/fftools/ffmpeg.c
+@@ -358,18 +358,24 @@ static void ffmpeg_cleanup(int ret)
+     for (i = 0; i < nb_filtergraphs; i++)
+         fg_free(&filtergraphs[i]);
+     av_freep(&filtergraphs);
++    nb_filtergraphs = 0;
+ 
+     for (i = 0; i < nb_output_files; i++)
+         of_free(&output_files[i]);
++    av_freep(&output_files);
++    nb_output_files = 0;
+ 
+     for (i = 0; i < nb_input_files; i++)
+         ifile_close(&input_files[i]);
++    av_freep(&input_files);
++    nb_input_files = 0;
+ 
+     if (vstats_file) {
+         if (fclose(vstats_file))
+             av_log(NULL, AV_LOG_ERROR,
+                    "Error closing vstats file, loss of information possible: %s\n",
+                    av_err2str(AVERROR(errno)));
++        vstats_file = NULL;
+     }
+     av_freep(&vstats_filename);
+     of_enc_stats_close();
+@@ -1290,7 +1296,12 @@ static int64_t getmaxrss(void)
+ #endif
+ }
+ 
++#ifdef __EMSCRIPTEN__
++int ffmpeg_main(int argc, char **argv);
++int ffmpeg_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     int ret, err_rate_exceeded;
+     BenchmarkTimeStamps ti;
+@@ -1348,5 +1359,9 @@ finish:
+         ret = 0;
+ 
+     ffmpeg_cleanup(ret);
++    ffmpeg_exited = 0;
++#ifdef __EMSCRIPTEN__
++    exit(ret);
++#endif
+     return ret;
+ }
+Index: ffmpeg-6.1.2/fftools/ffprobe.c
+===================================================================
+--- ffmpeg-6.1.2.orig/fftools/ffprobe.c
++++ ffmpeg-6.1.2/fftools/ffprobe.c
+@@ -79,6 +79,8 @@
+ #  define pthread_mutex_unlock(a) do{}while(0)
+ #endif
+ 
++static void ffprobe_cleanup_exit(int);
++
+ // attached as opaque_ref to packets/frames
+ typedef struct FrameData {
+     int64_t pkt_pos;
+@@ -98,8 +100,10 @@ typedef struct InputFile {
+     int       nb_streams;
+ } InputFile;
+ 
++#ifndef __EMSCRIPTEN__
+ const char program_name[] = "ffprobe";
+ const int program_birth_year = 2007;
++#endif
+ 
+ static int do_bitexact = 0;
+ static int do_count_frames = 0;
+@@ -3440,7 +3444,7 @@ static int open_input_file(InputFile *if
+ 
+     ifile->streams = av_calloc(fmt_ctx->nb_streams, sizeof(*ifile->streams));
+     if (!ifile->streams)
+-        exit(1);
++        ffprobe_cleanup_exit(1);
+     ifile->nb_streams = fmt_ctx->nb_streams;
+ 
+     /* bind a decoder to each input stream */
+@@ -3471,15 +3475,15 @@ static int open_input_file(InputFile *if
+             err = filter_codec_opts(codec_opts, stream->codecpar->codec_id,
+                                     fmt_ctx, stream, codec, &opts);
+             if (err < 0)
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+ 
+             ist->dec_ctx = avcodec_alloc_context3(codec);
+             if (!ist->dec_ctx)
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+ 
+             err = avcodec_parameters_to_context(ist->dec_ctx, stream->codecpar);
+             if (err < 0)
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+ 
+             if (do_show_log) {
+                 // For loging it is needed to disable at least frame threads as otherwise
+@@ -3495,7 +3499,7 @@ static int open_input_file(InputFile *if
+             if (avcodec_open2(ist->dec_ctx, codec, &opts) < 0) {
+                 av_log(NULL, AV_LOG_WARNING, "Could not open codec for input stream %d\n",
+                        stream->index);
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+             }
+ 
+             if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
+@@ -3860,6 +3864,7 @@ static int opt_print_filename(void *optc
+     return 0;
+ }
+ 
++#ifndef __EMSCRIPTEN__
+ void show_help_default(const char *opt, const char *arg)
+ {
+     av_log_set_callback(log_callback_help);
+@@ -3870,6 +3875,7 @@ void show_help_default(const char *opt,
+     show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+     show_help_children(avcodec_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+ }
++#endif
+ 
+ /**
+  * Parse interval specification, according to the format:
+@@ -4142,7 +4148,60 @@ static inline int check_section_show_ent
+             do_show_##varname = 1;                                      \
+     } while (0)
+ 
++#ifdef __EMSCRIPTEN__
++static void ffprobe_cleanup(void);
++static void ffprobe_cleanup()
++{
++    do_bitexact = do_count_frames = do_count_packets = do_read_frames =
++        do_read_packets = do_show_chapters = do_show_error = do_show_format =
++        do_show_frames = do_show_packets = do_show_programs =
++        do_show_streams = do_show_stream_disposition =
++        do_show_data =
++        do_show_program_version = do_show_library_versions =
++        do_show_pixel_formats = 0;
++    do_show_chapter_tags = do_show_format_tags = do_show_frame_tags =
++        do_show_program_tags = do_show_stream_tags =
++        do_show_packet_tags = 0;
++    show_value_unit = use_value_prefix = use_byte_value_binary_prefix =
++        use_value_sexagesimal_format = 0;
++    show_private_data = 1;
++    show_optional_fields = SHOW_OPTIONAL_FIELDS_AUTO;
++
++    av_freep(&output_format);
++    av_freep(&stream_specifier);
++    av_freep(&show_data_hash);
++
++    av_freep(&read_intervals);
++    read_intervals_nb = 0;
++
++    find_stream_info = 1;
++
++    options = NULL;
++
++    av_freep(&input_filename);
++    av_freep(&print_input_filename);
++    iformat = NULL;
++    av_freep(&output_filename);
++
++    av_hash_freep(&hash);
++
++    nb_streams = 0;
++    av_freep(&nb_streams_packets);
++    av_freep(&nb_streams_frames);
++    av_freep(&selected_streams);
++}
++
++static void ffprobe_cleanup_exit(int code)
++{
++    ffprobe_cleanup();
++    exit(code);
++}
++
++int ffprobe_main(int argc, char **argv);
++int ffprobe_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     const Writer *w;
+     WriterContext *wctx;
+@@ -4300,5 +4359,8 @@ end:
+     pthread_mutex_destroy(&log_mutex);
+ #endif
+ 
++#ifdef __EMSCRIPTEN__
++    ffprobe_cleanup_exit(ret < 0);
++#endif
+     return ret < 0;
+ }
+Index: ffmpeg-6.1.2/libavutil/thread.h
+===================================================================
+--- ffmpeg-6.1.2.orig/libavutil/thread.h
++++ ffmpeg-6.1.2/libavutil/thread.h
+@@ -32,9 +32,9 @@
+ 
+ #include "error.h"
+ 
+-#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS
++#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS || defined(__EMSCRIPTEN__)
+ 
+-#if HAVE_PTHREADS
++#if HAVE_PTHREADS || defined(__EMSCRIPTEN__)
+ #include <pthread.h>
+ 
+ #if defined(ASSERT_LEVEL) && ASSERT_LEVEL > 1
+Index: ffmpeg-6.1.2/libavutil/threadmessage.c
+===================================================================
+--- ffmpeg-6.1.2.orig/libavutil/threadmessage.c
++++ ffmpeg-6.1.2/libavutil/threadmessage.c
+@@ -27,8 +27,10 @@
+ #include "threadmessage.h"
+ #include "thread.h"
+ 
++#define HAVE_THREAD_MESSAGES (HAVE_THREADS || defined(__EMSCRIPTEN__))
++
+ struct AVThreadMessageQueue {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     AVFifo *fifo;
+     pthread_mutex_t lock;
+     pthread_cond_t cond_recv;
+@@ -46,7 +48,7 @@ int av_thread_message_queue_alloc(AVThre
+                                   unsigned nelem,
+                                   unsigned elsize)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     AVThreadMessageQueue *rmq;
+     int ret = 0;
+ 
+@@ -82,20 +84,20 @@ int av_thread_message_queue_alloc(AVThre
+ #else
+     *mq = NULL;
+     return AVERROR(ENOSYS);
+-#endif /* HAVE_THREADS */
++#endif /* HAVE_THREAD_MESSAGES */
+ }
+ 
+ void av_thread_message_queue_set_free_func(AVThreadMessageQueue *mq,
+                                            void (*free_func)(void *msg))
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     mq->free_func = free_func;
+ #endif
+ }
+ 
+ void av_thread_message_queue_free(AVThreadMessageQueue **mq)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     if (*mq) {
+         av_thread_message_flush(*mq);
+         av_fifo_freep2(&(*mq)->fifo);
+@@ -109,7 +111,7 @@ void av_thread_message_queue_free(AVThre
+ 
+ int av_thread_message_queue_nb_elems(AVThreadMessageQueue *mq)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     int ret;
+     pthread_mutex_lock(&mq->lock);
+     ret = av_fifo_can_read(mq->fifo);
+@@ -120,7 +122,7 @@ int av_thread_message_queue_nb_elems(AVT
+ #endif
+ }
+ 
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+ 
+ static int av_thread_message_queue_send_locked(AVThreadMessageQueue *mq,
+                                                void *msg,
+@@ -156,13 +158,13 @@ static int av_thread_message_queue_recv_
+     return 0;
+ }
+ 
+-#endif /* HAVE_THREADS */
++#endif /* HAVE_THREAD_MESSAGES */
+ 
+ int av_thread_message_queue_send(AVThreadMessageQueue *mq,
+                                  void *msg,
+                                  unsigned flags)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     int ret;
+ 
+     pthread_mutex_lock(&mq->lock);
+@@ -171,14 +173,14 @@ int av_thread_message_queue_send(AVThrea
+     return ret;
+ #else
+     return AVERROR(ENOSYS);
+-#endif /* HAVE_THREADS */
++#endif /* HAVE_THREAD_MESSAGES */
+ }
+ 
+ int av_thread_message_queue_recv(AVThreadMessageQueue *mq,
+                                  void *msg,
+                                  unsigned flags)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     int ret;
+ 
+     pthread_mutex_lock(&mq->lock);
+@@ -187,32 +189,32 @@ int av_thread_message_queue_recv(AVThrea
+     return ret;
+ #else
+     return AVERROR(ENOSYS);
+-#endif /* HAVE_THREADS */
++#endif /* HAVE_THREAD_MESSAGES */
+ }
+ 
+ void av_thread_message_queue_set_err_send(AVThreadMessageQueue *mq,
+                                           int err)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     pthread_mutex_lock(&mq->lock);
+     mq->err_send = err;
+     pthread_cond_broadcast(&mq->cond_send);
+     pthread_mutex_unlock(&mq->lock);
+-#endif /* HAVE_THREADS */
++#endif /* HAVE_THREAD_MESSAGES */
+ }
+ 
+ void av_thread_message_queue_set_err_recv(AVThreadMessageQueue *mq,
+                                           int err)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     pthread_mutex_lock(&mq->lock);
+     mq->err_recv = err;
+     pthread_cond_broadcast(&mq->cond_recv);
+     pthread_mutex_unlock(&mq->lock);
+-#endif /* HAVE_THREADS */
++#endif /* HAVE_THREAD_MESSAGES */
+ }
+ 
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+ static int free_func_wrap(void *arg, void *buf, size_t *nb_elems)
+ {
+     AVThreadMessageQueue *mq = arg;
+@@ -225,7 +227,7 @@ static int free_func_wrap(void *arg, voi
+ 
+ void av_thread_message_flush(AVThreadMessageQueue *mq)
+ {
+-#if HAVE_THREADS
++#if HAVE_THREAD_MESSAGES
+     size_t used;
+ 
+     pthread_mutex_lock(&mq->lock);
+@@ -236,5 +238,5 @@ void av_thread_message_flush(AVThreadMes
+      * is nothing to read */
+     pthread_cond_broadcast(&mq->cond_send);
+     pthread_mutex_unlock(&mq->lock);
+-#endif /* HAVE_THREADS */
++#endif /* HAVE_THREAD_MESSAGES */
+ }
