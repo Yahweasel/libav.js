@@ -2,6 +2,15 @@ Index: ffmpeg-7.0.2/configure
 ===================================================================
 --- ffmpeg-7.0.2.orig/configure
 +++ ffmpeg-7.0.2/configure
+@@ -3999,7 +3999,7 @@ avfilter_extralibs="pthreads_extralibs"
+ avutil_extralibs="d3d11va_extralibs d3d12va_extralibs mediacodec_extralibs nanosleep_extralibs pthreads_extralibs vaapi_drm_extralibs vaapi_x11_extralibs vaapi_win32_extralibs vdpau_x11_extralibs"
+ 
+ # programs
+-ffmpeg_deps="avcodec avfilter avformat threads"
++ffmpeg_deps="avcodec avfilter avformat"
+ ffmpeg_select="aformat_filter anull_filter atrim_filter format_filter
+                hflip_filter null_filter
+                transpose_filter trim_filter vflip_filter"
 @@ -6744,7 +6744,10 @@ fi
  # check for some common methods of building with pthread support
  # do this before the optional library checks as some of them require pthreads

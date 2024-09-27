@@ -218,3 +218,19 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
 +#endif
      return ret < 0;
  }
+Index: ffmpeg-7.0.2/libavutil/thread.h
+===================================================================
+--- ffmpeg-7.0.2.orig/libavutil/thread.h
++++ ffmpeg-7.0.2/libavutil/thread.h
+@@ -32,9 +32,9 @@
+ 
+ #include "error.h"
+ 
+-#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS
++#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS || defined(__EMSCRIPTEN__)
+ 
+-#if HAVE_PTHREADS
++#if HAVE_PTHREADS || defined(__EMSCRIPTEN__)
+ #include <pthread.h>
+ 
+ #if defined(ASSERT_LEVEL) && ASSERT_LEVEL > 1
