@@ -1,0 +1,220 @@
+Index: ffmpeg-7.0.2/fftools/ffmpeg.c
+===================================================================
+--- ffmpeg-7.0.2.orig/fftools/ffmpeg.c
++++ ffmpeg-7.0.2/fftools/ffmpeg.c
+@@ -337,22 +337,29 @@ static void ffmpeg_cleanup(int ret)
+     for (int i = 0; i < nb_filtergraphs; i++)
+         fg_free(&filtergraphs[i]);
+     av_freep(&filtergraphs);
++    nb_filtergraphs = 0;
+ 
+     for (int i = 0; i < nb_output_files; i++)
+         of_free(&output_files[i]);
++    av_freep(&output_files);
++    nb_output_files = 0;
+ 
+     for (int i = 0; i < nb_input_files; i++)
+         ifile_close(&input_files[i]);
++    av_freep(&input_files);
++    nb_input_files = 0;
+ 
+     for (int i = 0; i < nb_decoders; i++)
+         dec_free(&decoders[i]);
+     av_freep(&decoders);
++    nb_decoders = 0;
+ 
+     if (vstats_file) {
+         if (fclose(vstats_file))
+             av_log(NULL, AV_LOG_ERROR,
+                    "Error closing vstats file, loss of information possible: %s\n",
+                    av_err2str(AVERROR(errno)));
++        vstats_file = NULL;
+     }
+     av_freep(&vstats_filename);
+     of_enc_stats_close();
+@@ -375,7 +382,7 @@ static void ffmpeg_cleanup(int ret)
+         av_log(NULL, AV_LOG_INFO, "Conversion failed!\n");
+     }
+     term_exit();
+-    ffmpeg_exited = 1;
++    //ffmpeg_exited = 1;
+ }
+ 
+ OutputStream *ost_iter(OutputStream *prev)
+@@ -927,7 +934,12 @@ static int64_t getmaxrss(void)
+ #endif
+ }
+ 
++#ifdef __EMSCRIPTEN__
++int ffmpeg_main(int argc, char **argv);
++int ffmpeg_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     Scheduler *sch = NULL;
+ 
+@@ -993,8 +1005,15 @@ finish:
+         ret = 0;
+ 
+     ffmpeg_cleanup(ret);
++    ffmpeg_exited = 0;
+ 
+     sch_free(&sch);
+ 
++#ifdef __EMSCRIPTEN__
++#ifdef EMFIBERTHREADS
++    emfiberthreads_cleanup();
++#endif
++    exit(ret);
++#endif
+     return ret;
+ }
+Index: ffmpeg-7.0.2/fftools/ffprobe.c
+===================================================================
+--- ffmpeg-7.0.2.orig/fftools/ffprobe.c
++++ ffmpeg-7.0.2/fftools/ffprobe.c
+@@ -81,6 +81,8 @@
+ #  define pthread_mutex_unlock(a) do{}while(0)
+ #endif
+ 
++static void ffprobe_cleanup_exit(int);
++
+ // attached as opaque_ref to packets/frames
+ typedef struct FrameData {
+     int64_t pkt_pos;
+@@ -100,8 +102,10 @@ typedef struct InputFile {
+     int       nb_streams;
+ } InputFile;
+ 
++#ifndef __EMSCRIPTEN__
+ const char program_name[] = "ffprobe";
+ const int program_birth_year = 2007;
++#endif
+ 
+ static int do_bitexact = 0;
+ static int do_count_frames = 0;
+@@ -3892,7 +3896,7 @@ static int open_input_file(InputFile *if
+ 
+     ifile->streams = av_calloc(fmt_ctx->nb_streams, sizeof(*ifile->streams));
+     if (!ifile->streams)
+-        exit(1);
++        ffprobe_cleanup_exit(1);
+     ifile->nb_streams = fmt_ctx->nb_streams;
+ 
+     /* bind a decoder to each input stream */
+@@ -3923,15 +3927,15 @@ static int open_input_file(InputFile *if
+             err = filter_codec_opts(codec_opts, stream->codecpar->codec_id,
+                                     fmt_ctx, stream, codec, &opts);
+             if (err < 0)
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+ 
+             ist->dec_ctx = avcodec_alloc_context3(codec);
+             if (!ist->dec_ctx)
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+ 
+             err = avcodec_parameters_to_context(ist->dec_ctx, stream->codecpar);
+             if (err < 0)
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+ 
+             if (do_show_log) {
+                 // For loging it is needed to disable at least frame threads as otherwise
+@@ -3947,7 +3951,7 @@ static int open_input_file(InputFile *if
+             if (avcodec_open2(ist->dec_ctx, codec, &opts) < 0) {
+                 av_log(NULL, AV_LOG_WARNING, "Could not open codec for input stream %d\n",
+                        stream->index);
+-                exit(1);
++                ffprobe_cleanup_exit(1);
+             }
+ 
+             if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
+@@ -4322,6 +4326,7 @@ static int opt_print_filename(void *optc
+     return print_input_filename ? 0 : AVERROR(ENOMEM);
+ }
+ 
++#ifndef __EMSCRIPTEN__
+ void show_help_default(const char *opt, const char *arg)
+ {
+     av_log_set_callback(log_callback_help);
+@@ -4332,6 +4337,7 @@ void show_help_default(const char *opt,
+     show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+     show_help_children(avcodec_get_class(), AV_OPT_FLAG_DECODING_PARAM);
+ }
++#endif
+ 
+ /**
+  * Parse interval specification, according to the format:
+@@ -4606,7 +4612,61 @@ static inline int check_section_show_ent
+             do_show_##varname = 1;                                      \
+     } while (0)
+ 
++#ifdef __EMSCRIPTEN__
++static void ffprobe_cleanup(void);
++static void ffprobe_cleanup()
++{
++    do_bitexact = do_count_frames = do_count_packets = do_read_frames =
++        do_read_packets = do_show_chapters = do_show_error = do_show_format =
++        do_show_frames = do_show_packets = do_show_programs =
++        do_show_stream_groups = do_show_stream_group_components =
++        do_show_streams = do_show_stream_disposition =
++        do_show_stream_group_disposition = do_show_data =
++        do_show_program_version = do_show_library_versions =
++        do_show_pixel_formats = 0;
++    do_show_chapter_tags = do_show_format_tags = do_show_frame_tags =
++        do_show_program_tags = do_show_stream_group_tags = do_show_stream_tags =
++        do_show_packet_tags = 0;
++    show_value_unit = use_value_prefix = use_byte_value_binary_prefix =
++        use_value_sexagesimal_format = 0;
++    show_private_data = 1;
++    show_optional_fields = SHOW_OPTIONAL_FIELDS_AUTO;
++
++    av_freep(&output_format);
++    av_freep(&stream_specifier);
++    av_freep(&show_data_hash);
++
++    av_freep(&read_intervals);
++    read_intervals_nb = 0;
++
++    find_stream_info = 1;
++
++    options = NULL;
++
++    av_freep(&input_filename);
++    av_freep(&print_input_filename);
++    iformat = NULL;
++    av_freep(&output_filename);
++
++    av_hash_freep(&hash);
++
++    nb_streams = 0;
++    av_freep(&nb_streams_packets);
++    av_freep(&nb_streams_frames);
++    av_freep(&selected_streams);
++}
++
++static void ffprobe_cleanup_exit(int code)
++{
++    ffprobe_cleanup();
++    exit(code);
++}
++
++int ffprobe_main(int argc, char **argv);
++int ffprobe_main(int argc, char **argv)
++#else
+ int main(int argc, char **argv)
++#endif
+ {
+     const Writer *w;
+     WriterContext *wctx;
+@@ -4773,5 +4833,8 @@ end:
+     pthread_mutex_destroy(&log_mutex);
+ #endif
+ 
++#ifdef __EMSCRIPTEN__
++    ffprobe_cleanup_exit(ret < 0);
++#endif
+     return ret < 0;
+ }

@@ -2,6 +2,7 @@
 02-openh264-api.diff
 03-opus-flt.diff
 04-ogg-no-crc.diff
-05-fftools.diff
+05-fibers.diff
 06-doxygen-xml.diff
 07-jsfetch-protocol.diff
+08-fftools.diff

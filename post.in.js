@@ -1416,7 +1416,7 @@ Module.ff_read_multi = function(fmt_ctx, pkt, devfile, opts) {
 var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, input, output) {
     var buffersrc, abuffersrc, buffersink, abuffersink, filter_graph,
         tmp_src_ctx, tmp_sink_ctx, src_ctxs, sink_ctxs, io_outputs, io_inputs,
-        int32s, int64s;
+        int32s;
     var instr, outstr;
 
     var multiple_inputs = !!input.length;
@@ -1479,7 +1479,7 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
                     "time_base=" + time_base[0] + "/" + time_base[1] +
                     ":sample_rate=" + sample_rate +
                     ":sample_fmt=" + (input.sample_fmt?input.sample_fmt:3/*FLT*/) +
-                    ":channel_layout=" + (input.channel_layout?input.channel_layout:4/*MONO*/),
+                    ":channel_layout=0x" + (input.channel_layout?input.channel_layout:4/*MONO*/).toString(16),
                     null, filter_graph);
 
             }
@@ -1551,18 +1551,17 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
                     output.sample_fmt?output.sample_fmt:3/*FLT*/, -1,
                     output.sample_rate?output.sample_rate:48000, -1
                 ]);
-                int64s = ff_malloc_int64_list([
-                    output.channel_layout?output.channel_layout:4/*MONO*/, -1
-                ]);
-                if (int32s === 0 || int64s === 0)
+                if (int32s === 0)
                     throw new Error("Failed to transfer parameters");
 
                 if (
                     av_opt_set_int_list_js(
                         tmp_sink_ctx, "sample_fmts", 4, int32s, -1, 1 /* AV_OPT_SEARCH_CHILDREN */
                     ) < 0 ||
-                    av_opt_set_int_list_js(
-                        tmp_sink_ctx, "channel_layouts", 8, int64s, -1, 1
+                    av_opt_set(
+                        tmp_sink_ctx, "ch_layouts",
+                        "0x" + (output.channel_layout?output.channel_layout:4).toString(16),
+                        1
                     ) < 0 ||
                     av_opt_set_int_list_js(
                         tmp_sink_ctx, "sample_rates", 4, int32s + 8, -1, 1
@@ -1573,8 +1572,6 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
                 }
                 free(int32s);
                 int32s = 0;
-                free(int64s);
-                int64s = 0;
 
             }
 
@@ -1617,7 +1614,6 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
         if (tmp_src_ctx) avfilter_free(tmp_src_ctx);
         if (tmp_sink_ctx) avfilter_free(tmp_sink_ctx);
         if (int32s) free(int32s);
-        if (int64s) free(int64s);
         if (instr) free(instr);
         if (outstr) free(outstr);
         throw ex;

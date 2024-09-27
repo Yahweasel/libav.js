@@ -22,9 +22,9 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$* && $(MAKE)
 
 # General build rule for any target
-# Use: buildrule(target name, configure flags, CFLAGS)
+# Use: buildrule(target name, extra deps, configure flags, CFLAGS)
 define([[[buildrule]]], [[[
-build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
+build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: $2 \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/$1/cflags.txt
@@ -32,10 +32,10 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/ffbuild/config.mak: \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/$1/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-                $2 \
+                $3 \
 		--optflags="$(OPTFLAGS)" \
-		--extra-cflags="-I$(PWD)/build/inst/$1/include $3" \
-		--extra-ldflags="-L$(PWD)/build/inst/$1/lib $3" \
+		--extra-cflags="-I$(PWD)/build/inst/$1/include $4" \
+		--extra-ldflags="-L$(PWD)/build/inst/$1/lib $4 -s INITIAL_MEMORY=25165824" \
 		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-$1-$(*)/config.h
@@ -47,9 +47,9 @@ part-install-$1-%: build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/libavformat/libavfo
 ]]])
 
 # Base (asm.js and wasm)
-buildrule(base, [[[--disable-pthreads --arch=emscripten]]], [[[]]])
+buildrule(base, build/inst/base/lib/libemfiberthreads.a, [[[--arch=emscripten]]], [[[]]])
 # wasm + threads
-buildrule(thr, [[[--enable-pthreads --arch=emscripten]]], [[[$(THRFLAGS)]]])
+buildrule(thr, [[[]]], [[[--enable-pthreads --arch=emscripten]]], [[[$(THRFLAGS)]]])
 
 # All dependencies
 include configs/configs/*/deps.mk

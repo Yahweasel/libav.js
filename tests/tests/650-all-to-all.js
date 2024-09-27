@@ -103,7 +103,7 @@ const formats = await (async function() {
     const ret = [];
     for (; li < lines.length; li++) {
         const line = lines[li];
-        const parts = /^ (.)(.) ([^ ]*)/.exec(line);
+        const parts = /^ (.)(.) *([^ ]*)/.exec(line);
         if (!parts)
             continue;
 

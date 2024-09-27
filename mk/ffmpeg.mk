@@ -22,12 +22,12 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-$* && $(MAKE)
 
 # General build rule for any target
-# Use: buildrule(target name, configure flags, CFLAGS)
+# Use: buildrule(target name, extra deps, configure flags, CFLAGS)
 
 
 # Base (asm.js and wasm)
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
+build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/lib/libemfiberthreads.a \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/base/cflags.txt
@@ -35,10 +35,10 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: \
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/base/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-                --disable-pthreads --arch=emscripten \
+                --arch=emscripten \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/base/include " \
-		--extra-ldflags="-L$(PWD)/build/inst/base/lib " \
+		--extra-ldflags="-L$(PWD)/build/inst/base/lib  -s INITIAL_MEMORY=25165824" \
 		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h
@@ -50,7 +50,7 @@ part-install-base-%: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/lib
 
 # wasm + threads
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
+build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak:  \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/thr/cflags.txt
@@ -61,7 +61,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: \
                 --enable-pthreads --arch=emscripten \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/thr/include $(THRFLAGS)" \
-		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS)" \
+		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS) -s INITIAL_MEMORY=25165824" \
 		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h

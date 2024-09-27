@@ -358,7 +358,7 @@ function decls(f, meta) {
 
 // exports.json
 (function() {
-    var outp = [];
+    var outp = ["_emfiberthreads_timeout_expiry"];
     decls((decl) => {
         outp.push("_" + decl);
     });

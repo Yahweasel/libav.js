@@ -13,6 +13,7 @@ LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz
+NOTHRFLAGS=build/inst/base/lib/libemfiberthreads.a
 THRFLAGS=-pthread
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
@@ -21,7 +22,7 @@ EFLAGS=\
 	--post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
-	-s "EXPORTED_RUNTIME_METHODS=['cwrap', 'PThread']" \
+	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'PThread']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
@@ -123,7 +124,7 @@ dist/libav.types.d.ts: build/libav.types.d.ts
 dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) -s WASM=0 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) -s WASM=0 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -156,7 +157,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(ES6FLAGS) -s WASM=0 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) $(ES6FLAGS) -s WASM=0 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -189,7 +190,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) -g2 -s WASM=0 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) -g2 -s WASM=0 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -222,7 +223,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -256,7 +257,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS)  \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -289,7 +290,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(ES6FLAGS) \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) $(ES6FLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -322,7 +323,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) -gsource-map \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) -gsource-map \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -355,7 +356,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) -gsource-map $(ES6FLAGS) \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) $(NOTHRFLAGS) -gsource-map $(ES6FLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
@@ -557,7 +558,7 @@ release: extract
 	done
 	cp dist/libav.types.d.ts dist/release/libav.js-$(LIBAVJS_VERSION)/dist/
 	mkdir dist/release/libav.js-$(LIBAVJS_VERSION)/sources
-	for t in ffmpeg lame libaom libogg libvorbis libvpx opus zlib; \
+	for t in ffmpeg emfiberthreads lame libaom libogg libvorbis libvpx opus zlib; \
 	do \
 		$(MAKE) $$t-release; \
 	done
@@ -597,6 +598,7 @@ halfclean:
 
 clean: halfclean
 	-rm -rf build/inst
+	-rm -rf build/emfiberthreads-$(EMFT_VERSION)
 	-rm -rf build/opus-$(OPUS_VERSION)
 	-rm -rf build/libaom-$(LIBAOM_VERSION)
 	-rm -rf build/libvorbis-$(LIBVORBIS_VERSION)

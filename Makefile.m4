@@ -13,6 +13,7 @@ LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
 MINIFIER=node_modules/.bin/uglifyjs -m
 OPTFLAGS=-Oz
+NOTHRFLAGS=build/inst/base/lib/libemfiberthreads.a
 THRFLAGS=-pthread
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
@@ -21,7 +22,7 @@ EFLAGS=\
 	--post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
-	-s "EXPORTED_RUNTIME_METHODS=['cwrap', 'PThread']" \
+	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'PThread']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
@@ -124,15 +125,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 ]]])
 
 # asm.js version
-buildrule(asm, [[[]]], base, [[[-s WASM=0]]], js)
-buildrule(asm, [[[]]], base, [[[$(ES6FLAGS) -s WASM=0]]], mjs)
-buildrule(asm, dbg., base, [[[-g2 -s WASM=0]]], js)
-buildrule(asm, dbg., base, [[[-g2 $(ES6FLAGS) -s WASM=0]]], mjs)
+buildrule(asm, [[[]]], base, [[[$(NOTHRFLAGS) -s WASM=0]]], js)
+buildrule(asm, [[[]]], base, [[[$(NOTHRFLAGS) $(ES6FLAGS) -s WASM=0]]], mjs)
+buildrule(asm, dbg., base, [[[$(NOTHRFLAGS) -g2 -s WASM=0]]], js)
+buildrule(asm, dbg., base, [[[$(NOTHRFLAGS) -g2 $(ES6FLAGS) -s WASM=0]]], mjs)
 # wasm version with no added features
-buildrule(wasm, [[[]]], base, [[[]]], js)
-buildrule(wasm, [[[]]], base, [[[$(ES6FLAGS)]]], mjs)
-buildrule(wasm, dbg., base, [[[-gsource-map]]], js)
-buildrule(wasm, dbg., base, [[[-gsource-map $(ES6FLAGS)]]], mjs)
+buildrule(wasm, [[[]]], base, [[[$(NOTHRFLAGS)]]], js)
+buildrule(wasm, [[[]]], base, [[[$(NOTHRFLAGS) $(ES6FLAGS)]]], mjs)
+buildrule(wasm, dbg., base, [[[$(NOTHRFLAGS) -gsource-map]]], js)
+buildrule(wasm, dbg., base, [[[$(NOTHRFLAGS) -gsource-map $(ES6FLAGS)]]], mjs)
 # wasm + threads
 buildrule(thr, [[[]]], thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
 buildrule(thr, [[[]]], thr, [[[$(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
@@ -178,7 +179,7 @@ release: extract
 	done
 	cp dist/libav.types.d.ts dist/release/libav.js-$(LIBAVJS_VERSION)/dist/
 	mkdir dist/release/libav.js-$(LIBAVJS_VERSION)/sources
-	for t in ffmpeg lame libaom libogg libvorbis libvpx opus zlib; \
+	for t in ffmpeg emfiberthreads lame libaom libogg libvorbis libvpx opus zlib; \
 	do \
 		$(MAKE) $$t-release; \
 	done
@@ -218,6 +219,7 @@ halfclean:
 
 clean: halfclean
 	-rm -rf build/inst
+	-rm -rf build/emfiberthreads-$(EMFT_VERSION)
 	-rm -rf build/opus-$(OPUS_VERSION)
 	-rm -rf build/libaom-$(LIBAOM_VERSION)
 	-rm -rf build/libvorbis-$(LIBVORBIS_VERSION)

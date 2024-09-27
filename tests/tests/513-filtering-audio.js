@@ -25,7 +25,7 @@ var buffersink_ctx, buffersrc_ctx;
 
 function init_filters(libav, filters_descr, sample_fmt, channel_layout, frame_size) {
     var abuffersrc, abuffersink, outputs, inputs;
-    var int32s, int64s;
+    var int32s;
     return Promise.all([
         libav.avfilter_get_by_name("abuffer"),
         libav.avfilter_get_by_name("abuffersink"),
@@ -49,7 +49,6 @@ function init_filters(libav, filters_descr, sample_fmt, channel_layout, frame_si
             libav.avfilter_graph_create_filter_js(abuffersink, "out", null,
                 null, filter_graph),
             libav.ff_malloc_int32_list([sample_fmt, -1, 48000, -1]),
-            libav.ff_malloc_int64_list([channel_layout, -1]),
             libav.av_strdup("in"),
             libav.av_strdup("out")
         ]);
@@ -59,23 +58,22 @@ function init_filters(libav, filters_descr, sample_fmt, channel_layout, frame_si
             throw new Error("Cannot create audio buffer source");
         if (ret[1] === 0)
             throw new Error("Cannot create audio buffer sink");
-        if (ret[4] === 0 || ret[5] === 0)
+        if (ret[3] === 0 || ret[4] === 0)
             throw new Error("Failed to strdup");
 
         buffersrc_ctx = ret[0];
         buffersink_ctx = ret[1];
         int32s = ret[2];
-        int64s = ret[3];
 
         return Promise.all([
             libav.av_opt_set_int_list_js(buffersink_ctx, "sample_fmts", 4, int32s, -1, libav.AV_OPT_SEARCH_CHILDREN),
-            libav.av_opt_set_int_list_js(buffersink_ctx, "channel_layouts", 8, int64s, -1, libav.AV_OPT_SEARCH_CHILDREN),
+            libav.av_opt_set(buffersink_ctx, "ch_layouts", "0x" + channel_layout.toString(16), libav.AV_OPT_SEARCH_CHILDREN),
             libav.av_opt_set_int_list_js(buffersink_ctx, "sample_rates", 4, int32s + 8, -1, libav.AV_OPT_SEARCH_CHILDREN),
-            libav.AVFilterInOut_name_s(outputs, ret[4]),
+            libav.AVFilterInOut_name_s(outputs, ret[3]),
             libav.AVFilterInOut_filter_ctx_s(outputs, buffersrc_ctx),
             libav.AVFilterInOut_pad_idx_s(outputs, 0),
             libav.AVFilterInOut_next_s(outputs, 0),
-            libav.AVFilterInOut_name_s(inputs, ret[5]),
+            libav.AVFilterInOut_name_s(inputs, ret[4]),
             libav.AVFilterInOut_filter_ctx_s(inputs, buffersink_ctx),
             libav.AVFilterInOut_pad_idx_s(inputs, 0),
             libav.AVFilterInOut_next_s(inputs, 0)
@@ -100,10 +98,7 @@ function init_filters(libav, filters_descr, sample_fmt, channel_layout, frame_si
         if (ret < 0)
             throw new Error("Failed to configure filtergraph");
 
-        return Promise.all([
-            libav.free(int32s),
-            libav.free(int64s)
-        ]);
+        return libav.free(int32s);
     });
 }
 
