@@ -32,15 +32,6 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
      }
      av_freep(&vstats_filename);
      of_enc_stats_close();
-@@ -375,7 +382,7 @@ static void ffmpeg_cleanup(int ret)
-         av_log(NULL, AV_LOG_INFO, "Conversion failed!\n");
-     }
-     term_exit();
--    ffmpeg_exited = 1;
-+    //ffmpeg_exited = 1;
- }
- 
- OutputStream *ost_iter(OutputStream *prev)
 @@ -927,7 +934,12 @@ static int64_t getmaxrss(void)
  #endif
  }
@@ -54,7 +45,7 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
  {
      Scheduler *sch = NULL;
  
-@@ -993,8 +1005,15 @@ finish:
+@@ -993,8 +1005,12 @@ finish:
          ret = 0;
  
      ffmpeg_cleanup(ret);
@@ -63,9 +54,6 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
      sch_free(&sch);
  
 +#ifdef __EMSCRIPTEN__
-+#ifdef EMFIBERTHREADS
-+    emfiberthreads_cleanup();
-+#endif
 +    exit(ret);
 +#endif
      return ret;
