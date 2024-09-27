@@ -291,7 +291,16 @@ B(enum AVChromaLocation, chroma_location)
 B(int, sample_rate)
 #undef B
 
+#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(60, 10, 100)
 RAT(AVCodecParameters, framerate)
+#else
+int AVCodecParameters_framerate_num(AVCodecParameters *a) { (void) a; return 1; }
+int AVCodecParameters_framerate_den(AVCodecParameters *a) { (void) a; return 1000; }
+void AVCodecParameters_framerate_num_s(AVCodecParameters *a, int b) { (void) a; (void) b; }
+void AVCodecParameters_framerate_den_s(AVCodecParameters *a, int b) { (void) a; (void) b; }
+void AVCodecParameters_framerate_s(AVCodecParameters *a, int n, int d) { (void) a; (void) n; (void) d; }
+#endif
+
 CHL(AVCodecParameters)
 
 

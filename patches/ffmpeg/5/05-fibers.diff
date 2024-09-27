@@ -1,0 +1,16 @@
+Index: ffmpeg-5.1.6/configure
+===================================================================
+--- ffmpeg-5.1.6.orig/configure
++++ ffmpeg-5.1.6/configure
+@@ -6449,7 +6449,10 @@ fi
+ # check for some common methods of building with pthread support
+ # do this before the optional library checks as some of them require pthreads
+ if ! disabled pthreads && ! enabled w32threads && ! enabled os2threads; then
+-    if check_lib pthreads pthread.h pthread_join   -pthread &&
++    if check_lib pthreads pthread.h pthread_join -lemfiberthreads &&
++       check_lib pthreads pthread.h pthread_create -lemfiberthreads; then
++        add_cflags -lemfiberthreads
++    elif check_lib pthreads pthread.h pthread_join   -pthread &&
+        check_lib pthreads pthread.h pthread_create -pthread; then
+         add_cflags -pthread
+     elif check_lib pthreads pthread.h pthread_join   -pthreads &&
