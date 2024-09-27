@@ -2,7 +2,15 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
 ===================================================================
 --- ffmpeg-7.0.2.orig/fftools/ffmpeg.c
 +++ ffmpeg-7.0.2/fftools/ffmpeg.c
-@@ -337,22 +337,29 @@ static void ffmpeg_cleanup(int ret)
+@@ -24,6 +24,7 @@
+  */
+ 
+ #include "config.h"
++#define FF_FORCE_PTHREADS
+ 
+ #include <errno.h>
+ #include <limits.h>
+@@ -337,22 +338,29 @@ static void ffmpeg_cleanup(int ret)
      for (int i = 0; i < nb_filtergraphs; i++)
          fg_free(&filtergraphs[i]);
      av_freep(&filtergraphs);
@@ -32,7 +40,7 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
      }
      av_freep(&vstats_filename);
      of_enc_stats_close();
-@@ -927,7 +934,12 @@ static int64_t getmaxrss(void)
+@@ -927,7 +935,12 @@ static int64_t getmaxrss(void)
  #endif
  }
  
@@ -45,7 +53,7 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
  {
      Scheduler *sch = NULL;
  
-@@ -993,8 +1005,12 @@ finish:
+@@ -993,8 +1006,12 @@ finish:
          ret = 0;
  
      ffmpeg_cleanup(ret);
@@ -215,10 +223,36 @@ Index: ffmpeg-7.0.2/libavutil/thread.h
  #include "error.h"
  
 -#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS
-+#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS || defined(__EMSCRIPTEN__)
++#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS || defined(FF_FORCE_PTHREADS)
  
 -#if HAVE_PTHREADS
-+#if HAVE_PTHREADS || defined(__EMSCRIPTEN__)
++#if HAVE_PTHREADS || defined(FF_FORCE_PTHREADS)
  #include <pthread.h>
  
  #if defined(ASSERT_LEVEL) && ASSERT_LEVEL > 1
+Index: ffmpeg-7.0.2/fftools/ffmpeg_sched.c
+===================================================================
+--- ffmpeg-7.0.2.orig/fftools/ffmpeg_sched.c
++++ ffmpeg-7.0.2/fftools/ffmpeg_sched.c
+@@ -23,6 +23,8 @@
+ #include <stddef.h>
+ #include <stdint.h>
+ 
++#define FF_FORCE_PTHREADS
++
+ #include "cmdutils.h"
+ #include "ffmpeg_sched.h"
+ #include "ffmpeg_utils.h"
+Index: ffmpeg-7.0.2/fftools/thread_queue.c
+===================================================================
+--- ffmpeg-7.0.2.orig/fftools/thread_queue.c
++++ ffmpeg-7.0.2/fftools/thread_queue.c
+@@ -19,6 +19,8 @@
+ #include <stdint.h>
+ #include <string.h>
+ 
++#define FF_FORCE_PTHREADS
++
+ #include "libavutil/avassert.h"
+ #include "libavutil/error.h"
+ #include "libavutil/fifo.h"

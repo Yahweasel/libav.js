@@ -2,7 +2,15 @@ Index: ffmpeg-6.1.2/fftools/ffmpeg.c
 ===================================================================
 --- ffmpeg-6.1.2.orig/fftools/ffmpeg.c
 +++ ffmpeg-6.1.2/fftools/ffmpeg.c
-@@ -358,18 +358,24 @@ static void ffmpeg_cleanup(int ret)
+@@ -24,6 +24,7 @@
+  */
+ 
+ #include "config.h"
++#define FF_FORCE_PTHREADS
+ 
+ #include <errno.h>
+ #include <limits.h>
+@@ -358,18 +359,24 @@ static void ffmpeg_cleanup(int ret)
      for (i = 0; i < nb_filtergraphs; i++)
          fg_free(&filtergraphs[i]);
      av_freep(&filtergraphs);
@@ -27,7 +35,7 @@ Index: ffmpeg-6.1.2/fftools/ffmpeg.c
      }
      av_freep(&vstats_filename);
      of_enc_stats_close();
-@@ -1290,7 +1296,12 @@ static int64_t getmaxrss(void)
+@@ -1290,7 +1297,12 @@ static int64_t getmaxrss(void)
  #endif
  }
  
@@ -40,7 +48,7 @@ Index: ffmpeg-6.1.2/fftools/ffmpeg.c
  {
      int ret, err_rate_exceeded;
      BenchmarkTimeStamps ti;
-@@ -1348,5 +1359,9 @@ finish:
+@@ -1348,5 +1360,9 @@ finish:
          ret = 0;
  
      ffmpeg_cleanup(ret);
@@ -206,10 +214,10 @@ Index: ffmpeg-6.1.2/libavutil/thread.h
  #include "error.h"
  
 -#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS
-+#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS || defined(__EMSCRIPTEN__)
++#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS || defined(FF_FORCE_PTHREADS)
  
 -#if HAVE_PTHREADS
-+#if HAVE_PTHREADS || defined(__EMSCRIPTEN__)
++#if HAVE_PTHREADS || defined(FF_FORCE_PTHREADS)
  #include <pthread.h>
  
  #if defined(ASSERT_LEVEL) && ASSERT_LEVEL > 1
@@ -217,154 +225,25 @@ Index: ffmpeg-6.1.2/libavutil/threadmessage.c
 ===================================================================
 --- ffmpeg-6.1.2.orig/libavutil/threadmessage.c
 +++ ffmpeg-6.1.2/libavutil/threadmessage.c
-@@ -27,8 +27,10 @@
- #include "threadmessage.h"
- #include "thread.h"
+@@ -21,6 +21,8 @@
+ #include <limits.h>
+ #include <stddef.h>
  
-+#define HAVE_THREAD_MESSAGES (HAVE_THREADS || defined(__EMSCRIPTEN__))
++#define FF_FORCE_PTHREADS
 +
- struct AVThreadMessageQueue {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     AVFifo *fifo;
-     pthread_mutex_t lock;
-     pthread_cond_t cond_recv;
-@@ -46,7 +48,7 @@ int av_thread_message_queue_alloc(AVThre
-                                   unsigned nelem,
-                                   unsigned elsize)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     AVThreadMessageQueue *rmq;
-     int ret = 0;
+ #include "error.h"
+ #include "fifo.h"
+ #include "mem.h"
+Index: ffmpeg-6.1.2/fftools/thread_queue.c
+===================================================================
+--- ffmpeg-6.1.2.orig/fftools/thread_queue.c
++++ ffmpeg-6.1.2/fftools/thread_queue.c
+@@ -19,6 +19,8 @@
+ #include <stdint.h>
+ #include <string.h>
  
-@@ -82,20 +84,20 @@ int av_thread_message_queue_alloc(AVThre
- #else
-     *mq = NULL;
-     return AVERROR(ENOSYS);
--#endif /* HAVE_THREADS */
-+#endif /* HAVE_THREAD_MESSAGES */
- }
- 
- void av_thread_message_queue_set_free_func(AVThreadMessageQueue *mq,
-                                            void (*free_func)(void *msg))
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     mq->free_func = free_func;
- #endif
- }
- 
- void av_thread_message_queue_free(AVThreadMessageQueue **mq)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     if (*mq) {
-         av_thread_message_flush(*mq);
-         av_fifo_freep2(&(*mq)->fifo);
-@@ -109,7 +111,7 @@ void av_thread_message_queue_free(AVThre
- 
- int av_thread_message_queue_nb_elems(AVThreadMessageQueue *mq)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     int ret;
-     pthread_mutex_lock(&mq->lock);
-     ret = av_fifo_can_read(mq->fifo);
-@@ -120,7 +122,7 @@ int av_thread_message_queue_nb_elems(AVT
- #endif
- }
- 
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
- 
- static int av_thread_message_queue_send_locked(AVThreadMessageQueue *mq,
-                                                void *msg,
-@@ -156,13 +158,13 @@ static int av_thread_message_queue_recv_
-     return 0;
- }
- 
--#endif /* HAVE_THREADS */
-+#endif /* HAVE_THREAD_MESSAGES */
- 
- int av_thread_message_queue_send(AVThreadMessageQueue *mq,
-                                  void *msg,
-                                  unsigned flags)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     int ret;
- 
-     pthread_mutex_lock(&mq->lock);
-@@ -171,14 +173,14 @@ int av_thread_message_queue_send(AVThrea
-     return ret;
- #else
-     return AVERROR(ENOSYS);
--#endif /* HAVE_THREADS */
-+#endif /* HAVE_THREAD_MESSAGES */
- }
- 
- int av_thread_message_queue_recv(AVThreadMessageQueue *mq,
-                                  void *msg,
-                                  unsigned flags)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     int ret;
- 
-     pthread_mutex_lock(&mq->lock);
-@@ -187,32 +189,32 @@ int av_thread_message_queue_recv(AVThrea
-     return ret;
- #else
-     return AVERROR(ENOSYS);
--#endif /* HAVE_THREADS */
-+#endif /* HAVE_THREAD_MESSAGES */
- }
- 
- void av_thread_message_queue_set_err_send(AVThreadMessageQueue *mq,
-                                           int err)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     pthread_mutex_lock(&mq->lock);
-     mq->err_send = err;
-     pthread_cond_broadcast(&mq->cond_send);
-     pthread_mutex_unlock(&mq->lock);
--#endif /* HAVE_THREADS */
-+#endif /* HAVE_THREAD_MESSAGES */
- }
- 
- void av_thread_message_queue_set_err_recv(AVThreadMessageQueue *mq,
-                                           int err)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     pthread_mutex_lock(&mq->lock);
-     mq->err_recv = err;
-     pthread_cond_broadcast(&mq->cond_recv);
-     pthread_mutex_unlock(&mq->lock);
--#endif /* HAVE_THREADS */
-+#endif /* HAVE_THREAD_MESSAGES */
- }
- 
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
- static int free_func_wrap(void *arg, void *buf, size_t *nb_elems)
- {
-     AVThreadMessageQueue *mq = arg;
-@@ -225,7 +227,7 @@ static int free_func_wrap(void *arg, voi
- 
- void av_thread_message_flush(AVThreadMessageQueue *mq)
- {
--#if HAVE_THREADS
-+#if HAVE_THREAD_MESSAGES
-     size_t used;
- 
-     pthread_mutex_lock(&mq->lock);
-@@ -236,5 +238,5 @@ void av_thread_message_flush(AVThreadMes
-      * is nothing to read */
-     pthread_cond_broadcast(&mq->cond_send);
-     pthread_mutex_unlock(&mq->lock);
--#endif /* HAVE_THREADS */
-+#endif /* HAVE_THREAD_MESSAGES */
- }
++#define FF_FORCE_PTHREADS
++
+ #include "libavutil/avassert.h"
+ #include "libavutil/error.h"
+ #include "libavutil/fifo.h"
