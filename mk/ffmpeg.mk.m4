@@ -47,9 +47,9 @@ part-install-$1-%: build/ffmpeg-$(FFMPEG_VERSION)/build-$1-%/libavformat/libavfo
 ]]])
 
 # Base (asm.js and wasm)
-buildrule(base, build/inst/base/lib/libemfiberthreads.a, [[[--disable-pthreads --arch=emscripten]]], [[[-lemfiberthreads -sMEMORY64=2]]])
+buildrule(base, build/inst/base/lib/libemfiberthreads.a, [[[--disable-pthreads --arch=emscripten]]], [[[-lemfiberthreads]]])
 # wasm + threads
-buildrule(thr, [[[]]], [[[--enable-pthreads --arch=emscripten]]], [[[$(THRFLAGS) -sMEMORY64=2]]])
+buildrule(thr, [[[]]], [[[--enable-pthreads --arch=emscripten]]], [[[$(THRFLAGS)]]])
 
 # All dependencies
 include configs/configs/*/deps.mk

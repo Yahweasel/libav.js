@@ -37,8 +37,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/
 		../configure $(FFMPEG_CONFIG) \
                 --disable-pthreads --arch=emscripten \
 		--optflags="$(OPTFLAGS)" \
-		--extra-cflags="-I$(PWD)/build/inst/base/include -lemfiberthreads -sMEMORY64=2" \
-		--extra-ldflags="-L$(PWD)/build/inst/base/lib -lemfiberthreads -sMEMORY64=2 -s INITIAL_MEMORY=25165824" \
+		--extra-cflags="-I$(PWD)/build/inst/base/include -lemfiberthreads" \
+		--extra-ldflags="-L$(PWD)/build/inst/base/lib -lemfiberthreads -s INITIAL_MEMORY=25165824" \
 		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/config.h
@@ -60,8 +60,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak:  \
 		../configure $(FFMPEG_CONFIG) \
                 --enable-pthreads --arch=emscripten \
 		--optflags="$(OPTFLAGS)" \
-		--extra-cflags="-I$(PWD)/build/inst/thr/include $(THRFLAGS) -sMEMORY64=2" \
-		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS) -sMEMORY64=2 -s INITIAL_MEMORY=25165824" \
+		--extra-cflags="-I$(PWD)/build/inst/thr/include $(THRFLAGS)" \
+		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS) -s INITIAL_MEMORY=25165824" \
 		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h

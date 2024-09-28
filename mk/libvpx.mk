@@ -15,9 +15,7 @@ build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile: build/libvpx-$(LIBVPX_VERSION)/
 	tools/libvpx-emcc-version-check.sh
 	mkdir -p build/libvpx-$(LIBVPX_VERSION)/build-$*
 	cd build/libvpx-$(LIBVPX_VERSION)/build-$* && \
-		emconfigure \
-			env LD="emcc `cat $(PWD)/build/inst/$*/cflags.txt`" \
-			../../libvpx-$(LIBVPX_VERSION)/configure \
+		emconfigure ../../libvpx-$(LIBVPX_VERSION)/configure \
 			--prefix="$(PWD)/build/inst/$*" \
 			--target=generic-gnu \
 			--extra-cflags="-Oz `cat $(PWD)/build/inst/$*/cflags.txt`" \

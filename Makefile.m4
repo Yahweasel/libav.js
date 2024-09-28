@@ -28,8 +28,7 @@ EFLAGS=\
 	-s ASYNCIFY \
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
 	-s INITIAL_MEMORY=25165824 \
-	-s ALLOW_MEMORY_GROWTH=1 \
-        -s MEMORY64=2
+	-s ALLOW_MEMORY_GROWTH=1
 
 # For debugging:
 #EFLAGS+=\
@@ -124,7 +123,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
-                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -171,11 +169,11 @@ node_modules/.bin/terser:
 # Targets
 build/inst/base/cflags.txt:
 	mkdir -p build/inst/base
-	echo -gsource-map -sMEMORY64=2 -Wno-experimental > $@
+	echo -gsource-map > $@
 
 build/inst/thr/cflags.txt:
 	mkdir -p build/inst/thr
-	echo $(THRFLAGS) -gsource-map -sMEMORY64=2 -Wno-experimental > $@
+	echo $(THRFLAGS) -gsource-map > $@
 
 RELEASE_VARIANTS=\
 	default default-cli opus opus-af flac flac-af wav wav-af obsolete webm \
