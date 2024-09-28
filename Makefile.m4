@@ -11,7 +11,7 @@ LIBAVJS_VERSION_BASE=5.4
 LIBAVJS_VERSION=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION)$(LIBAVJS_VERSION_SUFFIX)
 LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
-MINIFIER=node_modules/.bin/uglifyjs -m
+MINIFIER=node_modules/.bin/terser
 OPTFLAGS=-Oz
 NOTHRFLAGS=build/inst/base/lib/libemfiberthreads.a
 THRFLAGS=-pthread
@@ -71,7 +71,7 @@ build-%: \
 define([[[febuildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%$1.$2: build/libav-$(LIBAVJS_VERSION).$2 \
 	dist/libav-$(LIBAVJS_VERSION)-%$1.wasm.$2 \
-	node_modules/.bin/uglifyjs
+	node_modules/.bin/terser
 	mkdir -p dist
 	sed "s/@CONFIG/$(*)/g ; s/@DBG/$1/g" < $< | $3 > $(@)
 
@@ -147,7 +147,7 @@ build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json tools/apply
 build/libav.types.d.ts build/libav-$(LIBAVJS_VERSION).mjs build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
 	touch $@
 
-node_modules/.bin/uglifyjs:
+node_modules/.bin/terser:
 	npm install
 
 # Targets
