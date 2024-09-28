@@ -11,9 +11,9 @@ LIBAVJS_VERSION_BASE=5.4
 LIBAVJS_VERSION=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION)$(LIBAVJS_VERSION_SUFFIX)
 LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
-MINIFIER=node_modules/.bin/uglifyjs -m
+MINIFIER=node_modules/.bin/terser
 OPTFLAGS=-Oz
-NOTHRFLAGS=build/inst/base/lib/libemfiberthreads.a
+NOTHRFLAGS=-Lbuild/inst/base/lib -lemfiberthreads
 THRFLAGS=-pthread
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
@@ -72,7 +72,7 @@ build-%: \
 define([[[febuildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%$1.$2: build/libav-$(LIBAVJS_VERSION).$2 \
 	dist/libav-$(LIBAVJS_VERSION)-%$1.wasm.$2 \
-	node_modules/.bin/uglifyjs
+	node_modules/.bin/terser
 	mkdir -p dist
 	sed "s/@CONFIG/$(*)/g ; s/@DBG/$1/g" < $< | $3 > $(@)
 
@@ -89,22 +89,38 @@ dist/libav.types.d.ts: build/libav.types.d.ts
 	mkdir -p dist
 	cp $< $@
 
+# Link rule that checks for a library's existence before linking it
+# Use: linkfflib(library name, target inst name)
+define([[[linkfflib]]], [[[ \
+	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/lib$1/lib$1.a || echo ' \
+	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/lib$1 -l$1 \
+	'` \
+]]])
+
 # General build rule for any target
-# Use: buildrule(target file name, debug infix, target inst name, CFLAGS, target file suffix)
+# Use: buildrule(target file name, debug infix, target inst name, extra link flags, target file suffix)
 define([[[buildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3-%/libavformat/libavformat.a \
 	build/exports.json pre.js build/post.js extern-post.js bindings.c
 	mkdir -p $(@).d
-	$(EMCC) $(OPTFLAGS) $(EFLAGS) $4 \
+	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
 		bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/libavdevice/libavdevice.a \
+		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/libavdevice -lavdevice \
 		'` \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/*/lib*.a \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/configs/$(*)/libs.txt` -o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
+		linkfflib(avutil, $3) \
+		linkfflib(avformat, $3) \
+		linkfflib(avcodec, $3) \
+		linkfflib(avfilter, $3) \
+		linkfflib(swresample, $3) \
+		linkfflib(swscale, $3) \
+		linkfflib(foob, $3) \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/configs/$(*)/libs.txt` \
+		$4 \
+		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
@@ -149,7 +165,7 @@ build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json tools/apply
 build/libav.types.d.ts build/libav-$(LIBAVJS_VERSION).mjs build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
 	touch $@
 
-node_modules/.bin/uglifyjs:
+node_modules/.bin/terser:
 	npm install
 
 # Targets

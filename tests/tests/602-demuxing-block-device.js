@@ -15,9 +15,6 @@
 
 // Example of directly using a block device
 
-if (h.libAVOpts && h.libAVOpts.yesthreads)
-    throw new Error("Known bug: test 602 does not work with threads.");
-
 const libav = await h.LibAV();
 const buf = await h.readCachedFile("bbb.webm");
 

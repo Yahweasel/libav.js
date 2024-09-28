@@ -12,4 +12,3 @@ tests/out.webm
 tests/out.mp4
 
 node_modules/
-package-lock.json
