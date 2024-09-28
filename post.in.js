@@ -2543,11 +2543,15 @@ var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
     var ptr = malloc((arr.length + 1) * 4);
     if (ptr === 0)
         throw new Error("Failed to malloc");
-    var inArr = new Uint32Array(Module.HEAPU8.buffer, ptr, arr.length + 1);
+    var inArr = new Uint32Array(Module.HEAPU8.buffer, ptr, (arr.length + 1) * 2);
     var i;
-    for (i = 0; i < arr.length; i++)
-        inArr[i] = av_strdup(arr[i]);
-    inArr[i] = 0;
+    for (i = 0; i < arr.length; i++) {
+        var tmp = av_strdup(arr[i]);
+        inArr[i*2] = Number(tmp % 0x100000000n);
+        inArr[i*2+1] = Number(tmp / 0x100000000n);
+    }
+    inArr[i*2] = 0;
+    inArr[i*2+1] = 0;
     return ptr;
 };
 
@@ -2557,9 +2561,12 @@ var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
  */
 /// @types ff_free_string_array@sync(ptr: number): @promise@void@
 var ff_free_string_array = Module.ff_free_string_array = function(ptr) {
-    var iPtr = ptr / 4;
-    for (;; iPtr++) {
-        var elPtr = Module.HEAPU32[iPtr];
+    var iPtr = Number(ptr / 4);
+    for (;; iPtr += 2) {
+        var elPtr = BigInt(
+            Module.HEAPU32[iPtr] +
+            Module.HEAPU32[iPtr+1] * 0x100000000
+        );
         if (!elPtr)
             break;
         free(elPtr);

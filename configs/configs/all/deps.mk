@@ -8,6 +8,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-all/ffbuild/config.mak: build/inst/bas
 build/ffmpeg-$(FFMPEG_VERSION)/build-thr-all/ffbuild/config.mak: build/inst/thr/lib/pkgconfig/vpx.pc
 build/ffmpeg-$(FFMPEG_VERSION)/build-base-all/ffbuild/config.mak: build/inst/base/lib/pkgconfig/aom.pc
 build/ffmpeg-$(FFMPEG_VERSION)/build-thr-all/ffbuild/config.mak: build/inst/thr/lib/pkgconfig/aom.pc
+build/ffmpeg-$(FFMPEG_VERSION)/build-base-all/ffbuild/config.mak: build/inst/base/lib/pkgconfig/SvtAv1Enc.pc
+build/ffmpeg-$(FFMPEG_VERSION)/build-thr-all/ffbuild/config.mak: build/inst/thr/lib/pkgconfig/SvtAv1Enc.pc
 build/ffmpeg-$(FFMPEG_VERSION)/build-base-all/ffbuild/config.mak: build/inst/base/lib/pkgconfig/openh264.pc
 build/ffmpeg-$(FFMPEG_VERSION)/build-thr-all/ffbuild/config.mak: build/inst/thr/lib/pkgconfig/openh264.pc
 build/ffmpeg-$(FFMPEG_VERSION)/build-base-all/ffbuild/config.mak: build/inst/base/lib/pkgconfig/zlib.pc

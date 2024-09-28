@@ -63,6 +63,10 @@ async function main() {
             // AOM-specific hack
             res = `../build/libaom-${version("libaom")}/` + orig.slice(6);
 
+        } else if (/^\.\.\/\.\.\/src\/[a-z]*thread/.test(orig)) {
+            // emfiberthreads
+            res = `../build/emfiberthreads-${version("emfiberthreads")}/` + orig.slice(6);
+
         } else if (
             /cache\/sysroot/.test(orig) ||
             /system\/lib/.test(orig)

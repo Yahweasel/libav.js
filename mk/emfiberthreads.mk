@@ -1,11 +1,13 @@
 EMFT_VERSION=0.2
 
-build/inst/%/lib/libemfiberthreads.a: build/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a
+build/inst/base/lib/libemfiberthreads.a: build/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a
 	cd build/emfiberthreads-$(EMFT_VERSION) && \
-		$(MAKE) install PREFIX="$(PWD)/build/inst/$*"
+		$(MAKE) install PREFIX="$(PWD)/build/inst/base"
 
 build/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a: build/emfiberthreads-$(EMFT_VERSION)/Makefile
-	cd build/emfiberthreads-$(EMFT_VERSION) && $(MAKE) STACK_SIZE=1048576
+	cd build/emfiberthreads-$(EMFT_VERSION) && \
+		$(MAKE) STACK_SIZE=1048576 \
+		CFLAGS="-Oz `cat $(PWD)/build/inst/base/cflags.txt`"
 
 extract: build/emfiberthreads-$(EMFT_VERSION)/Makefile
 

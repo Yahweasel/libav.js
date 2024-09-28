@@ -14,7 +14,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-const LibAV = require("../dist/libav-all.js");
+const LibAV = require("../dist/libav-all.dbg.js");
 const fs = require("fs/promises");
 
 async function main() {

@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 69a6468..bb87785 100644
+index 69a6468..4a699a6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -329,8 +329,8 @@ else()
@@ -13,34 +13,100 @@ index 69a6468..bb87785 100644
      endif()
      check_both_flags_add(-mno-avx)
  endif()
-@@ -476,8 +476,8 @@ endif()
+@@ -476,8 +476,12 @@ endif()
  include_directories(.)
  
  # Find out if we have threading available
--set(CMAKE_THREAD_PREFER_PTHREADS ON)
--find_package(Threads)
-+#set(CMAKE_THREAD_PREFER_PTHREADS ON)
-+#find_package(Threads)
++if(EMFIBERTHREADS)
++    link_libraries(-lemfiberthreads)
++else()
+ set(CMAKE_THREAD_PREFER_PTHREADS ON)
+ find_package(Threads)
++endif()
  
  string(TOLOWER "${SANITIZER}" SANITIZER)
  
+diff --git a/Source/Lib/Common/Codec/EbThreads.c b/Source/Lib/Common/Codec/EbThreads.c
+index 7350a89..658a0bf 100644
+--- a/Source/Lib/Common/Codec/EbThreads.c
++++ b/Source/Lib/Common/Codec/EbThreads.c
+@@ -87,6 +87,7 @@ static void check_set_prio(void) {
+         return;
+     pthread_attr_t attr;
+     int            ret;
++#ifndef EMFIBERTHREADS_PTHREAD_H
+     if ((ret = pthread_attr_init(&attr))) {
+         SVT_WARN("Failed to initalize thread attributes: %s\n", strerror(ret));
+         return;
+@@ -101,6 +102,7 @@ static void check_set_prio(void) {
+         SVT_WARN("Failed to set thread priority: %s\n", strerror(ret));
+         goto end;
+     }
++#endif
+     pthread_t th;
+     if (pthread_create(&th, &attr, dummy_func, NULL)) {
+         SVT_WARN("Failed to create thread: %s\n", strerror(ret));
+@@ -108,9 +110,11 @@ static void check_set_prio(void) {
+     }
+     can_use_prio = true;
+ end:
++#ifndef EMFIBERTHREADS_PTHREAD_H
+     if (pthread_attr_destroy(&attr)) {
+         SVT_WARN("Failed to destroy thread attributes: %s\n", strerror(ret));
+     }
++#endif
+ }
+ #endif
+ 
+@@ -137,6 +141,7 @@ EbHandle svt_create_thread(void *thread_function(void *), void *thread_context)
+     }
+ 
+     pthread_attr_t attr;
++#ifndef EMFIBERTHREADS_PTHREAD_H
+     if (pthread_attr_init(&attr)) {
+         SVT_ERROR("Failed to initalize thread attributes\n");
+         return NULL;
+@@ -149,11 +154,14 @@ EbHandle svt_create_thread(void *thread_function(void *), void *thread_context)
+         param.sched_priority = 99;
+         pthread_attr_setschedparam(&attr, &param);
+     }
++#endif
+ 
+     // 1 MiB in bytes for now since we can't easily change the stack size after creation
+     const size_t min_stack_size = 1024 * 1024;
++#ifndef EMFIBERTHREADS_PTHREAD_H
+     // We don't care if this fails, it's just a hint for the min size we are expecting.
+     (void)pthread_attr_setstacksize(&attr, min_stack_size);
++#endif
+ 
+     pthread_t *th = malloc(sizeof(*th));
+     if (th == NULL) {
+@@ -167,7 +175,9 @@ EbHandle svt_create_thread(void *thread_function(void *), void *thread_context)
+         return NULL;
+     }
+ 
++#ifndef EMFIBERTHREADS_PTHREAD_H
+     pthread_attr_destroy(&attr);
++#endif
+ 
+     thread_handle = th;
+ #endif // _WIN32
 diff --git a/Source/Lib/Decoder/CMakeLists.txt b/Source/Lib/Decoder/CMakeLists.txt
-index de416b9..bf4d242 100644
+index de416b9..1589cea 100644
 --- a/Source/Lib/Decoder/CMakeLists.txt
 +++ b/Source/Lib/Decoder/CMakeLists.txt
-@@ -22,9 +22,10 @@ if(UNIX)
+@@ -22,7 +22,11 @@ if(UNIX)
          if(M_LIB)
              list(APPEND PLATFORM_LIBS m)
          endif()
--        list(APPEND PLATFORM_LIBS Threads::Threads)
-+        #list(APPEND PLATFORM_LIBS Threads::Threads)
++        if(EMFIBERTHREADS)
++            list(APPEND PLATFORM_LIBS emfiberthreads)
++        else()
+         list(APPEND PLATFORM_LIBS Threads::Threads)
++        endif()
      endif()
--    set(LIBS_PRIVATE "-lpthread -lm")
-+    #set(LIBS_PRIVATE "-lpthread -lm")
-+    set(LIBS_PRIVATE "-lm")
+     set(LIBS_PRIVATE "-lpthread -lm")
  endif()
- 
- if(COVERAGE)
 diff --git a/Source/Lib/Decoder/Codec/EbDecHandle.c b/Source/Lib/Decoder/Codec/EbDecHandle.c
 index 62cb554..9da422f 100644
 --- a/Source/Lib/Decoder/Codec/EbDecHandle.c
@@ -55,22 +121,21 @@ index 62cb554..9da422f 100644
          (void)pthread_setschedparam(pthread_self(), SCHED_FIFO, &(struct sched_param){.sched_priority = 99});
  #endif
 diff --git a/Source/Lib/Encoder/CMakeLists.txt b/Source/Lib/Encoder/CMakeLists.txt
-index bc1e91b..91a77d1 100644
+index bc1e91b..be4493b 100644
 --- a/Source/Lib/Encoder/CMakeLists.txt
 +++ b/Source/Lib/Encoder/CMakeLists.txt
-@@ -23,9 +23,10 @@ if(UNIX)
+@@ -23,7 +23,11 @@ if(UNIX)
          if(M_LIB)
              list(APPEND PLATFORM_LIBS m)
          endif()
--        list(APPEND PLATFORM_LIBS Threads::Threads)
-+        #list(APPEND PLATFORM_LIBS Threads::Threads)
++        if(EMFIBERTHREADS)
++            list(APPEND PLATFORM_LIBS emfiberthreads)
++        else()
+         list(APPEND PLATFORM_LIBS Threads::Threads)
++        endif()
      endif()
--    set(LIBS_PRIVATE "-lpthread -lm")
-+    #set(LIBS_PRIVATE "-lpthread -lm")
-+    set(LIBS_PRIVATE "-lm")
+     set(LIBS_PRIVATE "-lpthread -lm")
  endif()
- 
- if(COVERAGE)
 diff --git a/Source/Lib/Encoder/Globals/EbEncHandle.c b/Source/Lib/Encoder/Globals/EbEncHandle.c
 index 119ed92..cce7833 100644
 --- a/Source/Lib/Encoder/Globals/EbEncHandle.c

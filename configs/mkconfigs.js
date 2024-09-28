@@ -74,7 +74,7 @@ const configsRaw = [
 
     ["vp8-opus", ["format-ogg", "format-webm", opus, "libvpx", vp8], {avf: true}],
     ["vp9-opus", ["format-ogg", "format-webm", opus, "libvpx", vp9], {avf: true}],
-    ["av1-opus", ["format-ogg", "format-webm", opus, aomav1], {avf: true}],
+    ["av1-opus", ["format-ogg", "format-webm", opus, aomsvtav1], {avf: true}],
 
     // Video reprobate:
     ["h264-aac", ["format-mp4", "format-aac", "format-webm", aac, h264], {avf: true}],

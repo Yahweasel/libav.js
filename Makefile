@@ -28,7 +28,8 @@ EFLAGS=\
 	-s ASYNCIFY \
 	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
 	-s INITIAL_MEMORY=25165824 \
-	-s ALLOW_MEMORY_GROWTH=1
+	-s ALLOW_MEMORY_GROWTH=1 \
+        -s MEMORY64=2
 
 # For debugging:
 #EFLAGS+=\
@@ -137,6 +138,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -170,6 +172,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -203,6 +206,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -236,6 +240,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -270,6 +275,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -303,6 +309,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -336,6 +343,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -369,6 +377,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -403,6 +412,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -436,6 +446,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -469,6 +480,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -502,6 +514,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
+                        emfiberthreads $(EMFT_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
 			libaom $(LIBAOM_VERSION); \
 	fi || ( rm -f $(@) ; false )
@@ -532,11 +545,11 @@ node_modules/.bin/uglifyjs:
 # Targets
 build/inst/base/cflags.txt:
 	mkdir -p build/inst/base
-	echo -gsource-map > $@
+	echo -gsource-map -sMEMORY64=2 -Wno-experimental > $@
 
 build/inst/thr/cflags.txt:
 	mkdir -p build/inst/thr
-	echo $(THRFLAGS) -gsource-map > $@
+	echo $(THRFLAGS) -gsource-map -sMEMORY64=2 -Wno-experimental > $@
 
 RELEASE_VARIANTS=\
 	default default-cli opus opus-af flac flac-af wav wav-af obsolete webm \
