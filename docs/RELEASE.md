@@ -8,6 +8,9 @@ These are notes, mainly to myself, for making a release.
    to make sure that the tests actually have perfect coverage, but it's at least
    a good way to know what I'm missing.
 
+ * Update the doxygen by going into FFmpeg's build-base-default directory and
+   `make doc/doxy/html`, then `tools/doxy-to-json.js <ffmpeg version>`.
+
  * Check library versions. Anything but FFmpeg is usually trivial to update, so
    can be updated shortly before release.
 

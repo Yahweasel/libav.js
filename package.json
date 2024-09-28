@@ -117,6 +117,7 @@
   },
   "homepage": "https://github.com/Yahweasel/libav.js#readme",
   "devDependencies": {
+    "fast-xml-parser": "^4.5.0",
     "terser": "^5.34.1"
   }
 }
