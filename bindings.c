@@ -232,9 +232,9 @@ int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, in
 /* AVCodec */
 #define B(type, field) A(AVCodec, type, field)
 #define BA(type, field) AA(AVCodec, type, field)
-B(enum AVSampleFormat *, sample_fmts)
+B(const enum AVSampleFormat *, sample_fmts)
 BA(enum AVSampleFormat, sample_fmts)
-B(int *, supported_samplerates)
+B(const int *, supported_samplerates)
 BA(int, supported_samplerates)
 B(enum AVMediaType, type)
 #undef B
@@ -275,9 +275,9 @@ CHL(AVCodecContext)
 /* AVCodecDescriptor */
 #define B(type, field) A(AVCodecDescriptor, type, field)
 B(enum AVCodecID, id)
-B(char *, long_name)
-AA(AVCodecDescriptor, char *, mime_types)
-B(char *, name)
+B(const char *, long_name)
+AA(AVCodecDescriptor, const char *, mime_types)
+B(const char *, name)
 B(int, props)
 B(enum AVMediaType, type)
 #undef B
@@ -375,7 +375,7 @@ void av_packet_rescale_ts_js(
 #define BA(type, field) AA(AVFormatContext, type, field)
 B(int, flags)
 B(unsigned int, nb_streams)
-B(struct AVOutputFormat *, oformat)
+B(const struct AVOutputFormat *, oformat)
 B(AVIOContext *, pb)
 BA(AVStream *, streams)
 #undef B
@@ -437,7 +437,7 @@ int ff_buffersink_set_ch_layout(AVFilterContext *ctx, unsigned int layoutlo, uns
     uint64_t layout;
     char layoutStr[20];
     layout = ((uint64_t) layouthi << 32) | ((uint64_t) layoutlo);
-    sprintf(layoutStr, "0x%x", layout);
+    sprintf(layoutStr, "0x%llx", layout);
     return av_opt_set(ctx, "ch_layouts", layoutStr, AV_OPT_SEARCH_CHILDREN);
 }
 #else
