@@ -1,0 +1,32 @@
+Index: ffmpeg-7.0.2/libavcodec/golomb.h
+===================================================================
+--- ffmpeg-7.0.2.orig/libavcodec/golomb.h
++++ ffmpeg-7.0.2/libavcodec/golomb.h
+@@ -612,10 +612,10 @@ static inline int get_te(GetBitContext *
+     return i;
+ }
+ 
+-#define get_ue_golomb(a) get_ue(a, __FILE__, __func__, __LINE__)
+-#define get_se_golomb(a) get_se(a, __FILE__, __func__, __LINE__)
+-#define get_te_golomb(a, r)  get_te(a, r, __FILE__, __func__, __LINE__)
+-#define get_te0_golomb(a, r) get_te(a, r, __FILE__, __func__, __LINE__)
++#define get_ue_golomb(a) get_ue(a, "", __func__, __LINE__)
++#define get_se_golomb(a) get_se(a, "", __func__, __LINE__)
++#define get_te_golomb(a, r)  get_te(a, r, "", __func__, __LINE__)
++#define get_te0_golomb(a, r) get_te(a, r, "", __func__, __LINE__)
+ 
+ #endif /* TRACE */
+ #endif /* AVCODEC_GOLOMB_H */
+Index: ffmpeg-7.0.2/libavutil/avassert.h
+===================================================================
+--- ffmpeg-7.0.2.orig/libavutil/avassert.h
++++ ffmpeg-7.0.2/libavutil/avassert.h
+@@ -40,7 +40,7 @@
+ #define av_assert0(cond) do {                                           \
+     if (!(cond)) {                                                      \
+         av_log(NULL, AV_LOG_PANIC, "Assertion %s failed at %s:%d\n",    \
+-               AV_STRINGIFY(cond), __FILE__, __LINE__);                 \
++               AV_STRINGIFY(cond), __func__, __LINE__);                 \
+         abort();                                                        \
+     }                                                                   \
+ } while (0)
