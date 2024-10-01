@@ -22,6 +22,8 @@
 --enable-demuxer=wav
 --enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
 --enable-muxer=wav
+--enable-decoder=pcm_f32le
+--enable-encoder=pcm_f32le
 --enable-parser=aac
 --enable-parser=vp8
 --enable-parser=vp9

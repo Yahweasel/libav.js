@@ -18,6 +18,8 @@
 --enable-demuxer=wav
 --enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
 --enable-muxer=wav
+--enable-decoder=pcm_f32le
+--enable-encoder=pcm_f32le
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix
@@ -102,8 +104,6 @@
 --enable-encoder=rawvideo
 --enable-demuxer=pcm_f32le
 --enable-muxer=pcm_f32le
---enable-decoder=pcm_f32le
---enable-encoder=pcm_f32le
 --enable-decoder=alac
 --enable-encoder=alac
 --enable-decoder=prores

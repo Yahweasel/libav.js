@@ -1,1 +1,1 @@
-["format-ogg","format-webm","parser-opus","codec-libopus","format-flac","parser-flac","codec-flac","format-wav","audio-filters"]
+["format-ogg","format-webm","parser-opus","codec-libopus","format-flac","parser-flac","codec-flac","format-wav","codec-pcm_f32le","audio-filters"]
