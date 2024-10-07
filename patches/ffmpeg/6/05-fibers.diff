@@ -1,17 +1,17 @@
-Index: ffmpeg-7.1/configure
+Index: ffmpeg-6.1.2/configure
 ===================================================================
---- ffmpeg-7.1.orig/configure
-+++ ffmpeg-7.1/configure
-@@ -4047,7 +4047,7 @@ avfilter_extralibs="pthreads_extralibs"
- avutil_extralibs="d3d11va_extralibs d3d12va_extralibs mediacodec_extralibs nanosleep_extralibs pthreads_extralibs vaapi_drm_extralibs vaapi_x11_extralibs vaapi_win32_extralibs vdpau_x11_extralibs"
+--- ffmpeg-6.1.2.orig/configure
++++ ffmpeg-6.1.2/configure
+@@ -3899,7 +3899,7 @@ avfilter_extralibs="pthreads_extralibs"
+ avutil_extralibs="d3d11va_extralibs mediacodec_extralibs nanosleep_extralibs pthreads_extralibs vaapi_drm_extralibs vaapi_x11_extralibs vaapi_win32_extralibs vdpau_x11_extralibs"
  
  # programs
 -ffmpeg_deps="avcodec avfilter avformat threads"
 +ffmpeg_deps="avcodec avfilter avformat"
- ffmpeg_select="aformat_filter anull_filter atrim_filter crop_filter
-                format_filter hflip_filter null_filter rotate_filter
+ ffmpeg_select="aformat_filter anull_filter atrim_filter format_filter
+                hflip_filter null_filter
                 transpose_filter trim_filter vflip_filter"
-@@ -6786,7 +6786,10 @@ fi
+@@ -6606,7 +6606,10 @@ fi
  # check for some common methods of building with pthread support
  # do this before the optional library checks as some of them require pthreads
  if ! disabled pthreads && ! enabled w32threads && ! enabled os2threads; then
