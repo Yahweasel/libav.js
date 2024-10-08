@@ -983,7 +983,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
  * ): @promise@Frame[]@
  * ff_decode_multi@sync(
  *     ctx: number, pkt: number, frame: number, inPackets: (Packet | number)[],
- *     config?: boolean | {
+ *     config: {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
  *         copyoutFrame: "ptr"
@@ -991,7 +991,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
  * ): @promise@number[]@
  * ff_decode_multi@sync(
  *     ctx: number, pkt: number, frame: number, inPackets: (Packet | number)[],
- *     config?: boolean | {
+ *     config: {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
  *         copyoutFrame: "ImageData"
@@ -1318,7 +1318,7 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
  * ff_read_frame_multi@sync(
- *     fmt_ctx: number, pkt: number, opts?: {
+ *     fmt_ctx: number, pkt: number, opts: {
  *         limit?: number, // OUTPUT limit, in bytes
  *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
  *         copyoutPacket: "ptr" // Version of ff_copyout_packet to use
@@ -1423,7 +1423,7 @@ Module.ff_read_frame_multi = function() {
  *     }
  * ): @promsync@[number, Record<number, Packet[]>]@
  * ff_read_multi@sync(
- *     fmt_ctx: number, pkt: number, devfile?: string, opts?: {
+ *     fmt_ctx: number, pkt: number, devfile?: string, opts: {
  *         limit?: number, // OUTPUT limit, in bytes
  *         devLimit?: number, // INPUT limit, in bytes (don't read if less than this much data is available)
  *         unify?: boolean, // If true, unify the packets into a single stream (called 0), so that the output is in the same order as the input
@@ -1857,7 +1857,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
  * ff_decode_filter_multi@sync(
  *     ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
  *     frame: number, inPackets: (Packet | number)[],
- *     config?: boolean | {
+ *     config: {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
  *         copyoutFrame: "ptr"
@@ -1866,7 +1866,7 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
  * ff_decode_filter_multi@sync(
  *     ctx: number, buffersrc_ctx: number, buffersink_ctx: number, pkt: number,
  *     frame: number, inPackets: (Packet | number)[],
- *     config?: boolean | {
+ *     config: {
  *         fin?: boolean,
  *         ignoreErrors?: boolean,
  *         copyoutFrame: "ImageData"
