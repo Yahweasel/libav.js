@@ -877,18 +877,52 @@ var ff_free_decoder = Module.ff_free_decoder = function(c, pkt, frame) {
  * @param frame  AVFrame
  * @param pkt  AVPacket
  * @param inFrames  Array of frames in libav.js format
- * @param fin  Set to true if this is the end of encoding
+ * @param config  Encoding options. May be "true" to indicate end of stream.
  */
 /* @types
  * ff_encode_multi@sync(
  *     ctx: number, frame: number, pkt: number, inFrames: (Frame | number)[],
- *     fin?: boolean
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         copyoutPacket?: "default"
+ *     }
  * ): @promise@Packet[]@
+ * ff_encode_multi@sync(
+ *     ctx: number, frame: number, pkt: number, inFrames: (Frame | number)[],
+ *     config: {
+ *         fin?: boolean,
+ *         copyoutPacket: "ptr"
+ *     }
+ * ): @promise@number[]@
  */
-var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrames, fin) {
+var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrames, config) {
+    if (typeof config === "boolean") {
+        config = {fin: config};
+    } else {
+        config = config || {};
+    }
+
     var outPackets = [];
     var tbNum = AVCodecContext_time_base_num(ctx);
     var tbDen = AVCodecContext_time_base_den(ctx);
+
+    var copyoutPacket = function(ptr) {
+        var ret = ff_copyout_packet(ptr);
+        if (!ret.time_base_num) {
+            ret.time_base_num = tbNum;
+            ret.time_base_den = tbDen;
+        }
+        return ret;
+    };
+
+    if (config.copyoutPacket === "ptr") {
+        copyoutPacket = function(ptr) {
+            var ret = ff_copyout_packet_ptr(ptr);
+            if (!AVPacket_time_base_num(ret))
+                AVPacket_time_base_s(ret, tbNum, tbDen);
+            return ret;
+        };
+    }
 
     function handleFrame(inFrame) {
         if (inFrame !== null) {
@@ -916,14 +950,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
             else if (ret < 0)
                 throw new Error("Error encoding audio frame: " + ff_error(ret));
 
-            var outPacket = ff_copyout_packet(pkt);
-
-            if (!outPacket.time_base_num) {
-                outPacket.time_base_num = tbNum;
-                outPacket.time_base_den = tbDen;
-            }
-
-            outPackets.push(outPacket);
+            outPackets.push(copyoutPacket(pkt));
             av_packet_unref(pkt);
         }
     }
@@ -983,9 +1010,25 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
     var tbNum = AVCodecContext_time_base_num(ctx);
     var tbDen = AVCodecContext_time_base_den(ctx);
 
-    var copyoutFrame = ff_copyout_frame;
+    var copyoutFrameO = ff_copyout_frame;
     if (config.copyoutFrame)
-        copyoutFrame = ff_copyout_frame_versions[config.copyoutFrame];
+        copyoutFrameO = ff_copyout_frame_versions[config.copyoutFrame];
+    var copyoutFrame = function(ptr) {
+        var ret = copyoutFrameO(ptr);
+        if (!ret.time_base_num) {
+            ret.time_base_num = tbNum;
+            ret.time_base_den = tbDen;
+        }
+        return ret;
+    };
+    if (config.copyoutFrame === "ptr") {
+        copyoutFrame = function(ptr) {
+            var ret = ff_copyout_frame_ptr(ptr);
+            if (!AVFrame_time_base_num(ret))
+                AVFrame_time_base_s(ret, tbNum, tbDen);
+            return ret;
+        };
+    }
 
     function handlePacket(inPacket) {
         var ret;
@@ -1029,12 +1072,6 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
                 throw new Error("Error decoding audio frame: " + ff_error(ret));
 
             var outFrame = copyoutFrame(frame);
-
-            if (typeof outFrame === "object" && !outFrame.time_base_num) {
-                outFrame.time_base_num = tbNum;
-                outFrame.time_base_den = tbDen;
-            }
-
             if (outFrame && outFrame.libavjsTransfer && outFrame.libavjsTransfer.length)
                 transfer.push.apply(transfer, outFrame.libavjsTransfer);
             outFrames.push(outFrame);
@@ -1228,7 +1265,15 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
         ff_copyin_packet(pkt, inPacket);
 
         var sti = inPacket.stream_index || 0;
-        if (typeof inPacket === "object" && inPacket.time_base_num) {
+        var iptbNum, iptbDen;
+        if (typeof inPacket === "number") {
+            iptbNum = AVPacket_time_base_num(inPacket);
+            iptbNum = AVPacket_time_base_den(inPacket);
+        } else {
+            iptbNum = inPacket.time_base_num;
+            iptbDen = inPacket.time_base_den;
+        }
+        if (iptbNum) {
             var tb = tbs[sti];
             if (!tb) {
                 var str = AVFormatContext_streams_a(oc, sti);
@@ -1240,7 +1285,7 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
             if (tb[0]) {
                 av_packet_rescale_ts_js(
                     pkt,
-                    inPacket.time_base_num, inPacket.time_base_den,
+                    iptbNum, iptbDen,
                     tb[0], tb[1]
                 );
                 AVPacket_time_base_s(pkt, tb[0], tb[1]);
@@ -1308,7 +1353,15 @@ function ff_read_frame_multi(fmt_ctx, pkt, opts) {
             var stri = AVPacket_stream_index(pkt);
 
             // Get the time base correct
-            if (typeof packet === "object" && !packet.time_base_num) {
+            var ptbNum, ptbDen;
+            if (typeof packet === "number") {
+                ptbNum = AVPacket_time_base_num(packet);
+                ptbDen = AVPacket_time_base_den(packet);
+            } else {
+                ptbNum = packet.time_base_num;
+                ptbDen = packet.time_base_den;
+            }
+            if (!ptbNum) {
                 var tb = tbs[stri];
                 if (!tb) {
                     var str = AVFormatContext_streams_a(fmt_ctx, stri);
@@ -1317,8 +1370,12 @@ function ff_read_frame_multi(fmt_ctx, pkt, opts) {
                         AVStream_time_base_den(str)
                     ];
                 }
-                packet.time_base_num = tb[0];
-                packet.time_base_den = tb[1];
+                if (typeof packet === "number") {
+                    AVPacket_time_base_s(packet, tb[0], tb[1]);
+                } else {
+                    packet.time_base_num = tb[0];
+                    packet.time_base_den = tb[1];
+                }
             }
 
             // Put it in the output
@@ -1651,28 +1708,28 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
  * ): @promise@Frame[]@
  * ff_filter_multi@sync(
  *     srcs: number, buffersink_ctx: number, framePtr: number,
- *     inFrames: (Frame | number)[], config?: boolean | {
+ *     inFrames: (Frame | number)[], config: {
  *         fin?: boolean,
  *         copyoutFrame: "ptr"
  *     }
  * ): @promise@number[]@;
  * ff_filter_multi@sync(
  *     srcs: number[], buffersink_ctx: number, framePtr: number,
- *     inFrames: (Frame | number)[][], config?: boolean[] | {
+ *     inFrames: (Frame | number)[][], config: {
  *         fin?: boolean,
  *         copyoutFrame: "ptr"
  *     }[]
  * ): @promise@number[]@
  * ff_filter_multi@sync(
  *     srcs: number, buffersink_ctx: number, framePtr: number,
- *     inFrames: (Frame | number)[], config?: boolean | {
+ *     inFrames: (Frame | number)[], config: {
  *         fin?: boolean,
  *         copyoutFrame: "ImageData"
  *     }
  * ): @promise@ImageData[]@;
  * ff_filter_multi@sync(
  *     srcs: number[], buffersink_ctx: number, framePtr: number,
- *     inFrames: (Frame | number)[][], config?: boolean[] | {
+ *     inFrames: (Frame | number)[][], config: {
  *         fin?: boolean,
  *         copyoutFrame: "ImageData"
  *     }[]
@@ -1717,13 +1774,15 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
                 break;
             if (ret < 0)
                 throw new Error("Error while receiving a frame from the filtergraph: " + ff_error(ret));
+
+            if (tbNum < 0) {
+                tbNum = av_buffersink_get_time_base_num(buffersink_ctx);
+                tbDen = av_buffersink_get_time_base_den(buffersink_ctx);
+            }
+
             var outFrame = copyoutFrame(framePtr);
 
             if (tbNum && typeof outFrame === "object" && !outFrame.time_base_num) {
-                if (tbNum < 0) {
-                    tbNum = av_buffersink_get_time_base_num(buffersink_ctx);
-                    tbDen = av_buffersink_get_time_base_den(buffersink_ctx);
-                }
                 outFrame.time_base_num = tbNum;
                 outFrame.time_base_den = tbDen;
             }
@@ -1735,15 +1794,37 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
         }
     }
 
+    // Choose a frame copier per stream
+    var copyoutFrames = [];
+    for (var ti = 0; ti < inFrames.length; ti++) (function(ti) {
+        var copyoutFrameO = ff_copyout_frame;
+        if (config[ti].copyoutFrame)
+            copyoutFrameO = ff_copyout_frame_versions[config[ti].copyoutFrame];
+        var copyoutFrame = function(ptr) {
+            var ret = copyoutFrameO(ptr);
+            if (!ret.time_base_num) {
+                ret.time_base_num = tbNum;
+                ret.time_base_den = tbDen;
+            }
+            return ret;
+        };
+        if (config[ti].copyoutFrame === "ptr") {
+            copyoutFrame = function(ptr) {
+                var ret = ff_copyout_frame_ptr(ptr);
+                if (!AVFrame_time_base_num(ret))
+                    AVFrame_time_base_s(ret, tbNum, tbDen);
+                return ret;
+            };
+        }
+        copyoutFrames.push(copyoutFrame);
+    })(ti);
+
     // Handle in *frame* order
     for (var fi = 0; fi <= max; fi++) {
         for (var ti = 0; ti < inFrames.length; ti++) {
             var inFrame = inFrames[ti][fi];
-            var copyoutFrame = ff_copyout_frame;
-            if (config[ti].copyoutFrame)
-                copyoutFrame = ff_copyout_frame_versions[config[ti].copyoutFrame];
-            if (inFrame) handleFrame(srcs[ti], inFrame, copyoutFrame);
-            else if (config[ti].fin) handleFrame(srcs[ti], null, copyoutFrame);
+            if (inFrame) handleFrame(srcs[ti], inFrame, copyoutFrames[ti]);
+            else if (config[ti].fin) handleFrame(srcs[ti], null, copyoutFrames[ti]);
         }
     }
 
