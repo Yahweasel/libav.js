@@ -957,7 +957,7 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
 
     inFrames.forEach(handleFrame);
 
-    if (fin)
+    if (config.fin)
         handleFrame(null);
 
     return outPackets;
