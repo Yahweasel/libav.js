@@ -56,6 +56,23 @@ var readerCallbacks = {
 
     read: function(stream, buffer, offset, length, position) {
         var data = Module.readBuffers[stream.node.name];
+
+        if (!data || (data.buf.length === 0 && !data.eof)) {
+            if (Module.onread) {
+                try {
+                    var rr = Module.onread(stream.node.name, position, length);
+                    if (rr && rr.then && rr.catch) {
+                        rr.catch(function(ex) {
+                            ff_reader_dev_send(stream.node.name, null, {error: ex});
+                        });
+                    }
+                } catch (ex) {
+                    ff_reader_dev_send(stream.node.name, null, {error: ex});
+                }
+            }
+            data = Module.readBuffers[stream.node.name];
+        }
+
         if (!data)
             throw new FS.ErrnoError(ERRNO_CODES.EAGAIN);
         if (data.error) {
@@ -1210,10 +1227,7 @@ var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
 function ff_init_demuxer_file(filename, fmt) {
     var fmt_ctx;
 
-    return Promise.all([]).then(function() {
-        return avformat_open_input_js(filename, fmt?fmt:null, null);
-
-    }).then(function(ret) {
+    return avformat_open_input_js(filename, fmt?fmt:null, null).then(function(ret) {
         fmt_ctx = ret;
         if (fmt_ctx === 0)
             throw new Error("Could not open source file");
@@ -1355,11 +1369,8 @@ function ff_read_frame_multi(fmt_ctx, pkt, opts) {
         copyoutPacket = ff_copyout_packet_versions[opts.copyoutPacket];
 
     function step() {
-        return Promise.all([]).then(function() {
-            // Read the frame
-            return av_read_frame(fmt_ctx, pkt);
-
-        }).then(function(ret) {
+        // Read the frame
+        return av_read_frame(fmt_ctx, pkt).then(function(ret) {
             if (ret < 0)
                 return [ret, outPackets];
 
@@ -1407,7 +1418,7 @@ function ff_read_frame_multi(fmt_ctx, pkt, opts) {
         });
     }
 
-    return Promise.all([]).then(step);
+    return step();
 }
 Module.ff_read_frame_multi = function() {
     var args = arguments;

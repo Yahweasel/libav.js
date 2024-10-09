@@ -610,7 +610,12 @@ export interface LibAV extends LibAVStatic {
     onwrite?: (filename: string, position: number, buffer: Uint8Array | Int8Array) => void;
 
     /**
-     * Callback for bock reader devices. Set by the user.
+     * Callback for stream reader devices. Set by the user.
+     */
+    onread?: (filename: string, pos: number, length: number) => void;
+
+    /**
+     * Callback for block reader devices. Set by the user.
      */
     onblockread?: (filename: string, pos: number, length: number) => void;
 

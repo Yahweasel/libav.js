@@ -93,9 +93,14 @@ if (/* We're in a worker */
             postMessage(["onwrite", "onwrite", true, [name, pos, buf]], [buf.buffer]);
         };
 
+        libav.onread = function(name, pos, len) {
+            postMessage(["onread", "onread", true, [name, pos, len]]);
+        };
+
         libav.onblockread = function(name, pos, len) {
             postMessage(["onblockread", "onblockread", true, [name, pos, len]]);
         };
+
         postMessage(["onready", "onready", true, null]);
 
     }).catch(function(ex) {

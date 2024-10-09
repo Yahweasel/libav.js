@@ -15,23 +15,21 @@
 
 // Audio decoding using our meta API
 
-// FIXME: This is currently not working for unknown reasons
-return;
-
 const libav = await h.LibAV();
 const buf = await h.readCachedFile("bbb.webm");
 await libav.mkreaderdev("tmp.webm");
 let rd = 0;
 
-// Blocking read
-let initPromise = libav.ff_init_demuxer_file("tmp.webm");
-while (await libav.ff_reader_dev_waiting()) {
-    let rdp = rd;
+libav.onread = function() {
+    const rdp = rd;
     rd += 1024;
-    await libav.ff_reader_dev_send("tmp.webm", buf.slice(rdp, rd));
-}
+    libav.ff_reader_dev_send("tmp.webm", buf.slice(rdp, rd));
+    if (rd >= buf.length)
+        libav.ff_reader_dev_send("tmp.webm", null);
+};
 
-const [fmt_ctx, streams] = await initPromise;
+// Blocking read
+const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("tmp.webm");
 
 let si, stream;
 for (si = 0; si < streams.length; si++) {
@@ -51,15 +49,7 @@ await libav.AVCodecContext_sample_fmt_s(c, libav.AV_SAMPLE_FMT_FLT);
 
 let packets = [];
 while (true) {
-    const rdPromise = libav.ff_read_frame_multi(fmt_ctx, pkt, {limit: 1024});
-    while (await libav.ff_reader_dev_waiting()) {
-        let rdp = rd;
-        rd += 1024;
-        await libav.ff_reader_dev_send("tmp.webm", buf.slice(rdp, rd));
-        if (rd >= buf.length)
-            await libav.ff_reader_dev_send("tmp.webm", null);
-    }
-    const [res, rdPackets] = await rdPromise;
+    const [res, rdPackets] = await libav.ff_read_frame_multi(fmt_ctx, pkt, {limit: 1024});
 
     if (audio_stream_idx in rdPackets)
         packets = packets.concat(rdPackets[audio_stream_idx]);

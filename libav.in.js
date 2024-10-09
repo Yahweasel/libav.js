@@ -330,6 +330,20 @@
                             if (ret.onwrite)
                                 ret.onwrite.apply(ret, args);
                         }, null],
+                        onread: [function(args) {
+                            try {
+                                var rr = null;
+                                if (ret.onread)
+                                    rr = ret.onread.apply(ret, args);
+                                if (rr && rr.then && rr.catch) {
+                                    rr.catch(function(ex) {
+                                        ret.ff_reader_dev_send(args[0], null, {error: ex});
+                                    });
+                                }
+                            } catch (ex) {
+                                ret.ff_reader_dev_send(args[0], null, {error: ex});
+                            }
+                        }, null],
                         onblockread: [function(args) {
                             try {
                                 var brr = null;
