@@ -14,7 +14,23 @@
  */
 
 // A global promise chain for serialization of asyncify components
-Module.serializationPromise = Promise.all([]);
+var serializationPromise = null;
+
+function serially(f) {
+    var p;
+    if (serializationPromise) {
+        p = serializationPromise.catch(function(){}).then(function() {
+            return f();
+        });
+    } else {
+        p = f();
+    }
+    serializationPromise = p = p.finally(function() {
+        if (serializationPromise === p)
+            serializationPromise = null;
+    });
+    return p;
+}
 
 // A global error passed through filesystem operations
 Module.fsThrownError = null;
@@ -1234,10 +1250,9 @@ function ff_init_demuxer_file(filename, fmt) {
 }
 Module.ff_init_demuxer_file = function() {
     var args = arguments;
-    Module.serializationPromise = Module.serializationPromise.catch(function(){}).then(function() {
+    return serially(function() {
         return ff_init_demuxer_file.apply(void 0, args);
     });
-    return Module.serializationPromise;
 };
 
 /**
@@ -1396,10 +1411,9 @@ function ff_read_frame_multi(fmt_ctx, pkt, opts) {
 }
 Module.ff_read_frame_multi = function() {
     var args = arguments;
-    Module.serializationPromise = Module.serializationPromise.catch(function(){}).then(function() {
+    return serially(function() {
         return ff_read_frame_multi.apply(void 0, args);
     });
-    return Module.serializationPromise;
 };
 
 /**

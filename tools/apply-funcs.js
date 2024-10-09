@@ -104,10 +104,10 @@ function decls(f, meta) {
             // Need to serialize async functions
             outp += `Module.${decl[0]} = function() { ` +
                 "var args = arguments; " +
-                "Module.serializationPromise = Module.serializationPromise.catch(function(){}).then(function() { " +
+                "return serially(function() { " +
                 `return ${decl[0]}.apply(void 0, args); ` +
                 "}); " +
-                "return Module.serializationPromise; };\n";
+                "};\n";
         }
     });
     accessors((decl, field) => {
