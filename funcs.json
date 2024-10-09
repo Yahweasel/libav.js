@@ -217,6 +217,7 @@
             "nb_components"
         ]],
         ["AVCodec", [
+            {"name": "name", "string": true},
             "sample_fmts",
             {"name": "sample_fmts", "array": true},
             "supported_samplerates",

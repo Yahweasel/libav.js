@@ -46,6 +46,8 @@ function decls(f, meta) {
             f(`${decl}_den`, "getter");
             f(`${decl}_den_s`, "setter");
             f(`${decl}_s`, "setter");
+        } else if (field && field.string) {
+            f(decl, "getter");
         } else {
             f(decl, "getter");
             f(decl+"_s", "setter");
@@ -136,6 +138,12 @@ function decls(f, meta) {
                 `Module.${decl}_s = ` +
                 `CAccessors.${decl}_s = ` +
                 `Module.cwrap(${s(decl+"_s")}, null, ["number", "number", "number"]);\n`;
+
+        } else if (field && field.string) {
+            outp += `var ${decl} = ` +
+                `Module.${decl} = ` +
+                `CAccessors.${decl} = ` +
+                `Module.cwrap(${s(decl)}, "string", ["number"]);\n`;
 
         } else {
             outp += `var ${decl} = ` +
@@ -260,6 +268,8 @@ function decls(f, meta) {
                 signature(`${decl}_${part}_s`, "ptr: number, val: number", "void");
             }
             signature(`${decl}_s`, "ptr: number, num: number, den: number", "void");
+        } else if (field && field.string) {
+            signature(decl, "ptr: number", "string");
         } else {
             signature(decl, "ptr: number", "number");
             signature(`${decl}_s`, "ptr: number, val: number", "void");

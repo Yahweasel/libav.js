@@ -232,6 +232,8 @@ int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, in
 /* AVCodec */
 #define B(type, field) A(AVCodec, type, field)
 #define BA(type, field) AA(AVCodec, type, field)
+B(const char *, name)
+B(const char *, long_name)
 B(const enum AVSampleFormat *, sample_fmts)
 BA(enum AVSampleFormat, sample_fmts)
 B(const int *, supported_samplerates)
