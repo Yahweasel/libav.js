@@ -240,6 +240,12 @@ export interface CodecParameters {
     format: number;
 
     /**
+     * Bitrate. Not always set.
+     */
+    bit_rate?: number;
+    bit_ratehi?: number;
+
+    /**
      * Codec-specific bitstream restrictions that the stream conforms to.
      */
     profile?: number;
