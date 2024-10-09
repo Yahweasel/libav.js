@@ -33,34 +33,48 @@ files can be deleted with `await libav.unlink(<name>)`.
 
 If your data is streaming (i.e., you're receiving it from start to finish), you
 can provide it in a virtual file (formally, a character device). When libav
-reads from this file, if no data is available, it will block. Functions allow
-you to check if libav is blocked on a reader device, and provide more data.
+reads from this file, if no data is available, it will block. When it blocks, it
+calls a callback to indicate to you that it needs more data, and you can call a
+function to provide it with that data.
 
 To create a readable streaming device, use `libav.mkreaderdev(<name>)`, with
 any file name you wish. Streaming reader devices can be deleted with `await
-libav.unlink(<name>)`.
+libav.unlink(<name>)`. Create a `libav.onread` callback, which takes the
+arguments `filename, position, length`, being the name of the file being read,
+the position it's reading from in bytes (which will always be in sequence with
+previous reads), and the length it wants to read.
 
-When calling a libav function that may read from this file, do *not* await the
-promise. Set the promise aside, and check whether it's blocking with `await
-libav.ff_reader_dev_waiting()`. If a reader device is waiting, send data to it
-with `await libav.ff_reader_dev_send(<name>, <data>)`, where `<name>` is the
-filename and `<data>` is a Uint8Array of the data to send.
+To send data (usually during `onread`, but you can send data whenever you want),
+call `libav.ff_reader_dev_send(<name>, <data>)`, where `<name>` is the filename
+and `<data>` is a Uint8Array of the data to send. You may send the requested
+length if you want to, but you can also send less or more.
+`libav.ff_reader_dev_send` returns a promise, but it's not necessary to `await`
+it, since it will actually be unblocking another promise (the one reading from a
+file).
+
+Send `null` as `<data>` to indicate EOF.
 
 To put all of this together, a typical process to use `ff_read_multi` to read
 packets from a streaming reader device might look like this:
 
 ```
 await libav.mkreaderdev("input");
+libav.onread = function() {
+    /* This function assumes you have only one reader device, so don't actually
+     * care about the arguments. */
+    // ... get some data...
+    libav.ff_reader_dev_send("input", eof ? null : data);
+};
 
 ...
 
 while (true) {
-    const readPromise = libav.ff_read_multi(fmt_ctx, pkt, null, {limit: 32*1024 /* amount to read at once */});
-    while (await libav.ff_reader_dev_waiting()) {
-        // ... get some data ...
-        await libav.ff_reader_dev_send("input", data);
-    }
-    const [result, packets] = await readPromise;
+    const [result, packets] = await libav.ff_read_multi(
+        fmt_ctx, pkt, null,
+        {
+            limit: 32*1024 /* amount to read at once */
+        }
+    );
     ...
 }
 ```
@@ -74,11 +88,11 @@ example using that style might look like this:
 
 ```
 while (true) {
-    const [result, packets] = libav.ff_read_multi(fmt_ctx, pkt, "input");
+    const [result, packets] = await libav.ff_read_multi(fmt_ctx, pkt, "input");
     ...
     if (result === -libav.EAGAIN) {
         // ... get some data ...
-        await libav.ff_reader_dev_send("input", data);
+        libav.ff_reader_dev_send("input", data);
     }
 }
 ```
@@ -86,8 +100,7 @@ while (true) {
 There should be no appreciable difference in performance between these two
 styles; they just let you control the process in different ways. Note that only
 `ff_read_multi` supports this "push" style; you will still need to use
-`libav.ff_reader_dev_waiting` for `ff_init_demuxer_file` and all low-level C
-functions.
+`libav.onread` for `ff_init_demuxer_file` and all low-level C functions.
 
 ### Block reader devices
 

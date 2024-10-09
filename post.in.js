@@ -731,6 +731,8 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
 };
 
 /**
+ * @deprecated
+ * DEPRECATED. Use the onread callback.
  * Metafunction to determine whether any device has any waiters. This can be
  * used to determine whether more data needs to be sent before a previous step
  * will be fully resolved.
@@ -738,6 +740,7 @@ var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, 
  */
 /// @types ff_reader_dev_waiting@sync(name?: string): @promise@boolean@
 var ff_reader_dev_waiting = Module.ff_reader_dev_waiting = function(name) {
+    console.log("[libav.js] ff_reader_dev_waiting is deprecated. Use the onread callback.");
     return ff_nothing().then(function() {
         if (name)
             return !!Module.ff_reader_dev_waiters[name];
