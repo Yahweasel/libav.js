@@ -963,13 +963,25 @@ var ff_encode_multi = Module.ff_encode_multi = function(ctx, frame, pkt, inFrame
     function handleFrame(inFrame) {
         if (inFrame !== null) {
             ff_copyin_frame(frame, inFrame);
-            if (tbNum && typeof inFrame === "object" && inFrame.time_base_num) {
-                ff_frame_rescale_ts_js(
-                    frame,
-                    tbNum, tbDen,
-                    inFrame.time_base_num, inFrame.time_base_den
-                );
-                AVFrame_time_base_s(frame, tbNum, tbDen);
+            if (tbNum) {
+                if (typeof inFrame === "number") {
+                    var itbn = AVFrame_time_base_num(frame);
+                    if (itbn) {
+                        ff_frame_rescale_ts_js(
+                            frame,
+                            itbn, AVFrame_time_base_den(frame),
+                            tbNum, tbDen
+                        );
+                        AVFrame_time_base_s(frame, tbNum, tbDen);
+                    }
+                } else if (inFrame && inFrame.time_base_num) {
+                    ff_frame_rescale_ts_js(
+                        frame,
+                        inFrame.time_base_num, inFrame.time_base_den,
+                        tbNum, tbDen
+                    );
+                    AVFrame_time_base_s(frame, tbNum, tbDen);
+                }
             }
         }
 
@@ -1075,13 +1087,25 @@ var ff_decode_multi = Module.ff_decode_multi = function(ctx, pkt, frame, inPacke
                 throw new Error("Failed to make packet writable: " + ff_error(ret));
             ff_copyin_packet(pkt, inPacket);
 
-            if (inPacket.time_base_num && tbNum) {
-                av_packet_rescale_ts_js(
-                    pkt,
-                    inPacket.time_base_num, inPacket.time_base_den,
-                    tbNum, tbDen
-                );
-                AVPacket_time_base_s(pkt, tbNum, tbDen);
+            if (tbNum) {
+                if (typeof inPacket === "number") {
+                    var iptbn = AVPacket_time_base_num(pkt);
+                    if (iptbn) {
+                        av_packet_rescale_ts_js(
+                            pkt,
+                            iptbn, AVPacket_time_base_den(pkt),
+                            tbNum, tbDen
+                        );
+                        AVPacket_time_base_s(pkt, tbNum, tbDen);
+                    }
+                } else if (inPacket && inPacket.time_base_num) {
+                    av_packet_rescale_ts_js(
+                        pkt,
+                        inPacket.time_base_num, inPacket.time_base_den,
+                        tbNum, tbDen
+                    );
+                    AVPacket_time_base_s(pkt, tbNum, tbDen);
+                }
             }
         } else {
             av_packet_unref(pkt);
@@ -1299,8 +1323,8 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
         var sti = inPacket.stream_index || 0;
         var iptbNum, iptbDen;
         if (typeof inPacket === "number") {
-            iptbNum = AVPacket_time_base_num(inPacket);
-            iptbNum = AVPacket_time_base_den(inPacket);
+            iptbNum = AVPacket_time_base_num(pkt);
+            iptbNum = AVPacket_time_base_den(pkt);
         } else {
             iptbNum = inPacket.time_base_num;
             iptbDen = inPacket.time_base_den;
