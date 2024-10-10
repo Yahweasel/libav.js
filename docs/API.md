@@ -331,16 +331,19 @@ Free the things allocated by `ff_init_encoder`.
 ### `ff_init_decoder`
 ```
 ff_init_decoder(
-    name: string | number, codecpar?: number
+    name: string | number, config?: {
+        codecpar?: number | CodecParameters,
+        time_base?: [number, number]
+    }
 ): Promise<[number, number, number, number]>
 ```
 
 Initialize a decoder. `name` can be a string name (e.g. `"libopus"`) *or* an
 internal identifier. Usually, an internal identifier would come from a `Stream`
-from `ff_init_demuxer_file`, in which case `codecpar` would also come from that
-`Stream`.
+from `ff_init_demuxer_file`, in which case `codecpar` and `time_base` would also
+come from that `Stream`.
 
-Returns a *lot* of things, some of which aren't alwayys needed: `[codec, codec
+Returns a *lot* of things, some of which aren't always needed: `[codec, codec
 context (c), packet (pkt), frame]`. Usually called as `[, c, pkt, frame] =
 ff_init_decoder(...)`.
 

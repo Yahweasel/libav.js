@@ -829,14 +829,24 @@ var ff_init_encoder = Module.ff_init_encoder = function(name, opts) {
  * Similar to ff_init_encoder but doesn't need to initialize the frame.
  * Returns [AVCodec, AVCodecContext, AVPacket, AVFrame]
  * @param name  libav decoder identifier or name
- * @param codecpar  Optional AVCodecParameters
+ * @param config  Decoder configuration. Can just be a number for codec
+ *                parameters, or can be multiple configuration options.
  */
 /* @types
  * ff_init_decoder@sync(
- *     name: string | number, codecpar?: number
+ *     name: string | number, config?: number | {
+ *         codecpar?: number | CodecParameters,
+ *         time_base?: [number, number]
+ *     }
  * ): @promise@[number, number, number, number]@
  */
-var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
+var ff_init_decoder = Module.ff_init_decoder = function(name, config) {
+    if (typeof config === "number") {
+        config = {codecpar: config};
+    } else {
+        config = config || {};
+    }
+
     var codec, ret;
     if (typeof name === "string")
         codec = avcodec_find_decoder_by_name(name);
@@ -851,13 +861,29 @@ var ff_init_decoder = Module.ff_init_decoder = function(name, codecpar) {
 
     var codecid = AVCodecContext_codec_id(c);
 
-    if (codecpar) {
+    if (config.codecpar) {
+        var codecparPtr = 0;
+        var codecpar = config.codecpar;
+        if (typeof codecpar === "object") {
+            codecparPtr = avcodec_parameters_alloc();
+            if (codecparPtr === 0)
+                throw new Error("Failed to allocate codec parameters");
+            ff_copyin_codecpar(codecparPtr, codecpar);
+            codecpar = codecparPtr;
+        }
         ret = avcodec_parameters_to_context(c, codecpar);
+        if (codecparPtr)
+            avcodec_parameters_free_js(codecparPtr);
         if (ret < 0)
             throw new Error("Could not set codec parameters: " + ff_error(ret));
     }
-    // if it is not set, use the copy.
-    if (AVCodecContext_codec_id(c) === 0)  AVCodecContext_codec_id_s(c, codecid);
+
+    // If it is not set, use the copy.
+    if (AVCodecContext_codec_id(c) === 0) AVCodecContext_codec_id_s(c, codecid);
+
+    // Keep the time base
+    if (config.time_base)
+        AVCodecContext_time_base_s(c, config.time_base[0], config.time_base[1]);
 
     ret = avcodec_open2(c, codec, 0);
     if (ret < 0)
