@@ -1860,9 +1860,14 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
 
             var outFrame = copyoutFrame(framePtr);
 
-            if (tbNum && typeof outFrame === "object" && !outFrame.time_base_num) {
-                outFrame.time_base_num = tbNum;
-                outFrame.time_base_den = tbDen;
+            if (tbNum) {
+                if (typeof outFrame === "number") {
+                    if (!AVFrame_time_base_num(outFrame))
+                        AVFrame_time_base_s(outFrame, tbNum, tbDen);
+                } else if (outFrame && !outFrame.time_base_num) {
+                    outFrame.time_base_num = tbNum;
+                    outFrame.time_base_den = tbDen;
+                }
             }
 
             if (outFrame && outFrame.libavjsTransfer && outFrame.libavjsTransfer.length)
