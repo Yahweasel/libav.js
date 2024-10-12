@@ -1350,7 +1350,7 @@ var ff_write_multi = Module.ff_write_multi = function(oc, pkt, inPackets, interl
         var iptbNum, iptbDen;
         if (typeof inPacket === "number") {
             iptbNum = AVPacket_time_base_num(pkt);
-            iptbNum = AVPacket_time_base_den(pkt);
+            iptbDen = AVPacket_time_base_den(pkt);
         } else {
             iptbNum = inPacket.time_base_num;
             iptbDen = inPacket.time_base_den;
