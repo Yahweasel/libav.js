@@ -1,0 +1,39 @@
+Index: ffmpeg-7.1/libavformat/aviobuf.c
+===================================================================
+--- ffmpeg-7.1.orig/libavformat/aviobuf.c
++++ ffmpeg-7.1/libavformat/aviobuf.c
+@@ -19,6 +19,10 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+  */
+ 
++#ifdef __EMSCRIPTEN__
++#include <emscripten.h>
++#endif
++
+ #include "libavutil/bprint.h"
+ #include "libavutil/crc.h"
+ #include "libavutil/dict.h"
+@@ -128,6 +132,12 @@ void avio_context_free(AVIOContext **ps)
+     av_freep(ps);
+ }
+ 
++#ifdef __EMSCRIPTEN__
++EM_JS(static void, writeoutEmscriptenOOM, (), {
++    throw new Error("Out of memory");
++});
++#endif
++
+ static void writeout(AVIOContext *s, const uint8_t *data, int len)
+ {
+     FFIOContext *const ctx = ffiocontext(s);
+@@ -142,6 +152,10 @@ static void writeout(AVIOContext *s, con
+             ret = s->write_packet(s->opaque, data, len);
+         if (ret < 0) {
+             s->error = ret;
++#ifdef __EMSCRIPTEN__
++            if (ret == AVERROR(ENOMEM))
++                writeoutEmscriptenOOM();
++#endif
+         } else {
+             ctx->bytes_written += len;
+             s->bytes_written = ctx->bytes_written;
