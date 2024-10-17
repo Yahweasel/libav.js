@@ -6,7 +6,7 @@
  *
  * ffmpeg:
  *
- *  Copyright (c) 2000-2023 Fabrice Bellard et al
+ *  Copyright (c) 2000-2024 Fabrice Bellard et al
  *
  *                   GNU LESSER GENERAL PUBLIC LICENSE
  *                        Version 2.1, February 1999
@@ -514,96 +514,10 @@
  *
  * ---
  *
- * ffmpeg-faandct:
- *
- * Copyright (c) 2003 Michael Niedermayer <michaelni@gmx.at>
- * Copyright (c) 2003 Roman Shaposhnik
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
- *
- * ---
- *
- * ffmepg (JPEG components):
- *
- * The authors make NO WARRANTY or representation, either express or implied,
- * with respect to this software, its quality, accuracy, merchantability, or
- * fitness for a particular purpose.  This software is provided "AS IS", and
- * you, its user, assume the entire risk as to its quality and accuracy.
- *
- * This software is copyright (C) 1991, 1992, Thomas G. Lane.
- * All Rights Reserved except as specified below.
- *
- * Permission is hereby granted to use, copy, modify, and distribute this
- * software (or portions thereof) for any purpose, without fee, subject to
- * these conditions:
- * (1) If any part of the source code for this software is distributed, then
- * this README file must be included, with this copyright and no-warranty
- * notice unaltered; and any additions, deletions, or changes to the original
- * files must be clearly indicated in accompanying documentation.
- * (2) If only executable code is distributed, then the accompanying
- * documentation must state that "this software is based in part on the work
- * of the Independent JPEG Group".
- * (3) Permission for use of this software is granted only if the user accepts
- * full responsibility for any undesirable consequences; the authors accept
- * NO LIABILITY for damages of any kind.
- *
- * These conditions apply to any software derived from or based on the IJG
- * code, not just to the unmodified library.  If you use our work, you ought
- * to acknowledge us.
- *
- * Permission is NOT granted for the use of any IJG author's name or company
- * name in advertising or publicity relating to this software or products
- * derived from it.  This software may be referred to only as "the Independent
- * JPEG Group's software".
- *
- * We specifically permit and encourage the use of this software as the basis
- * of commercial products, provided that all warranty or liability claims are
- * assumed by the product vendor.
- *
- *
- * ---
- *
- * ffmpeg-avsscanf:
- *
- * Copyright (c) 2005-2014 Rich Felker, et al.
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- *
- * ---
- *
  * emscripten and musl:
  *
- * Copyright (c) 2010-2023 Emscripten authors, see AUTHORS file.
- * Copyright © 2005-2023 Rich Felker, et al.
+ * Copyright (c) 2010-2024 Emscripten authors, see AUTHORS file.
+ * Copyright © 2005-2024 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -622,4 +536,4 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- */
+ *

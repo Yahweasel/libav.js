@@ -3,8 +3,8 @@
  *
  * emscripten and musl:
  *
- * Copyright (c) 2010-2023 Emscripten authors, see AUTHORS file.
- * Copyright © 2005-2023 Rich Felker, et al.
+ * Copyright (c) 2010-2024 Emscripten authors, see AUTHORS file.
+ * Copyright © 2005-2024 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,4 +23,4 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- */
+ *
