@@ -187,7 +187,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 		s/@TARGET/asm/g ; \
 		s/@DBG//g ; \
 		s/@JS/js/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -256,7 +256,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		s/@TARGET/asm/g ; \
 		s/@DBG//g ; \
 		s/@JS/mjs/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -325,7 +325,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		s/@TARGET/asm/g ; \
 		s/@DBG/dbg./g ; \
 		s/@JS/js/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -394,7 +394,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		s/@TARGET/asm/g ; \
 		s/@DBG/dbg./g ; \
 		s/@JS/mjs/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -464,7 +464,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		s/@TARGET/wasm/g ; \
 		s/@DBG//g ; \
 		s/@JS/js/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -533,7 +533,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 		s/@TARGET/wasm/g ; \
 		s/@DBG//g ; \
 		s/@JS/mjs/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -602,7 +602,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		s/@TARGET/wasm/g ; \
 		s/@DBG/dbg./g ; \
 		s/@JS/js/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -671,7 +671,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 		s/@TARGET/wasm/g ; \
 		s/@DBG/dbg./g ; \
 		s/@JS/mjs/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -741,7 +741,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 		s/@TARGET/thr/g ; \
 		s/@DBG//g ; \
 		s/@JS/js/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -810,7 +810,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 		s/@TARGET/thr/g ; \
 		s/@DBG//g ; \
 		s/@JS/mjs/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -879,7 +879,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		s/@TARGET/thr/g ; \
 		s/@DBG/dbg./g ; \
 		s/@JS/js/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
@@ -948,7 +948,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		s/@TARGET/thr/g ; \
 		s/@DBG/dbg./g ; \
 		s/@JS/mjs/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/

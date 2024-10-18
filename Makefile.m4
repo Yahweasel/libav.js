@@ -133,7 +133,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		s/@TARGET/$1/g ; \
 		s/@DBG/$2/g ; \
 		s/@JS/$5/g \
-	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5 | tools/license-header.sh "$(LIBAVJS_VERSION)" configs/configs/$(*)/license.js > $(@)
+	" $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5 | tools/license-header.sh configs/configs/$(*)/license.js > $(@)
 	rm -f $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
 	-chmod a-x $(@).d/*.wasm
 	-mv $(@).d/* dist/
