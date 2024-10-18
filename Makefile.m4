@@ -116,7 +116,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		linkfflib(avfilter, $3) \
 		linkfflib(swresample, $3) \
 		linkfflib(swscale, $3) \
-		linkfflib(foob, $3) \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/configs/$(*)/libs.txt` \
 		$4 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5

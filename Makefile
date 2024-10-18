@@ -166,11 +166,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
 	'` \
  \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
-	'` \
- \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
 		$(NOTHRFLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js
@@ -233,11 +228,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		 \
 	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
@@ -304,11 +294,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
 	'` \
  \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
-	'` \
- \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
 		$(NOTHRFLAGS) -g2 -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js
@@ -371,11 +356,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		 \
 	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
@@ -443,11 +423,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
 	'` \
  \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
-	'` \
- \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
 		$(NOTHRFLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js
@@ -510,11 +485,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 		 \
 	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
@@ -581,11 +551,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
 	'` \
  \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
-	'` \
- \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
 		$(NOTHRFLAGS) -gsource-map \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js
@@ -648,11 +613,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 		 \
 	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libfoob -lfoob \
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
@@ -720,11 +680,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
 	'` \
  \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob -lfoob \
-	'` \
- \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
 		$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js
@@ -787,11 +742,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 		 \
 	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale/libswscale.a || echo ' \
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob -lfoob \
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
@@ -858,11 +808,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
 	'` \
  \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob -lfoob \
-	'` \
- \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
 		-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js
@@ -925,11 +870,6 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		 \
 	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale/libswscale.a || echo ' \
 	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob/libfoob.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libfoob -lfoob \
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
