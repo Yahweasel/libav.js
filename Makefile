@@ -912,7 +912,7 @@ build/inst/base/cflags.txt:
 
 build/inst/thr/cflags.txt:
 	mkdir -p build/inst/thr
-	echo $(THRFLAGS) -gsource-map > $@
+	echo -pthread -gsource-map > $@
 
 RELEASE_VARIANTS=\
 	default default-cli opus opus-af flac flac-af wav wav-af obsolete webm \
