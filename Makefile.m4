@@ -234,7 +234,7 @@ halfclean:
 
 clean: halfclean
 	-rm -rf build/inst
-	-rm -rf build/emfiberthreads-$(EMFT_VERSION)
+	-rm -rf build/emfiberthreads
 	-rm -rf build/opus-$(OPUS_VERSION)
 	-rm -rf build/libaom-$(LIBAOM_VERSION)
 	-rm -rf build/libvorbis-$(LIBVORBIS_VERSION)

@@ -14,7 +14,7 @@ build/emfiberthreads/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a: \
 	cd build/emfiberthreads/emfiberthreads-$(EMFT_VERSION) && \
 		$(MAKE) STACK_SIZE=1048576
 
-extract: build/emfiberthreads-$(EMFT_VERSION)/Makefile
+extract: build/emfiberthreads/emfiberthreads-$(EMFT_VERSION)/Makefile
 
 build/emfiberthreads/emfiberthreads-$(EMFT_VERSION)/Makefile: build/emfiberthreads-$(EMFT_VERSION).tar.gz
 	mkdir -p build/emfiberthreads
