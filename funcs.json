@@ -144,13 +144,13 @@
         "mkfsfhfile",
         "unlinkfsfhfile",
         "mkworkerfsfile",
-        "unlinkworkerfsfile"
+        "unlinkworkerfsfile",
+        "ff_reader_dev_send",
+        "ff_block_reader_dev_send",
+        "ff_reader_dev_waiting"
     ],
 
     "meta": [
-        "ff_reader_dev_send",
-        "ff_block_reader_dev_send",
-        "ff_reader_dev_waiting",
         "ff_init_encoder",
         "ff_init_decoder",
         "ff_free_encoder",
