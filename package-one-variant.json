@@ -7,7 +7,7 @@
   "exports": {
     "import": "./dist/libav-@VARIANT.mjs",
     "default": "./dist/libav-@VARIANT.js",
-    "types": "dist/libav.types.d.ts"
+    "types": "./dist/libav.types.d.ts"
   },
   "directories": {
     "test": "tests"
