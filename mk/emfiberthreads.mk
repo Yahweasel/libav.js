@@ -29,6 +29,7 @@ emfiberthreads-release:
 	cp build/emfiberthreads-$(EMFT_VERSION).tar.gz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
 
 .PRECIOUS: \
+	build/inst/%/include/pthread.h \
 	build/inst/%/lib/libemfiberthreads.a \
 	build/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a \
 	build/emfiberthreads-$(EMFT_VERSION)/Makefile
