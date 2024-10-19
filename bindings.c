@@ -559,9 +559,6 @@ pthread_t libavjs_create_main_thread()
     return ret;
 }
 
-// Just to make sure this export is defined
-void emfiberthreads_timeout_expiry() {}
-
 #else
 void *libavjs_create_main_thread() { return NULL; }
 

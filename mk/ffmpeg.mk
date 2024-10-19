@@ -27,7 +27,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \
 
 # Base (asm.js and wasm)
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/lib/libemfiberthreads.a \
+build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/include/pthread.h \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/base/cflags.txt
@@ -50,7 +50,7 @@ part-install-base-%: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/lib
 
 # wasm + threads
 
-build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak:  \
+build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak: build/inst/thr/lib/libemfiberthreads.a \
 	build/ffmpeg-$(FFMPEG_VERSION)/PATCHED \
 	configs/configs/%/ffmpeg-config.txt | \
 	build/inst/thr/cflags.txt
@@ -60,8 +60,8 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/ffbuild/config.mak:  \
 		../configure $(FFMPEG_CONFIG) \
                 --enable-pthreads --arch=emscripten \
 		--optflags="$(OPTFLAGS)" \
-		--extra-cflags="-I$(PWD)/build/inst/thr/include $(THRFLAGS)" \
-		--extra-ldflags="-L$(PWD)/build/inst/thr/lib $(THRFLAGS) -s INITIAL_MEMORY=25165824" \
+		--extra-cflags="-I$(PWD)/build/inst/thr/include -lemfiberthreads $(THRFLAGS)" \
+		--extra-ldflags="-L$(PWD)/build/inst/thr/lib -lemfiberthreads $(THRFLAGS) -s INITIAL_MEMORY=25165824" \
 		`cat ../../../configs/configs/$(*)/ffmpeg-config.txt`
 	sed 's/--extra-\(cflags\|ldflags\)='\''[^'\'']*'\''//g' < build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h > build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp
 	mv build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h.tmp build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/config.h

@@ -13,8 +13,8 @@ LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
 MINIFIER=node_modules/.bin/terser
 OPTFLAGS=-Oz
-NOTHRFLAGS=-Lbuild/inst/base/lib -lemfiberthreads
-THRFLAGS=-pthread
+EMFTFLAGS=-Lbuild/inst/base/lib -lemfiberthreads
+THRFLAGS=-pthread $(EMFTFLAGS)
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
 	`tools/memory-init-file-emcc.sh` \
@@ -167,7 +167,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) -s WASM=0 \
+		$(EMFTFLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
@@ -231,7 +231,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) $(ES6FLAGS) -s WASM=0 \
+		$(EMFTFLAGS) $(ES6FLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
@@ -295,7 +295,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) -g2 -s WASM=0 \
+		$(EMFTFLAGS) -g2 -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
@@ -359,7 +359,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
+		$(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
@@ -424,7 +424,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) \
+		$(EMFTFLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
@@ -488,7 +488,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) $(ES6FLAGS) \
+		$(EMFTFLAGS) $(ES6FLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
@@ -552,7 +552,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) -gsource-map \
+		$(EMFTFLAGS) -gsource-map \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
@@ -616,7 +616,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 	'` \
  \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
-		$(NOTHRFLAGS) -gsource-map $(ES6FLAGS) \
+		$(EMFTFLAGS) -gsource-map $(ES6FLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \

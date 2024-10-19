@@ -13,8 +13,8 @@ LIBAVJS_VERSION_SHORT=$(LIBAVJS_VERSION_BASE).$(FFMPEG_VERSION_MAJOR)
 EMCC=emcc
 MINIFIER=node_modules/.bin/terser
 OPTFLAGS=-Oz
-NOTHRFLAGS=-Lbuild/inst/base/lib -lemfiberthreads
-THRFLAGS=-pthread
+EMFTFLAGS=-Lbuild/inst/base/lib -lemfiberthreads
+THRFLAGS=-pthread $(EMFTFLAGS)
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
 	`tools/memory-init-file-emcc.sh` \
@@ -140,15 +140,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 ]]])
 
 # asm.js version
-buildrule(asm, [[[]]], base, [[[$(NOTHRFLAGS) -s WASM=0]]], js)
-buildrule(asm, [[[]]], base, [[[$(NOTHRFLAGS) $(ES6FLAGS) -s WASM=0]]], mjs)
-buildrule(asm, dbg., base, [[[$(NOTHRFLAGS) -g2 -s WASM=0]]], js)
-buildrule(asm, dbg., base, [[[$(NOTHRFLAGS) -g2 $(ES6FLAGS) -s WASM=0]]], mjs)
+buildrule(asm, [[[]]], base, [[[$(EMFTFLAGS) -s WASM=0]]], js)
+buildrule(asm, [[[]]], base, [[[$(EMFTFLAGS) $(ES6FLAGS) -s WASM=0]]], mjs)
+buildrule(asm, dbg., base, [[[$(EMFTFLAGS) -g2 -s WASM=0]]], js)
+buildrule(asm, dbg., base, [[[$(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0]]], mjs)
 # wasm version with no added features
-buildrule(wasm, [[[]]], base, [[[$(NOTHRFLAGS)]]], js)
-buildrule(wasm, [[[]]], base, [[[$(NOTHRFLAGS) $(ES6FLAGS)]]], mjs)
-buildrule(wasm, dbg., base, [[[$(NOTHRFLAGS) -gsource-map]]], js)
-buildrule(wasm, dbg., base, [[[$(NOTHRFLAGS) -gsource-map $(ES6FLAGS)]]], mjs)
+buildrule(wasm, [[[]]], base, [[[$(EMFTFLAGS)]]], js)
+buildrule(wasm, [[[]]], base, [[[$(EMFTFLAGS) $(ES6FLAGS)]]], mjs)
+buildrule(wasm, dbg., base, [[[$(EMFTFLAGS) -gsource-map]]], js)
+buildrule(wasm, dbg., base, [[[$(EMFTFLAGS) -gsource-map $(ES6FLAGS)]]], mjs)
 # wasm + threads
 buildrule(thr, [[[]]], thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
 buildrule(thr, [[[]]], thr, [[[$(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)

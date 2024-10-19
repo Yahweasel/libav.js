@@ -1,16 +1,8 @@
-Index: ffmpeg-7.0.2/fftools/ffmpeg.c
+Index: ffmpeg-7.1/fftools/ffmpeg.c
 ===================================================================
---- ffmpeg-7.0.2.orig/fftools/ffmpeg.c
-+++ ffmpeg-7.0.2/fftools/ffmpeg.c
-@@ -24,6 +24,7 @@
-  */
- 
- #include "config.h"
-+#define FF_FORCE_PTHREADS
- 
- #include <errno.h>
- #include <limits.h>
-@@ -337,22 +338,29 @@ static void ffmpeg_cleanup(int ret)
+--- ffmpeg-7.1.orig/fftools/ffmpeg.c
++++ ffmpeg-7.1/fftools/ffmpeg.c
+@@ -316,22 +316,29 @@ static void ffmpeg_cleanup(int ret)
      for (int i = 0; i < nb_filtergraphs; i++)
          fg_free(&filtergraphs[i]);
      av_freep(&filtergraphs);
@@ -40,7 +32,7 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
      }
      av_freep(&vstats_filename);
      of_enc_stats_close();
-@@ -927,7 +935,12 @@ static int64_t getmaxrss(void)
+@@ -943,7 +950,12 @@ static int64_t getmaxrss(void)
  #endif
  }
  
@@ -53,7 +45,7 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
  {
      Scheduler *sch = NULL;
  
-@@ -993,8 +1006,12 @@ finish:
+@@ -1009,8 +1021,12 @@ finish:
          ret = 0;
  
      ffmpeg_cleanup(ret);
@@ -66,11 +58,25 @@ Index: ffmpeg-7.0.2/fftools/ffmpeg.c
 +#endif
      return ret;
  }
-Index: ffmpeg-7.0.2/fftools/ffprobe.c
+Index: ffmpeg-7.1/fftools/ffprobe.c
 ===================================================================
---- ffmpeg-7.0.2.orig/fftools/ffprobe.c
-+++ ffmpeg-7.0.2/fftools/ffprobe.c
-@@ -81,6 +81,8 @@
+--- ffmpeg-7.1.orig/fftools/ffprobe.c
++++ ffmpeg-7.1/fftools/ffprobe.c
+@@ -29,6 +29,13 @@
+ #include <string.h>
+ #include <math.h>
+ 
++#if defined(__EMSCRIPTEN__) && HAVE_THREADS
++#include <emft-pthread.h>
++#define EMFT(x) emfiber_ ## x
++#else
++#define EMFT(x) x
++#endif
++
+ #include "libavformat/avformat.h"
+ #include "libavformat/version.h"
+ #include "libavcodec/avcodec.h"
+@@ -82,6 +89,8 @@
  #  define pthread_mutex_unlock(a) do{}while(0)
  #endif
  
@@ -79,7 +85,7 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
  // attached as opaque_ref to packets/frames
  typedef struct FrameData {
      int64_t pkt_pos;
-@@ -100,8 +102,10 @@ typedef struct InputFile {
+@@ -101,8 +110,10 @@ typedef struct InputFile {
      int       nb_streams;
  } InputFile;
  
@@ -90,7 +96,71 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
  
  static int do_bitexact = 0;
  static int do_count_frames = 0;
-@@ -3892,7 +3896,7 @@ static int open_input_file(InputFile *if
+@@ -387,7 +398,7 @@ static uint64_t *nb_streams_frames;
+ static int *selected_streams;
+ 
+ #if HAVE_THREADS
+-pthread_mutex_t log_mutex;
++EMFT(pthread_mutex_t) log_mutex;
+ #endif
+ typedef struct LogBuffer {
+     char *context_name;
+@@ -415,7 +426,7 @@ static void log_callback(void *ptr, int
+     va_end(vl2);
+ 
+ #if HAVE_THREADS
+-    pthread_mutex_lock(&log_mutex);
++    EMFT(pthread_mutex_lock)(&log_mutex);
+ 
+     new_log_buffer = av_realloc_array(log_buffer, log_buffer_size + 1, sizeof(*log_buffer));
+     if (new_log_buffer) {
+@@ -446,7 +457,7 @@ static void log_callback(void *ptr, int
+         log_buffer_size ++;
+     }
+ 
+-    pthread_mutex_unlock(&log_mutex);
++    EMFT(pthread_mutex_unlock)(&log_mutex);
+ #endif
+ }
+ 
+@@ -2715,7 +2726,7 @@ static void clear_log(int need_lock)
+     int i;
+ 
+     if (need_lock)
+-        pthread_mutex_lock(&log_mutex);
++        EMFT(pthread_mutex_lock)(&log_mutex);
+     for (i=0; i<log_buffer_size; i++) {
+         av_freep(&log_buffer[i].context_name);
+         av_freep(&log_buffer[i].parent_name);
+@@ -2723,15 +2734,15 @@ static void clear_log(int need_lock)
+     }
+     log_buffer_size = 0;
+     if(need_lock)
+-        pthread_mutex_unlock(&log_mutex);
++        EMFT(pthread_mutex_unlock)(&log_mutex);
+ }
+ 
+ static int show_log(WriterContext *w, int section_ids, int section_id, int log_level)
+ {
+     int i;
+-    pthread_mutex_lock(&log_mutex);
++    EMFT(pthread_mutex_lock)(&log_mutex);
+     if (!log_buffer_size) {
+-        pthread_mutex_unlock(&log_mutex);
++        EMFT(pthread_mutex_unlock)(&log_mutex);
+         return 0;
+     }
+     writer_print_section_header(w, NULL, section_ids);
+@@ -2754,7 +2765,7 @@ static int show_log(WriterContext *w, in
+         }
+     }
+     clear_log(0);
+-    pthread_mutex_unlock(&log_mutex);
++    EMFT(pthread_mutex_unlock)(&log_mutex);
+ 
+     writer_print_section_footer(w);
+ 
+@@ -3914,7 +3925,7 @@ static int open_input_file(InputFile *if
  
      ifile->streams = av_calloc(fmt_ctx->nb_streams, sizeof(*ifile->streams));
      if (!ifile->streams)
@@ -99,9 +169,9 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
      ifile->nb_streams = fmt_ctx->nb_streams;
  
      /* bind a decoder to each input stream */
-@@ -3923,15 +3927,15 @@ static int open_input_file(InputFile *if
+@@ -3945,15 +3956,15 @@ static int open_input_file(InputFile *if
              err = filter_codec_opts(codec_opts, stream->codecpar->codec_id,
-                                     fmt_ctx, stream, codec, &opts);
+                                     fmt_ctx, stream, codec, &opts, NULL);
              if (err < 0)
 -                exit(1);
 +                ffprobe_cleanup_exit(1);
@@ -118,7 +188,7 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
  
              if (do_show_log) {
                  // For loging it is needed to disable at least frame threads as otherwise
-@@ -3947,7 +3951,7 @@ static int open_input_file(InputFile *if
+@@ -3969,7 +3980,7 @@ static int open_input_file(InputFile *if
              if (avcodec_open2(ist->dec_ctx, codec, &opts) < 0) {
                  av_log(NULL, AV_LOG_WARNING, "Could not open codec for input stream %d\n",
                         stream->index);
@@ -126,8 +196,8 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
 +                ffprobe_cleanup_exit(1);
              }
  
-             if ((t = av_dict_get(opts, "", NULL, AV_DICT_IGNORE_SUFFIX))) {
-@@ -4322,6 +4326,7 @@ static int opt_print_filename(void *optc
+             if ((t = av_dict_iterate(opts, NULL))) {
+@@ -4344,6 +4355,7 @@ static int opt_print_filename(void *optc
      return print_input_filename ? 0 : AVERROR(ENOMEM);
  }
  
@@ -135,7 +205,7 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
  void show_help_default(const char *opt, const char *arg)
  {
      av_log_set_callback(log_callback_help);
-@@ -4332,6 +4337,7 @@ void show_help_default(const char *opt,
+@@ -4354,6 +4366,7 @@ void show_help_default(const char *opt,
      show_help_children(avformat_get_class(), AV_OPT_FLAG_DECODING_PARAM);
      show_help_children(avcodec_get_class(), AV_OPT_FLAG_DECODING_PARAM);
  }
@@ -143,7 +213,7 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
  
  /**
   * Parse interval specification, according to the format:
-@@ -4606,7 +4612,61 @@ static inline int check_section_show_ent
+@@ -4628,7 +4641,61 @@ static inline int check_section_show_ent
              do_show_##varname = 1;                                      \
      } while (0)
  
@@ -205,8 +275,21 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
  {
      const Writer *w;
      WriterContext *wctx;
-@@ -4773,5 +4833,8 @@ end:
-     pthread_mutex_destroy(&log_mutex);
+@@ -4639,7 +4706,7 @@ int main(int argc, char **argv)
+     init_dynload();
+ 
+ #if HAVE_THREADS
+-    ret = pthread_mutex_init(&log_mutex, NULL);
++    ret = EMFT(pthread_mutex_init)(&log_mutex, NULL);
+     if (ret != 0) {
+         goto end;
+     }
+@@ -4792,8 +4859,11 @@ end:
+     avformat_network_deinit();
+ 
+ #if HAVE_THREADS
+-    pthread_mutex_destroy(&log_mutex);
++    EMFT(pthread_mutex_destroy)(&log_mutex);
  #endif
  
 +#ifdef __EMSCRIPTEN__
@@ -214,45 +297,650 @@ Index: ffmpeg-7.0.2/fftools/ffprobe.c
 +#endif
      return ret < 0;
  }
-Index: ffmpeg-7.0.2/libavutil/thread.h
+Index: ffmpeg-7.1/fftools/ffmpeg_sched.c
 ===================================================================
---- ffmpeg-7.0.2.orig/libavutil/thread.h
-+++ ffmpeg-7.0.2/libavutil/thread.h
-@@ -32,9 +32,9 @@
+--- ffmpeg-7.1.orig/fftools/ffmpeg_sched.c
++++ ffmpeg-7.1/fftools/ffmpeg_sched.c
+@@ -50,8 +50,8 @@ enum QueueType {
+ };
  
- #include "error.h"
+ typedef struct SchWaiter {
+-    pthread_mutex_t     lock;
+-    pthread_cond_t      cond;
++    EMFT(pthread_mutex_t)     lock;
++    EMFT(pthread_cond_t)      cond;
+     atomic_int          choked;
  
--#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS
-+#if HAVE_PTHREADS || HAVE_W32THREADS || HAVE_OS2THREADS || defined(FF_FORCE_PTHREADS)
+     // the following are internal state of schedule_update_locked() and must not
+@@ -67,7 +67,7 @@ typedef struct SchTask {
+     SchThreadFunc       func;
+     void               *func_arg;
  
--#if HAVE_PTHREADS
-+#if HAVE_PTHREADS || defined(FF_FORCE_PTHREADS)
- #include <pthread.h>
+-    pthread_t           thread;
++    EMFT(pthread_t)           thread;
+     int                 thread_running;
+ } SchTask;
  
- #if defined(ASSERT_LEVEL) && ASSERT_LEVEL > 1
-Index: ffmpeg-7.0.2/fftools/ffmpeg_sched.c
+@@ -100,7 +100,7 @@ typedef struct SchDec {
+ typedef struct SchSyncQueue {
+     SyncQueue          *sq;
+     AVFrame            *frame;
+-    pthread_mutex_t     lock;
++    EMFT(pthread_mutex_t)     lock;
+ 
+     unsigned           *enc_idx;
+     unsigned         nb_enc_idx;
+@@ -282,11 +282,11 @@ struct Scheduler {
+     unsigned         nb_mux;
+ 
+     unsigned         nb_mux_ready;
+-    pthread_mutex_t     mux_ready_lock;
++    EMFT(pthread_mutex_t)     mux_ready_lock;
+ 
+     unsigned         nb_mux_done;
+-    pthread_mutex_t     mux_done_lock;
+-    pthread_cond_t      mux_done_cond;
++    EMFT(pthread_mutex_t)     mux_done_lock;
++    EMFT(pthread_cond_t)      mux_done_cond;
+ 
+ 
+     SchDec             *dec;
+@@ -308,7 +308,7 @@ struct Scheduler {
+     atomic_int          terminate;
+     atomic_int          task_failed;
+ 
+-    pthread_mutex_t     schedule_lock;
++    EMFT(pthread_mutex_t)     schedule_lock;
+ 
+     atomic_int_least64_t last_dts;
+ };
+@@ -326,26 +326,26 @@ static int waiter_wait(Scheduler *sch, S
+     if (!atomic_load(&w->choked))
+         return 0;
+ 
+-    pthread_mutex_lock(&w->lock);
++    EMFT(pthread_mutex_lock)(&w->lock);
+ 
+     while (atomic_load(&w->choked) && !atomic_load(&sch->terminate))
+-        pthread_cond_wait(&w->cond, &w->lock);
++        EMFT(pthread_cond_wait)(&w->cond, &w->lock);
+ 
+     terminate = atomic_load(&sch->terminate);
+ 
+-    pthread_mutex_unlock(&w->lock);
++    EMFT(pthread_mutex_unlock)(&w->lock);
+ 
+     return terminate;
+ }
+ 
+ static void waiter_set(SchWaiter *w, int choked)
+ {
+-    pthread_mutex_lock(&w->lock);
++    EMFT(pthread_mutex_lock)(&w->lock);
+ 
+     atomic_store(&w->choked, choked);
+-    pthread_cond_signal(&w->cond);
++    EMFT(pthread_cond_signal)(&w->cond);
+ 
+-    pthread_mutex_unlock(&w->lock);
++    EMFT(pthread_mutex_unlock)(&w->lock);
+ }
+ 
+ static int waiter_init(SchWaiter *w)
+@@ -354,11 +354,11 @@ static int waiter_init(SchWaiter *w)
+ 
+     atomic_init(&w->choked, 0);
+ 
+-    ret = pthread_mutex_init(&w->lock, NULL);
++    ret = EMFT(pthread_mutex_init)(&w->lock, NULL);
+     if (ret)
+         return AVERROR(ret);
+ 
+-    ret = pthread_cond_init(&w->cond, NULL);
++    ret = EMFT(pthread_cond_init)(&w->cond, NULL);
+     if (ret)
+         return AVERROR(ret);
+ 
+@@ -367,8 +367,8 @@ static int waiter_init(SchWaiter *w)
+ 
+ static void waiter_uninit(SchWaiter *w)
+ {
+-    pthread_mutex_destroy(&w->lock);
+-    pthread_cond_destroy(&w->cond);
++    EMFT(pthread_mutex_destroy)(&w->lock);
++    EMFT(pthread_cond_destroy)(&w->cond);
+ }
+ 
+ static int queue_alloc(ThreadQueue **ptq, unsigned nb_streams, unsigned queue_size,
+@@ -419,7 +419,7 @@ static int task_start(SchTask *task)
+ 
+     av_assert0(!task->thread_running);
+ 
+-    ret = pthread_create(&task->thread, NULL, task_wrapper, task);
++    ret = EMFT(pthread_create)(&task->thread, NULL, task_wrapper, task);
+     if (ret) {
+         av_log(task->func_arg, AV_LOG_ERROR, "pthread_create() failed: %s\n",
+                strerror(ret));
+@@ -548,7 +548,7 @@ void sch_free(Scheduler **psch)
+         SchSyncQueue *sq = &sch->sq_enc[i];
+         sq_free(&sq->sq);
+         av_frame_free(&sq->frame);
+-        pthread_mutex_destroy(&sq->lock);
++        EMFT(pthread_mutex_destroy)(&sq->lock);
+         av_freep(&sq->enc_idx);
+     }
+     av_freep(&sch->sq_enc);
+@@ -567,12 +567,12 @@ void sch_free(Scheduler **psch)
+ 
+     av_freep(&sch->sdp_filename);
+ 
+-    pthread_mutex_destroy(&sch->schedule_lock);
++    EMFT(pthread_mutex_destroy)(&sch->schedule_lock);
+ 
+-    pthread_mutex_destroy(&sch->mux_ready_lock);
++    EMFT(pthread_mutex_destroy)(&sch->mux_ready_lock);
+ 
+-    pthread_mutex_destroy(&sch->mux_done_lock);
+-    pthread_cond_destroy(&sch->mux_done_cond);
++    EMFT(pthread_mutex_destroy)(&sch->mux_done_lock);
++    EMFT(pthread_cond_destroy)(&sch->mux_done_cond);
+ 
+     av_freep(psch);
+ }
+@@ -594,19 +594,19 @@ Scheduler *sch_alloc(void)
+     sch->class    = &scheduler_class;
+     sch->sdp_auto = 1;
+ 
+-    ret = pthread_mutex_init(&sch->schedule_lock, NULL);
++    ret = EMFT(pthread_mutex_init)(&sch->schedule_lock, NULL);
+     if (ret)
+         goto fail;
+ 
+-    ret = pthread_mutex_init(&sch->mux_ready_lock, NULL);
++    ret = EMFT(pthread_mutex_init)(&sch->mux_ready_lock, NULL);
+     if (ret)
+         goto fail;
+ 
+-    ret = pthread_mutex_init(&sch->mux_done_lock, NULL);
++    ret = EMFT(pthread_mutex_init)(&sch->mux_done_lock, NULL);
+     if (ret)
+         goto fail;
+ 
+-    ret = pthread_cond_init(&sch->mux_done_cond, NULL);
++    ret = EMFT(pthread_cond_init)(&sch->mux_done_cond, NULL);
+     if (ret)
+         goto fail;
+ 
+@@ -886,7 +886,7 @@ int sch_add_sq_enc(Scheduler *sch, uint6
+     if (!sq->frame)
+         return AVERROR(ENOMEM);
+ 
+-    ret = pthread_mutex_init(&sq->lock, NULL);
++    ret = EMFT(pthread_mutex_init)(&sq->lock, NULL);
+     if (ret)
+         return AVERROR(ret);
+ 
+@@ -1198,7 +1198,7 @@ int sch_mux_stream_ready(Scheduler *sch,
+ 
+     av_assert0(stream_idx < mux->nb_streams);
+ 
+-    pthread_mutex_lock(&sch->mux_ready_lock);
++    EMFT(pthread_mutex_lock)(&sch->mux_ready_lock);
+ 
+     av_assert0(mux->nb_streams_ready < mux->nb_streams);
+ 
+@@ -1208,7 +1208,7 @@ int sch_mux_stream_ready(Scheduler *sch,
+         sch->state >= SCH_STATE_STARTED)
+         ret = mux_init(sch, mux);
+ 
+-    pthread_mutex_unlock(&sch->mux_ready_lock);
++    EMFT(pthread_mutex_unlock)(&sch->mux_ready_lock);
+ 
+     return ret;
+ }
+@@ -1622,9 +1622,9 @@ int sch_start(Scheduler *sch)
+             goto fail;
+     }
+ 
+-    pthread_mutex_lock(&sch->schedule_lock);
++    EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+     schedule_update_locked(sch);
+-    pthread_mutex_unlock(&sch->schedule_lock);
++    EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+ 
+     return 0;
+ fail:
+@@ -1639,17 +1639,17 @@ int sch_wait(Scheduler *sch, uint64_t ti
+     // convert delay to absolute timestamp
+     timeout_us += av_gettime();
+ 
+-    pthread_mutex_lock(&sch->mux_done_lock);
++    EMFT(pthread_mutex_lock)(&sch->mux_done_lock);
+ 
+     if (sch->nb_mux_done < sch->nb_mux) {
+         struct timespec tv = { .tv_sec  =  timeout_us / 1000000,
+                                .tv_nsec = (timeout_us % 1000000) * 1000 };
+-        pthread_cond_timedwait(&sch->mux_done_cond, &sch->mux_done_lock, &tv);
++        EMFT(pthread_cond_timedwait)(&sch->mux_done_cond, &sch->mux_done_lock, &tv);
+     }
+ 
+     ret = sch->nb_mux_done == sch->nb_mux;
+ 
+-    pthread_mutex_unlock(&sch->mux_done_lock);
++    EMFT(pthread_mutex_unlock)(&sch->mux_done_lock);
+ 
+     *transcode_ts = atomic_load(&sch->last_dts);
+ 
+@@ -1675,11 +1675,11 @@ static int enc_open(Scheduler *sch, SchE
+         av_assert0(enc->sq_idx[0] >= 0);
+         sq = &sch->sq_enc[enc->sq_idx[0]];
+ 
+-        pthread_mutex_lock(&sq->lock);
++        EMFT(pthread_mutex_lock)(&sq->lock);
+ 
+         sq_frame_samples(sq->sq, enc->sq_idx[1], ret);
+ 
+-        pthread_mutex_unlock(&sq->lock);
++        EMFT(pthread_mutex_unlock)(&sq->lock);
+     }
+ 
+     return 0;
+@@ -1725,16 +1725,16 @@ static int send_to_enc_sq(Scheduler *sch
+             mux = &sch->mux[enc->dst[i].idx];
+             ms = &mux->streams[enc->dst[i].idx_stream];
+ 
+-            pthread_mutex_lock(&sch->schedule_lock);
++            EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+ 
+             ms->source_finished = 1;
+             schedule_update_locked(sch);
+ 
+-            pthread_mutex_unlock(&sch->schedule_lock);
++            EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+         }
+     }
+ 
+-    pthread_mutex_lock(&sq->lock);
++    EMFT(pthread_mutex_lock)(&sq->lock);
+ 
+     ret = sq_send(sq->sq, enc->sq_idx[1], SQFRAME(frame));
+     if (ret < 0)
+@@ -1775,7 +1775,7 @@ static int send_to_enc_sq(Scheduler *sch
+     }
+ 
+ finish:
+-    pthread_mutex_unlock(&sq->lock);
++    EMFT(pthread_mutex_unlock)(&sq->lock);
+ 
+     return ret;
+ }
+@@ -1850,14 +1850,14 @@ static int send_to_mux(Scheduler *sch, S
+ 
+         // the muxer could have started between the above atomic check and
+         // locking the mutex, then this block falls through to normal send path
+-        pthread_mutex_lock(&sch->mux_ready_lock);
++        EMFT(pthread_mutex_lock)(&sch->mux_ready_lock);
+ 
+         if (!atomic_load(&mux->mux_started)) {
+             int ret = mux_queue_packet(mux, ms, pkt);
+             queued = ret < 0 ? ret : 1;
+         }
+ 
+-        pthread_mutex_unlock(&sch->mux_ready_lock);
++        EMFT(pthread_mutex_unlock)(&sch->mux_ready_lock);
+ 
+         if (queued < 0)
+             return queued;
+@@ -1881,14 +1881,14 @@ update_schedule:
+     // TODO: use atomics to check whether this changes trailing dts
+     // to avoid locking unnecesarily
+     if (dts != AV_NOPTS_VALUE || !pkt) {
+-        pthread_mutex_lock(&sch->schedule_lock);
++        EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+ 
+         if (pkt) ms->last_dts = dts;
+         else     ms->source_finished = 1;
+ 
+         schedule_update_locked(sch);
+ 
+-        pthread_mutex_unlock(&sch->schedule_lock);
++        EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+     }
+ 
+     return 0;
+@@ -2039,13 +2039,13 @@ static int demux_done(Scheduler *sch, un
+             ret = err_merge(ret, err);
+     }
+ 
+-    pthread_mutex_lock(&sch->schedule_lock);
++    EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+ 
+     d->task_exited = 1;
+ 
+     schedule_update_locked(sch);
+ 
+-    pthread_mutex_unlock(&sch->schedule_lock);
++    EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+ 
+     return ret;
+ }
+@@ -2073,12 +2073,12 @@ void sch_mux_receive_finish(Scheduler *s
+     av_assert0(stream_idx < mux->nb_streams);
+     tq_receive_finish(mux->queue, stream_idx);
+ 
+-    pthread_mutex_lock(&sch->schedule_lock);
++    EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+     mux->streams[stream_idx].source_finished = 1;
+ 
+     schedule_update_locked(sch);
+ 
+-    pthread_mutex_unlock(&sch->schedule_lock);
++    EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+ }
+ 
+ int sch_mux_sub_heartbeat(Scheduler *sch, unsigned mux_idx, unsigned stream_idx,
+@@ -2111,7 +2111,7 @@ static int mux_done(Scheduler *sch, unsi
+ {
+     SchMux *mux = &sch->mux[mux_idx];
+ 
+-    pthread_mutex_lock(&sch->schedule_lock);
++    EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+ 
+     for (unsigned i = 0; i < mux->nb_streams; i++) {
+         tq_receive_finish(mux->queue, i);
+@@ -2120,16 +2120,16 @@ static int mux_done(Scheduler *sch, unsi
+ 
+     schedule_update_locked(sch);
+ 
+-    pthread_mutex_unlock(&sch->schedule_lock);
++    EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+ 
+-    pthread_mutex_lock(&sch->mux_done_lock);
++    EMFT(pthread_mutex_lock)(&sch->mux_done_lock);
+ 
+     av_assert0(sch->nb_mux_done < sch->nb_mux);
+     sch->nb_mux_done++;
+ 
+-    pthread_cond_signal(&sch->mux_done_cond);
++    EMFT(pthread_cond_signal)(&sch->mux_done_cond);
+ 
+-    pthread_mutex_unlock(&sch->mux_done_lock);
++    EMFT(pthread_mutex_unlock)(&sch->mux_done_lock);
+ 
+     return 0;
+ }
+@@ -2387,12 +2387,12 @@ int sch_filter_receive(Scheduler *sch, u
+     // this check needs no locking because only the filtering thread
+     // updates this value
+     if (*in_idx != fg->best_input) {
+-        pthread_mutex_lock(&sch->schedule_lock);
++        EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+ 
+         fg->best_input = *in_idx;
+         schedule_update_locked(sch);
+ 
+-        pthread_mutex_unlock(&sch->schedule_lock);
++        EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+     }
+ 
+     if (*in_idx == fg->nb_inputs) {
+@@ -2471,13 +2471,13 @@ static int filter_done(Scheduler *sch, u
+             ret = err_merge(ret, err);
+     }
+ 
+-    pthread_mutex_lock(&sch->schedule_lock);
++    EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+ 
+     fg->task_exited = 1;
+ 
+     schedule_update_locked(sch);
+ 
+-    pthread_mutex_unlock(&sch->schedule_lock);
++    EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+ 
+     return ret;
+ }
+@@ -2540,7 +2540,7 @@ static int task_stop(Scheduler *sch, Sch
+     if (!task->thread_running)
+         return task_cleanup(sch, task->node);
+ 
+-    ret = pthread_join(task->thread, &thread_ret);
++    ret = EMFT(pthread_join)(task->thread, &thread_ret);
+     av_assert0(ret == 0);
+ 
+     task->thread_running = 0;
+Index: ffmpeg-7.1/fftools/thread_queue.c
 ===================================================================
---- ffmpeg-7.0.2.orig/fftools/ffmpeg_sched.c
-+++ ffmpeg-7.0.2/fftools/ffmpeg_sched.c
-@@ -23,6 +23,8 @@
- #include <stddef.h>
- #include <stdint.h>
- 
-+#define FF_FORCE_PTHREADS
-+
- #include "cmdutils.h"
- #include "ffmpeg_sched.h"
- #include "ffmpeg_utils.h"
-Index: ffmpeg-7.0.2/fftools/thread_queue.c
-===================================================================
---- ffmpeg-7.0.2.orig/fftools/thread_queue.c
-+++ ffmpeg-7.0.2/fftools/thread_queue.c
-@@ -19,6 +19,8 @@
+--- ffmpeg-7.1.orig/fftools/thread_queue.c
++++ ffmpeg-7.1/fftools/thread_queue.c
+@@ -19,6 +19,13 @@
  #include <stdint.h>
  #include <string.h>
  
-+#define FF_FORCE_PTHREADS
++#ifdef __EMSCRIPTEN__
++#include <emft-pthread.h>
++#define EMFT(x) emfiber_ ## x
++#else
++#define EMFT(x) x
++#endif
 +
  #include "libavutil/avassert.h"
  #include "libavutil/error.h"
  #include "libavutil/fifo.h"
+@@ -48,8 +55,8 @@ struct ThreadQueue {
+     ObjPool *obj_pool;
+     void   (*obj_move)(void *dst, void *src);
+ 
+-    pthread_mutex_t lock;
+-    pthread_cond_t  cond;
++    EMFT(pthread_mutex_t) lock;
++    EMFT(pthread_cond_t)  cond;
+ };
+ 
+ void tq_free(ThreadQueue **ptq)
+@@ -70,8 +77,8 @@ void tq_free(ThreadQueue **ptq)
+ 
+     av_freep(&tq->finished);
+ 
+-    pthread_cond_destroy(&tq->cond);
+-    pthread_mutex_destroy(&tq->lock);
++    EMFT(pthread_cond_destroy)(&tq->cond);
++    EMFT(pthread_mutex_destroy)(&tq->lock);
+ 
+     av_freep(ptq);
+ }
+@@ -86,15 +93,15 @@ ThreadQueue *tq_alloc(unsigned int nb_st
+     if (!tq)
+         return NULL;
+ 
+-    ret = pthread_cond_init(&tq->cond, NULL);
++    ret = EMFT(pthread_cond_init)(&tq->cond, NULL);
+     if (ret) {
+         av_freep(&tq);
+         return NULL;
+     }
+ 
+-    ret = pthread_mutex_init(&tq->lock, NULL);
++    ret = EMFT(pthread_mutex_init)(&tq->lock, NULL);
+     if (ret) {
+-        pthread_cond_destroy(&tq->cond);
++        EMFT(pthread_cond_destroy)(&tq->cond);
+         av_freep(&tq);
+         return NULL;
+     }
+@@ -125,7 +132,7 @@ int tq_send(ThreadQueue *tq, unsigned in
+     av_assert0(stream_idx < tq->nb_streams);
+     finished = &tq->finished[stream_idx];
+ 
+-    pthread_mutex_lock(&tq->lock);
++    EMFT(pthread_mutex_lock)(&tq->lock);
+ 
+     if (*finished & FINISHED_SEND) {
+         ret = AVERROR(EINVAL);
+@@ -133,7 +140,7 @@ int tq_send(ThreadQueue *tq, unsigned in
+     }
+ 
+     while (!(*finished & FINISHED_RECV) && !av_fifo_can_write(tq->fifo))
+-        pthread_cond_wait(&tq->cond, &tq->lock);
++        EMFT(pthread_cond_wait)(&tq->cond, &tq->lock);
+ 
+     if (*finished & FINISHED_RECV) {
+         ret = AVERROR_EOF;
+@@ -149,11 +156,11 @@ int tq_send(ThreadQueue *tq, unsigned in
+ 
+         ret = av_fifo_write(tq->fifo, &elem, 1);
+         av_assert0(ret >= 0);
+-        pthread_cond_broadcast(&tq->cond);
++        EMFT(pthread_cond_broadcast)(&tq->cond);
+     }
+ 
+ finish:
+-    pthread_mutex_unlock(&tq->lock);
++    EMFT(pthread_mutex_unlock)(&tq->lock);
+ 
+     return ret;
+ }
+@@ -199,7 +206,7 @@ int tq_receive(ThreadQueue *tq, int *str
+ 
+     *stream_idx = -1;
+ 
+-    pthread_mutex_lock(&tq->lock);
++    EMFT(pthread_mutex_lock)(&tq->lock);
+ 
+     while (1) {
+         size_t can_read = av_fifo_can_read(tq->fifo);
+@@ -208,17 +215,17 @@ int tq_receive(ThreadQueue *tq, int *str
+ 
+         // signal other threads if the fifo state changed
+         if (can_read != av_fifo_can_read(tq->fifo))
+-            pthread_cond_broadcast(&tq->cond);
++            EMFT(pthread_cond_broadcast)(&tq->cond);
+ 
+         if (ret == AVERROR(EAGAIN)) {
+-            pthread_cond_wait(&tq->cond, &tq->lock);
++            EMFT(pthread_cond_wait)(&tq->cond, &tq->lock);
+             continue;
+         }
+ 
+         break;
+     }
+ 
+-    pthread_mutex_unlock(&tq->lock);
++    EMFT(pthread_mutex_unlock)(&tq->lock);
+ 
+     return ret;
+ }
+@@ -227,28 +234,28 @@ void tq_send_finish(ThreadQueue *tq, uns
+ {
+     av_assert0(stream_idx < tq->nb_streams);
+ 
+-    pthread_mutex_lock(&tq->lock);
++    EMFT(pthread_mutex_lock)(&tq->lock);
+ 
+     /* mark the stream as send-finished;
+      * next time the consumer thread tries to read this stream it will get
+      * an EOF and recv-finished flag will be set */
+     tq->finished[stream_idx] |= FINISHED_SEND;
+-    pthread_cond_broadcast(&tq->cond);
++    EMFT(pthread_cond_broadcast)(&tq->cond);
+ 
+-    pthread_mutex_unlock(&tq->lock);
++    EMFT(pthread_mutex_unlock)(&tq->lock);
+ }
+ 
+ void tq_receive_finish(ThreadQueue *tq, unsigned int stream_idx)
+ {
+     av_assert0(stream_idx < tq->nb_streams);
+ 
+-    pthread_mutex_lock(&tq->lock);
++    EMFT(pthread_mutex_lock)(&tq->lock);
+ 
+     /* mark the stream as recv-finished;
+      * next time the producer thread tries to send for this stream, it will
+      * get an EOF and send-finished flag will be set */
+     tq->finished[stream_idx] |= FINISHED_RECV;
+-    pthread_cond_broadcast(&tq->cond);
++    EMFT(pthread_cond_broadcast)(&tq->cond);
+ 
+-    pthread_mutex_unlock(&tq->lock);
++    EMFT(pthread_mutex_unlock)(&tq->lock);
+ }
+Index: ffmpeg-7.1/fftools/ffmpeg.h
+===================================================================
+--- ffmpeg-7.1.orig/fftools/ffmpeg.h
++++ ffmpeg-7.1/fftools/ffmpeg.h
+@@ -541,7 +541,7 @@ typedef struct EncStats {
+ 
+     AVIOContext        *io;
+ 
+-    pthread_mutex_t     lock;
++    EMFT(pthread_mutex_t)     lock;
+     int                 lock_initialized;
+ } EncStats;
+ 
+Index: ffmpeg-7.1/fftools/ffmpeg_enc.c
+===================================================================
+--- ffmpeg-7.1.orig/fftools/ffmpeg_enc.c
++++ ffmpeg-7.1/fftools/ffmpeg_enc.c
+@@ -472,7 +472,7 @@ void enc_stats_write(OutputStream *ost,
+         ptsi = fd->dec.pts;
+     }
+ 
+-    pthread_mutex_lock(&es->lock);
++    EMFT(pthread_mutex_lock)(&es->lock);
+ 
+     for (size_t i = 0; i < es->nb_components; i++) {
+         const EncStatsComponent *c = &es->components[i];
+@@ -522,7 +522,7 @@ void enc_stats_write(OutputStream *ost,
+     avio_w8(io, '\n');
+     avio_flush(io);
+ 
+-    pthread_mutex_unlock(&es->lock);
++    EMFT(pthread_mutex_unlock)(&es->lock);
+ }
+ 
+ static inline double psnr(double d)
+Index: ffmpeg-7.1/fftools/ffmpeg_mux.c
+===================================================================
+--- ffmpeg-7.1.orig/fftools/ffmpeg_mux.c
++++ ffmpeg-7.1/fftools/ffmpeg_mux.c
+@@ -782,7 +782,7 @@ static void enc_stats_uninit(EncStats *e
+     av_freep(&es->components);
+ 
+     if (es->lock_initialized)
+-        pthread_mutex_destroy(&es->lock);
++        EMFT(pthread_mutex_destroy)(&es->lock);
+     es->lock_initialized = 0;
+ }
+ 
+Index: ffmpeg-7.1/fftools/ffmpeg_mux_init.c
+===================================================================
+--- ffmpeg-7.1.orig/fftools/ffmpeg_mux_init.c
++++ ffmpeg-7.1/fftools/ffmpeg_mux_init.c
+@@ -362,7 +362,7 @@ fail:
+             return ret;
+     }
+ 
+-    ret = pthread_mutex_init(&es->lock, NULL);
++    ret = EMFT(pthread_mutex_init)(&es->lock, NULL);
+     if (ret)
+         return AVERROR(ret);
+     es->lock_initialized = 1;
+Index: ffmpeg-7.1/fftools/ffmpeg_sched.h
+===================================================================
+--- ffmpeg-7.1.orig/fftools/ffmpeg_sched.h
++++ ffmpeg-7.1/fftools/ffmpeg_sched.h
+@@ -25,6 +25,13 @@
+ #include <stddef.h>
+ #include <stdint.h>
+ 
++#ifdef __EMSCRIPTEN__
++#include <emft-pthread.h>
++#define EMFT(x) emfiber_ ## x
++#else
++#define EMFT(x) x
++#endif
++
+ #include "ffmpeg_utils.h"
+ 
+ /*

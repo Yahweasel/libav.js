@@ -1,16 +1,24 @@
-EMFT_VERSION=1.0
+EMFT_VERSION=1.1
 
-build/inst/%/lib/libemfiberthreads.a: build/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a
-	cd build/emfiberthreads-$(EMFT_VERSION) && \
+build/inst/%/include/pthread.h: build/inst/%/lib/libemfiberthreads.a
+	cd build/emfiberthreads/emfiberthreads-$(EMFT_VERSION) && \
+		$(MAKE) install-interpose PREFIX="$(PWD)/build/inst/$*"
+
+build/inst/%/lib/libemfiberthreads.a: \
+	build/emfiberthreads/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a
+	cd build/emfiberthreads/emfiberthreads-$(EMFT_VERSION) && \
 		$(MAKE) install PREFIX="$(PWD)/build/inst/$*"
 
-build/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a: build/emfiberthreads-$(EMFT_VERSION)/Makefile
-	cd build/emfiberthreads-$(EMFT_VERSION) && $(MAKE) STACK_SIZE=1048576
+build/emfiberthreads/emfiberthreads-$(EMFT_VERSION)/libemfiberthreads.a: \
+	build/emfiberthreads/emfiberthreads-$(EMFT_VERSION)/Makefile
+	cd build/emfiberthreads/emfiberthreads-$(EMFT_VERSION) && \
+		$(MAKE) STACK_SIZE=1048576
 
 extract: build/emfiberthreads-$(EMFT_VERSION)/Makefile
 
-build/emfiberthreads-$(EMFT_VERSION)/Makefile: build/emfiberthreads-$(EMFT_VERSION).tar.gz
-	cd build && tar zxf emfiberthreads-$(EMFT_VERSION).tar.gz
+build/emfiberthreads/emfiberthreads-$(EMFT_VERSION)/Makefile: build/emfiberthreads-$(EMFT_VERSION).tar.gz
+	mkdir -p build/emfiberthreads
+	cd build/emfiberthreads && tar zxf ../emfiberthreads-$(EMFT_VERSION).tar.gz
 	touch $@
 
 build/emfiberthreads-$(EMFT_VERSION).tar.gz:
