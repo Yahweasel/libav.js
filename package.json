@@ -7,84 +7,84 @@
   "types": "dist/libav.types.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-default.mjs",
-      "default": "./dist/libav-default.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-default.js"
     },
     "./default": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-default.mjs",
-      "default": "./dist/libav-default.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-default.js"
     },
     "./default-cli": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-default-cli.mjs",
-      "default": "./dist/libav-default-cli.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-default-cli.js"
     },
     "./opus": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-opus.mjs",
-      "default": "./dist/libav-opus.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-opus.js"
     },
     "./opus-af": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-opus-af.mjs",
-      "default": "./dist/libav-opus-af.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-opus-af.js"
     },
     "./flac": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-flac.mjs",
-      "default": "./dist/libav-flac.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-flac.js"
     },
     "./flac-af": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-flac-af.mjs",
-      "default": "./dist/libav-flac-af.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-flac-af.js"
     },
     "./wav": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-wav.mjs",
-      "default": "./dist/libav-wav.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-wav.js"
     },
     "./wav-af": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-wav-af.mjs",
-      "default": "./dist/libav-wav-af.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-wav-af.js"
     },
     "./obsolete": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-obsolete.mjs",
-      "default": "./dist/libav-obsolete.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-obsolete.js"
     },
     "./webm": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-webm.mjs",
-      "default": "./dist/libav-webm.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-webm.js"
     },
     "./webm-cli": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-webm-cli.mjs",
-      "default": "./dist/libav-webm-cli.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-webm-cli.js"
     },
     "./vp8-opus": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-vp8-opus.mjs",
-      "default": "./dist/libav-vp8-opus.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-vp8-opus.js"
     },
     "./vp8-opus-avf": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-vp8-opus-avf.mjs",
-      "default": "./dist/libav-vp8-opus-avf.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-vp8-opus-avf.js"
     },
     "./webcodecs": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-webcodecs.mjs",
-      "default": "./dist/libav-webcodecs.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-webcodecs.js"
     },
     "./webcodecs-avf": {
+      "types": "./dist/libav.types.d.ts",
       "import": "./dist/libav-webcodecs-avf.mjs",
-      "default": "./dist/libav-webcodecs-avf.js",
-      "types": "./dist/libav.types.d.ts"
+      "default": "./dist/libav-webcodecs-avf.js"
     }
   },
   "directories": {

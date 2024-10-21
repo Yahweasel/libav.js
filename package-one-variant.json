@@ -5,9 +5,9 @@
   "main": "dist/libav-@VARIANT.js",
   "types": "dist/libav.types.d.ts",
   "exports": {
+    "types": "./dist/libav.types.d.ts",
     "import": "./dist/libav-@VARIANT.mjs",
-    "default": "./dist/libav-@VARIANT.js",
-    "types": "./dist/libav.types.d.ts"
+    "default": "./dist/libav-@VARIANT.js"
   },
   "directories": {
     "test": "tests"
