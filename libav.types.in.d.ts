@@ -553,7 +553,7 @@ export interface LibAVStatic {
 /**
  * A LibAV instance, created by LibAV.LibAV (*not* the LibAV wrapper itself)
  */
-export interface LibAV extends LibAVStatic {
+export interface LibAVInstance extends LibAVStatic {
     /**
      * The operating mode of this libav.js instance. Each operating mode has
      * different constraints.
@@ -705,9 +705,9 @@ export interface LibAVWrapper extends LibAVOpts, LibAVStatic {
      * Create a LibAV instance.
      * @param opts  Options
      */
-    LibAV(opts?: LibAVOpts & {noworker?: false}): Promise<LibAV>;
-    LibAV(opts: LibAVOpts & {noworker: true}): Promise<LibAV & LibAVSync>;
-    LibAV(opts: LibAVOpts): Promise<LibAV | LibAV & LibAVSync>;
+    LibAV(opts?: LibAVOpts & {noworker?: false}): Promise<LibAVInstance>;
+    LibAV(opts: LibAVOpts & {noworker: true}): Promise<LibAVInstance & LibAVSync>;
+    LibAV(opts: LibAVOpts): Promise<LibAVInstance | LibAVInstance & LibAVSync>;
 }
 
 /**

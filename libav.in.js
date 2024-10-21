@@ -273,10 +273,6 @@
 @E6                 return laf.default;
 @E6             });
 
-            } else if (nodejs) {
-                // Node.js: Load LibAV now
-                return libav.factories[toImport] = require(toImport);
-
             } else if (typeof importScripts !== "undefined") {
                 // Worker scope. Import it.
                 importScripts(toImport);
@@ -574,9 +570,6 @@
             return ret;
         });
     }
-
-@E5 if (nodejs)
-@E5     module.exports = libav;
 })();
 
 @E6 export default LibAV;
