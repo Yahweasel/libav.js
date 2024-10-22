@@ -73,6 +73,7 @@
         ["avformat_new_stream", "number", ["number", "number"]],
         ["avformat_open_input", "number", ["number", "string", "number", "number"], {"async": true, "returnsErrno": true}],
         ["avformat_open_input_js", "number", ["string", "number", "number"], {"async": true, "returnsErrno": true}],
+        ["av_seek_frame", "number", ["number", "number", "number", "number"], {"async": true, "returnsErrno": true, "notypes": true}],
         ["avformat_seek_file", "number", ["number", "number", "number", "number", "number", "number"], {"async": true, "returnsErrno": true, "notypes": true}],
         ["avformat_seek_file_min", "number", ["number", "number", "number", "number"], {"async": true, "returnsErrno": true, "notypes": true}],
         ["avformat_seek_file_max", "number", ["number", "number", "number", "number"], {"async": true, "returnsErrno": true, "notypes": true}],
