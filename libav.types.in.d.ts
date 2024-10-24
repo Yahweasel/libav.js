@@ -605,6 +605,15 @@ export interface LibAV extends LibAVStatic {
     ): Promise<number>;
 
     /**
+     * Seek to the keyframe at timestamp 'timestamp' in 'stream_index'.
+     */
+    av_seek_frame(
+        s: number, stream_index: number,
+        timestamplo: number, timestamphi: number,
+        flags: number
+    ): Promise<number>;
+
+    /**
      * Get the depth of this component of this pixel format.
      */
     AVPixFmtDescriptor_comp_depth(fmt: number, comp: number): Promise<number>;
