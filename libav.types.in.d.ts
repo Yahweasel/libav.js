@@ -605,10 +605,11 @@ export interface LibAV extends LibAVStatic {
     ): Promise<number>;
 
     /**
-     * Seek to the keyframe at timestamp.
+     * Seek to the keyframe at timestamp 'timestamp' in 'stream_index'.
      */
     av_seek_frame(
-        s: number, stream_index: number, tslo: number, tshi: number,
+        s: number, stream_index: number,
+        timestamplo: number, timestamphi: number,
         flags: number
     ): Promise<number>;
 
