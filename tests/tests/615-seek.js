@@ -55,6 +55,10 @@ await libav.avformat_seek_file_approx(fmt_ctx, 0,
     3.5 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
     0);
 await testSeek(3 * 60, 4 * 60, "avformat_seek_file_approx");
+await libav.av_seek_frame(fmt_ctx, 0,
+    3.5 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
+    0);
+await testSeek(3 * 60, 4 * 60, "av_seek_frame");
 
 await libav.av_packet_free_js(pkt);
 await libav.avformat_close_input_js(fmt_ctx);
