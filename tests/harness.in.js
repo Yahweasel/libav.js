@@ -18,6 +18,11 @@
 @E6 let LibAVTestHarness;
 @E6 let LibAV;
 
+@E5 if (typeof process !== "undefined")
+@E5 {
+@E5     throw new Error("Please run Node tests on the ES6 version");
+@E5 }
+
 LibAVTestHarness = {
     tests: [],
     files: [],
@@ -34,15 +39,14 @@ LibAVTestHarness = {
         this.tests = [];
         for (const test of list) {
             let js;
-            if (typeof process !== "undefined") {
+@E6         if (typeof process !== "undefined") {
 @E6             js = await fs.readFile(`tests/${test}`, "utf8");
-@E5             js = await (require("fs/promises").readFile(`tests/${test}`, "utf8"));
-            } else {
+@E6         } else
+            {
                 const resp = await fetch(`tests/${test}`);
                 const ab = await resp.arrayBuffer();
                 const tdec = new TextDecoder();
                 js = tdec.decode(new Uint8Array(ab));
-
             }
 
             this.tests.push({
@@ -53,10 +57,9 @@ LibAVTestHarness = {
     },
 
     readFile: async function(name) {
-        if (typeof process !== "undefined") {
+@E6     if (typeof process !== "undefined") {
 @E6         return fs.readFile(name);
-@E5         return require("fs/promises").readFile(name);
-        }
+@E6     }
 
         const resp = await fetch(name);
         const ab = await resp.arrayBuffer();
@@ -79,9 +82,7 @@ LibAVTestHarness = {
 @E5             "js";
 @E6         LibAV = (await import(toImport)).default;
 @E5         LibAV = {};
-@E5         if (typeof process !== "undefined")
-@E5             require(toImport);
-@E5         else if (typeof importScripts !== "undefined")
+@E5         if (typeof importScripts !== "undefined")
 @E5             importScripts(toImport);
 @E5         else {
 @E5             // Assume web
@@ -188,5 +189,3 @@ LibAVTestHarness = {
 };
 
 @E6 export default LibAVTestHarness;
-@E5 if (typeof module !== "undefined")
-@E5     module.exports = LibAVTestHarness;
