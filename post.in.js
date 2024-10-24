@@ -284,8 +284,8 @@ function fsBinding(of) {
 
 var readerDev = FS.makedev(44, 0);
 FS.registerDevice(readerDev, readerCallbacks);
-Module.readBuffers = {};
-Module.blockReadBuffers = {};
+Module.readBuffers = Object.create(null);
+Module.blockReadBuffers = Object.create(null);
 var writerDev = FS.makedev(44, 1);
 FS.registerDevice(writerDev, writerCallbacks);
 var streamWriterDev = FS.makedev(44, 2);
@@ -342,6 +342,12 @@ fsBinding("createLazyFile");
 /// @types mkreaderdev@sync(name: string, mode?: number): @promise@void@
 Module.mkreaderdev = function(loc, mode) {
     FS.mkdev(loc, mode?mode:0x1FF, readerDev);
+    Module.readBuffers[loc] = {
+        buf: new Uint8Array(0),
+        eof: false,
+        errorCode: 0,
+        error: null
+    };
     return 0;
 };
 
@@ -637,16 +643,7 @@ Module.unlinkfsfhfile = function(name) {
  */
 var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) {
     opts = opts || {};
-    var idata;
-    if (!(name in Module.readBuffers)) {
-        Module.readBuffers[name] = {
-            buf: new Uint8Array(0),
-            eof: false,
-            errorCode: 0,
-            error: null
-        };
-    }
-    idata = Module.readBuffers[name];
+    var idata = Module.readBuffers[name];
 
     if (data === null) {
         // EOF or error
@@ -697,23 +694,12 @@ var ff_reader_dev_send = Module.ff_reader_dev_send = function(name, data, opts) 
  */
 var ff_block_reader_dev_send = Module.ff_block_reader_dev_send = function(name, pos, data, opts) {
     opts = opts || {};
-    var idata;
-    if (!(name in Module.blockReadBuffers)) {
-        idata = Module.blockReadBuffers[name] = {
-            position: pos,
-            buf: data,
-            ready: true,
-            errorCode: 0,
-            error: null
-        };
-    } else {
-        idata = Module.blockReadBuffers[name];
-        idata.position = pos;
-        idata.buf = data;
-        idata.ready = true;
-        idata.errorCode = 0;
-        idata.error = null;
-    }
+    var idata = Module.blockReadBuffers[name];
+    idata.position = pos;
+    idata.buf = data;
+    idata.ready = true;
+    idata.errorCode = 0;
+    idata.error = null;
 
     if (data === null)
         idata.buf = new Uint8Array(0);
