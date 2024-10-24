@@ -21,7 +21,7 @@ const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("bitrate.webm");
 const pkt = await libav.av_packet_alloc();
 
 async function zero() {
-    await libav.avformat_seek_file_approx(fmt_ctx, 0, 0, 0);
+    await libav.avformat_seek_file_approx(fmt_ctx, 0, 0, 0, 0);
 }
 
 async function testSeek(min, max, func) {
@@ -29,30 +29,30 @@ async function testSeek(min, max, func) {
     const packet = await libav.ff_copyout_packet(pkt);
     await libav.av_packet_unref(pkt);
 
-    const time = packet.pts * streams[0].timebase_num / streams[0].timebase_den;
+    const time = packet.pts * streams[0].time_base_num / streams[0].time_base_den;
     if (time < min || time > max)
         throw new Error(`Failed to seek between ${min} and ${max} (${func})`);
 }
 
 await libav.avformat_seek_file(fmt_ctx, 0,
-    3 * 60 * streams[0].timebase_num / streams[0].timebase_den,
-    3.5 * 60 * streams[0].timebase_num / streams[0].timebase_den,
-    4 * 60 * streams[0].timebase_num / streams[0].timebase_den,
+    3 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
+    3.5 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
+    4 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
     0);
 await testSeek(3 * 60, 4 * 60, "avformat_seek_file");
 await zero();
 await libav.avformat_seek_file_min(fmt_ctx, 0,
-    3 * 60 * streams[0].timebase_num / streams[0].timebase_den,
+    3 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
     0);
 await testSeek(3 * 60, 4 * 60, "avformat_seek_file_min");
 await zero();
 await libav.avformat_seek_file_max(fmt_ctx, 0,
-    4 * 60 * streams[0].timebase_num / streams[0].timebase_den,
+    4 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
     0);
 await testSeek(3 * 60, 4 * 60, "avformat_seek_file_max");
 await zero();
 await libav.avformat_seek_file_approx(fmt_ctx, 0,
-    3.5 * 60 * streams[0].timebase_num / streams[0].timebase_den,
+    3.5 * 60 * streams[0].time_base_den / streams[0].time_base_num, 0,
     0);
 await testSeek(3 * 60, 4 * 60, "avformat_seek_file_approx");
 
