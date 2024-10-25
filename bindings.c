@@ -375,13 +375,17 @@ void av_packet_rescale_ts_js(
 /* AVFormatContext */
 #define B(type, field) A(AVFormatContext, type, field)
 #define BA(type, field) AA(AVFormatContext, type, field)
+#define BL(type, field) AL(AVFormatContext, type, field)
+BL(int64_t, duration)
 B(int, flags)
 B(unsigned int, nb_streams)
 B(const struct AVOutputFormat *, oformat)
 B(AVIOContext *, pb)
+BL(int64_t, start_time)
 BA(AVStream *, streams)
 #undef B
 #undef BA
+#undef BL
 
 /* AVStream */
 #define B(type, field) A(AVStream, type, field)

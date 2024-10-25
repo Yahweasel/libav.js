@@ -307,10 +307,14 @@
             {"name": "time_base", "rational": true}
         ]],
         ["AVFormatContext", [
+            "duration",
+            "durationhi",
             "flags",
             "nb_streams",
             "oformat",
             "pb",
+            "start_time",
+            "start_timehi",
             {"name": "streams", "array": true}
         ]],
         ["AVStream", [

@@ -131,6 +131,8 @@
         });
     }
 
+    libavStatics.AV_TIME_BASE = 1000000;
+
     // AV_OPT
     libavStatics.AV_OPT_SEARCH_CHILDREN = 1;
 
