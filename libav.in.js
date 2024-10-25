@@ -575,8 +575,10 @@
         });
     }
 
-@E5 if (nodejs)
+@E5 if (nodejs) {
+@E5     libav.default = libav;
 @E5     module.exports = libav;
+@E5 }
 })();
 
 @E6 export default LibAV;
