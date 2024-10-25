@@ -13,7 +13,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-@E6 let LibAV;
+@E6 const libav = {};
 
 (function() {
     function isWebAssemblySupported(module) {
@@ -38,13 +38,13 @@
         return false;
     }
 
-    var libav;
+@E5 var libav;
     var nodejs = (typeof process !== "undefined");
 
-    // Make sure LibAV is defined for later loading
-    if (typeof LibAV === "undefined")
-        LibAV = {};
-    libav = LibAV;
+@E5 // Make sure LibAV is defined for later loading
+@E5 if (typeof LibAV === "undefined")
+@E5     LibAV = {};
+@E5 libav = LibAV;
 
     if (!libav.base) {
 @E6     libav.base = import.meta.url;
@@ -577,10 +577,11 @@
         });
     }
 
-@E5 if (nodejs) {
-@E5     libav.default = libav;
+@E5 if (nodejs)
 @E5     module.exports = libav;
-@E5 }
 })();
 
-@E6 export default LibAV;
+@E6 export const {
+@E6 @EXPORTS
+@E6 } = libav;
+@E6 export default libav;

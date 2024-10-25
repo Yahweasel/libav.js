@@ -363,7 +363,7 @@ function decls(f, meta) {
         .replace(/\n@E6 /g, "\n");
 
     fs.writeFileSync(`build/libav-${ver}.js`, outpJS);
-    fs.writeFileSync(`build/libav-${ver}.mjs`, outpMJS);
+    fs.writeFileSync(`build/libav-${ver}.in.mjs`, outpMJS);
 })();
 
 // exports.json

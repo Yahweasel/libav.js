@@ -895,12 +895,15 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	rmdir $(@).d
 
 
-build/libav-$(LIBAVJS_VERSION).js: libav.in.js post.in.js funcs.json tools/apply-funcs.js
+build/libav-$(LIBAVJS_VERSION).js: libav.in.js libav.types.in.d.ts post.in.js funcs.json tools/apply-funcs.js
 	mkdir -p build dist
 	./tools/apply-funcs.js $(LIBAVJS_VERSION)
 
-build/libav.types.d.ts build/libav-$(LIBAVJS_VERSION).mjs build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
+build/libav.types.d.ts build/libav-$(LIBAVJS_VERSION).in.mjs build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
 	touch $@
+
+build/libav-$(LIBAVJS_VERSION).mjs: build/libav-$(LIBAVJS_VERSION).in.mjs
+	./tools/mk-es6.js ../build/libav-$(LIBAVJS_VERSION).js $< > $@
 
 node_modules/.bin/terser:
 	npm install
