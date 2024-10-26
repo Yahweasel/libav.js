@@ -397,7 +397,7 @@ declare namespace LibAV {
          * @param lo  Low bits of the pair
          * @param hi  High bits of the pair
          */
-        i64ToBigInt(lo: number, hi: number): BigInteger;
+        i64ToBigInt(lo: number, hi: number): BigInt;
 
         /**
          * Convert a (64-bit) BigInt into a pair of 32-bit integers. Requires BigInt
@@ -405,7 +405,7 @@ declare namespace LibAV {
          * @param val  BigInt value to convert
          * @returns [low bits, high bits]
          */
-        bigIntToi64(val: BigInteger): [number, number];
+        bigIntToi64(val: BigInt): [number, number];
 
         // Enumerations:
         AV_OPT_SEARCH_CHILDREN: number;
