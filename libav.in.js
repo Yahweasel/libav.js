@@ -402,7 +402,7 @@
                  * instance. */
                 return Promise.all([]).then(function() {
                     return factory({
-                        wasmurl: opts.warmurl || libav.wasmurl,
+                        wasmurl: opts.wasmurl || libav.wasmurl,
                         variant: opts.variant || libav.variant
                     });
                 }).then(function(x) {
