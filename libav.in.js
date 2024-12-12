@@ -121,6 +121,31 @@
         return [dv.getInt32(0, true), dv.getInt32(4, true)];
     };
 
+    libavStatics.ff_channel_layout(frame) {
+        if (frame.channel_layout)
+            return frame.channel_layout;
+        else if (frame.channels && frame.channels !== 1)
+            return (1 << frame.channels) - 1;
+        else
+            return 4; // Mono
+    };
+
+    libavStatics.ff_channels(frame) {
+        if (frame.channels) {
+            return frame.channels;
+        } else if (frame.channel_layout) {
+            var channels = 0;
+            var cl = frame.channel_layout;
+            while (cl) {
+                channels += (cl & 1);
+                cl >>= 1;
+            }
+            return channels;
+        } else {
+            return 1;
+        }
+    };
+
     // Some enumerations lifted directly from FFmpeg
     function enume(vals, first) {
         if (typeof first === undefined)
