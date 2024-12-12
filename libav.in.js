@@ -121,7 +121,7 @@
         return [dv.getInt32(0, true), dv.getInt32(4, true)];
     };
 
-    libavStatics.ff_channel_layout(frame) {
+    libavStatics.ff_channel_layout = function(frame) {
         if (frame.channel_layout)
             return frame.channel_layout;
         else if (frame.channels && frame.channels !== 1)
@@ -130,7 +130,7 @@
             return 4; // Mono
     };
 
-    libavStatics.ff_channels(frame) {
+    libavStatics.ff_channels = function(frame) {
         if (frame.channels) {
             return frame.channels;
         } else if (frame.channel_layout) {
