@@ -1,4 +1,4 @@
-LIBVPX_VERSION=1.14.1
+LIBVPX_VERSION=1.15.0
 
 build/inst/%/lib/pkgconfig/vpx.pc: build/libvpx-$(LIBVPX_VERSION)/build-%/Makefile
 	-cd build/libvpx-$(LIBVPX_VERSION)/build-$* && \
