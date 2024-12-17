@@ -1848,9 +1848,8 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
 
             if (tbNum) {
                 if (typeof outFrame === "number") {
-                    if (!AVFrame_time_base_num(outFrame))
-                        AVFrame_time_base_s(outFrame, tbNum, tbDen);
-                } else if (outFrame && !outFrame.time_base_num) {
+                    AVFrame_time_base_s(outFrame, tbNum, tbDen);
+                } else if (outFrame) {
                     outFrame.time_base_num = tbNum;
                     outFrame.time_base_den = tbDen;
                 }
@@ -1866,25 +1865,9 @@ var ff_filter_multi = Module.ff_filter_multi = function(srcs, buffersink_ctx, fr
     // Choose a frame copier per stream
     var copyoutFrames = [];
     for (var ti = 0; ti < inFrames.length; ti++) (function(ti) {
-        var copyoutFrameO = ff_copyout_frame;
+        var copyoutFrame = ff_copyout_frame;
         if (config[ti].copyoutFrame)
-            copyoutFrameO = ff_copyout_frame_versions[config[ti].copyoutFrame];
-        var copyoutFrame = function(ptr) {
-            var ret = copyoutFrameO(ptr);
-            if (!ret.time_base_num) {
-                ret.time_base_num = tbNum;
-                ret.time_base_den = tbDen;
-            }
-            return ret;
-        };
-        if (config[ti].copyoutFrame === "ptr") {
-            copyoutFrame = function(ptr) {
-                var ret = ff_copyout_frame_ptr(ptr);
-                if (!AVFrame_time_base_num(ret))
-                    AVFrame_time_base_s(ret, tbNum, tbDen);
-                return ret;
-            };
-        }
+            copyoutFrame = ff_copyout_frame_versions[config[ti].copyoutFrame];
         copyoutFrames.push(copyoutFrame);
     })(ti);
 
