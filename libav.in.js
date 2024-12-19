@@ -393,7 +393,7 @@
                         var transfer = [];
                         for (var i = 0; i < msg.length; i++) {
                             if (msg[i] && msg[i].libavjsTransfer)
-                                transfer.push.apply(transfer, msg[i].libavjs_create_main_thread);
+                                transfer.push.apply(transfer, msg[i].libavjsTransfer);
                         }
                         return new Promise(function(res, rej) {
                             var id = ret.on++;
