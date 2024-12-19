@@ -1,0 +1,28 @@
+{
+  "name": "@libav.js/types",
+  "version": "@VER",
+  "description": "A compilation of the libraries associated with handling audio and video in ffmpeg—libavformat, libavcodec, libavfilter, libavutil and libswresample—for WebAssembly and asm.js, and thus the web. This package includes only the types.",
+  "types": "dist/libav.types.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yahweasel/libav.js.git"
+  },
+  "keywords": [
+    "ffmpeg",
+    "libav",
+    "audio",
+    "video",
+    "av",
+    "encode",
+    "decode",
+    "transcode",
+    "mux",
+    "demux"
+  ],
+  "author": "Yahweasel",
+  "license": "LGPL-2.1",
+  "bugs": {
+    "url": "https://github.com/Yahweasel/libav.js/issues"
+  },
+  "homepage": "https://github.com/Yahweasel/libav.js#readme"
+}
