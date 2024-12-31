@@ -427,8 +427,11 @@ declare namespace LibAV {
             channels?: number
         }): number;
 
-        // Enumerations:
+        // Constants:
+        AV_TIME_BASE: number;
         AV_OPT_SEARCH_CHILDREN: number;
+
+        // Enumerations:
         AVMEDIA_TYPE_UNKNOWN: number;
         AVMEDIA_TYPE_VIDEO: number;
         AVMEDIA_TYPE_AUDIO: number;
