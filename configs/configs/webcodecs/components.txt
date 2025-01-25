@@ -3,3 +3,4 @@ avutil
 avformat
 avfcbridge
 avcodec
+avframe

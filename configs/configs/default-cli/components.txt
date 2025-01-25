@@ -3,5 +3,6 @@ avutil
 avformat
 avfcbridge
 avcodec
+avframe
 avfilter
 cli

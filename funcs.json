@@ -33,6 +33,24 @@
             ["av_dict_copy_js", "number", ["number", "number", "number"]],
             ["av_dict_free", null, ["number"]],
             ["av_dict_set_js", "number", ["number", "string", "string", "number"]],
+            ["av_log_get_level", "number", []],
+            ["av_log_set_level", null, ["number"]],
+            ["av_opt_set", "number", ["number", "string", "string", "number"]],
+            ["av_opt_set_int_list_js", "number", ["number", "string", "number", "number", "number", "number"]],
+            ["av_strdup", "number", ["string"]],
+            ["ff_error", "string", ["number"]],
+            ["ff_nothing", null, [], {"async": true}]
+        ],
+
+        "freers": [
+            "av_dict_free"
+        ]
+    },
+
+    "avframe": {
+        "//": "This is not a real library. This is the libavutil symbols used specifically for frames.",
+
+        "functions": [
             ["av_frame_alloc", "number", []],
             ["av_frame_clone", "number", ["number", "number"]],
             ["av_frame_free", null, ["number"]],
@@ -42,16 +60,9 @@
             ["av_frame_unref", null, ["number"]],
             ["av_get_bytes_per_sample", "number", ["number"]],
             ["av_get_sample_fmt_name", "string", ["number"]],
-            ["av_log_get_level", "number", []],
-            ["av_log_set_level", null, ["number"]],
-            ["av_opt_set", "number", ["number", "string", "string", "number"]],
-            ["av_opt_set_int_list_js", "number", ["number", "string", "number", "number", "number", "number"]],
             ["av_pix_fmt_desc_get", "number", ["number"]],
             ["AVPixFmtDescriptor_comp_depth", "number", ["number", "number"]],
-            ["av_strdup", "number", ["string"]],
-            ["ff_error", "string", ["number"]],
-            ["ff_frame_rescale_ts_js", null, ["number", "number", "number", "number", "number"]],
-            ["ff_nothing", null, [], {"async": true}]
+            ["ff_frame_rescale_ts_js", null, ["number", "number", "number", "number", "number"]]
         ],
 
         "meta": [
@@ -98,8 +109,7 @@
         ],
 
         "freers": [
-            "av_frame_free",
-            "av_dict_free"
+            "av_frame_free"
         ]
     },
 

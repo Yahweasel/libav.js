@@ -3,6 +3,7 @@ avutil
 avformat
 avfcbridge
 avcodec
+avframe
 avfilter
 cli
 swscale

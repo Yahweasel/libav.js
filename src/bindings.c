@@ -60,45 +60,6 @@
     void struc ## _ ## field ## _den_s(struc *a, int b) { (void) a; (void) b; } \
     void struc ## _ ## field ## _s(struc *a, int n, int d) { (void) a; (void) n; (void) d; }
 
-
-/* Not part of libav, just used to ensure a round trip to C for async purposes */
-void ff_nothing() {}
-
-
-/****************************************************************
- * libavutil
- ***************************************************************/
-
-/* AVFrame */
-#define B(type, field) A(AVFrame, type, field)
-#define BL(type, field) AL(AVFrame, type, field)
-#define BA(type, field) AA(AVFrame, type, field)
-B(size_t, crop_bottom)
-B(size_t, crop_left)
-B(size_t, crop_right)
-B(size_t, crop_top)
-BA(uint8_t *, data)
-B(int, format)
-B(int, height)
-B(int, key_frame)
-BA(int, linesize)
-B(int, nb_samples)
-B(int, pict_type)
-BL(int64_t, pts)
-B(int, sample_rate)
-B(int, width)
-#undef B
-#undef BL
-#undef BA
-
-RAT(AVFrame, sample_aspect_ratio)
-
-#if LIBAVUTIL_VERSION_INT > AV_VERSION_INT(57, 10, 101)
-RAT(AVFrame, time_base)
-#else
-RAT_FAKE(AVFrame, time_base, 1, 1000)
-#endif
-
 /* Either way we expose the old channel layout API, but if the new channel
  * layout API is available, we use it */
 #if LIBAVUTIL_VERSION_INT > AV_VERSION_INT(57, 23, 100)
@@ -183,34 +144,18 @@ void struc ##_channel_layouthi_s(struc *a, uint32_t b) { \
 
 #endif /* Channel layout API version */
 
-CHL(AVFrame)
 
-/* This isn't in libav because there's only one property to scale, but this
- * scaling is sufficiently painful in JavaScript that it's worth wrapping this
- * up in a helper. */
-void ff_frame_rescale_ts_js(
-    AVFrame *frame,
-    int tb_src_num, int tb_src_den,
-    int tb_dst_num, int tb_dst_den
-) {
-    AVRational tb_src = {tb_src_num, tb_src_den},
-               tb_dst = {tb_dst_num, tb_dst_den};
-    if (frame->pts != AV_NOPTS_VALUE)
-        frame->pts = av_rescale_q(frame->pts, tb_src, tb_dst);
-}
+/* Not part of libav, just used to ensure a round trip to C for async purposes */
+void ff_nothing() {}
 
-/* AVPixFmtDescriptor */
-#define B(type, field) A(AVPixFmtDescriptor, type, field)
-B(uint64_t, flags)
-B(uint8_t, nb_components)
-B(uint8_t, log2_chroma_h)
-B(uint8_t, log2_chroma_w)
-#undef B
 
-int AVPixFmtDescriptor_comp_depth(AVPixFmtDescriptor *fmt, int comp)
-{
-    return fmt->comp[comp].depth;
-}
+/****************************************************************
+ * libavutil
+ ***************************************************************/
+
+#if LIBAVJS_WITH_AVFRAME
+#include "b-avframe.c"
+#endif
 
 int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, int term, int flags)
 {

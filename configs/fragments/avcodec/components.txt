@@ -1,2 +1,3 @@
 avfcbridge
 avcodec
+avframe

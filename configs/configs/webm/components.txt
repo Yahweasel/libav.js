@@ -3,4 +3,5 @@ avutil
 avformat
 avfcbridge
 avcodec
+avframe
 swscale

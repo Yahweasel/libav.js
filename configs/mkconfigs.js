@@ -17,6 +17,9 @@
 const cproc = require("child_process");
 const fs = require("fs");
 
+const libav = ["avformat", "avcodec"];
+const avformat = ["avformat", "avfcbridge"];
+
 const opus = ["parser-opus", "codec-libopus"];
 const flac = ["format-flac", "parser-flac", "codec-flac"];
 const mp3 = ["format-mp3", "decoder-mp3", "encoder-libmp3lame"];
@@ -34,19 +37,19 @@ const hevc = ["parser-hevc", "decoder-hevc"];
 const configsRaw = [
     // Audio sensible:
     ["default", [
-        "avformat", "avcodec", "avfilter", "swresample",
+        libav, "avfilter", "swresample",
         "format-ogg", "format-webm",
         opus, flac, "format-wav", "codec-pcm_f32le",
         "audio-filters"
     ], {cli: true}],
 
-    ["opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus], {af: true}],
-    ["flac", ["avformat", "avcodec", "format-ogg", flac], {af: true}],
-    ["wav", ["avformat", "avcodec", "format-wav", "codec-pcm_f32le"], {af: true}],
+    ["opus", [libav, "format-ogg", "format-webm", opus], {af: true}],
+    ["flac", [libav, "format-ogg", flac], {af: true}],
+    ["wav", [libav, "format-wav", "codec-pcm_f32le"], {af: true}],
 
     // Audio silly:
     ["obsolete", [
-        "avformat", "avcodec", "avfilter", "swresample",
+        libav, "avfilter", "swresample",
 
         // Modern:
         "format-ogg", "format-webm",
@@ -63,11 +66,11 @@ const configsRaw = [
     ]],
 
     // Audio reprobate:
-    ["aac", ["avformat", "avcodec", "format-mp4", "format-aac", "format-webm", aac], {af: true}],
+    ["aac", [libav, "format-mp4", "format-aac", "format-webm", aac], {af: true}],
 
     // Video sensible:
     ["webm", [
-        "avformat", "avcodec",
+        libav,
         "format-ogg", "format-webm",
         opus, flac, "format-wav", "codec-pcm_f32le",
         "audio-filters",
@@ -76,17 +79,17 @@ const configsRaw = [
         "swscale", "video-filters"
     ], {vp9: true, cli: true}],
 
-    ["vp8-opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus, "libvpx", vp8], {avf: true}],
-    ["vp9-opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus, "libvpx", vp9], {avf: true}],
-    ["av1-opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus, aomav1], {avf: true}],
+    ["vp8-opus", [libav, "format-ogg", "format-webm", opus, "libvpx", vp8], {avf: true}],
+    ["vp9-opus", [libav, "format-ogg", "format-webm", opus, "libvpx", vp9], {avf: true}],
+    ["av1-opus", [libav, "format-ogg", "format-webm", opus, aomav1], {avf: true}],
 
     // Video reprobate:
-    ["h264-aac", ["avformat", "avcodec", "format-mp4", "format-aac", "format-webm", aac, h264], {avf: true}],
-    ["hevc-aac", ["avformat", "avcodec", "format-mp4", "format-aac", "format-webm", aac, hevc], {avf: true}],
+    ["h264-aac", [libav, "format-mp4", "format-aac", "format-webm", aac, h264], {avf: true}],
+    ["hevc-aac", [libav, "format-mp4", "format-aac", "format-webm", aac, hevc], {avf: true}],
 
     // Mostly parsing:
     ["webcodecs", [
-        "avformat", "avcodec",
+        libav,
         "format-ogg", "format-webm", "format-mp4",
         opus, flac, "format-wav", "codec-pcm_f32le",
         "parser-aac",
@@ -101,19 +104,19 @@ const configsRaw = [
 
     // Strictly formats
     ["common-formats", [
-        "avformat", "avfcbridge",
+        avformat,
         "format-webm", "format-mp4", "format-ogg", "format-flac", "format-aac",
         "format-avi", "format-wav", "format-mpeg", "format-mpegts", "format-mp3"
     ]],
 
     ["a-few-formats", [
-        "avformat", "avfcbridge",
+        avformat,
         "format-ogg", "format-webm", "format-wav"
     ]],
 
     // These are here so that "all" will have them for testing
     ["extras", [
-        "avformat", "avcodec", "avfilter", "swresample", "swscale",
+        libav, "avfilter", "swresample", "swscale",
 
         // Images
         "format-image2", "demuxer-image_gif_pipe", "demuxer-image_jpeg_pipe",
