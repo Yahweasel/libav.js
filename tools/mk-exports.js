@@ -24,7 +24,7 @@ async function main() {
     const jsSuffix = process.argv[4];
 
     const funcs = JSON.parse(await fs.readFile("funcs.json", "utf8"));
-    const exports = [];
+    const exports = ["_emfiberthreads_timeout_expiry"];
     const components = (
         await fs.readFile(`configs/configs/${variant}/components.txt`, "utf8")
     ).trim().split("\n");
