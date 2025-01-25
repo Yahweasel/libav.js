@@ -1,1 +1,1 @@
-["format-wav","codec-pcm_f32le"]
+["avformat","avcodec","format-wav","codec-pcm_f32le"]

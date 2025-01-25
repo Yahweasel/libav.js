@@ -34,7 +34,8 @@ async function main() {
         let res = orig;
 
         if (
-            orig === "../../bindings.c" ||
+            orig === "../../src/bindings.c" ||
+            /^\.\.\/\.\.\/src\/b-/.test(orig) ||
             /^\.\.\/\.\.\/build/.test(orig)
         ) {
             // Already a full path

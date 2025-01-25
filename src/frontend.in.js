@@ -79,7 +79,7 @@
     }
     libav.target = target;
     libav.VER = "@VER";
-    libav.CONFIG = "@CONFIG";
+    libav.CONFIG = "@VARIANT";
     libav.DBG = "@DBG";
     libav.factories = {};
 
@@ -261,10 +261,10 @@
         opts = opts || {};
         var base = opts.base || libav.base;
         var t = target(opts);
-        var variant = "@CONFIG";
+        var variant = "@VARIANT";
         if (t === "asm") {
             // In asm.js, we can't load alternate wasm
-            variant = opts.variant || libav.variant || "@CONFIG";
+            variant = opts.variant || libav.variant || "@VARIANT";
         }
 
         // Determine the file to import

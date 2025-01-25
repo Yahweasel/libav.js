@@ -18,10 +18,9 @@ THRFLAGS=-pthread $(EMFTFLAGS)
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
 	`tools/memory-init-file-emcc.sh` \
-	--pre-js pre.js \
-	--post-js build/post.js --extern-post-js extern-post.js \
+	--pre-js src/pre.js \
+	--extern-post-js src/extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
-	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
 	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'PThread']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
@@ -71,41 +70,37 @@ build-%: \
 
 
 
-dist/libav-$(LIBAVJS_VERSION)-%.js: build/libav-$(LIBAVJS_VERSION).js \
-	dist/libav-$(LIBAVJS_VERSION)-%.wasm.js \
+dist/libav-$(LIBAVJS_VERSION)-%.js: build/frontend-$(LIBAVJS_VERSION)-%.js \
 	node_modules/.bin/terser
 	mkdir -p dist
-	sed "s/@CONFIG/$(*)/g ; s/@DBG//g" < $< | $(MINIFIER) > $(@)
+	sed "s/@DBG//g" < $< | $(MINIFIER) > $(@)
 
 dist/libav-%.js: dist/libav-$(LIBAVJS_VERSION)-%.js
 	cp $(<) $(@)
 
 
-dist/libav-$(LIBAVJS_VERSION)-%.mjs: build/libav-$(LIBAVJS_VERSION).mjs \
-	dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs \
+dist/libav-$(LIBAVJS_VERSION)-%.mjs: build/frontend-$(LIBAVJS_VERSION)-%.mjs \
 	node_modules/.bin/terser
 	mkdir -p dist
-	sed "s/@CONFIG/$(*)/g ; s/@DBG//g" < $< | $(MINIFIER) > $(@)
+	sed "s/@DBG//g" < $< | $(MINIFIER) > $(@)
 
 dist/libav-%.mjs: dist/libav-$(LIBAVJS_VERSION)-%.mjs
 	cp $(<) $(@)
 
 
-dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/libav-$(LIBAVJS_VERSION).js \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js \
+dist/libav-$(LIBAVJS_VERSION)-%.dbg.js: build/frontend-$(LIBAVJS_VERSION)-%.js \
 	node_modules/.bin/terser
 	mkdir -p dist
-	sed "s/@CONFIG/$(*)/g ; s/@DBG/.dbg/g" < $< | cat > $(@)
+	sed "s/@DBG/.dbg/g" < $< | cat > $(@)
 
 dist/libav-%.dbg.js: dist/libav-$(LIBAVJS_VERSION)-%.dbg.js
 	cp $(<) $(@)
 
 
-dist/libav-$(LIBAVJS_VERSION)-%.dbg.mjs: build/libav-$(LIBAVJS_VERSION).mjs \
-	dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs \
+dist/libav-$(LIBAVJS_VERSION)-%.dbg.mjs: build/frontend-$(LIBAVJS_VERSION)-%.mjs \
 	node_modules/.bin/terser
 	mkdir -p dist
-	sed "s/@CONFIG/$(*)/g ; s/@DBG/.dbg/g" < $< | cat > $(@)
+	sed "s/@DBG/.dbg/g" < $< | cat > $(@)
 
 dist/libav-%.dbg.mjs: dist/libav-$(LIBAVJS_VERSION)-%.dbg.mjs
 	cp $(<) $(@)
@@ -115,10 +110,6 @@ dist/libav.types.d.ts: build/libav.types.d.ts
 	mkdir -p dist
 	cp $< $@
 
-# Link rule that checks for a library's existence before linking it
-# Use: linkfflib(library name, target inst name)
-
-
 # General build rule for any target
 # Use: buildrule(target file name, debug infix, target inst name, extra link flags, target file suffix)
 
@@ -126,47 +117,20 @@ dist/libav.types.d.ts: build/libav.types.d.ts
 # asm.js version
 
 dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
@@ -190,47 +154,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) $(ES6FLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
@@ -254,47 +191,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) -g2 -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
@@ -318,47 +228,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
@@ -383,47 +266,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 # wasm version with no added features
 
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
@@ -447,47 +303,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) $(ES6FLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
@@ -511,47 +340,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) -gsource-map \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
@@ -575,47 +377,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/base/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EMFTFLAGS) -gsource-map $(ES6FLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
@@ -640,47 +415,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 # wasm + threads
 
 dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map ] ; then \
@@ -704,47 +452,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map ] ; then \
@@ -768,47 +489,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map ] ; then \
@@ -832,47 +526,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil/libavutil.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavutil -lavutil \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat/libavformat.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavformat -lavformat \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec/libavcodec.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavcodec -lavcodec \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter/libavfilter.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavfilter -lavfilter \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample/libswresample.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswresample -lswresample \
-	'` \
- \
-		 \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale/libswscale.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libswscale -lswscale \
-	'` \
- \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/thr/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		-gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map ] ; then \
@@ -895,15 +562,31 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 	rmdir $(@).d
 
 
-build/libav-$(LIBAVJS_VERSION).js: libav.in.js libav.types.in.d.ts post.in.js funcs.json tools/apply-funcs.js
-	mkdir -p build dist
-	./tools/apply-funcs.js $(LIBAVJS_VERSION)
+# Built source files
+build/exports-%.json: configs/configs/%/components.txt funcs.json \
+	tools/mk-exports.js
+	mkdir -p build
+	./tools/mk-exports.js $(*) > $@
 
-build/libav.types.d.ts build/libav-$(LIBAVJS_VERSION).in.mjs build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
-	touch $@
+build/frontend-$(LIBAVJS_VERSION)-%.js: configs/configs/%/components.txt \
+	funcs.json src/frontend.in.js tools/mk-frontend.js
+	mkdir -p build
+	./tools/mk-frontend.js $(*) $(LIBAVJS_VERSION) js > $@
 
-build/libav-$(LIBAVJS_VERSION).mjs: build/libav-$(LIBAVJS_VERSION).in.mjs
-	./tools/mk-es6.js ../build/libav-$(LIBAVJS_VERSION).js $< > $@
+build/frontend-$(LIBAVJS_VERSION)-%.mjs: build/frontend-$(LIBAVJS_VERSION)-%.js \
+	configs/configs/%/components.txt funcs.json src/frontend.in.js \
+	tools/mk-frontend.js
+	./tools/mk-frontend.js $(*) $(LIBAVJS_VERSION) mjs > $@.tmp
+	./tools/mk-es6.js ../build/frontend-$(LIBAVJS_VERSION)-$(*).js $@.tmp > $@
+	rm -f $@.tmp
+
+build/post-%.js: configs/configs/%/components.txt funcs.json tools/mk-post.js
+	mkdir -p build
+	./tools/mk-post.js $(*) > $@
+
+build/libav.types.d.ts: funcs.json mk/doxygen.json tools/mk-types-dts.js
+	mkdir -p build
+	./tools/mk-types-dts.js > $@
 
 node_modules/.bin/terser:
 	npm install

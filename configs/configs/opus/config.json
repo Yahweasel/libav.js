@@ -1,1 +1,1 @@
-["format-ogg","format-webm","parser-opus","codec-libopus"]
+["avformat","avcodec","format-ogg","format-webm","parser-opus","codec-libopus"]

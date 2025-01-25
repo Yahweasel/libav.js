@@ -34,17 +34,20 @@ const hevc = ["parser-hevc", "decoder-hevc"];
 const configsRaw = [
     // Audio sensible:
     ["default", [
+        "avformat", "avcodec", "avfilter", "swresample",
         "format-ogg", "format-webm",
         opus, flac, "format-wav", "codec-pcm_f32le",
         "audio-filters"
     ], {cli: true}],
 
-    ["opus", ["format-ogg", "format-webm", opus], {af: true}],
-    ["flac", ["format-ogg", flac], {af: true}],
-    ["wav", ["format-wav", "codec-pcm_f32le"], {af: true}],
+    ["opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus], {af: true}],
+    ["flac", ["avformat", "avcodec", "format-ogg", flac], {af: true}],
+    ["wav", ["avformat", "avcodec", "format-wav", "codec-pcm_f32le"], {af: true}],
 
     // Audio silly:
     ["obsolete", [
+        "avformat", "avcodec", "avfilter", "swresample",
+
         // Modern:
         "format-ogg", "format-webm",
         opus, flac,
@@ -60,10 +63,11 @@ const configsRaw = [
     ]],
 
     // Audio reprobate:
-    ["aac", ["format-mp4", "format-aac", "format-webm", aac], {af: true}],
+    ["aac", ["avformat", "avcodec", "format-mp4", "format-aac", "format-webm", aac], {af: true}],
 
     // Video sensible:
     ["webm", [
+        "avformat", "avcodec",
         "format-ogg", "format-webm",
         opus, flac, "format-wav", "codec-pcm_f32le",
         "audio-filters",
@@ -72,16 +76,17 @@ const configsRaw = [
         "swscale", "video-filters"
     ], {vp9: true, cli: true}],
 
-    ["vp8-opus", ["format-ogg", "format-webm", opus, "libvpx", vp8], {avf: true}],
-    ["vp9-opus", ["format-ogg", "format-webm", opus, "libvpx", vp9], {avf: true}],
-    ["av1-opus", ["format-ogg", "format-webm", opus, aomav1], {avf: true}],
+    ["vp8-opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus, "libvpx", vp8], {avf: true}],
+    ["vp9-opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus, "libvpx", vp9], {avf: true}],
+    ["av1-opus", ["avformat", "avcodec", "format-ogg", "format-webm", opus, aomav1], {avf: true}],
 
     // Video reprobate:
-    ["h264-aac", ["format-mp4", "format-aac", "format-webm", aac, h264], {avf: true}],
-    ["hevc-aac", ["format-mp4", "format-aac", "format-webm", aac, hevc], {avf: true}],
+    ["h264-aac", ["avformat", "avcodec", "format-mp4", "format-aac", "format-webm", aac, h264], {avf: true}],
+    ["hevc-aac", ["avformat", "avcodec", "format-mp4", "format-aac", "format-webm", aac, hevc], {avf: true}],
 
     // Mostly parsing:
     ["webcodecs", [
+        "avformat", "avcodec",
         "format-ogg", "format-webm", "format-mp4",
         opus, flac, "format-wav", "codec-pcm_f32le",
         "parser-aac",
@@ -94,8 +99,22 @@ const configsRaw = [
         "bsf-h264_metadata", "bsf-hevc_metadata"
     ], {avf: true}],
 
+    // Strictly formats
+    ["common-formats", [
+        "avformat", "avfcbridge",
+        "format-webm", "format-mp4", "format-ogg", "format-flac", "format-aac",
+        "format-avi", "format-wav", "format-mpeg", "format-mpegts", "format-mp3"
+    ]],
+
+    ["a-few-formats", [
+        "avformat", "avfcbridge",
+        "format-ogg", "format-webm", "format-wav"
+    ]],
+
     // These are here so that "all" will have them for testing
     ["extras", [
+        "avformat", "avcodec", "avfilter", "swresample", "swscale",
+
         // Images
         "format-image2", "demuxer-image_gif_pipe", "demuxer-image_jpeg_pipe",
         "demuxer-image_png_pipe",
@@ -146,9 +165,9 @@ for (const config of configsRaw) {
     if (extra && extra.vp9)
         configGroup(toAdd, "vp9", vp9);
     if (extra && extra.af)
-        configGroup(toAdd, "af", ["audio-filters"]);
+        configGroup(toAdd, "af", ["avfilter", "swresample", "audio-filters"]);
     if (extra && extra.avf)
-        configGroup(toAdd, "avf", ["audio-filters", "swscale", "video-filters"]);
+        configGroup(toAdd, "avf", ["avfilter", "swresample", "swscale", "audio-filters", "video-filters"]);
     if (extra && extra.cli)
         configGroup(toAdd, "cli", ["cli"]);
 

@@ -1,1 +1,1 @@
-["format-ogg","format-flac","parser-flac","codec-flac"]
+["avformat","avcodec","format-ogg","format-flac","parser-flac","codec-flac"]

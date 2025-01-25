@@ -18,10 +18,9 @@ THRFLAGS=-pthread $(EMFTFLAGS)
 ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
 	`tools/memory-init-file-emcc.sh` \
-	--pre-js pre.js \
-	--post-js build/post.js --extern-post-js extern-post.js \
+	--pre-js src/pre.js \
+	--extern-post-js src/extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
-	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
 	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'PThread']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
@@ -69,11 +68,10 @@ build-%: \
 # Generic rule for frontend builds
 # Use: febuildrule(debug infix, target extension, minifier)
 define([[[febuildrule]]], [[[
-dist/libav-$(LIBAVJS_VERSION)-%$1.$2: build/libav-$(LIBAVJS_VERSION).$2 \
-	dist/libav-$(LIBAVJS_VERSION)-%$1.wasm.$2 \
+dist/libav-$(LIBAVJS_VERSION)-%$1.$2: build/frontend-$(LIBAVJS_VERSION)-%.$2 \
 	node_modules/.bin/terser
 	mkdir -p dist
-	sed "s/@CONFIG/$(*)/g ; s/@DBG/$1/g" < $< | $3 > $(@)
+	sed "s/@DBG/$1/g" < $< | $3 > $(@)
 
 dist/libav-%$1.$2: dist/libav-$(LIBAVJS_VERSION)-%$1.$2
 	cp $(<) $(@)
@@ -88,35 +86,24 @@ dist/libav.types.d.ts: build/libav.types.d.ts
 	mkdir -p dist
 	cp $< $@
 
-# Link rule that checks for a library's existence before linking it
-# Use: linkfflib(library name, target inst name)
-define([[[linkfflib]]], [[[ \
-	`test ! -e build/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/lib$1/lib$1.a || echo ' \
-	-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-$2-$(*)/lib$1 -l$1 \
-	'` \
-]]])
-
 # General build rule for any target
 # Use: buildrule(target file name, debug infix, target inst name, extra link flags, target file suffix)
 define([[[buildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3-%/libavformat/libavformat.a \
-	build/exports.json pre.js build/post.js extern-post.js bindings.c
+	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+        src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--post-js build/post-$(*).js \
+		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*) \
 		`test ! -e configs/configs/$(*)/link-flags.txt || cat configs/configs/$(*)/link-flags.txt` \
-		bindings.c \
+		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/libavdevice -lavdevice \
 		'` \
-		linkfflib(avutil, $3) \
-		linkfflib(avformat, $3) \
-		linkfflib(avcodec, $3) \
-		linkfflib(avfilter, $3) \
-		linkfflib(swresample, $3) \
-		linkfflib(swscale, $3) \
-		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@TARGET/$3/' configs/configs/$(*)/libs.txt` \
+		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/$3/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$4 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.$5
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map ] ; then \
@@ -155,15 +142,31 @@ buildrule(thr, [[[]]], thr, [[[$(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navig
 buildrule(thr, dbg., thr, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
 buildrule(thr, dbg., thr, [[[-gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
 
-build/libav-$(LIBAVJS_VERSION).js: libav.in.js libav.types.in.d.ts post.in.js funcs.json tools/apply-funcs.js
-	mkdir -p build dist
-	./tools/apply-funcs.js $(LIBAVJS_VERSION)
+# Built source files
+build/exports-%.json: configs/configs/%/components.txt funcs.json \
+	tools/mk-exports.js
+	mkdir -p build
+	./tools/mk-exports.js $(*) > $@
 
-build/libav.types.d.ts build/libav-$(LIBAVJS_VERSION).in.mjs build/exports.json build/post.js: build/libav-$(LIBAVJS_VERSION).js
-	touch $@
+build/frontend-$(LIBAVJS_VERSION)-%.js: configs/configs/%/components.txt \
+	funcs.json src/frontend.in.js tools/mk-frontend.js
+	mkdir -p build
+	./tools/mk-frontend.js $(*) $(LIBAVJS_VERSION) js > $@
 
-build/libav-$(LIBAVJS_VERSION).mjs: build/libav-$(LIBAVJS_VERSION).in.mjs
-	./tools/mk-es6.js ../build/libav-$(LIBAVJS_VERSION).js $< > $@
+build/frontend-$(LIBAVJS_VERSION)-%.mjs: build/frontend-$(LIBAVJS_VERSION)-%.js \
+	configs/configs/%/components.txt funcs.json src/frontend.in.js \
+	tools/mk-frontend.js
+	./tools/mk-frontend.js $(*) $(LIBAVJS_VERSION) mjs > $@.tmp
+	./tools/mk-es6.js ../build/frontend-$(LIBAVJS_VERSION)-$(*).js $@.tmp > $@
+	rm -f $@.tmp
+
+build/post-%.js: configs/configs/%/components.txt funcs.json tools/mk-post.js
+	mkdir -p build
+	./tools/mk-post.js $(*) > $@
+
+build/libav.types.d.ts: funcs.json mk/doxygen.json tools/mk-types-dts.js
+	mkdir -p build
+	./tools/mk-types-dts.js > $@
 
 node_modules/.bin/terser:
 	npm install

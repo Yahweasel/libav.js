@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Yahweasel and contributors
+ * Copyright (C) 2019-2025 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -224,237 +224,57 @@ int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, in
     }
 }
 
+AVDictionary *av_dict_copy_js(
+    AVDictionary *dst, const AVDictionary *src, int flags
+) {
+    av_dict_copy(&dst, src, flags);
+    return dst;
+}
+
+AVDictionary *av_dict_set_js(
+    AVDictionary *pm, const char *key, const char *value, int flags
+) {
+    av_dict_set(&pm, key, value, flags);
+    return pm;
+}
+
+int av_compare_ts_js(
+    unsigned int ts_a_lo, int ts_a_hi,
+    int tb_a_num, int tb_a_den,
+    unsigned int ts_b_lo, int ts_b_hi,
+    int tb_b_num, int tb_b_den
+) {
+    int64_t ts_a = (int64_t) ts_a_lo + ((int64_t) ts_a_hi << 32);
+    int64_t ts_b = (int64_t) ts_b_lo + ((int64_t) ts_b_hi << 32);
+    AVRational tb_a = {tb_a_num, tb_b_den},
+               tb_b = {tb_b_num, tb_b_den};
+    return av_compare_ts(ts_a, tb_a, ts_b, tb_b);
+}
+
 
 /****************************************************************
  * libavcodec
  ***************************************************************/
 
-/* AVCodec */
-#define B(type, field) A(AVCodec, type, field)
-#define BA(type, field) AA(AVCodec, type, field)
-B(const char *, name)
-B(const char *, long_name)
-B(const enum AVSampleFormat *, sample_fmts)
-BA(enum AVSampleFormat, sample_fmts)
-B(const int *, supported_samplerates)
-BA(int, supported_samplerates)
-B(enum AVMediaType, type)
-#undef B
-#undef BA
-
-/* AVCodecContext */
-#define B(type, field) A(AVCodecContext, type, field)
-#define BL(type, field) AL(AVCodecContext, type, field)
-B(enum AVCodecID, codec_id)
-B(enum AVMediaType, codec_type)
-BL(int64_t, bit_rate)
-B(uint8_t *, extradata)
-B(int, extradata_size)
-B(int, frame_size)
-B(int, gop_size)
-B(int, height)
-B(int, keyint_min)
-B(int, level)
-B(int, max_b_frames)
-B(int, pix_fmt)
-B(int, profile)
-BL(int64_t, rc_max_rate)
-BL(int64_t, rc_min_rate)
-B(int, sample_fmt)
-B(int, sample_rate)
-B(int, qmax)
-B(int, qmin)
-B(int, width)
-#undef B
-#undef BL
-
-RAT(AVCodecContext, framerate)
-RAT(AVCodecContext, sample_aspect_ratio)
-RAT(AVCodecContext, time_base)
-CHL(AVCodecContext)
-
-
-/* AVCodecDescriptor */
-#define B(type, field) A(AVCodecDescriptor, type, field)
-B(enum AVCodecID, id)
-B(const char *, long_name)
-AA(AVCodecDescriptor, const char *, mime_types)
-B(const char *, name)
-B(int, props)
-B(enum AVMediaType, type)
-#undef B
-
-/* AVCodecParameters */
-#define B(type, field) A(AVCodecParameters, type, field)
-B(enum AVCodecID, codec_id)
-B(uint32_t, codec_tag)
-B(enum AVMediaType, codec_type)
-B(uint8_t *, extradata)
-B(int, extradata_size)
-B(int, format)
-B(int64_t, bit_rate)
-B(int, profile)
-B(int, level)
-B(int, width)
-B(int, height)
-B(enum AVColorRange, color_range)
-B(enum AVColorPrimaries, color_primaries)
-B(enum AVColorTransferCharacteristic, color_trc)
-B(enum AVColorSpace, color_space)
-B(enum AVChromaLocation, chroma_location)
-B(int, sample_rate)
-#undef B
-
-#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(60, 10, 100)
-RAT(AVCodecParameters, framerate)
-#else
-RAT_FAKE(AVCodecParameters, framerate, 60, 1)
+#if LIBAVJS_WITH_AVCODEC
+#include "b-avcodec.c"
 #endif
-
-CHL(AVCodecParameters)
-
-
-/* AVPacket */
-#define B(type, field) A(AVPacket, type, field)
-#define BL(type, field) AL(AVPacket, type, field)
-B(uint8_t *, data)
-BL(int64_t, dts)
-BL(int64_t, duration)
-B(int, flags)
-BL(int64_t, pos)
-BL(int64_t, pts)
-B(AVPacketSideData *, side_data)
-B(int, side_data_elems)
-B(int, size)
-B(int, stream_index)
-#undef B
-#undef BL
-
-#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(59, 4, 100)
-RAT(AVPacket, time_base)
-#else
-RAT_FAKE(AVPacket, time_base, 1, 1000)
-#endif
-
-
-/* AVPacketSideData uses special accessors because it's usually an array */
-uint8_t *AVPacketSideData_data(AVPacketSideData *a, int idx) {
-    return a[idx].data;
-}
-
-int AVPacketSideData_size(AVPacketSideData *a, int idx) {
-    return a[idx].size;
-}
-
-enum AVPacketSideDataType AVPacketSideData_type(AVPacketSideData *a, int idx) {
-    return a[idx].type;
-}
-
-int avcodec_open2_js(
-    AVCodecContext *avctx, const AVCodec *codec, AVDictionary *options
-) {
-    return avcodec_open2(avctx, codec, &options);
-}
-
-/* Implemented as a binding so that we don't have to worry about struct copies */
-void av_packet_rescale_ts_js(
-    AVPacket *pkt,
-    int tb_src_num, int tb_src_den,
-    int tb_dst_num, int tb_dst_den
-) {
-    AVRational tb_src = {tb_src_num, tb_src_den},
-               tb_dst = {tb_dst_num, tb_dst_den};
-    av_packet_rescale_ts(pkt, tb_src, tb_dst);
-}
-
 
 /****************************************************************
  * avformat
  ***************************************************************/
 
-/* AVFormatContext */
-#define B(type, field) A(AVFormatContext, type, field)
-#define BA(type, field) AA(AVFormatContext, type, field)
-#define BL(type, field) AL(AVFormatContext, type, field)
-BL(int64_t, duration)
-B(int, flags)
-B(unsigned int, nb_streams)
-B(const struct AVOutputFormat *, oformat)
-B(AVIOContext *, pb)
-BL(int64_t, start_time)
-BA(AVStream *, streams)
-#undef B
-#undef BA
-#undef BL
-
-/* AVStream */
-#define B(type, field) A(AVStream, type, field)
-#define BL(type, field) AL(AVStream, type, field)
-B(AVCodecParameters *, codecpar)
-B(enum AVDiscard, discard)
-BL(int64_t, duration)
-#undef B
-#undef BL
-
-RAT(AVStream, time_base)
-
-int avformat_seek_file_min(
-    AVFormatContext *s, int stream_index, int64_t ts, int flags
-) {
-    return avformat_seek_file(s, stream_index, ts, ts, INT64_MAX, flags);
-}
-
-int avformat_seek_file_max(
-    AVFormatContext *s, int stream_index, int64_t ts, int flags
-) {
-    return avformat_seek_file(s, stream_index, INT64_MIN, ts, ts, flags);
-}
-
-int avformat_seek_file_approx(
-    AVFormatContext *s, int stream_index, int64_t ts, int flags
-) {
-    return avformat_seek_file(s, stream_index, INT64_MIN, ts, INT64_MAX, flags);
-}
-
+#if LIBAVJS_WITH_AVFORMAT
+#include "b-avformat.c"
+#endif
 
 /****************************************************************
  * libavfilter
  ***************************************************************/
 
-/* AVFilterInOut */
-#define B(type, field) A(AVFilterInOut, type, field)
-B(AVFilterContext *, filter_ctx)
-B(char *, name)
-B(AVFilterInOut *, next)
-B(int, pad_idx)
-#undef B
-
-/* Buffer sink */
-int av_buffersink_get_time_base_num(const AVFilterContext *ctx) {
-    return av_buffersink_get_time_base(ctx).num;
-}
-
-int av_buffersink_get_time_base_den(const AVFilterContext *ctx) {
-    return av_buffersink_get_time_base(ctx).den;
-}
-
-#if LIBAVFILTER_VERSION_INT > AV_VERSION_INT(8, 27, 100)
-int ff_buffersink_set_ch_layout(AVFilterContext *ctx, unsigned int layoutlo, unsigned int layouthi) {
-    uint64_t layout;
-    char layoutStr[20];
-    layout = ((uint64_t) layouthi << 32) | ((uint64_t) layoutlo);
-    sprintf(layoutStr, "0x%llx", layout);
-    return av_opt_set(ctx, "ch_layouts", layoutStr, AV_OPT_SEARCH_CHILDREN);
-}
-#else
-int ff_buffersink_set_ch_layout(AVFilterContext *ctx, unsigned int layoutlo, unsigned int layouthi) {
-    uint64_t layout[2];
-    layout[0] = ((uint64_t) layouthi << 32) | ((uint64_t) layoutlo);
-    layout[1] = -1;
-    return av_opt_set_int_list(ctx, "channel_layouts", layout, -1, AV_OPT_SEARCH_CHILDREN);
-}
+#if LIBAVJS_WITH_AVFILTER
+#include "b-avfilter.c"
 #endif
-
 
 /****************************************************************
  * swscale
@@ -467,33 +287,9 @@ int libavjs_with_swscale() {
 #endif
 }
 
-#ifndef LIBAVJS_WITH_SWSCALE
-/* swscale isn't included, but we need the symbols */
-void sws_getContext() {}
-void sws_freeContext() {}
-void sws_scale_frame() {}
-
-#elif LIBAVUTIL_VERSION_INT <= AV_VERSION_INT(57, 4, 101)
+#if LIBAVJS_WITH_SWSCALE && LIBAVUTIL_VERSION_INT <= AV_VERSION_INT(57, 4, 101)
 /* No sws_scale_frame in this version */
 void sws_scale_frame() {}
-
-#endif
-
-
-/****************************************************************
- * CLI
- ***************************************************************/
-int libavjs_with_cli() {
-#ifdef LIBAVJS_WITH_CLI
-    return 1;
-#else
-    return 0;
-#endif
-}
-
-#ifndef LIBAVJS_WITH_CLI
-int ffmpeg_main() { return 0; }
-int ffprobe_main() { return 0; }
 #endif
 
 
@@ -571,78 +367,6 @@ void *libavjs_create_main_thread() { return NULL; }
 /****************************************************************
  * Other bindings
  ***************************************************************/
-
-AVFormatContext *avformat_alloc_output_context2_js(AVOutputFormat *oformat,
-    const char *format_name, const char *filename)
-{
-    AVFormatContext *ret = NULL;
-    int err = avformat_alloc_output_context2(&ret, oformat, format_name, filename);
-    if (err < 0)
-        fprintf(stderr, "[avformat_alloc_output_context2_js] %s\n", av_err2str(err));
-    return ret;
-}
-
-AVFormatContext *avformat_open_input_js(const char *url, AVInputFormat *fmt,
-    AVDictionary *options)
-{
-    AVFormatContext *ret = NULL;
-    AVDictionary** options_p = &options;
-    int err = avformat_open_input(&ret, url, fmt, options_p);
-    if (err < 0)
-        fprintf(stderr, "[avformat_open_input_js] %s\n", av_err2str(err));
-    return ret;
-}
-
-AVIOContext *avio_open2_js(const char *url, int flags,
-    const AVIOInterruptCB *int_cb, AVDictionary *options)
-{
-    AVIOContext *ret = NULL;
-    AVDictionary** options_p = &options;
-    int err = avio_open2(&ret, url, flags, int_cb, options_p);
-    if (err < 0)
-        fprintf(stderr, "[avio_open2_js] %s\n", av_err2str(err));
-    return ret;
-}
-
-AVFilterContext *avfilter_graph_create_filter_js(const AVFilter *filt,
-    const char *name, const char *args, void *opaque, AVFilterGraph *graph_ctx)
-{
-    AVFilterContext *ret = NULL;
-    int err = avfilter_graph_create_filter(&ret, filt, name, args, opaque, graph_ctx);
-    if (err < 0)
-        fprintf(stderr, "[avfilter_graph_create_filter_js] %s\n", av_err2str(err));
-    return ret;
-}
-
-AVDictionary *av_dict_copy_js(
-    AVDictionary *dst, const AVDictionary *src, int flags
-) {
-    av_dict_copy(&dst, src, flags);
-    return dst;
-}
-
-AVDictionary *av_dict_set_js(
-    AVDictionary *pm, const char *key, const char *value, int flags
-) {
-    av_dict_set(&pm, key, value, flags);
-    return pm;
-}
-
-int av_compare_ts_js(
-    unsigned int ts_a_lo, int ts_a_hi,
-    int tb_a_num, int tb_a_den,
-    unsigned int ts_b_lo, int ts_b_hi,
-    int tb_b_num, int tb_b_den
-) {
-    int64_t ts_a = (int64_t) ts_a_lo + ((int64_t) ts_a_hi << 32);
-    int64_t ts_b = (int64_t) ts_b_lo + ((int64_t) ts_b_hi << 32);
-    AVRational tb_a = {tb_a_num, tb_b_den},
-               tb_b = {tb_b_num, tb_b_den};
-    return av_compare_ts(ts_a, tb_a, ts_b, tb_b);
-}
-
-
-/* Errors */
 #define ERR_BUF_SZ 256
 static char err_buf[ERR_BUF_SZ];
 

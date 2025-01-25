@@ -17,6 +17,7 @@
 --enable-libopenh264
 --enable-decoder=libopenh264
 --enable-encoder=libopenh264
+--enable-filter=scale
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix
@@ -25,6 +26,5 @@
 --enable-filter=bandreject --enable-filter=dynaudnorm --enable-filter=equalizer
 --enable-filter=loudnorm --enable-filter=pan --enable-filter=amix
 --enable-filter=volume --enable-filter=anull
---enable-filter=scale
 --enable-filter=crop --enable-filter=fps --enable-filter=null
 --enable-filter=settb --enable-filter=split --enable-filter=trim

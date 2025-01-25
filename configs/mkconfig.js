@@ -17,7 +17,7 @@
 const fs = require("fs");
 const name = process.argv[2];
 const parts = JSON.parse(process.argv[3]);
-const files = ["ffmpeg-config.txt", "libs.txt", "license.js", "link-flags.txt"];
+const files = ["components.txt", "ffmpeg-config.txt", "libs.txt", "license.js", "link-flags.txt"];
 
 try {
     fs.mkdirSync("configs");

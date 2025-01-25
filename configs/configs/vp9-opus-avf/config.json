@@ -1,1 +1,1 @@
-["format-ogg","format-webm","parser-opus","codec-libopus","libvpx","parser-vp9","codec-libvpx_vp9","audio-filters","swscale","video-filters"]
+["avformat","avcodec","format-ogg","format-webm","parser-opus","codec-libopus","libvpx","parser-vp9","codec-libvpx_vp9","avfilter","swresample","swscale","audio-filters","video-filters"]

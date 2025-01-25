@@ -1,0 +1,9 @@
+c
+avutil
+avformat
+avfcbridge
+avcodec
+avfilter
+cli
+swscale
+avfcbridge

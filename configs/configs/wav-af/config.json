@@ -1,1 +1,1 @@
-["format-wav","codec-pcm_f32le","audio-filters"]
+["avformat","avcodec","format-wav","codec-pcm_f32le","avfilter","swresample","audio-filters"]
