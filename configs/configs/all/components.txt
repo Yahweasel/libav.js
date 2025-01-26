@@ -7,4 +7,3 @@ avframe
 avfilter
 cli
 swscale
-avfcbridge

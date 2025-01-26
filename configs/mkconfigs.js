@@ -102,18 +102,6 @@ const configsRaw = [
         "bsf-h264_metadata", "bsf-hevc_metadata"
     ], {avf: true}],
 
-    // Strictly formats
-    ["common-formats", [
-        avformat,
-        "format-webm", "format-mp4", "format-ogg", "format-flac", "format-aac",
-        "format-avi", "format-wav", "format-mpeg", "format-mpegts", "format-mp3"
-    ]],
-
-    ["a-few-formats", [
-        avformat,
-        "format-ogg", "format-webm", "format-wav"
-    ]],
-
     // These are here so that "all" will have them for testing
     ["extras", [
         libav, "avfilter", "swresample", "swscale",
