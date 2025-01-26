@@ -1,5 +1,4 @@
 --enable-protocol=data --enable-protocol=file
---enable-filter=aresample
 --enable-demuxer=ogg
 --enable-muxer=ogg
 --enable-demuxer=matroska
@@ -9,6 +8,7 @@
 --enable-decoder=libopus
 --enable-bsf=opus_metadata
 --enable-encoder=libopus
+--enable-filter=aresample
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix

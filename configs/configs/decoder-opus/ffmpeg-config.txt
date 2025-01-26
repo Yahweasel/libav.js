@@ -1,0 +1,4 @@
+--enable-libopus
+--enable-decoder=libopus
+--enable-bsf=opus_metadata
+--enable-parser=opus

@@ -1,0 +1,2 @@
+--enable-decoder=flac
+--enable-parser=flac

@@ -1,0 +1,5 @@
+build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libavutil/libavutil.a
+build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libavcodec/libavcodec.a
+build/inst/@TARGET/lib/libvorbis.a
+build/inst/@TARGET/lib/libvorbisenc.a
+build/inst/@TARGET/lib/libogg.a

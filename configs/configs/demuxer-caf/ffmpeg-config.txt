@@ -1,0 +1,4 @@
+--enable-protocol=data --enable-protocol=file
+--enable-demuxer=caf
+--enable-parser=aac
+--enable-parser=opus

@@ -1,0 +1,5 @@
+--enable-protocol=data --enable-protocol=file
+--enable-demuxer=mpeg
+--enable-parser=mpeg4video
+--enable-parser=mpegaudio
+--enable-parser=mpegvideo

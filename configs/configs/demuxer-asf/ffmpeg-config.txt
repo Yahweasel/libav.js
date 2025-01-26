@@ -1,0 +1,8 @@
+--enable-protocol=data --enable-protocol=file
+--enable-demuxer=asf
+--enable-parser=aac
+--enable-parser=h263
+--enable-parser=h264
+--enable-parser=hevc
+--enable-parser=mpeg4video
+--enable-parser=mpegaudio

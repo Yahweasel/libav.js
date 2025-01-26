@@ -1,0 +1,2 @@
+--enable-decoder=aac
+--enable-parser=aac

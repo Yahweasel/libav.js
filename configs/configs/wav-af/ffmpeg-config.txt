@@ -1,11 +1,11 @@
 --enable-protocol=data --enable-protocol=file
---enable-filter=aresample
 --enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
 --enable-demuxer=wav
 --enable-encoder=pcm_s16le --enable-encoder=pcm_s24le
 --enable-muxer=wav
 --enable-decoder=pcm_f32le
 --enable-encoder=pcm_f32le
+--enable-filter=aresample
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix

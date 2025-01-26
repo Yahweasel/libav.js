@@ -1,0 +1,2 @@
+--enable-decoder=mp1
+--enable-parser=mpegaudio

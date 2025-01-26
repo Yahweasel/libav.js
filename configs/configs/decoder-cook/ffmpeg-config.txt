@@ -1,0 +1,2 @@
+--enable-decoder=cook
+--enable-parser=cook

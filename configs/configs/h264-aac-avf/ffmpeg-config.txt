@@ -1,5 +1,4 @@
 --enable-protocol=data --enable-protocol=file
---enable-filter=aresample
 --enable-demuxer=mov
 --enable-muxer=ipod
 --enable-muxer=mov
@@ -17,6 +16,7 @@
 --enable-libopenh264
 --enable-decoder=libopenh264
 --enable-encoder=libopenh264
+--enable-filter=aresample
 --enable-filter=scale
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat

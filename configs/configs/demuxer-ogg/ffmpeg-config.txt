@@ -1,0 +1,5 @@
+--enable-protocol=data --enable-protocol=file
+--enable-demuxer=ogg
+--enable-parser=flac
+--enable-parser=opus
+--enable-parser=vorbis

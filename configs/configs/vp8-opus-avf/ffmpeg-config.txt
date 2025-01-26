@@ -1,5 +1,4 @@
 --enable-protocol=data --enable-protocol=file
---enable-filter=aresample
 --enable-demuxer=ogg
 --enable-muxer=ogg
 --enable-demuxer=matroska
@@ -14,6 +13,7 @@
 --enable-decoder=libvpx_vp8
 --enable-libvpx
 --enable-encoder=libvpx_vp8
+--enable-filter=aresample
 --enable-filter=scale
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat

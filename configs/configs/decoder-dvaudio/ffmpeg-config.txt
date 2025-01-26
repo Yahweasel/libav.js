@@ -1,0 +1,2 @@
+--enable-decoder=dvaudio
+--enable-parser=dvaudio

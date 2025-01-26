@@ -1,0 +1,4 @@
+--enable-decoder=hevc
+--enable-bsf=hevc_metadata
+--enable-bsf=extract_extradata
+--enable-parser=hevc

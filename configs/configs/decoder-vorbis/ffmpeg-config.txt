@@ -1,0 +1,3 @@
+--enable-libvorbis
+--enable-decoder=libvorbis
+--enable-parser=vorbis

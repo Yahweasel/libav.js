@@ -102,6 +102,102 @@ const configsRaw = [
         "bsf-h264_metadata", "bsf-hevc_metadata"
     ], {avf: true}],
 
+    // Single-format demuxers
+    ["demuxer-asf", [avformat, "demuxer-asf", "parser-aac", "parser-h263", "parser-h264", "parser-hevc", "parser-mpeg4video", "parser-mpegaudio"], {noAll: true}],
+    ["demuxer-au", [avformat, "demuxer-au"], {noAll: true}],
+    ["demuxer-avi", [avformat, "demuxer-avi", "parser-aac", "parser-av1", "parser-flac", "parser-h261", "parser-h263", "parser-h264", "parser-hevc", "parser-mpeg4video", "parser-mpegaudio", "parser-mpegvideo", "parser-opus", "parser-vorbis", "parser-vp8", "parser-vp9"], {noAll: true}],
+    ["demuxer-caf", [avformat, "demuxer-caf", "parser-aac", "parser-opus"], {noAll: true}],
+    ["demuxer-dv", [avformat, "demuxer-dv", "parser-dvaudio"], {noAll: true}],
+    ["demuxer-flac", [avformat, "demuxer-flac", "parser-flac"], {noAll: true}],
+    ["demuxer-flv", [avformat, "demuxer-flv", "parser-aac", "parser-h264", "parser-mpeg4video"], {noAll: true}],
+    ["demuxer-matroska", [avformat, "demuxer-matroska", "parser-aac", "parser-ac3", "parser-av1", "parser-flac", "parser-h261", "parser-h263", "parser-h264", "parser-hevc", "parser-mpeg4video", "parser-mpegaudio", "parser-mpegvideo", "parser-opus", "parser-vorbis", "parser-vp8", "parser-vp9"], {noAll: true}],
+    ["demuxer-mp3", [avformat, "demuxer-mp3", "parser-mpegaudio"], {noAll: true}],
+    ["demuxer-mp4", [avformat, "demuxer-mp4", "parser-aac", "parser-av1", "parser-h263", "parser-h264", "parser-hevc", "parser-mpeg4video", "parser-mpegaudio", "parser-mpegvideo", "parser-opus"], {noAll: true}],
+    ["demuxer-mpeg", [avformat, "demuxer-mpeg", "parser-mpeg4video", "parser-mpegaudio", "parser-mpegvideo"], {noAll: true}],
+    ["demuxer-ogg", [avformat, "demuxer-ogg", "parser-flac", "parser-opus", "parser-vorbis"], {noAll: true}],
+    ["demuxer-rm", [avformat, "demuxer-rm", "parser-cook", "parser-h263", "parser-h264", "parser-mpeg4video", "parser-mpegaudio", "parser-mpegvideo", "parser-rv34", "parser-sipr"], {noAll: true}],
+    ["demuxer-wav", [avformat, "demuxer-wav"], {noAll: true}],
+    ["demuxer-wv", [avformat, "demuxer-wv"], {noAll: true}],
+
+    // Single-format decoders
+    ["decoder-av1", ["avcodec", "decoder-libaom-av1"], {noAll: true}],
+    ["decoder-cinepak", ["avcodec", "decoder-cinepak"], {noAll: true}],
+    ["decoder-dvvideo", ["avcodec", "decoder-dvvideo"], {noAll: true}],
+    ["decoder-flashsv", ["avcodec", "decoder-flashsv"], {noAll: true}],
+    ["decoder-flashsv2", ["avcodec", "decoder-flashsv2"], {noAll: true}],
+    ["decoder-flv1", ["avcodec", "decoder-flv1"], {noAll: true}],
+    ["decoder-h261", ["avcodec", "decoder-h261", "parser-h261"], {noAll: true}],
+    ["decoder-h263", ["avcodec", "decoder-h263", "parser-h263"], {noAll: true}],
+    ["decoder-h263p", ["avcodec", "decoder-h263p", "parser-h263"], {noAll: true}],
+    ["decoder-h264", ["avcodec", "decoder-h264", "parser-h264"], {noAll: true}],
+    ["decoder-hevc", ["avcodec", "decoder-hevc", "parser-hevc"], {noAll: true}],
+    ["decoder-indeo2", ["avcodec", "decoder-indeo2"], {noAll: true}],
+    ["decoder-indeo3", ["avcodec", "decoder-indeo3"], {noAll: true}],
+    ["decoder-indeo4", ["avcodec", "decoder-indeo4"], {noAll: true}],
+    ["decoder-indeo5", ["avcodec", "decoder-indeo5"], {noAll: true}],
+    ["decoder-mpeg1video", ["avcodec", "decoder-mpeg1video", "parser-mpegvideo"], {noAll: true}],
+    ["decoder-mpeg2video", ["avcodec", "decoder-mpeg2video", "parser-mpegvideo"], {noAll: true}],
+    ["decoder-mpeg4", ["avcodec", "decoder-mpeg4", "parser-mpeg4video"], {noAll: true}],
+    ["decoder-msmpeg4v1", ["avcodec", "decoder-msmpeg4v1", "parser-mpeg4video"], {noAll: true}],
+    ["decoder-msmpeg4v2", ["avcodec", "decoder-msmpeg4v2", "parser-mpeg4video"], {noAll: true}],
+    ["decoder-msmpeg4v3", ["avcodec", "decoder-msmpeg4v3", "parser-mpeg4video"], {noAll: true}],
+    ["decoder-msvideo1", ["avcodec", "decoder-msvideo1"], {noAll: true}],
+    ["decoder-prores", ["avcodec", "decoder-prores"], {noAll: true}],
+    ["decoder-qtrle", ["avcodec", "decoder-qtrle"], {noAll: true}],
+    ["decoder-rv10", ["avcodec", "decoder-rv10"], {noAll: true}],
+    ["decoder-rv20", ["avcodec", "decoder-rv20"], {noAll: true}],
+    ["decoder-rv30", ["avcodec", "decoder-rv30", "parser-rv34"], {noAll: true}],
+    ["decoder-rv40", ["avcodec", "decoder-rv40", "parser-rv34"], {noAll: true}],
+    ["decoder-theora", ["avcodec", "decoder-theora"], {noAll: true}],
+    ["decoder-vp8", ["avcodec", "decoder-libvpx_vp8", "parser-vp8"], {noAll: true}],
+    ["decoder-vp9", ["avcodec", "decoder-libvpx_vp9", "parser-vp9"], {noAll: true}],
+    ["decoder-wmv1", ["avcodec", "decoder-wmv1"], {noAll: true}],
+    ["decoder-wmv2", ["avcodec", "decoder-wmv2"], {noAll: true}],
+    ["decoder-wmv3", ["avcodec", "decoder-wmv3"], {noAll: true}],
+    ["decoder-aac", ["avcodec", "decoder-aac", "parser-aac"], {noAll: true}],
+    ["decoder-ac3", ["avcodec", "decoder-ac3", "parser-ac3"], {noAll: true}],
+    ["decoder-alac", ["avcodec", "decoder-alac"], {noAll: true}],
+    ["decoder-cook", ["avcodec", "decoder-cook", "parser-cook"], {noAll: true}],
+    ["decoder-dvaudio", ["avcodec", "decoder-dvaudio", "parser-dvaudio"], {noAll: true}],
+    ["decoder-flac", ["avcodec", "decoder-flac", "parser-flac"], {noAll: true}],
+    ["decoder-mp1", ["avcodec", "decoder-mp1", "parser-mpegaudio"], {noAll: true}],
+    ["decoder-mp2", ["avcodec", "decoder-mp2", "parser-mpegaudio"], {noAll: true}],
+    ["decoder-mp3", ["avcodec", "decoder-mp3", "parser-mpegaudio"], {noAll: true}],
+    ["decoder-opus", ["avcodec", "decoder-libopus", "parser-opus"], {noAll: true}],
+    ["decoder-pcm_f16le", ["avcodec", "decoder-pcm_f16le"], {noAll: true}],
+    ["decoder-pcm_f24le", ["avcodec", "decoder-pcm_f24le"], {noAll: true}],
+    ["decoder-pcm_f32be", ["avcodec", "decoder-pcm_f32be"], {noAll: true}],
+    ["decoder-pcm_f32le", ["avcodec", "decoder-pcm_f32le"], {noAll: true}],
+    ["decoder-pcm_f64be", ["avcodec", "decoder-pcm_f64be"], {noAll: true}],
+    ["decoder-pcm_f64le", ["avcodec", "decoder-pcm_f64le"], {noAll: true}],
+    ["decoder-pcm_s16be", ["avcodec", "decoder-pcm_s16be"], {noAll: true}],
+    ["decoder-pcm_s16le", ["avcodec", "decoder-pcm_s16le"], {noAll: true}],
+    ["decoder-pcm_s24be", ["avcodec", "decoder-pcm_s24be"], {noAll: true}],
+    ["decoder-pcm_s24le", ["avcodec", "decoder-pcm_s24le"], {noAll: true}],
+    ["decoder-pcm_s32be", ["avcodec", "decoder-pcm_s32be"], {noAll: true}],
+    ["decoder-pcm_s32le", ["avcodec", "decoder-pcm_s32le"], {noAll: true}],
+    ["decoder-pcm_s64be", ["avcodec", "decoder-pcm_s64be"], {noAll: true}],
+    ["decoder-pcm_s64le", ["avcodec", "decoder-pcm_s64le"], {noAll: true}],
+    ["decoder-pcm_s8", ["avcodec", "decoder-pcm_s8"], {noAll: true}],
+    ["decoder-pcm_u16be", ["avcodec", "decoder-pcm_u16be"], {noAll: true}],
+    ["decoder-pcm_u16le", ["avcodec", "decoder-pcm_u16le"], {noAll: true}],
+    ["decoder-pcm_u24be", ["avcodec", "decoder-pcm_u24be"], {noAll: true}],
+    ["decoder-pcm_u24le", ["avcodec", "decoder-pcm_u24le"], {noAll: true}],
+    ["decoder-pcm_u32be", ["avcodec", "decoder-pcm_u32be"], {noAll: true}],
+    ["decoder-pcm_u32le", ["avcodec", "decoder-pcm_u32le"], {noAll: true}],
+    ["decoder-pcm_u8", ["avcodec", "decoder-pcm_u8"], {noAll: true}],
+    ["decoder-ra_144", ["avcodec", "decoder-ra_144",], {noAll: true}],
+    ["decoder-ra_288", ["avcodec", "decoder-ra_288"], {noAll: true}],
+    ["decoder-ralf", ["avcodec", "decoder-ralf"], {noAll: true}],
+    ["decoder-sipr", ["avcodec", "decoder-sipr", "parser-sipr"], {noAll: true}],
+    ["decoder-vorbis", ["avcodec", "decoder-libvorbis", "parser-vorbis"], {noAll: true}],
+    ["decoder-wavpack", ["avcodec", "decoder-wavpack"], {noAll: true}],
+    ["decoder-wmalossless", ["avcodec", "decoder-wmalossless"], {noAll: true}],
+    ["decoder-wmapro", ["avcodec", "decoder-wmapro"], {noAll: true}],
+    ["decoder-wmav1", ["avcodec", "decoder-wmav1"], {noAll: true}],
+    ["decoder-wmav2", ["avcodec", "decoder-wmav2"], {noAll: true}],
+    ["decoder-wmavoice", ["avcodec", "decoder-wmavoice"], {noAll: true}],
+
     // These are here so that "all" will have them for testing
     ["extras", [
         libav, "avfilter", "swresample", "swscale",
@@ -177,10 +273,12 @@ for (const arg of process.argv.slice(2)) {
 }
 
 async function main() {
-    for (let [name, config] of configs) {
+    for (let [name, config, extra] of configs) {
         if (name !== "all") {
-            for (const fragment of config)
-                all[fragment] = true;
+            if (!extra || !extra.noAll) {
+                for (const fragment of config)
+                    all[fragment] = true;
+            }
         } else {
             config = Object.keys(all);
         }

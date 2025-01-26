@@ -1,0 +1,16 @@
+--enable-protocol=data --enable-protocol=file
+--enable-demuxer=avi
+--enable-parser=aac
+--enable-parser=av1
+--enable-parser=flac
+--enable-parser=h261
+--enable-parser=h263
+--enable-parser=h264
+--enable-parser=hevc
+--enable-parser=mpeg4video
+--enable-parser=mpegaudio
+--enable-parser=mpegvideo
+--enable-parser=opus
+--enable-parser=vorbis
+--enable-parser=vp8
+--enable-parser=vp9

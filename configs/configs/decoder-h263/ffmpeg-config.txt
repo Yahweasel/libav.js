@@ -1,0 +1,2 @@
+--enable-decoder=h263
+--enable-parser=h263

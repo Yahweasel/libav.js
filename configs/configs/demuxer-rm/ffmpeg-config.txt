@@ -1,0 +1,10 @@
+--enable-protocol=data --enable-protocol=file
+--enable-demuxer=rm
+--enable-parser=cook
+--enable-parser=h263
+--enable-parser=h264
+--enable-parser=mpeg4video
+--enable-parser=mpegaudio
+--enable-parser=mpegvideo
+--enable-parser=rv34
+--enable-parser=sipr

@@ -1,0 +1,2 @@
+--enable-decoder=ac3
+--enable-parser=ac3

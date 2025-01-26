@@ -1,0 +1,4 @@
+--enable-decoder=h264
+--enable-bsf=h264_metadata
+--enable-bsf=extract_extradata
+--enable-parser=h264

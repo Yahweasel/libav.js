@@ -1,5 +1,4 @@
 --enable-protocol=data --enable-protocol=file
---enable-filter=aresample
 --enable-demuxer=ogg
 --enable-muxer=ogg
 --enable-demuxer=flac
@@ -7,6 +6,7 @@
 --enable-parser=flac
 --enable-decoder=flac
 --enable-encoder=flac
+--enable-filter=aresample
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix

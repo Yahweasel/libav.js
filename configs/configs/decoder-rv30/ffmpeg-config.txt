@@ -1,0 +1,2 @@
+--enable-decoder=rv30
+--enable-parser=rv34

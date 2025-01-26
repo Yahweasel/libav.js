@@ -1,0 +1,2 @@
+--enable-decoder=mpeg2video
+--enable-parser=mpegvideo

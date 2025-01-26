@@ -1,5 +1,4 @@
 --enable-protocol=data --enable-protocol=file
---enable-filter=aresample
 --enable-demuxer=ogg
 --enable-muxer=ogg
 --enable-demuxer=matroska
@@ -35,6 +34,7 @@
 --enable-bsf=av1_metadata
 --enable-bsf=h264_metadata
 --enable-bsf=hevc_metadata
+--enable-filter=aresample
 --enable-filter=scale
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat

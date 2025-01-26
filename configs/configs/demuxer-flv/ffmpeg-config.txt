@@ -1,0 +1,5 @@
+--enable-protocol=data --enable-protocol=file
+--enable-demuxer=flv
+--enable-parser=aac
+--enable-parser=h264
+--enable-parser=mpeg4video

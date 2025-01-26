@@ -1,0 +1,1 @@
+--enable-decoder=pcm_s8
