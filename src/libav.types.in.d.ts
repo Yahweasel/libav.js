@@ -589,8 +589,7 @@ declare namespace LibAV {
          */
         worker?: Worker;
 
-    @FUNCS
-    @DECLS
+@FUNCS
 
         // Declarations for things that use int64, so will be communicated incorrectly
 
@@ -669,8 +668,7 @@ declare namespace LibAV {
      * Synchronous functions, available on non-worker libav.js instances.
      */
     export interface LibAVSync {
-    @SYNCFUNCS
-    @SYNCDECLS
+@SYNCFUNCS
     }
 
     /**

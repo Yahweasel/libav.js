@@ -32,6 +32,18 @@ async function main() {
         };
     }
 
+    function commentType(decl) {
+        let async = decl.replace(/@sync/g, "")
+            .replace(/@promise@([^@]*)@/g, "Promise<$1>")
+            .replace(/@promsync@([^@]*)@/g, "Promise<$1>");
+        let syncy = decl
+            .replace(/@sync/g, "_sync")
+            .replace(/@promise@([^@]*)@/g, "$1")
+            .replace(/@promsync@([^@]*)@/g, "$1 | Promise<$1>");
+        asyncOut += async + ";\n";
+        syncOut += syncy + ";\n";
+    }
+
     for (const component in funcs) {
         const fc = funcs[component];
 
@@ -128,6 +140,7 @@ async function main() {
             );
         }
 
+        // Convert declarations to types
         for (const decl of fc.functions) {
             if (decl[3] && decl[3].notypes)
                 continue;
@@ -178,6 +191,43 @@ async function main() {
             if (decl[3] && decl[3].async)
                 syncOut += ` | Promise<${ret}>`;
             syncOut += ";\n";
+        }
+
+        // Convert post.js components
+        let postJs = null;
+        if (component === "c")
+            postJs = "post";
+        else if (fc.post)
+            postJs = `p-${component}`;
+        if (postJs) {
+            let lastComment = "";
+            let inComment = false;
+            let lastTypes = "";
+            let inTypes = false;
+            const lines = (await fs.readFile(`src/${postJs}.in.js`, "utf8")).split("\n");
+
+            for (const line of lines) {
+                if (line === "/**") {
+                    inComment = true;
+                    lastComment = line + "\n";
+                } else if (inComment) {
+                    lastComment += line + "\n";
+                    if (line === " */")
+                        inComment = false;
+                } else if (line === "/* @types") {
+                    inTypes = true;
+                    lastTypes = "";
+                } else if (inTypes) {
+                    if (line === " */") {
+                        inTypes = false;
+                        commentType(lastComment + lastTypes.trim());
+                    } else {
+                        lastTypes += line.slice(3) + "\n";
+                    }
+                } else if (line.slice(0, 10) === "/// @types") {
+                    commentType(lastComment + line.slice(11));
+                }
+            }
         }
     }
 
