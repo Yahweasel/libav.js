@@ -229,10 +229,6 @@ streamWriterFS.createNode = function() {
     return node;
 };
 
-/* Original versions of all our functions, since the Module version is replaced
- * if we're a Worker */
-var CAccessors = {};
-
 // Filesystem
 function fsBinding(of) {
     Module[of] = function() {
