@@ -160,7 +160,8 @@ build/frontend-$(LIBAVJS_VERSION)-%.mjs: build/frontend-$(LIBAVJS_VERSION)-%.js 
 	./tools/mk-es6.js ../build/frontend-$(LIBAVJS_VERSION)-$(*).js $@.tmp > $@
 	rm -f $@.tmp
 
-build/post-%.js: configs/configs/%/components.txt funcs.json tools/mk-post.js
+build/post-%.js: configs/configs/%/components.txt funcs.json tools/mk-post.js \
+	src/post.in.js src/p-*.in.js
 	mkdir -p build
 	./tools/mk-post.js $(*) > $@
 
@@ -267,6 +268,8 @@ print-version:
 
 .PRECIOUS: \
 	build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a \
+	build/exports-%.json \
+	build/post-%.js \
 	dist/libav.types.d.ts \
 	dist/libav-$(LIBAVJS_VERSION)-%.js \
 	dist/libav-%.js \

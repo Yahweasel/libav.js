@@ -26,8 +26,11 @@ async function main() {
         await fs.readFile(`configs/configs/${process.argv[2]}/components.txt`, "utf8")
     ).trim().split("\n");
 
+    let parts = [];
     for (const component of components) {
         const fc = funcs[component];
+        if (fc.post)
+            parts.push(component);
 
         // Create functions for accessors
         for (const accFamily of (fc.accessors || [])) {
@@ -133,6 +136,9 @@ async function main() {
                 "};\n";
         }
     }
+
+    for (const part of parts)
+        inp += await fs.readFile(`src/p-${part}.in.js`, "utf8");
 
     out = inp.replace("@FUNCS", out);
 

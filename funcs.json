@@ -49,6 +49,7 @@
 
     "avframe": {
         "//": "This is not a real library. This is the libavutil symbols used specifically for frames.",
+        "post": true,
 
         "functions": [
             ["av_frame_alloc", "number", []],
@@ -115,6 +116,7 @@
 
     "avfcbridge": {
         "//": "This is not a real library. This is the avcodec symbols that are needed to make use of avformat.",
+        "post": true,
 
         "functions": [
             ["av_grow_packet", "number", ["number", "number"]],
@@ -197,6 +199,8 @@
     },
 
     "avformat": {
+        "post": true,
+
         "functions": [
             ["av_find_best_stream", "number", ["number", "number", "number", "number", "number", "number"]],
             ["av_find_input_format", "number", ["string"]],
@@ -283,6 +287,8 @@
     },
 
     "avcodec": {
+        "post": true,
+
         "functions": [
             ["avcodec_alloc_context3", "number", ["number"]],
             ["avcodec_close", "number", ["number"]],
@@ -370,6 +376,8 @@
     },
 
     "avfilter": {
+        "post": true,
+
         "functions": [
             ["av_buffersink_get_frame", "number", ["number", "number"]],
             ["av_buffersink_get_time_base_num", "number", ["number"]],
@@ -419,6 +427,8 @@
     },
 
     "cli": {
+        "post": true,
+
         "functions": [
             ["ffmpeg_main", "number", ["number", "number"], {"async": true}],
             ["ffprobe_main", "number", ["number", "number"], {"async": true}]
