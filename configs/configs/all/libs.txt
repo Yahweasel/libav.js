@@ -13,8 +13,9 @@ build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libswscale/libswscale.a
 build/inst/@TARGET/lib/libaom.a
 build/inst/@TARGET/lib/libopenh264.a
 build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libavcodec/libavcodec.a
+build/inst/@TARGET/lib/libaom.a
+build/inst/@TARGET/lib/libz.a
 build/inst/@TARGET/lib/libopus.a
 build/inst/@TARGET/lib/libvorbis.a
 build/inst/@TARGET/lib/libvorbisenc.a
 build/inst/@TARGET/lib/libogg.a
-build/inst/@TARGET/lib/libz.a

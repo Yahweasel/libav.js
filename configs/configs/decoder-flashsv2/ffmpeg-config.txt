@@ -1,1 +1,2 @@
+--enable-zlib
 --enable-decoder=flashsv2

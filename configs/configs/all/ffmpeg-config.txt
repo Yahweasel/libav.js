@@ -100,6 +100,7 @@
 --enable-demuxer=mp3
 --enable-demuxer=mov
 --enable-demuxer=mpeg
+--enable-demuxer=mpegts
 --enable-demuxer=ogg
 --enable-demuxer=rm
 --enable-parser=cook
@@ -108,12 +109,16 @@
 --enable-decoder=pcm_s16le --enable-decoder=pcm_s24le
 --enable-demuxer=wav
 --enable-demuxer=wv
---enable-decoder=libaom-av1
+--enable-libaom
+--enable-decoder=libaom_av1
+--enable-bsf=av1_metadata
+--enable-bsf=extract_extradata
 --enable-decoder=cinepak
 --enable-decoder=dvvideo
+--enable-zlib
 --enable-decoder=flashsv
 --enable-decoder=flashsv2
---enable-decoder=flv1
+--enable-decoder=flv
 --enable-decoder=h261
 --enable-decoder=h263
 --enable-decoder=h263p
@@ -201,7 +206,6 @@
 --enable-decoder=mjpeg
 --enable-encoder=mjpeg
 --enable-parser=png
---enable-zlib
 --enable-decoder=png
 --enable-encoder=png
 --enable-parser=webp

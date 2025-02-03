@@ -1,1 +1,1 @@
---enable-decoder=flv1
+--enable-decoder=flv

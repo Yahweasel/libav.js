@@ -1,1 +1,1 @@
-["avcodec","decoder-libaom-av1"]
+["avcodec","parser-av1","decoder-libaom_av1"]
