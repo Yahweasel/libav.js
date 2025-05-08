@@ -11,7 +11,7 @@ jobs:
         with:
           node-version: '18'
 
-      - uses: mymindstorm/setup-emsdk@v12
+      - uses: mymindstorm/setup-emsdk@v14
         with:
           version: 4.0.5
           actions-cache-folder: 'cache-emsdk'
