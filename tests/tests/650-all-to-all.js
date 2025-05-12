@@ -17,7 +17,7 @@
 
 const mp4 = ["libopenh264", "aac"];
 const formatCodecs = {
-    "adts": [null, null],
+    "adts": [null, "aac"],
     "f32le": [null, "pcm_f32le", {nocheck: true}],
     "flac": [null, "flac"],
     "hls": [null, null],
