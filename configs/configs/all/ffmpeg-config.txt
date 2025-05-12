@@ -42,6 +42,7 @@
 --enable-muxer=mov
 --enable-muxer=mp4
 --enable-demuxer=aac
+--enable-muxer=adts
 --enable-parser=aac
 --enable-decoder=aac
 --enable-encoder=aac
