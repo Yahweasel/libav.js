@@ -22,7 +22,7 @@ EFLAGS=\
 	--post-js build/post.js --extern-post-js extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s "EXPORTED_FUNCTIONS=@build/exports.json" \
-	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'PThread']" \
+	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'HEAPU8', 'HEAP8', 'HEAPU16', 'HEAP16', 'HEAPU32', 'HEAP32', 'HEAPF32']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
