@@ -3,8 +3,7 @@ run-name: Build and test ${{ github.sha }}
 on: [push]
 jobs:
   build:
-    # This should be ubuntu-latest, but as of 2023-10-06ish, it has problems
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -12,9 +11,9 @@ jobs:
         with:
           node-version: '18'
 
-      - uses: mymindstorm/setup-emsdk@v12
+      - uses: mymindstorm/setup-emsdk@v14
         with:
-          version: 3.1.70
+          version: 4.0.5
           actions-cache-folder: 'cache-emsdk'
 
       - uses: actions/cache@v3

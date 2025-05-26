@@ -4,6 +4,7 @@
 --enable-muxer=mov
 --enable-muxer=mp4
 --enable-demuxer=aac
+--enable-muxer=adts
 --enable-demuxer=matroska
 --enable-muxer=matroska --enable-muxer=webm
 --enable-parser=aac

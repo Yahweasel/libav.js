@@ -375,6 +375,13 @@ connect it to WebCodecs:
    decoding, or WebCodecs for encoding and libav.js for muxing. Of course, the
    WebCodecs used with the bridge can easily be the polyfill if needed.
 
+In addition, a frontend library was created to bring together all of these
+projects and provide a single frontend for media transformation on a browser:
+
+ * [TransAVormer](https://github.com/Yahweasel/transavormer) is a stream-based
+   frontend for libav.js and WebCodecs for anything-to-anything transformation
+   of digital media data.
+
 
 ## Bundlers
 
