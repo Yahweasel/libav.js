@@ -261,11 +261,7 @@
         opts = opts || {};
         var base = opts.base || libav.base;
         var t = target(opts);
-        var variant = "@VARIANT";
-        if (t === "asm") {
-            // In asm.js, we can't load alternate wasm
-            variant = opts.variant || libav.variant || "@VARIANT";
-        }
+        var variant = opts.variant || libav.variant || "@VARIANT";
 
         // Determine the file to import
 @E6     var useES6 = true;
