@@ -119,6 +119,9 @@
         "post": true,
 
         "functions": [
+            ["avcodec_descriptor_get", "number", ["number"]],
+            ["avcodec_descriptor_get_by_name", "number", ["string"]],
+            ["avcodec_descriptor_next", "number", ["number"]],
             ["av_grow_packet", "number", ["number", "number"]],
             ["av_packet_alloc", "number", []],
             ["av_packet_clone", "number", ["number"]],
@@ -144,9 +147,9 @@
         "accessors": [
             ["AVCodecDescriptor", [
                 "id",
-                "long_name",
+                {"name": "long_name", "string": true},
                 {"name": "mime_types", "array": true},
-                "name",
+                {"name": "name", "string": true},
                 "props",
                 "type"
             ]],
@@ -292,9 +295,6 @@
         "functions": [
             ["avcodec_alloc_context3", "number", ["number"]],
             ["avcodec_close", "number", ["number"]],
-            ["avcodec_descriptor_get", "number", ["number"]],
-            ["avcodec_descriptor_get_by_name", "number", ["string"]],
-            ["avcodec_descriptor_next", "number", ["number"]],
             ["avcodec_find_decoder", "number", ["number"]],
             ["avcodec_find_decoder_by_name", "number", ["string"]],
             ["avcodec_find_encoder", "number", ["number"]],
