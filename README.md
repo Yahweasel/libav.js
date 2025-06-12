@@ -310,6 +310,28 @@ default version unless you have some specific compatibility issue that forces
 you to use a different version.
 
 
+## Modular variants
+
+In addition to the variants described above, a large number of modular variants
+are provided, each of which is sufficient for demuxing exactly one format, or
+decoding exactly one codec. The purpose of these modular variants is to make it
+easy to support every conceivable input file without making a massive
+monolithic build of libav.js.
+
+The modular variants are not available in NPM. Instead, they are all provided
+in releases on GitHub with the suffix `-modular`.
+
+Demuxer variants are named `demuxer-<format>`, e.g. `demuxer-matroska` and
+`demuxer-mp4`. Decoder variants are named `decoder-<codec>`, e.g.
+`decoder-opus` and `decoder-aac`. Each provides *only* functions related to
+demuxing or decoding, respectively.
+
+The modular variants are best paired with
+[AVGuesser](https://github.com/Yahweasel/AVGuesser) and
+[TransAVormer](https://github.com/Yahweasel/transavormer), as loading multiple
+variants on demand is complicated.
+
+
 ## Size
 
 FFmpeg is big, so libav.js is big. But, it's not ludicrous; the WebAssembly is
