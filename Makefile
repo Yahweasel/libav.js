@@ -610,28 +610,30 @@ RELEASE_VARIANTS=\
 RELEASE_SUFFIX=
 RELEASE_DIR=dist/release$(RELEASE_SUFFIX)
 
+MODULAR_VARIANTS_ENCUMBERED=\
+	decoder-aac decoder-h264 decoder-hevc
+	
 MODULAR_VARIANTS=\
-	decoder-aac decoder-ac3 decoder-alac decoder-av1 decoder-cinepak \
-	decoder-cook decoder-dvaudio decoder-dvvideo decoder-flac \
-	decoder-flashsv decoder-flashsv2 decoder-flv1 decoder-h261 decoder-h263 \
-	decoder-h263p decoder-h264 decoder-hevc decoder-indeo2 decoder-indeo3 \
-	decoder-indeo4 decoder-indeo5 decoder-mp1 decoder-mp2 decoder-mp3 \
-	decoder-mpeg1video decoder-mpeg2video decoder-mpeg4 decoder-msmpeg4v1 \
-	decoder-msmpeg4v2 decoder-msmpeg4v3 decoder-msvideo1 decoder-opus \
-	decoder-pcm_f16le decoder-pcm_f24le decoder-pcm_f32be decoder-pcm_f32le \
-	decoder-pcm_f64be decoder-pcm_f64le decoder-pcm_s16be decoder-pcm_s16le \
-	decoder-pcm_s24be decoder-pcm_s24le decoder-pcm_s32be decoder-pcm_s32le \
-	decoder-pcm_s64be decoder-pcm_s64le decoder-pcm_s8 decoder-pcm_u16be \
-	decoder-pcm_u16le decoder-pcm_u24be decoder-pcm_u24le decoder-pcm_u32be \
-	decoder-pcm_u32le decoder-pcm_u8 decoder-prores decoder-qtrle \
-	decoder-ra_144 decoder-ra_288 decoder-ralf decoder-rv10 decoder-rv20 \
-	decoder-rv30 decoder-rv40 decoder-sipr decoder-theora decoder-vorbis \
-	decoder-vp8 decoder-vp9 decoder-wavpack decoder-wmalossless \
-	decoder-wmapro decoder-wmav1 decoder-wmav2 decoder-wmavoice decoder-wmv1 \
-	decoder-wmv2 decoder-wmv3 demuxer-asf demuxer-au demuxer-avi demuxer-caf \
-	demuxer-dv demuxer-flac demuxer-flv demuxer-matroska demuxer-mp3 \
-	demuxer-mp4 demuxer-mpeg demuxer-mpegts demuxer-ogg demuxer-rm \
-	demuxer-wav demuxer-wv
+	decoder-ac3 decoder-alac decoder-av1 decoder-cinepak decoder-cook \
+	decoder-dvaudio decoder-dvvideo decoder-flac decoder-flashsv \
+	decoder-flashsv2 decoder-flv1 decoder-h261 decoder-h263 decoder-h263p \
+	decoder-indeo2 decoder-indeo3 decoder-indeo4 decoder-indeo5 decoder-mp1 \
+	decoder-mp2 decoder-mp3 decoder-mpeg1video decoder-mpeg2video \
+	decoder-mpeg4 decoder-msmpeg4v1 decoder-msmpeg4v2 decoder-msmpeg4v3 \
+	decoder-msvideo1 decoder-opus decoder-pcm_f16le decoder-pcm_f24le \
+	decoder-pcm_f32be decoder-pcm_f32le decoder-pcm_f64be decoder-pcm_f64le \
+	decoder-pcm_s16be decoder-pcm_s16le decoder-pcm_s24be decoder-pcm_s24le \
+	decoder-pcm_s32be decoder-pcm_s32le decoder-pcm_s64be decoder-pcm_s64le \
+	decoder-pcm_s8 decoder-pcm_u16be decoder-pcm_u16le decoder-pcm_u24be \
+	decoder-pcm_u24le decoder-pcm_u32be decoder-pcm_u32le decoder-pcm_u8 \
+	decoder-prores decoder-qtrle decoder-ra_144 decoder-ra_288 decoder-ralf \
+	decoder-rv10 decoder-rv20 decoder-rv30 decoder-rv40 decoder-sipr \
+	decoder-theora decoder-vorbis decoder-vp8 decoder-vp9 decoder-wavpack \
+	decoder-wmalossless decoder-wmapro decoder-wmav1 decoder-wmav2 \
+	decoder-wmavoice decoder-wmv1 decoder-wmv2 decoder-wmv3 demuxer-asf \
+	demuxer-au demuxer-avi demuxer-caf demuxer-dv demuxer-flac demuxer-flv \
+	demuxer-matroska demuxer-mp3 demuxer-mp4 demuxer-mpeg demuxer-mpegts \
+	demuxer-ogg demuxer-rm demuxer-wav demuxer-wv
 
 release: extract
 	mkdir -p $(RELEASE_DIR)

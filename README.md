@@ -318,8 +318,10 @@ decoding exactly one codec. The purpose of these modular variants is to make it
 easy to support every conceivable input file without making a massive
 monolithic build of libav.js.
 
-The modular variants are not available in NPM. Instead, they are all provided
-in releases on GitHub with the suffix `-modular`.
+The modular variants are not available in NPM. Instead, most are provided in
+releases on GitHub with the suffix `-modular`. This release does not include
+popular reprobate codecs; you will need to build them yourself if you need
+them.
 
 Demuxer variants are named `demuxer-<format>`, e.g. `demuxer-matroska` and
 `demuxer-mp4`. Decoder variants are named `decoder-<codec>`, e.g.
