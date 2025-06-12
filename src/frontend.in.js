@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Yahweasel
+ * Copyright (C) 2019-2025 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -156,7 +156,12 @@
         });
     }
 
+    // Common
     libavStatics.AV_TIME_BASE = 1000000;
+    libavStatics.AV_NOPTS_VALUE_I64 = [0, ~~0x80000000];
+    libavStatics.AV_NOPTS_VALUE_LO = 0;
+    libavStatics.AV_NOPTS_VALUE_HI = ~~0x80000000;
+    libavStatics.AV_NOPTS_VALUE = libavStatics.i64tof64(0, ~~0x80000000);
 
     // AV_OPT
     libavStatics.AV_OPT_SEARCH_CHILDREN = 1;

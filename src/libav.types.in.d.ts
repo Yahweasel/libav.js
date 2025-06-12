@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2024 Yahweasel and contributors
+ * Copyright (C) 2021-2025 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -428,6 +428,10 @@ declare namespace LibAV {
         }): number;
 
         // Constants:
+        AV_NOPTS_VALUE_I64: [number, number];
+        AV_NOPTS_VALUE_LO: number;
+        AV_NOPTS_VALUE_HI: number;
+        AV_NOPTS_VALUE: number;
         AV_TIME_BASE: number;
         AV_OPT_SEARCH_CHILDREN: number;
 
