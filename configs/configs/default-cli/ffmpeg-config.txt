@@ -28,4 +28,5 @@
 --enable-filter=bandreject --enable-filter=dynaudnorm --enable-filter=equalizer
 --enable-filter=loudnorm --enable-filter=pan --enable-filter=amix
 --enable-filter=volume --enable-filter=anull
+--enable-filter=scale
 --enable-ffmpeg --enable-ffprobe

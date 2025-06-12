@@ -5,6 +5,6 @@ avfcbridge
 avcodec
 avframe
 avfilter
-cli
 swscale
+cli
 avfcbridge

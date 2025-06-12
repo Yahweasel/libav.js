@@ -4,12 +4,12 @@ build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libavcodec/libavcodec.a
 build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libavfilter/libavfilter.a
 build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libswresample/libswresample.a
 build/inst/@TARGET/lib/libopus.a
+build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libswscale/libswscale.a
 build/inst/@TARGET/lib/libvorbis.a
 build/inst/@TARGET/lib/libvorbisenc.a
 build/inst/@TARGET/lib/libogg.a
 build/inst/@TARGET/lib/libmp3lame.a
 build/inst/@TARGET/lib/libvpx.a
-build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libswscale/libswscale.a
 build/inst/@TARGET/lib/libaom.a
 build/inst/@TARGET/lib/libopenh264.a
 build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libavcodec/libavcodec.a

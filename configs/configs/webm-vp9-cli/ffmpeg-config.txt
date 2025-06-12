@@ -41,4 +41,5 @@
 --enable-bsf=vp9_metadata
 --enable-libvpx
 --enable-encoder=libvpx_vp9
+--enable-filter=scale
 --enable-ffmpeg --enable-ffprobe

@@ -258,7 +258,7 @@ for (const config of configsRaw) {
     if (extra && extra.avf)
         configGroup(toAdd, "avf", ["avfilter", "swresample", "swscale", "audio-filters", "video-filters"]);
     if (extra && extra.cli)
-        configGroup(toAdd, "cli", ["cli"]);
+        configGroup(toAdd, "cli", ["swscale", "cli"]);
 
     configs.push.apply(configs, toAdd);
 }

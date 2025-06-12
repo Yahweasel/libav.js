@@ -28,6 +28,7 @@
 --enable-filter=bandreject --enable-filter=dynaudnorm --enable-filter=equalizer
 --enable-filter=loudnorm --enable-filter=pan --enable-filter=amix
 --enable-filter=volume --enable-filter=anull
+--enable-filter=scale
 --enable-ffmpeg --enable-ffprobe
 --enable-libvorbis
 --enable-decoder=libvorbis
@@ -51,7 +52,6 @@
 --enable-decoder=libvpx_vp8
 --enable-libvpx
 --enable-encoder=libvpx_vp8
---enable-filter=scale
 --enable-filter=crop --enable-filter=fps --enable-filter=null
 --enable-filter=settb --enable-filter=split --enable-filter=trim
 --enable-parser=vp9
