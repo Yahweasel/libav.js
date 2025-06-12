@@ -36,7 +36,7 @@ build/libvpx-$(LIBVPX_VERSION).tar.gz:
 	curl https://github.com/webmproject/libvpx/archive/refs/tags/v$(LIBVPX_VERSION).tar.gz -L -o $@
 
 libvpx-release:
-	cp build/libvpx-$(LIBVPX_VERSION).tar.gz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/libvpx-$(LIBVPX_VERSION).tar.gz $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/vpx.pc \

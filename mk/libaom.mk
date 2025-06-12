@@ -70,7 +70,7 @@ build/libaom-$(LIBAOM_VERSION).tar.gz:
 	curl https://aomedia.googlesource.com/aom/+archive/$(LIBAOM_VERSION).tar.gz -L -o $@
 
 libaom-release:
-	cp build/libaom-$(LIBAOM_VERSION).tar.gz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/libaom-$(LIBAOM_VERSION).tar.gz $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/aom.pc \

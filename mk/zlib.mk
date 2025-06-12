@@ -25,7 +25,7 @@ build/zlib-$(ZLIB_VERSION).tar.gz:
 	curl https://www.zlib.net/fossils/zlib-$(ZLIB_VERSION).tar.gz -L -o $@
 
 zlib-release:
-	cp build/zlib-$(ZLIB_VERSION).tar.gz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/zlib-$(ZLIB_VERSION).tar.gz $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/zlib.pc \

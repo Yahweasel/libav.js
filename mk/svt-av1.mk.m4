@@ -45,7 +45,7 @@ build/SVT-AV1-v$(SVT_AV1_VERSION).tar.bz2:
 	curl https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v1.8.0/SVT-AV1-v$(SVT_AV1_VERSION).tar.bz2 -L -o $@
 
 SVT-AV1-release:
-	cp build/SVT-AV1-v$(SVT_AV1_VERSION).tar.bz2 dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/SVT-AV1-v$(SVT_AV1_VERSION).tar.bz2 $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/svt-av1.pc \

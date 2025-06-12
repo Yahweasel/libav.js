@@ -23,7 +23,7 @@ build/openh264-$(OPENH264_VERSION).tar.gz:
 	curl https://github.com/cisco/openh264/archive/refs/tags/$(OPENH264_VERSION).tar.gz -L -o $@
 
 openh264-release:
-	cp build/openh264-$(OPENH264_VERSION).tar.gz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/openh264-$(OPENH264_VERSION).tar.gz $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/openh264.pc \

@@ -30,7 +30,7 @@ build/libvorbis-$(LIBVORBIS_VERSION).tar.xz:
 	curl https://downloads.xiph.org/releases/vorbis/libvorbis-$(LIBVORBIS_VERSION).tar.xz -L -o $@
 
 libvorbis-release:
-	cp build/libvorbis-$(LIBVORBIS_VERSION).tar.xz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
+	cp build/libvorbis-$(LIBVORBIS_VERSION).tar.xz $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources/
 
 .PRECIOUS: \
 	build/inst/%/lib/pkgconfig/vorbis.pc \
