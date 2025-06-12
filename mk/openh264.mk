@@ -1,4 +1,4 @@
-OPENH264_VERSION=2.5.0
+OPENH264_VERSION=2.5.1
 
 build/inst/%/lib/pkgconfig/openh264.pc: build/openh264-$(OPENH264_VERSION)/PATCHED | build/inst/%/cflags.txt
 	mkdir -p build/openh264-$(OPENH264_VERSION)/build-$*
@@ -20,7 +20,7 @@ build/openh264-$(OPENH264_VERSION)/Makefile: build/openh264-$(OPENH264_VERSION).
 
 build/openh264-$(OPENH264_VERSION).tar.gz:
 	mkdir -p build
-	curl https://github.com/cisco/openh264/archive/refs/tags/v$(OPENH264_VERSION).tar.gz -L -o $@
+	curl https://github.com/cisco/openh264/archive/refs/tags/$(OPENH264_VERSION).tar.gz -L -o $@
 
 openh264-release:
 	cp build/openh264-$(OPENH264_VERSION).tar.gz dist/release/libav.js-$(LIBAVJS_VERSION)/sources/
