@@ -14,7 +14,7 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 	--disable-programs \
 	--disable-ffplay --disable-ffprobe --disable-network --disable-iconv --disable-xlib \
 	--disable-sdl2 --disable-zlib \
-	--disable-everything
+	--disable-everything --disable-swscale --disable-swresample
 
 
 build/ffmpeg-$(FFMPEG_VERSION)/build-%/libavformat/libavformat.a: \

@@ -1,1 +1,1 @@
-["avformat","avcodec","avfilter","swresample","format-ogg","format-webm","parser-opus","codec-libopus","format-flac","parser-flac","codec-flac","format-wav","codec-pcm_f32le","audio-filters","avfilter","swscale","cli"]
+["avformat","avcodec","avfilter","swresample","format-ogg","format-webm","parser-opus","codec-libopus","format-flac","parser-flac","codec-flac","format-wav","codec-pcm_f32le","audio-filters","avfilter","cli"]

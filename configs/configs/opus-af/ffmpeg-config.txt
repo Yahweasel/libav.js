@@ -8,7 +8,7 @@
 --enable-decoder=libopus
 --enable-bsf=opus_metadata
 --enable-encoder=libopus
---enable-filter=aresample
+--enable-swresample --enable-filter=aresample
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix

@@ -1,5 +1,5 @@
 --enable-protocol=data --enable-protocol=file
---enable-filter=aresample
+--enable-swresample --enable-filter=aresample
 --enable-demuxer=ogg
 --enable-muxer=ogg
 --enable-demuxer=matroska
@@ -28,5 +28,4 @@
 --enable-filter=bandreject --enable-filter=dynaudnorm --enable-filter=equalizer
 --enable-filter=loudnorm --enable-filter=pan --enable-filter=amix
 --enable-filter=volume --enable-filter=anull
---enable-filter=scale
 --enable-ffmpeg --enable-ffprobe

@@ -6,5 +6,4 @@ avcodec
 avframe
 avfilter
 avfilter
-swscale
 cli

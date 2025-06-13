@@ -34,8 +34,8 @@
 --enable-bsf=av1_metadata
 --enable-bsf=h264_metadata
 --enable-bsf=hevc_metadata
---enable-filter=aresample
---enable-filter=scale
+--enable-swresample --enable-filter=aresample
+--enable-swscale --enable-filter=scale
 --enable-filter=acompressor --enable-filter=adeclick --enable-filter=adeclip
 --enable-filter=aecho --enable-filter=afade --enable-filter=aformat
 --enable-filter=agate --enable-filter=alimiter --enable-filter=amix

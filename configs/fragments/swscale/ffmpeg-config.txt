@@ -1,1 +1,1 @@
---enable-filter=scale
+--enable-swscale --enable-filter=scale

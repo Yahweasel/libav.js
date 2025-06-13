@@ -32,8 +32,7 @@
 --enable-decoder=libvpx_vp8
 --enable-libvpx
 --enable-encoder=libvpx_vp8
---enable-filter=scale
+--enable-swscale --enable-filter=scale
 --enable-filter=crop --enable-filter=fps --enable-filter=null
 --enable-filter=settb --enable-filter=split --enable-filter=trim
---enable-filter=scale
 --enable-ffmpeg --enable-ffprobe

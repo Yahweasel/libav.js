@@ -1,1 +1,1 @@
---enable-filter=aresample
+--enable-swresample --enable-filter=aresample
