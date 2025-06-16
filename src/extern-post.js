@@ -104,6 +104,11 @@ if (/* We're in a worker */
         postMessage(["onready", "onready", true, null]);
 
     }).catch(function(ex) {
+        try {
+            postMessage(["error", "error", false, ex]);
+        } catch (_) {
+            postMessage(["error", "error", false, ex + "\n" + ex.stack]);
+        }
         console.log("Loading LibAV failed\n" + ex + "\n" + ex.stack);
     });
 })();

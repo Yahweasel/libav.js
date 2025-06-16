@@ -338,19 +338,27 @@
 @E6                 , {type: useES6 ? "module" : "classic"}
                 );
 
-                ret.worker.postMessage({
-                    config: {
-                        variant: opts.variant || libav.variant,
-                        wasmurl: opts.wasmurl || libav.wasmurl
-                    }
-                });
-
                 // Report our readiness
                 return new Promise(function(res, rej) {
+
+                    ret.worker.onerror = ev => {
+                        console.error(ev);
+                        rej(ev.error || new Error(ev.message));
+                    };
+
+                    ret.worker.postMessage({
+                        config: {
+                            variant: opts.variant || libav.variant,
+                            wasmurl: opts.wasmurl || libav.wasmurl
+                        }
+                    });
 
                     // Our handlers
                     ret.on = 1;
                     ret.handlers = {
+                        error: [function(ex) {
+                            rej(ex);
+                        }, null],
                         onready: [function() {
                             res();
                         }, null],
