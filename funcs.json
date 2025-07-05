@@ -345,6 +345,7 @@
                 "channels",
                 "channel_layoutmask",
                 "ch_layout_nb_channels",
+                "compression_level",
                 "extradata",
                 "extradata_size",
                 "frame_size",
