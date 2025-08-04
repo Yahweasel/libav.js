@@ -205,6 +205,10 @@ int av_compare_ts_js(
 #include "b-avcodec.c"
 #endif
 
+#if LIBAVJS_WITH_BSF
+#include "b-avbsf.c"
+#endif
+
 /****************************************************************
  * avformat
  ***************************************************************/

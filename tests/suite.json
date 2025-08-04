@@ -6,6 +6,7 @@
  "100-ffmpeg-cli.js",
  "101-ffprobe-cli-expected.js",
  "102-ffprobe-cli.js",
+ "500-bsf.js",
  "500-decode-audio.js",
  "500-decode-video.js",
  "500-demux-decode.js",
