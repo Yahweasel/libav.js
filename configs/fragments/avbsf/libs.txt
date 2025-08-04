@@ -1,0 +1,1 @@
+build/ffmpeg-@FFVER/build-@TARGET-@VARIANT/libavcodec/libavcodec.a

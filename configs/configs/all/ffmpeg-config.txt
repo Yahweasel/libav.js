@@ -227,3 +227,6 @@
 --enable-demuxer=hls
 --enable-muxer=hls
 --enable-protocol=jsfetch
+--enable-bsf=null
+--enable-bsf=h264_mp4toannexb
+--enable-bsf=hevc_mp4toannexb

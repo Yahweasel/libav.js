@@ -202,6 +202,24 @@
         ]
     },
 
+    "avbsf": {
+        "//": "This isn't a real library. It's the bitstream-filter-related components of libavcodec.",
+
+        "functions": [
+            ["av_bsf_flush", null, ["number"]],
+            ["av_bsf_free", null, ["number"]],
+            ["av_bsf_init", "number", ["number"]],
+            ["av_bsf_list_parse_str", "number", ["string", "number"]],
+            ["av_bsf_list_parse_str_js", "number", ["string"]],
+            ["av_bsf_receive_packet", "number", ["number", "number"]],
+            ["av_bsf_send_packet", "number", ["number", "number"]]
+        ],
+
+        "freers": [
+            "av_bsf_free"
+        ]
+    },
+
     "avformat": {
         "post": true,
 

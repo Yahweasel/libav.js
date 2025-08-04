@@ -218,7 +218,10 @@ const configsRaw = [
         "codec-alac", "codec-prores", "codec-qtrle",
 
         // HLS
-        "format-hls", "protocol-jsfetch"
+        "format-hls", "protocol-jsfetch",
+
+        // BSF (bitstream filters)
+        "avbsf", "bsf-null", "bsf-h264_mp4toannexb", "bsf-hevc_mp4toannexb"
     ]],
 
     ["empty", []],
