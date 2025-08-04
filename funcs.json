@@ -204,6 +204,7 @@
 
     "avbsf": {
         "//": "This isn't a real library. It's the bitstream-filter-related components of libavcodec.",
+        "post": true,
 
         "functions": [
             ["av_bsf_flush", null, ["number"]],
