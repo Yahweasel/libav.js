@@ -21,7 +21,6 @@ EFLAGS=\
 	--pre-js src/pre.js \
 	--extern-post-js src/extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
-	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'HEAPU8', 'HEAP8', 'HEAPU16', 'HEAP16', 'HEAPU32', 'HEAP32', 'HEAPF32', 'PThread']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
@@ -29,6 +28,11 @@ EFLAGS=\
 	-s INITIAL_MEMORY=25165824 \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s WASM_BIGINT=0
+
+EFLAGS_NTHR=\
+	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'HEAPU8', 'HEAP8', 'HEAPU16', 'HEAP16', 'HEAPU32', 'HEAP32', 'HEAPF32']"
+EFLAGS_THR=\
+	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'HEAPU8', 'HEAP8', 'HEAPU16', 'HEAP16', 'HEAPU32', 'HEAP32', 'HEAPF32', 'PThread']"
 
 # For debugging:
 #EFLAGS+=\
@@ -132,7 +136,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) -s WASM=0 \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
@@ -169,7 +173,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) $(ES6FLAGS) -s WASM=0 \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) $(ES6FLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
@@ -206,7 +210,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) -g2 -s WASM=0 \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) -g2 -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
@@ -243,7 +247,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
@@ -281,7 +285,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
@@ -318,7 +322,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) $(ES6FLAGS) \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) $(ES6FLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
@@ -355,7 +359,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) -gsource-map \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) -gsource-map \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
@@ -392,7 +396,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(EMFTFLAGS) -gsource-map $(ES6FLAGS) \
+		$(EFLAGS_NTHR) $(EMFTFLAGS) -gsource-map $(ES6FLAGS) \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
@@ -430,7 +434,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
+		$(EFLAGS_THR) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
@@ -467,7 +471,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		$(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
+		$(EFLAGS_THR) $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
@@ -504,7 +508,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
+		$(EFLAGS_THR) -gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.js
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
@@ -541,7 +545,7 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
-		-gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
+		$(EFLAGS_THR) -gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
 		-o $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.mjs
 	if [ -e $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map ] ; then \
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
