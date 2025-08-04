@@ -21,7 +21,6 @@ EFLAGS=\
 	--pre-js src/pre.js \
 	--extern-post-js src/extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
-	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'HEAPU8', 'HEAP8', 'HEAPU16', 'HEAP16', 'HEAPU32', 'HEAP32', 'HEAPF32', 'PThread']" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
@@ -29,6 +28,11 @@ EFLAGS=\
 	-s INITIAL_MEMORY=25165824 \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s WASM_BIGINT=0
+
+EFLAGS_NTHR=\
+	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'HEAPU8', 'HEAP8', 'HEAPU16', 'HEAP16', 'HEAPU32', 'HEAP32', 'HEAPF32']"
+EFLAGS_THR=\
+	-s "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'HEAPU8', 'HEAP8', 'HEAPU16', 'HEAP16', 'HEAPU32', 'HEAP32', 'HEAPF32', 'PThread']"
 
 # For debugging:
 #EFLAGS+=\
@@ -128,20 +132,20 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 ]]])
 
 # asm.js version
-buildrule(asm, [[[]]], base, [[[$(EMFTFLAGS) -s WASM=0]]], js)
-buildrule(asm, [[[]]], base, [[[$(EMFTFLAGS) $(ES6FLAGS) -s WASM=0]]], mjs)
-buildrule(asm, dbg., base, [[[$(EMFTFLAGS) -g2 -s WASM=0]]], js)
-buildrule(asm, dbg., base, [[[$(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0]]], mjs)
+buildrule(asm, [[[]]], base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS) -s WASM=0]]], js)
+buildrule(asm, [[[]]], base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS) $(ES6FLAGS) -s WASM=0]]], mjs)
+buildrule(asm, dbg., base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS) -g2 -s WASM=0]]], js)
+buildrule(asm, dbg., base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0]]], mjs)
 # wasm version with no added features
-buildrule(wasm, [[[]]], base, [[[$(EMFTFLAGS)]]], js)
-buildrule(wasm, [[[]]], base, [[[$(EMFTFLAGS) $(ES6FLAGS)]]], mjs)
-buildrule(wasm, dbg., base, [[[$(EMFTFLAGS) -gsource-map]]], js)
-buildrule(wasm, dbg., base, [[[$(EMFTFLAGS) -gsource-map $(ES6FLAGS)]]], mjs)
+buildrule(wasm, [[[]]], base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS)]]], js)
+buildrule(wasm, [[[]]], base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS) $(ES6FLAGS)]]], mjs)
+buildrule(wasm, dbg., base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS) -gsource-map]]], js)
+buildrule(wasm, dbg., base, [[[$(EFLAGS_NTHR) $(EMFTFLAGS) -gsource-map $(ES6FLAGS)]]], mjs)
 # wasm + threads
-buildrule(thr, [[[]]], thr, [[[$(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
-buildrule(thr, [[[]]], thr, [[[$(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
-buildrule(thr, dbg., thr, [[[-gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
-buildrule(thr, dbg., thr, [[[-gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
+buildrule(thr, [[[]]], thr, [[[$(EFLAGS_THR) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
+buildrule(thr, [[[]]], thr, [[[$(EFLAGS_THR) $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
+buildrule(thr, dbg., thr, [[[$(EFLAGS_THR) -gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], js)
+buildrule(thr, dbg., thr, [[[$(EFLAGS_THR) -gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency]]], mjs)
 
 # Built source files
 build/exports-%.json: configs/configs/%/components.txt funcs.json \
