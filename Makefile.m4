@@ -170,7 +170,8 @@ build/post-%.js: configs/configs/%/components.txt funcs.json tools/mk-post.js \
 	mkdir -p build
 	./tools/mk-post.js $(*) > $@
 
-build/libav.types.d.ts: funcs.json mk/doxygen.json tools/mk-types-dts.js
+build/libav.types.d.ts: funcs.json mk/doxygen.json tools/mk-types-dts.js \
+	src/post.in.js src/p-*.in.js src/libav.types.in.d.ts
 	mkdir -p build
 	./tools/mk-types-dts.js > $@
 
