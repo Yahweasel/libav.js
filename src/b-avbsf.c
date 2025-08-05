@@ -15,6 +15,13 @@
 
 #include "libavcodec/bsf.h"
 
+#define B(type, field) A(AVBSFContext, type, field)
+B(AVCodecParameters *, par_in)
+B(AVCodecParameters *, par_out) // Read-only, should I just ignore the setter?
+RAT(AVBSFContext, time_base_in)
+RAT(AVBSFContext, time_base_out) // Read-only, should I just ignore the setter?
+#undef B
+
 AVBSFContext *av_bsf_list_parse_str_js(const char *str) {
     AVBSFContext *ret = NULL;
     int res;
