@@ -215,6 +215,15 @@
             ["av_bsf_send_packet", "number", ["number", "number"]]
         ],
 
+        "accessors": [
+            ["AVBSFContext", [
+                "par_in",
+                "par_out",
+                {"name": "time_base_in", "rational": true},
+                {"name": "time_base_out", "rational": true}
+            ]]
+        ],
+
         "freers": [
             "av_bsf_free"
         ]
