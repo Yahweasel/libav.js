@@ -23,8 +23,18 @@
 /* @types
  * ff_bsf_multi@sync(
  *     bsf: number, pktPtr: number, inPackets: (Packet | number)[],
- *     config?: boolean | { fin?: boolean }
- * )
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         copyoutPacket?: "default"
+ *     }
+ * ): @promsync@Packet[]@
+ * ff_bsf_multi@sync(
+ *     bsf: number, pktPtr: number, inPackets: (Packet | number)[],
+ *     config?: boolean | {
+ *         fin?: boolean,
+ *         copyoutPacket: "ptr"
+ *     }
+ * ): @promsync@number[]@
  */
 var ff_bsf_multi = Module.ff_bsf_multi = function(bsf, pktPtr, inPackets, config) {
     var outPackets = [];
@@ -37,7 +47,9 @@ var ff_bsf_multi = Module.ff_bsf_multi = function(bsf, pktPtr, inPackets, config
     }
 
     // Choose a packet copier
-    var copyoutPacket = config.copyoutPacket || ff_copyout_packet;
+    var copyoutPacket = ff_copyout_packet;
+    if (config.copyoutPacket)
+        copyoutPacket = ff_copyout_packet_versions[config.copyoutPacket];
 
     function handlePacket(inPacket) {
         var ret;
