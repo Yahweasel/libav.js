@@ -8,4 +8,5 @@ avfilter
 cli
 swscale
 avfcbridge
+avfcbridge
 avbsf
