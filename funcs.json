@@ -88,6 +88,7 @@
                 "crop_right",
                 "crop_top",
                 {"name": "data", "array": true},
+                "duration",
                 "format",
                 "height",
                 "key_frame",
@@ -396,7 +397,9 @@
                 {"name": "sample_aspect_ratio", "rational": true},
                 "sample_fmt",
                 "sample_rate",
+                "strict_std_compliance",
                 {"name": "time_base", "rational": true},
+                {"name": "pkt_timebase", "rational": true},
                 "qmax",
                 "qmin",
                 "width"
