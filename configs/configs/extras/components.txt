@@ -6,4 +6,5 @@ avcodec
 avframe
 avfilter
 swscale
+avfcbridge
 avbsf
