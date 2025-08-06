@@ -224,6 +224,10 @@
             ]]
         ],
 
+        "meta": [
+            "ff_bsf_multi"
+        ],
+
         "freers": [
             "av_bsf_free"
         ]
