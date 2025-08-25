@@ -277,6 +277,11 @@ declare namespace LibAV {
          */
         channel_layoutmask?: number;
         channels?: number;
+
+        /**
+         * Side data. Codec-specific.
+         */
+        coded_side_data?: any;
     }
 
     /**

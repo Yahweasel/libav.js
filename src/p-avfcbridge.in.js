@@ -52,14 +52,15 @@ var ff_copyout_packet = Module.ff_copyout_packet = function(pkt) {
         flags: AVPacket_flags(pkt),
         duration: AVPacket_duration(pkt),
         durationhi: AVPacket_durationhi(pkt),
-        side_data: ff_copyout_side_data(pkt)
+        side_data: ff_copyout_side_data(
+            AVPacket_side_data(pkt),
+            AVPacket_side_data_elems(pkt)
+        )
     };
 };
 
 // Copy out a packet's side data. Used internally by ff_copyout_packet.
-var ff_copyout_side_data = Module.ff_copyout_side_data = function(pkt) {
-    var side_data = AVPacket_side_data(pkt);
-    var side_data_elems = AVPacket_side_data_elems(pkt);
+var ff_copyout_side_data = Module.ff_copyout_side_data = function(side_data, side_data_elems) {
     if (!side_data) return null;
 
     var ret = [];
@@ -114,9 +115,8 @@ var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
     ff_set_packet(pktPtr, packet.data);
 
     [
-        "dts", "dtshi", "duration", "durationhi", "flags", "side_data",
-        "side_data_elems", "stream_index", "pts", "ptshi", "time_base_num",
-        "time_base_den"
+        "dts", "dtshi", "duration", "durationhi", "flags", "stream_index",
+        "pts", "ptshi", "time_base_num", "time_base_den"
     ].forEach(function(key) {
         if (key in packet)
             CAccessors["AVPacket_" + key + "_s"](pktPtr, packet[key]);
@@ -128,6 +128,8 @@ var ff_copyin_packet = Module.ff_copyin_packet = function(pktPtr, packet) {
 
 // Copy in a packet's side data. Used internally by ff_copyin_packet.
 var ff_copyin_side_data = Module.ff_copyin_side_data = function(pktPtr, side_data) {
+    AVPacket_side_data_s(pktPtr, 0);
+    AVPacket_side_data_elems_s(pktPtr, 0);
     side_data.forEach(function(elem) {
         var data = av_packet_new_side_data(pktPtr, elem.type, elem.data.length);
         if (data === 0)
@@ -160,7 +162,11 @@ var ff_copyout_codecpar = Module.ff_copyout_codecpar = function(codecpar) {
         profile: AVCodecParameters_profile(codecpar),
         sample_rate: AVCodecParameters_sample_rate(codecpar),
         width: AVCodecParameters_width(codecpar),
-        extradata: ff_copyout_codecpar_extradata(codecpar)
+        extradata: ff_copyout_codecpar_extradata(codecpar),
+        coded_side_data: ff_copyout_side_data(
+            AVCodecParameters_coded_side_data(codecpar),
+            AVCodecParameters_nb_coded_side_data(codecpar)
+        )
     };
 };
 
@@ -181,9 +187,10 @@ var ff_copyout_codecpar_extradata = Module.ff_copyout_codecpar_extradata = funct
 var ff_copyin_codecpar = Module.ff_copyin_codecpar = function(codecparPtr, codecpar) {
     [
         "bit_rate", "channel_layoutmask", "channels", "chroma_location",
-        "codec_id", "codec_tag", "codec_type", "color_primaries", "color_range",
-        "color_space", "color_trc", "format", "height", "level", "profile",
-        "sample_rate", "width"
+        "codec_id", "codec_tag", "codec_type", "coded_side_data",
+        "color_primaries", "color_range", "color_space", "color_trc", "format",
+        "height", "level", "nb_coded_side_data", "profile", "sample_rate",
+        "width"
     ].forEach(function(key) {
         if (key in codecpar)
             CAccessors["AVCodecParameters_" + key + "_s"](codecparPtr, codecpar[key]);
@@ -191,6 +198,8 @@ var ff_copyin_codecpar = Module.ff_copyin_codecpar = function(codecparPtr, codec
 
     if (codecpar.extradata)
         ff_copyin_codecpar_extradata(codecparPtr, codecpar.extradata);
+    if (codecpar.coded_side_data)
+        ff_copyin_codecpar_side_data(codecparPtr, codecpar.side_data);
 };
 
 // Copy in codec parameter extradata. Used internally by ff_copyin_codecpar.
@@ -199,4 +208,16 @@ var ff_copyin_codecpar_extradata = Module.ff_copyin_codecpar_extradata = functio
     copyin_u8(extradataPtr, extradata);
     AVCodecParameters_extradata_s(codecparPtr, extradataPtr);
     AVCodecParameters_extradata_size_s(codecparPtr, extradata.length);
+};
+
+// Copy in a codecpar's side data. Used internally by ff_copyin_codecpar.
+var ff_copyin_codecpar_side_data = Module.ff_copyin_codecpar_side_data = function(codecpar, side_data) {
+    AVCodecParameters_coded_side_data_s(codecpar, 0);
+    AVCodecParameters_nb_coded_side_data_s(codecpar, 0);
+    side_data.forEach(function(elem) {
+        var data = ff_codecpar_new_side_data(codecpar, elem.type, elem.data.length);
+        if (data === 0)
+            throw new Error("Failed to allocate side data!");
+        copyin_u8(data, elem.data);
+    });
 };

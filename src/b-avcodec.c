@@ -33,15 +33,17 @@ B(enum AVMediaType, type)
 B(enum AVCodecID, codec_id)
 B(enum AVMediaType, codec_type)
 BL(int64_t, bit_rate)
+B(AVPacketSideData *, coded_side_data)
+B(int, compression_level)
 B(uint8_t *, extradata)
 B(int, extradata_size)
-B(int, compression_level)
 B(int, frame_size)
 B(int, gop_size)
 B(int, height)
 B(int, keyint_min)
 B(int, level)
 B(int, max_b_frames)
+B(int, nb_coded_side_data)
 B(int, pix_fmt)
 B(int, profile)
 BL(int64_t, rc_max_rate)
@@ -93,6 +95,16 @@ B(enum AVColorTransferCharacteristic, color_trc)
 B(enum AVColorSpace, color_space)
 B(enum AVChromaLocation, chroma_location)
 B(int, sample_rate)
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 30, 100)
+B(AVPacketSideData *, coded_side_data)
+B(int, nb_coded_side_data)
+#else
+AVPacketSideData *AVCodecParameters_coded_side_data(AVCodecParameters *a) { return NULL; }
+void AVCodecParameters_coded_side_data_s(AVCodecParameters *a, AVPacketSideData *b) {}
+int AVCodecParameters_nb_coded_side_data(AVCodecParameters *a) { return 0; }
+void AVCodecParameters_nb_coded_side_data_s(AVCodecParameters *a, AVPacketSideData *b) {}
+#endif
 #undef B
 
 #if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(60, 10, 100)
@@ -102,6 +114,20 @@ RAT_FAKE(AVCodecParameters, framerate, 60, 1)
 #endif
 
 CHL(AVCodecParameters)
+
+uint8_t *ff_codecpar_new_side_data(
+    AVCodecParameters *codecpar, enum AVPacketSideDataType type, size_t size
+) {
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(60, 30, 100)
+    AVPacketSideData *sd = av_packet_side_data_new(
+        &codecpar->coded_side_data, &codecpar->nb_coded_side_data, type, size,
+        0
+    );
+    return sd ? sd->data : NULL;
+#else
+    return NULL;
+#endif
+}
 
 
 /* AVPacket */

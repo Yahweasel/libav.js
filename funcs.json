@@ -135,7 +135,8 @@
             ["AVPacketSideData_size", "number", ["number", "number"]],
             ["AVPacketSideData_type", "number", ["number", "number"]],
             ["av_packet_unref", null, ["number"]],
-            ["av_shrink_packet", null, ["number", "number"]]
+            ["av_shrink_packet", null, ["number", "number"]],
+            ["ff_codecpar_new_side_data", "number", ["number", "number", "number"]]
         ],
 
         "meta": [
@@ -163,6 +164,7 @@
                 "codec_id",
                 "codec_tag",
                 "codec_type",
+                "coded_side_data",
                 "color_primaries",
                 "color_range",
                 "color_space",
@@ -173,6 +175,7 @@
                 {"name": "framerate", "rational": true},
                 "height",
                 "level",
+                "nb_coded_side_data",
                 "profile",
                 "sample_rate",
                 "width"
@@ -378,6 +381,7 @@
                 "channels",
                 "channel_layoutmask",
                 "ch_layout_nb_channels",
+                "coded_side_data",
                 "compression_level",
                 "extradata",
                 "extradata_size",
@@ -388,6 +392,7 @@
                 "keyint_min",
                 "level",
                 "max_b_frames",
+                "nb_coded_side_data",
                 "pix_fmt",
                 "profile",
                 "rc_max_rate",
