@@ -22,6 +22,16 @@ B(size_t, crop_left)
 B(size_t, crop_right)
 B(size_t, crop_top)
 BA(uint8_t *, data)
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 30, 100)
+BL(int64_t, duration)
+#else
+uint32_t AVFrame_duration(AVFrame *a) { return (uint32_t) a->pkt_duration; }
+uint32_t AVFrame_durationhi(AVFrame *a) { return (uint32_t) (a->pkt_duration >> 32); }
+void AVFrame_duration_s(AVFrame *a, uint32_t b) { a->pkt_duration = b; }
+void AVFrame_durationhi_s(AVFrame *a, uint32_t b) { a->pkt_duration |= (((int64_t) b) << 32); }
+#endif
+
 B(int, format)
 B(int, height)
 B(int, key_frame)
