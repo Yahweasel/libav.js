@@ -146,6 +146,10 @@
         }
     };
 
+    libavStatics.AV_VERSION_INT = function(maj, min, rev) {
+        return maj << 16 | min << 8 | rev;
+    };
+
     // Some enumerations lifted directly from FFmpeg
     function enume(vals, first) {
         if (typeof first === undefined)

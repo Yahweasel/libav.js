@@ -432,6 +432,14 @@ declare namespace LibAV {
             channels?: number
         }): number;
 
+        /**
+         * Convert a major, minor, and revision number to the internal integer
+         * version representation used in libav. Note that these version numbers
+         * are *not* FFmpeg versions. They are the internal libav versions, one
+         * for each libav library.
+         */
+        AV_VERSION_INT(maj: number, min: number, rev: number): number;
+
         // Constants:
         AV_NOPTS_VALUE_I64: [number, number];
         AV_NOPTS_VALUE_LO: number;

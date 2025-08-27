@@ -184,3 +184,7 @@ void av_packet_rescale_ts_js(
                tb_dst = {tb_dst_num, tb_dst_den};
     av_packet_rescale_ts(pkt, tb_src, tb_dst);
 }
+
+static const int LIBAVCODEC_VERSION_INT_V = LIBAVCODEC_VERSION_INT;
+#undef LIBAVCODEC_VERSION_INT
+int LIBAVCODEC_VERSION_INT() { return LIBAVCODEC_VERSION_INT_V; }

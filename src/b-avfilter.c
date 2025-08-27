@@ -56,3 +56,7 @@ AVFilterContext *avfilter_graph_create_filter_js(const AVFilter *filt,
         fprintf(stderr, "[avfilter_graph_create_filter_js] %s\n", av_err2str(err));
     return ret;
 }
+
+static const int LIBAVFILTER_VERSION_INT_V = LIBAVFILTER_VERSION_INT;
+#undef LIBAVFILTER_VERSION_INT
+int LIBAVFILTER_VERSION_INT() { return LIBAVFILTER_VERSION_INT_V; }
