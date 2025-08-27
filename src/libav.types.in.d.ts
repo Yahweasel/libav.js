@@ -277,6 +277,11 @@ declare namespace LibAV {
          */
         channel_layoutmask?: number;
         channels?: number;
+
+        /**
+         * Side data. Codec-specific.
+         */
+        coded_side_data?: any;
     }
 
     /**
@@ -426,6 +431,14 @@ declare namespace LibAV {
             channel_layout?: number,
             channels?: number
         }): number;
+
+        /**
+         * Convert a major, minor, and revision number to the internal integer
+         * version representation used in libav. Note that these version numbers
+         * are *not* FFmpeg versions. They are the internal libav versions, one
+         * for each libav library.
+         */
+        AV_VERSION_INT(maj: number, min: number, rev: number): number;
 
         // Constants:
         AV_NOPTS_VALUE_I64: [number, number];

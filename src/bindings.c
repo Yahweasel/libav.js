@@ -329,3 +329,7 @@ int mallinfo_uordblks()
 {
     return mallinfo().uordblks;
 }
+
+static const int LIBAVUTIL_VERSION_INT_V = LIBAVUTIL_VERSION_INT;
+#undef LIBAVUTIL_VERSION_INT
+int LIBAVUTIL_VERSION_INT() { return LIBAVUTIL_VERSION_INT_V; }

@@ -88,3 +88,7 @@ AVIOContext *avio_open2_js(const char *url, int flags,
         fprintf(stderr, "[avio_open2_js] %s\n", av_err2str(err));
     return ret;
 }
+
+static const int LIBAVFORMAT_VERSION_INT_V = LIBAVFORMAT_VERSION_INT;
+#undef LIBAVFORMAT_VERSION_INT
+int LIBAVFORMAT_VERSION_INT() { return LIBAVFORMAT_VERSION_INT_V; }

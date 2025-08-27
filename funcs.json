@@ -39,7 +39,8 @@
             ["av_opt_set_int_list_js", "number", ["number", "string", "number", "number", "number", "number"]],
             ["av_strdup", "number", ["string"]],
             ["ff_error", "string", ["number"]],
-            ["ff_nothing", null, [], {"async": true}]
+            ["ff_nothing", null, [], {"async": true}],
+            ["LIBAVUTIL_VERSION_INT", "number", []]
         ],
 
         "freers": [
@@ -135,7 +136,9 @@
             ["AVPacketSideData_size", "number", ["number", "number"]],
             ["AVPacketSideData_type", "number", ["number", "number"]],
             ["av_packet_unref", null, ["number"]],
-            ["av_shrink_packet", null, ["number", "number"]]
+            ["av_shrink_packet", null, ["number", "number"]],
+            ["ff_codecpar_new_side_data", "number", ["number", "number", "number"]],
+            ["LIBAVCODEC_VERSION_INT", "number", []]
         ],
 
         "meta": [
@@ -163,6 +166,7 @@
                 "codec_id",
                 "codec_tag",
                 "codec_type",
+                "coded_side_data",
                 "color_primaries",
                 "color_range",
                 "color_space",
@@ -173,6 +177,7 @@
                 {"name": "framerate", "rational": true},
                 "height",
                 "level",
+                "nb_coded_side_data",
                 "profile",
                 "sample_rate",
                 "width"
@@ -261,7 +266,8 @@
             ["av_read_frame", "number", ["number", "number"], {"async": true, "returnsErrno": true}],
             ["av_seek_frame", "number", ["number", "number", "number", "number"], {"async": true, "returnsErrno": true, "notypes": true}],
             ["av_write_frame", "number", ["number", "number"]],
-            ["av_write_trailer", "number", ["number"]]
+            ["av_write_trailer", "number", ["number"]],
+            ["LIBAVFORMAT_VERSION_INT", "number", []]
         ],
 
         "fs": [
@@ -378,6 +384,7 @@
                 "channels",
                 "channel_layoutmask",
                 "ch_layout_nb_channels",
+                "coded_side_data",
                 "compression_level",
                 "extradata",
                 "extradata_size",
@@ -388,6 +395,7 @@
                 "keyint_min",
                 "level",
                 "max_b_frames",
+                "nb_coded_side_data",
                 "pix_fmt",
                 "profile",
                 "rc_max_rate",
@@ -430,7 +438,8 @@
             ["avfilter_graph_parse", "number", ["number", "string", "number", "number", "number"]],
             ["avfilter_inout_alloc", "number", []],
             ["avfilter_inout_free", null, ["number"]],
-            ["avfilter_link", "number", ["number", "number", "number", "number"]]
+            ["avfilter_link", "number", ["number", "number", "number", "number"]],
+            ["LIBAVFILTER_VERSION_INT", "number", []]
         ],
 
         "meta": [
