@@ -106,8 +106,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/$3/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$4 \

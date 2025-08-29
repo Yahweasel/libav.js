@@ -133,8 +133,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) -s WASM=0 \
@@ -171,8 +173,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) $(ES6FLAGS) -s WASM=0 \
@@ -209,8 +213,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) -g2 -s WASM=0 \
@@ -247,8 +253,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) -g2 $(ES6FLAGS) -s WASM=0 \
@@ -286,8 +294,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) \
@@ -324,8 +334,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) $(ES6FLAGS) \
@@ -362,8 +374,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) -gsource-map \
@@ -400,8 +414,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/base/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_NTHR) $(EMFTFLAGS) -gsource-map $(ES6FLAGS) \
@@ -439,8 +455,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_THR) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
@@ -477,8 +495,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_THR) $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
@@ -515,8 +535,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_THR) -gsource-map $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
@@ -553,8 +575,10 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		src/bindings.c \
 		`grep LIBAVJS_WITH_CLI configs/configs/$(*)/link-flags.txt > /dev/null 2>&1 && echo ' \
 		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*.o \
-		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		-Lbuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/libavdevice -lavdevice \
+		'` \
+		`test -e build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/textformat/tf_xml.o && echo ' \
+		build/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*)/fftools/*/*.o \
 		'` \
 		`test ! -e configs/configs/$(*)/libs.txt || sed 's/@FFVER/$(FFMPEG_VERSION)/ ; s/@TARGET/thr/ ; s/@VARIANT/$(*)/' configs/configs/$(*)/libs.txt` \
 		$(EFLAGS_THR) -gsource-map $(ES6FLAGS) $(THRFLAGS) -sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency \
