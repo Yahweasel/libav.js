@@ -90,6 +90,7 @@
                 "crop_top",
                 {"name": "data", "array": true},
                 "duration",
+                "flags",
                 "format",
                 "height",
                 "key_frame",
@@ -333,7 +334,6 @@
 
         "functions": [
             ["avcodec_alloc_context3", "number", ["number"]],
-            ["avcodec_close", "number", ["number"]],
             ["avcodec_find_decoder", "number", ["number"]],
             ["avcodec_find_decoder_by_name", "number", ["string"]],
             ["avcodec_find_encoder", "number", ["number"]],

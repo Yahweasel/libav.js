@@ -5,7 +5,7 @@
 05-fibers.diff
 06-doxygen-xml.diff
 07-jsfetch-protocol.diff
-7/08-fftools.diff
+08-fftools.diff
 09-no-file.diff
 10-write-malloc-crash.diff
 11-h2645-sei-aom-fix.diff

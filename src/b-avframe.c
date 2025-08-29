@@ -32,9 +32,9 @@ void AVFrame_duration_s(AVFrame *a, uint32_t b) { a->pkt_duration = b; }
 void AVFrame_durationhi_s(AVFrame *a, uint32_t b) { a->pkt_duration |= (((int64_t) b) << 32); }
 #endif
 
+B(int, flags)
 B(int, format)
 B(int, height)
-B(int, key_frame)
 BA(int, linesize)
 B(int, nb_samples)
 B(int, pict_type)
@@ -52,6 +52,11 @@ RAT(AVFrame, time_base)
 #else
 RAT_FAKE(AVFrame, time_base, 1, 1000)
 #endif
+
+int AVFrame_key_frame(AVFrame *a) { return !!(a->flags & AV_FRAME_FLAG_KEY); }
+void AVFrame_key_frame_s(AVFrame *a, int b) {
+    a->flags = (a->flags & ~AV_FRAME_FLAG_KEY) | (b ? AV_FRAME_FLAG_KEY : 0);
+}
 
 CHL(AVFrame)
 

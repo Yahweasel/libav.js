@@ -1,4 +1,4 @@
-LIBOGG_VERSION=1.3.5
+LIBOGG_VERSION=1.3.6
 
 build/inst/%/lib/pkgconfig/ogg.pc: build/libogg-$(LIBOGG_VERSION)/build-%/config.h
 	cd build/libogg-$(LIBOGG_VERSION)/build-$* && \

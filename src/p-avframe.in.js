@@ -138,6 +138,7 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(fram
             right: AVFrame_crop_right(frame)
         },
         format: AVFrame_format(frame),
+        flags: AVFrame_flags(frame),
         key_frame: AVFrame_key_frame(frame),
         pict_type: AVFrame_pict_type(frame),
         pts: AVFrame_pts(frame),
@@ -278,6 +279,7 @@ var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = funct
         width: AVFrame_width(frame),
         height: AVFrame_height(frame),
         format: AVFrame_format(frame),
+        flags: AVFrame_flags(frame),
         key_frame: AVFrame_key_frame(frame),
         pict_type: AVFrame_pict_type(frame),
         pts: AVFrame_pts(frame),
@@ -446,7 +448,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
 // Copy in a video frame. Used internally by ff_copyin_frame.
 var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, frame) {
     [
-        "format", "height", "key_frame", "pict_type", "pts", "ptshi", "width",
+        "format", "height", "key_frame", "flags", "pict_type", "pts", "ptshi", "width",
         "time_base_num", "time_base_den"
     ].forEach(function(key) {
         if (key in frame)
