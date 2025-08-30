@@ -30,7 +30,7 @@ Index: ffmpeg-6.0.1/libavformat/jsfetch.c
 ===================================================================
 --- /dev/null
 +++ ffmpeg-6.0.1/libavformat/jsfetch.c
-@@ -0,0 +1,188 @@
+@@ -0,0 +1,335 @@
 +/*
 + * JavaScript fetch metaprotocol for ffmpeg client
 + * Copyright (c) 2023 Yahweasel and contributors
@@ -65,6 +65,8 @@ Index: ffmpeg-6.0.1/libavformat/jsfetch.c
 +    const AVClass *class;
 +    // All of the real information is stored in a JavaScript structure
 +    int idx;
++    uint64_t off, filesize;
++    int seekable;
 +} JSFetchContext;
 +
 +static const AVOption options[] = {
@@ -82,32 +84,56 @@ Index: ffmpeg-6.0.1/libavformat/jsfetch.c
 +/**
 + * Open a fetch connection (JavaScript side).
 + */
-+EM_JS(int, jsfetch_open_js, (const char *url), {
++EM_JS(int, jsfetch_open_js, (const char *url, uint64_t start_offset), {
 +    return Asyncify.handleAsync(function() {
-+        return Promise.all([]).then(function() {
 +            url = UTF8ToString(url);
-+            if (url.slice(0, 8) === "jsfetch:")
-+                return fetch(url.slice(8));
-+            else
-+                return fetch(url);
-+        }).then(function(response) {
++            var fetchUrl = url.slice(0, 8) === "jsfetch:" ? url.slice(8) : url;
++        return Promise.all([]).then(function() {
++            var fetchOptions = {};
++            
++            if (start_offset > 0) {
++                fetchOptions.headers = {
++                    'Range': 'bytes=' + start_offset + '-'
++                };
++            }
++            
++            // Create AbortController for cancellation
++            var abortController = new AbortController();
++            fetchOptions.signal = abortController.signal;
++            
++            return fetch(fetchUrl, fetchOptions).then(function(response) {
++                return {response: response, abortController: abortController};
++            });
++        }).then(function(result) {
++            var response = result.response;
++            var abortController = result.abortController;
 +            if (!Module.libavjsJSFetch)
 +                Module.libavjsJSFetch = {ctr: 1, fetches: {}};
 +            var jsf = Module.libavjsJSFetch;
 +            var idx = jsf.ctr++;
 +            var reader = response.body.getReader();
 +            var jsfo = jsf.fetches[idx] = {
-+                url: url,
++                url: fetchUrl,
 +                response: response,
 +                reader: reader,
-+                next: reader.read().then(function(res) {
-+                    jsfo.buf = res;
-+                }).catch(function(rej) {
-+                    jsfo.rej = rej;
-+                }),
++                abortController: abortController,
 +                buf: null,
-+                rej: null
++                rej: null,
++                filesize: 0,
 +            };
++            
++            var contentLength = response.headers.get('Content-Length');
++            var contentRange = response.headers.get('Content-Range');
++            
++            if (contentRange) {
++                // Parse "bytes start-end/total" format
++                var match = contentRange.match(/bytes \\\\d+-\\\\d+\\\\/(\\\\d+)/);
++                if (match) {
++                    jsfo.filesize = parseInt(match[1]);
++                }
++            } else if (contentLength && start_offset === 0) {
++                jsfo.filesize = parseInt(contentLength);
++            }
 +            return idx;
 +        }).catch(function(ex) {
 +            Module.fsThrownError = ex;
@@ -118,64 +144,79 @@ Index: ffmpeg-6.0.1/libavformat/jsfetch.c
 +});
 +
 +/**
++ * Get file size from JavaScript side.
++ */
++EM_JS(uint64_t, jsfetch_get_filesize_js, (int idx), {
++    var jsfo = Module.libavjsJSFetch.fetches[idx];
++    return jsfo ? jsfo.filesize : 0;
++});
++
++/**
 + * Open a fetch connection.
 + */
 +static int jsfetch_open(URLContext *h, const char *url, int flags, AVDictionary **options)
 +{
 +    JSFetchContext *ctx = h->priv_data;
-+    h->is_streamed = 1;
-+    ctx->idx = jsfetch_open_js(url);
-+    return (ctx->idx > 0) ? 0 : ctx->idx;
++    ctx->off = 0;
++    ctx->seekable = -1; // probe seekability
++    ctx->idx = jsfetch_open_js(url, 0);
++    
++    if (ctx->idx > 0) {
++        ctx->filesize = jsfetch_get_filesize_js(ctx->idx);
++        // If we got a filesize, assume seekable. Otherwise keep as streaming.
++        if (ctx->filesize > 0) {
++            h->is_streamed = 0;
++            ctx->seekable = 1;
++        } else {
++            h->is_streamed = 1;
++            ctx->seekable = 0;
++        }
++        return 0;
++    }
++    return ctx->idx;
 +}
 +
 +/**
 + * Read from a fetch connection (JavaScript side).
 + */
 +EM_JS(int, jsfetch_read_js, (int idx, unsigned char *toBuf, int size), {
-+    var jsfo = Module.libavjsJSFetch.fetches[idx];
-+    return Asyncify.handleAsync(function() { return Promise.all([]).then(function() {
-+        if (jsfo.buf || jsfo.rej) {
-+            // Already have data
-+            var fromBuf = jsfo.buf;
-+            var rej = jsfo.rej;
++      var jsfo = Module.libavjsJSFetch.fetches[idx];
++      return Asyncify.handleAsync(async function () {
++        try {
++          if (jsfo.buf && jsfo.buf.value && jsfo.buf.value.length > 0) {
++            const chunk = jsfo.buf.value;
++            const len = Math.min(size, chunk.length);
 +
-+            if (fromBuf) {
-+                if (fromBuf.done) {
-+                    // EOF
-+                    return -0x20464f45 /* AVERROR_EOF */;
-+                }
-+                if (fromBuf.value.length > size) {
-+                    // Return some of the buffer
-+                    Module.HEAPU8.set(fromBuf.value.subarray(0, size), toBuf);
-+                    fromBuf.value = fromBuf.value.subarray(size);
-+                    return size;
-+                }
-+
-+                /* Otherwise, return the remainder of the buffer and start
-+                 * the next read */
-+                var ret = fromBuf.value.length;
-+                Module.HEAPU8.set(fromBuf.value, toBuf);
-+                jsfo.buf = jsfo.rej = null;
-+                jsfo.next = jsfo.reader.read().then(function(res) {
-+                    jsfo.buf = res;
-+                }).catch(function(rej) {
-+                    jsfo.rej = rej;
-+                });
-+                return ret;
++            Module.HEAPU8.set(chunk.subarray(0, len), toBuf);
++            jsfo.buf.value = chunk.subarray(len);
++            if (jsfo.buf.value.length === 0) {
++              jsfo.buf = null;
 +            }
++            return len;
++          }
 +
-+            // Otherwise, there was an error
-+            Module.fsThrownError = rej;
-+            console.error(rej);
-+            return -11 /* ECANCELED */;
++          const res = await jsfo.reader.read();
++          if (res.done) {
++            return -0x20464f45;
++          }
++
++          const chunk = res.value;
++          const len = Math.min(size, chunk.length);
++          Module.HEAPU8.set(chunk.subarray(0, len), toBuf);
++
++          if (chunk.length > len) {
++            jsfo.buf = { value: chunk.subarray(len) };
++          } else {
++            jsfo.buf = null;
++          }
++
++          return len;
++        } catch (e) {
++          console.error("jsfetch_read_js error", e);
++          Module.fsThrownError = e;
++          return -11;
 +        }
-+
-+        // The next data isn't available yet. Force them to wait.
-+        return Promise.race([
-+            jsfo.next,
-+            new Promise(function(res) { setTimeout(res, 100); })
-+        ]).then(function() { return -6 /* EAGAIN */; });
-+    }); });
++      });
 +});
 +
 +/**
@@ -187,16 +228,121 @@ Index: ffmpeg-6.0.1/libavformat/jsfetch.c
 +    return jsfetch_read_js(ctx->idx, buf, size);
 +}
 +
++EM_JS(int, jsfetch_seek_js, (int old_idx, const char *url, uint64_t start_offset), {
++    return Asyncify.handleAsync(function () {
++        url = UTF8ToString(url);
++        var fetchUrl = url.slice(0, 8) === "jsfetch:" ? url.slice(8) : url;
++        return Promise.all([])
++          .then(function () {
++            var fetchOptions = {
++              headers: { Range: "bytes=" + start_offset + "-" },
++            };
++            var abortController = new AbortController();
++            fetchOptions.signal = abortController.signal;
++            return fetch(fetchUrl, fetchOptions).then(function (response) {
++              return { response: response, abortController: abortController };
++            });
++          })
++          .then(function (result) {
++            var response = result.response;
++            var abortController = result.abortController;
++            if (!Module.libavjsJSFetch)
++              Module.libavjsJSFetch = { ctr: 1, fetches: {} };
++            var jsf = Module.libavjsJSFetch;
++            if (old_idx > 0 && jsf.fetches[old_idx]) {
++              try {
++                jsf.fetches[old_idx].buf = null;
++                jsf.fetches[old_idx].reader.cancel();
++                if (jsf.fetches[old_idx].abortController) {
++                  jsf.fetches[old_idx].abortController.abort();
++                }
++              } catch (ex) {}
++              delete jsf.fetches[old_idx];
++            }
++            var idx = jsf.ctr++;
++            var reader = response.body.getReader();
++            var jsfo = (jsf.fetches[idx] = {
++              url: fetchUrl,
++              response: response,
++              reader: reader,
++              abortController: abortController,
++              buf: null,
++              rej: null,
++              filesize: 0,
++            });
++            var contentRange = response.headers.get("Content-Range");
++            if (contentRange) {
++              var match = contentRange.match(/bytes \\\\d+-\\\\d+\\\\/(\\\\d+)/);
++              if (match) {
++                jsfo.filesize = parseInt(match[1]);
++              }
++            }
++
++            return idx;
++          })
++          .catch(function (ex) {
++            Module.fsThrownError = ex;
++            console.error(ex);
++            return -11;
++          });
++      });
++});
++
 +/**
 + * Close a fetch connection (JavaScript side).
 + */
 +EM_JS(void, jsfetch_close_js, (int idx), {
 +    var jsfo = Module.libavjsJSFetch.fetches[idx];
 +    if (jsfo) {
-+        try { jsfo.reader.cancel(); } catch (ex) {}
++        try {
++            jsfo.reader.cancel();
++            if (jsfo.abortController) {
++                jsfo.abortController.abort();
++            }
++        } catch (ex) {}
 +        delete Module.libavjsJSFetch.fetches[idx];
 +    }
 +});
++
++/**
++ * Seek to a position in the fetch stream.
++ */
++static int64_t jsfetch_seek(URLContext *h, int64_t off, int whence)
++{
++    JSFetchContext *ctx = h->priv_data;
++    int64_t old_off = ctx->off;
++    
++    if (whence == AVSEEK_SIZE)
++        return ctx->filesize;
++    else if (((whence == SEEK_CUR && off == 0) ||
++              (whence == SEEK_SET && off == ctx->off)))
++        return ctx->off;
++    else if ((ctx->filesize == UINT64_MAX && whence == SEEK_END))
++        return AVERROR(ENOSYS);
++
++    if (whence == SEEK_CUR)
++        off += ctx->off;
++    else if (whence == SEEK_END)
++        off += ctx->filesize;
++    else if (whence != SEEK_SET)
++        return AVERROR(EINVAL);
++    if (off < 0)
++        return AVERROR(EINVAL);
++    ctx->off = off;
++
++    if (ctx->off && h->is_streamed)
++        return AVERROR(ENOSYS);
++
++    int new_idx = jsfetch_seek_js(ctx->idx, h->filename, off);
++    if (new_idx < 0) {
++       ctx->off = old_off;
++       return old_off;
++    }
++    
++    ctx->idx = new_idx;
++
++    return off;
++}
 +
 +/**
 + * Close a fetch connection.
@@ -212,6 +358,7 @@ Index: ffmpeg-6.0.1/libavformat/jsfetch.c
 +    .name               = "jsfetch",
 +    .url_open2          = jsfetch_open,
 +    .url_read           = jsfetch_read,
++    .url_seek           = jsfetch_seek,
 +    .url_close          = jsfetch_close,
 +    .priv_data_size     = sizeof(JSFetchContext),
 +    .priv_data_class    = &jsfetch_context_class,
