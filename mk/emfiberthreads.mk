@@ -1,4 +1,4 @@
-EMFT_VERSION=1.2
+EMFT_VERSION=1.3
 
 build/inst/%/include/pthread.h: build/inst/%/lib/libemfiberthreads.a
 	cd build/emfiberthreads/emfiberthreads-$(EMFT_VERSION) && \

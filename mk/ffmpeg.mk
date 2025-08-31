@@ -35,7 +35,7 @@ build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/ffbuild/config.mak: build/inst/base/
 	cd build/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) && \
 	emconfigure env PKG_CONFIG_PATH="$(PWD)/build/inst/base/lib/pkgconfig" \
 		../configure $(FFMPEG_CONFIG) \
-                --disable-pthreads --arch=emscripten \
+                --enable-pthreads --arch=emscripten \
 		--optflags="$(OPTFLAGS)" \
 		--extra-cflags="-I$(PWD)/build/inst/base/include -lemfiberthreads" \
 		--extra-ldflags="-L$(PWD)/build/inst/base/lib -lemfiberthreads -s INITIAL_MEMORY=25165824" \
