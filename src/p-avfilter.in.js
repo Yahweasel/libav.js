@@ -48,8 +48,8 @@
  * ): @promise@[number, number[], number[]]@
  */
 var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr, input, output) {
-    var buffersrc, abuffersrc, buffersink, abuffersink, filter_graph,
-        tmp_src_ctx, tmp_sink_ctx, src_ctxs, sink_ctxs, io_outputs, io_inputs,
+    var buffersrc, abuffersrc, format, aformat, buffersink, abuffersink, filter_graph,
+        tmp_src_ctx, format_ctx, tmp_sink_ctx, src_ctxs, sink_ctxs, io_outputs, io_inputs,
         int32s;
     var instr, outstr;
 
@@ -63,6 +63,8 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
     try {
         buffersrc = avfilter_get_by_name("buffer");
         abuffersrc = avfilter_get_by_name("abuffer");
+        format = avfilter_get_by_name("format");
+        aformat = avfilter_get_by_name("aformat");
         buffersink = avfilter_get_by_name("buffersink");
         abuffersink = avfilter_get_by_name("abuffersink");
 
@@ -149,66 +151,28 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
             // Create the output filter
             var nm = "out" + (multiple_outputs?oi:"");
             if (output.type === 0 /* AVMEDIA_TYPE_VIDEO */) {
-                if (buffersink === 0)
-                    throw new Error("Failed to load buffersink filter");
+                if (format === 0 || buffersink === 0)
+                    throw new Error("Failed to load format or buffersink filter");
+                format_ctx = avfilter_graph_create_filter_js(format, nm + "format",
+                    "pix_fmts=0x" + (output.pix_fmt||0).toString(16),
+                    null, filter_graph);
                 tmp_sink_ctx = avfilter_graph_create_filter_js(
                     buffersink, nm, null, null, filter_graph);
             } else { // audio
+                format_ctx = avfilter_graph_create_filter_js(aformat, nm + "format",
+                    "sample_fmts=" + (output.sample_fmt||3/*FLT*/) +
+                    ":channel_layouts=0x" + (output.channel_layout||4/*mono*/).toString(16) +
+                    ":sample_rates=" + (output.sample_rate||48000),
+                    null, filter_graph);
                 tmp_sink_ctx = avfilter_graph_create_filter_js(abuffersink, nm,
                     null, null, filter_graph);
             }
+            if (format_ctx === 0)
+                throw new Error("Cannot create format filter");
             if (tmp_sink_ctx === 0)
                 throw new Error("Cannot create buffer sink");
+            avfilter_link(format_ctx, 0, tmp_sink_ctx, 0);
             sink_ctxs.push(tmp_sink_ctx);
-
-            if (output.type === 0 /* AVMEDIA_TYPE_VIDEO */) {
-                // Allocate space to transfer our options
-                int32s = ff_malloc_int32_list([
-                    output.pix_fmt?output.pix_fmt:0 /* YUV420P */, -1
-                ]);
-                if (int32s === 0)
-                    throw new Error("Failed to transfer parameters");
-
-                if (
-                    av_opt_set_int_list_js(
-                        tmp_sink_ctx, "pix_fmts", 4, int32s, -1, 1
-                    ) < 0
-                ) {
-                    throw new Error("Failed to set filter parameters");
-                }
-                free(int32s);
-                int32s = 0;
-
-            } else { // audio
-                // Allocate space to transfer our options
-                int32s = ff_malloc_int32_list([
-                    output.sample_fmt?output.sample_fmt:3/*FLT*/, -1,
-                    output.sample_rate?output.sample_rate:48000, -1
-                ]);
-                if (int32s === 0)
-                    throw new Error("Failed to transfer parameters");
-                var ch_layout = output.channel_layout?output.channel_layout:4;
-                var ch_layout_i64 = [~~ch_layout, Math.floor(ch_layout / 0x100000000)];
-
-                if (
-                    av_opt_set_int_list_js(
-                        tmp_sink_ctx, "sample_fmts", 4, int32s, -1, 1 /* AV_OPT_SEARCH_CHILDREN */
-                    ) < 0 ||
-                    ff_buffersink_set_ch_layout(
-                        tmp_sink_ctx,
-                        ch_layout_i64[0], ch_layout_i64[1]
-                    ) < 0 ||
-                    av_opt_set_int_list_js(
-                        tmp_sink_ctx, "sample_rates", 4, int32s + 8, -1, 1
-                    ) < 0
-                )
-                {
-                    throw new Error("Failed to set filter parameters");
-                }
-                free(int32s);
-                int32s = 0;
-
-            }
 
             // Configure it
             outstr = av_strdup(nm);
@@ -216,8 +180,8 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
                 throw new Error("Failed to transfer parameters");
             AVFilterInOut_name_s(io_inputs, outstr);
             outstr = 0;
-            AVFilterInOut_filter_ctx_s(io_inputs, tmp_sink_ctx);
-            tmp_sink_ctx = 0;
+            AVFilterInOut_filter_ctx_s(io_inputs, format_ctx);
+            format_ctx = tmp_sink_ctx = 0;
             AVFilterInOut_pad_idx_s(io_inputs, 0);
             oi++;
         });
@@ -247,6 +211,7 @@ var ff_init_filter_graph = Module.ff_init_filter_graph = function(filters_descr,
         if (io_inputs) avfilter_inout_free(io_inputs);
         if (filter_graph) avfilter_graph_free(filter_graph);
         if (tmp_src_ctx) avfilter_free(tmp_src_ctx);
+        if (format_ctx) avfilter_free(format_ctx);
         if (tmp_sink_ctx) avfilter_free(tmp_sink_ctx);
         if (int32s) free(int32s);
         if (instr) free(instr);
