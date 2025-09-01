@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Yahweasel and contributors
+ * Copyright (C) 2023-2025 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -15,9 +15,16 @@
 
 // Test of seeking functionality
 
+// This test requires fetch, so only works with the web test framework
+if (typeof document === "undefined")
+    return;
+
 const libav = await h.LibAV();
 
-const [fmt_ctx, streams] = await libav.ff_init_demuxer_file(`jsfetch://${location.host}/tests/files/bbb_bitrate.webm`);
+const testLoc = new URL(document.location.href);
+testLoc.pathname = testLoc.pathname.replace(/\/[^\/]*$/, "/");
+const [fmt_ctx, streams] = await libav.ff_init_demuxer_file(
+    `jsfetch:${testLoc.toString()}/files/bbb_bitrate.webm`);
 const pkt = await libav.av_packet_alloc();
 
 async function zero() {
