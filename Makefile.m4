@@ -24,7 +24,7 @@ EFLAGS=\
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
 	-s ASYNCIFY \
-	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader']" \
+	-s "ASYNCIFY_IMPORTS=['libavjs_wait_reader', 'jsfetch_open_js', 'jsfetch_read_js', 'jsfetch_seek_js']" \
 	-s INITIAL_MEMORY=25165824 \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s WASM_BIGINT=0
