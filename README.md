@@ -50,7 +50,7 @@ example of using libav.js from a CDN in the browser thread:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@libav.js/variant-default@6.7.7/dist/libav-6.7.7.1.1-default.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@libav.js/variant-default@6.8.8/dist/libav-6.8.8.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV({noworker: true});
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -73,7 +73,7 @@ Here's a better example, using libav.js locally:
 <!doctype html>
 <html>
     <body>
-        <script type="text/javascript" src="libav-6.7.7.1.1-default.js"></script>
+        <script type="text/javascript" src="libav-6.8.8.0-default.js"></script>
         <script type="text/javascript">(async function() {
             const libav = await LibAV.LibAV();
             await libav.writeFile("tmp.opus", new Uint8Array(
@@ -341,12 +341,17 @@ usually between 1.5 and 3 MiB for fairly complete builds, and the asm.js is abou
 double that.
 
 You can estimate the size of variants based on the size of the constituent
-fragments. As of version 5.0.6.1.1, an empty build is approximately 589KiB
+fragments. As of version 6.8.8.0, an empty build is approximately 178KiB
 (WebAssembly). The sizes of each additional fragment can be found in
 [fragment-sizes.csv](docs/fragment-sizes.csv). The data in that CSV file can be
 recreated by `tools/fragment-sizes.sh`, but note that the CSV file in the
 repository is after further processing (in particular, normalizing to KiB and
-subtracting away the empty size).
+subtracting away the empty and sizes). Note that the library columns show
+dependencies: for example, the `decoder-libopus` fragment depends on the
+`avcodec` fragment (since it's a codec), and the `1` in the `avcodec` column
+tells you that that dependency exists; a build with just `decoder-libopus` will
+take approximately the empty size, plus the fragment size of `avcodec`, plus the
+fragment size of `decoder-libopus`.
 
 The asm.js versions are much bigger, but will not be loaded on
 WebAssembly-capable clients.
