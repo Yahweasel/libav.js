@@ -316,6 +316,33 @@ async function main() {
             if (fragment === "parser-aac")
                 fragments.push("parser-ac3");
 
+            if (fragment.startsWith("bsf-"))
+                fragments.push("avbsf");
+
+            if (
+                fragment.startsWith("codec-") ||
+                fragment.startsWith("decoder-") ||
+                fragment.startsWith("encoder-") ||
+                fragment.startsWith("parser-")
+            )
+                fragments.push("avcodec");
+
+            if (
+                fragment.startsWith("demuxer-") ||
+                fragment.startsWith("format-") ||
+                fragment.startsWith("muxer-") ||
+                fragment.startsWith("protocol-")
+            )
+                fragments.push("avformat");
+
+            if (
+                fragment === "audio-filters" ||
+                fragment === "swresample" ||
+                fragment === "swscale" ||
+                fragment === "video-filters"
+            )
+                fragments.push("avfilter");
+
             // And make the variant
             const p = cproc.spawn("./mkconfig.js", [
                 `one-${fragment}`, JSON.stringify(fragments)
