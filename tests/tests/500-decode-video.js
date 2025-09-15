@@ -58,7 +58,6 @@ async function decode(dec_ctx, frame, pkt)
 
 async function main()
 {
-    let ret;
     const filename    = "bbb.mp4";
 
     pkt = await libav.av_packet_alloc();
@@ -69,7 +68,7 @@ async function main()
         libav.ff_init_demuxer_file(filename);
     let streamIdx = -1, stream;
     for (let i = 0; i < streams.length; i++) {
-        if (streams[i].codec_type === libav.AVMEDIA_TYPE_AUDIO) {
+        if (streams[i].codec_type === libav.AVMEDIA_TYPE_VIDEO) {
             streamIdx = i;
             stream = streams[i];
             break;
@@ -106,7 +105,7 @@ async function main()
 
     /* decode until eof */
     const [, packets] = await libav.ff_read_frame_multi(fmt_ctx, pkt);
-    let decoded_frame;
+
     for (const packet of packets[streamIdx]) {
         await libav.ff_copyin_packet(pkt, packet);
         await decode(c, frame, pkt);
