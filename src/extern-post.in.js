@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Yahweasel
+ * Copyright (C) 2019-2025 Yahweasel
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -16,7 +16,8 @@
 if (/* We're in a worker */
     typeof importScripts !== "undefined" &&
     /* We're not being loaded with noworker from the main code */
-    typeof LibAV === "undefined" &&
+@E5 typeof LibAV === "undefined" &&
+@E6 self.location.href === import.meta.url &&
     /* We're not being loaded as a thread */
     (
         (typeof self === "undefined" && typeof Module === "undefined") ||

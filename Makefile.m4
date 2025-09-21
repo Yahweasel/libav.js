@@ -19,7 +19,6 @@ ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
 	`tools/memory-init-file-emcc.sh` \
 	--pre-js src/pre.js \
-	--extern-post-js src/extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
@@ -95,10 +94,11 @@ dist/libav.types.d.ts: build/libav.types.d.ts
 # Use: buildrule(target file name, debug infix, target inst name, extra link flags, target file suffix)
 define([[[buildrule]]], [[[
 dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.$5 \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.$5 \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-$3-$(*) \
@@ -172,6 +172,12 @@ build/post-%.js: configs/configs/%/components.txt funcs.json tools/mk-post.js \
 	src/post.in.js src/p-*.in.js
 	mkdir -p build
 	./tools/mk-post.js $(*) > $@
+
+build/extern-post.js: src/extern-post.in.js
+	./tools/mk-extern-post.js js > $@
+
+build/extern-post.mjs: src/extern-post.in.js
+	./tools/mk-extern-post.js mjs > $@
 
 build/libav.types.d.ts: funcs.json mk/doxygen.json tools/mk-types-dts.js \
 	src/post.in.js src/p-*.in.js src/libav.types.in.d.ts

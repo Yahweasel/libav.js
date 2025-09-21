@@ -19,7 +19,6 @@ ES6FLAGS=-sEXPORT_ES6=1 -sUSE_ES6_IMPORT_META=1
 EFLAGS=\
 	`tools/memory-init-file-emcc.sh` \
 	--pre-js src/pre.js \
-	--extern-post-js src/extern-post.js \
 	-s "EXPORT_NAME='LibAVFactory'" \
 	-s MODULARIZE=1 \
 	-s STACK_SIZE=1048576 \
@@ -122,10 +121,11 @@ dist/libav.types.d.ts: build/libav.types.d.ts
 # asm.js version
 
 dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.js \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.js \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -162,10 +162,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.mjs \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.mjs \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -202,10 +203,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.js \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.js \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -242,10 +244,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.mjs \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.mjs \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -283,10 +286,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 # wasm version with no added features
 
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.js \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.js \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -323,10 +327,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.mjs \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.mjs \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -363,10 +368,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.js \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.js \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -403,10 +409,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-base-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.mjs \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.mjs \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-base-$(*) \
@@ -444,10 +451,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 # wasm + threads
 
 dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.js \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.js \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
@@ -484,10 +492,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.mjs \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.mjs \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
@@ -524,10 +533,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.js \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.js \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
@@ -564,10 +574,11 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 
 
 dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-thr-%/libavformat/libavformat.a \
-	build/exports-%.json src/pre.js build/post-%.js src/extern-post.js \
+	build/exports-%.json src/pre.js build/post-%.js build/extern-post.mjs \
         src/bindings.c src/b-*.c
 	mkdir -p $(@).d
 	$(EMCC) $(OPTFLAGS) $(EFLAGS) \
+		--extern-post-js build/extern-post.mjs \
 		--post-js build/post-$(*).js \
 		-s "EXPORTED_FUNCTIONS=@build/exports-$(*).json" \
 		-Ibuild/ffmpeg-$(FFMPEG_VERSION) -Ibuild/ffmpeg-$(FFMPEG_VERSION)/build-thr-$(*) \
@@ -625,6 +636,12 @@ build/post-%.js: configs/configs/%/components.txt funcs.json tools/mk-post.js \
 	src/post.in.js src/p-*.in.js
 	mkdir -p build
 	./tools/mk-post.js $(*) > $@
+
+build/extern-post.js: src/extern-post.in.js
+	./tools/mk-extern-post.js js > $@
+
+build/extern-post.mjs: src/extern-post.in.js
+	./tools/mk-extern-post.js mjs > $@
 
 build/libav.types.d.ts: funcs.json mk/doxygen.json tools/mk-types-dts.js \
 	src/post.in.js src/p-*.in.js src/libav.types.in.d.ts
