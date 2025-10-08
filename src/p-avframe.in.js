@@ -377,6 +377,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function (framePtr, frame) {
 
     [
         "channel_layout", "channels", "format", "pts", "ptshi", "sample_rate",
+        "best_effort_timestamp", "best_effort_timestamphi",
         "time_base_num", "time_base_den"
     ].forEach(function (key) {
         if (key in frame)
