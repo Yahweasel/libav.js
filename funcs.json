@@ -99,6 +99,7 @@
                 "pict_type",
                 "pts",
                 "ptshi",
+                "best_effort_timestamp",
                 {"name": "sample_aspect_ratio", "rational": true},
                 "sample_rate",
                 {"name": "time_base", "rational": true},

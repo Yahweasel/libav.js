@@ -143,6 +143,7 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(fram
         pict_type: AVFrame_pict_type(frame),
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
+        best_effort_timestamp: AVFrame_best_effort_timestamp(frame),
         time_base_num: AVFrame_time_base_num(frame),
         time_base_den: AVFrame_time_base_den(frame),
         sample_aspect_ratio: [
