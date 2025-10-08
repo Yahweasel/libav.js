@@ -59,7 +59,7 @@ declare namespace LibAV {
         /**
          * Presentation timestamp estimated using various heuristics, in stream time base.
          */
-        best_effort_timestamp?: number;
+        best_effort_timestamp?: number, best_effort_timestamp?: number;
 
         /**
          * Base for timestamps of this frame.
