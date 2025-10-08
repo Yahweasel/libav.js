@@ -456,6 +456,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function (framePtr, frame) {
 var ff_copyin_frame_video = Module.ff_copyin_frame_video = function (framePtr, frame) {
     [
         "format", "height", "key_frame", "flags", "pict_type", "pts", "ptshi", "width",
+        "best_effort_timestamp", "best_effort_timestamphi",
         "time_base_num", "time_base_den"
     ].forEach(function (key) {
         if (key in frame)
