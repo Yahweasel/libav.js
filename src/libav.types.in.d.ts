@@ -57,7 +57,7 @@ declare namespace LibAV {
         pts?: number, ptshi?: number;
         
         /**
-         * Presentation timestamp calculated various heuristics, in stream time base.
+         * Presentation timestamp estimated using various heuristics, in stream time base.
          */
         best_effort_timestamp?: number;
 
