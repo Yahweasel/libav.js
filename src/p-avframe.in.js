@@ -39,7 +39,7 @@ var ff_copyout_frame = Module.ff_copyout_frame = function (frame) {
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
         best_effort_timestamp: AVFrame_best_effort_timestamp(frame),
-        best_effort_timestamphi: AVFrame_best_effort_timestamp_hi(frame),
+        best_effort_timestamphi: AVFrame_best_effort_timestamphi(frame),
         time_base_num: AVFrame_time_base_num(frame),
         time_base_den: AVFrame_time_base_den(frame),
         sample_rate: AVFrame_sample_rate(frame)
@@ -146,7 +146,7 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function (fra
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
         best_effort_timestamp: AVFrame_best_effort_timestamp(frame),
-        best_effort_timestamphi: AVFrame_best_effort_timestamp_hi(frame),
+        best_effort_timestamphi: AVFrame_best_effort_timestamphi(frame),
         time_base_num: AVFrame_time_base_num(frame),
         time_base_den: AVFrame_time_base_den(frame),
         sample_aspect_ratio: [
@@ -289,7 +289,7 @@ var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = funct
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
         best_effort_timestamp: AVFrame_best_effort_timestamp(frame),
-        best_effort_timestamphi: AVFrame_best_effort_timestamp_hi(frame),
+        best_effort_timestamphi: AVFrame_best_effort_timestamphi(frame),
         time_base_num: AVFrame_time_base_num(frame),
         time_base_den: AVFrame_time_base_den(frame),
         sample_aspect_ratio: [
