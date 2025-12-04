@@ -38,6 +38,8 @@ var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
         nb_samples: nb_samples,
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
+        best_effort_timestamp: AVFrame_best_effort_timestamp(frame),
+        best_effort_timestamphi: AVFrame_best_effort_timestamphi(frame),
         time_base_num: AVFrame_time_base_num(frame),
         time_base_den: AVFrame_time_base_den(frame),
         sample_rate: AVFrame_sample_rate(frame)
@@ -143,6 +145,8 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(fram
         pict_type: AVFrame_pict_type(frame),
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
+        best_effort_timestamp: AVFrame_best_effort_timestamp(frame),
+        best_effort_timestamphi: AVFrame_best_effort_timestamphi(frame),
         time_base_num: AVFrame_time_base_num(frame),
         time_base_den: AVFrame_time_base_den(frame),
         sample_aspect_ratio: [
@@ -284,6 +288,8 @@ var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = funct
         pict_type: AVFrame_pict_type(frame),
         pts: AVFrame_pts(frame),
         ptshi: AVFrame_ptshi(frame),
+        best_effort_timestamp: AVFrame_best_effort_timestamp(frame),
+        best_effort_timestamphi: AVFrame_best_effort_timestamphi(frame),
         time_base_num: AVFrame_time_base_num(frame),
         time_base_den: AVFrame_time_base_den(frame),
         sample_aspect_ratio: [
@@ -371,6 +377,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
 
     [
         "channel_layout", "channels", "format", "pts", "ptshi", "sample_rate",
+        "best_effort_timestamp", "best_effort_timestamphi",
         "time_base_num", "time_base_den"
     ].forEach(function(key) {
         if (key in frame)
@@ -449,6 +456,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
 var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, frame) {
     [
         "format", "height", "key_frame", "flags", "pict_type", "pts", "ptshi", "width",
+        "best_effort_timestamp", "best_effort_timestamphi",
         "time_base_num", "time_base_den"
     ].forEach(function(key) {
         if (key in frame)

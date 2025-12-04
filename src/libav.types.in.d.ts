@@ -55,6 +55,11 @@ declare namespace LibAV {
          * from outside that do not have this set.
          */
         pts?: number, ptshi?: number;
+        
+        /**
+         * Presentation timestamp estimated using various heuristics, in stream time base.
+         */
+        best_effort_timestamp?: number, best_effort_timestamphi?: number;
 
         /**
          * Base for timestamps of this frame.

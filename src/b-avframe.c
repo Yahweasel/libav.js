@@ -39,6 +39,7 @@ BA(int, linesize)
 B(int, nb_samples)
 B(int, pict_type)
 BL(int64_t, pts)
+BL(int64_t, best_effort_timestamp)
 B(int, sample_rate)
 B(int, width)
 #undef B
