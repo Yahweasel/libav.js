@@ -18,7 +18,7 @@
  * @param frame  AVFrame
  */
 /// @types ff_copyout_frame@sync(frame: number): @promise@Frame@
-var ff_copyout_frame = Module.ff_copyout_frame = function (frame) {
+var ff_copyout_frame = Module.ff_copyout_frame = function(frame) {
     var nb_samples = AVFrame_nb_samples(frame);
     if (nb_samples === 0) {
         // Maybe a video frame?
@@ -78,7 +78,7 @@ var ff_copyout_frame = Module.ff_copyout_frame = function (frame) {
         outFrame.data = data;
 
     } else {
-        var ct = channels * nb_samples;
+        var ct = channels*nb_samples;
         var inData = AVFrame_data_a(frame, 0);
         var outData = null;
         switch (format) {
@@ -115,12 +115,12 @@ var ff_copyout_frame = Module.ff_copyout_frame = function (frame) {
  * @param frame  AVFrame
  */
 /// @types ff_copyout_frame_video@sync(frame: number): @promise@Frame@
-var ff_copyout_frame_video = Module.ff_copyout_frame_video = function (frame) {
+var ff_copyout_frame_video = Module.ff_copyout_frame_video = function(frame) {
     return ff_copyout_frame_video_width(frame, AVFrame_width(frame));
 };
 
 // Copy out a video frame. Used internally by ff_copyout_frame.
-var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function (frame, width) {
+var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function(frame, width) {
     var height = AVFrame_height(frame);
     var format = AVFrame_format(frame);
     var desc = av_pix_fmt_desc_get(format);
@@ -156,7 +156,7 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function (fra
     };
 
     // Figure out the data range
-    var dataLo = 1 / 0;
+    var dataLo = 1/0;
     var dataHi = 0;
     for (var p = 0; p < 8 /* AV_NUM_DATA_POINTERS */; p++) {
         var linesize = AVFrame_linesize_a(frame, p);
@@ -197,7 +197,7 @@ var ff_copyout_frame_video_width = Module.ff_copyout_frame_video = function (fra
  * @param frame  AVFrame
  */
 /// @types ff_frame_video_packed_size@sync(frame: number): @promise@Frame@
-var ff_frame_video_packed_size = Module.ff_frame_video_packed_size = function (frame) {
+var ff_frame_video_packed_size = Module.ff_frame_video_packed_size = function(frame) {
     // FIXME: duplication
     var width = AVFrame_width(frame);
     var height = AVFrame_height(frame);
@@ -272,7 +272,7 @@ function ff_copyout_frame_data_packed(data, layout, frame) {
  * @param frame  AVFrame
  */
 /// @types ff_copyout_frame_video_packed@sync(frame: number): @promise@Frame@
-var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = function (frame) {
+var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = function(frame) {
     var data = new Uint8Array(ff_frame_video_packed_size(frame));
     var layout = [];
     ff_copyout_frame_data_packed(data, layout, frame);
@@ -312,7 +312,7 @@ var ff_copyout_frame_video_packed = Module.ff_copyout_frame_video_packed = funct
  *     frame: number
  * ): @promise@ImageData@
  */
-var ff_copyout_frame_video_imagedata = Module.ff_copyout_frame_video_imagedata = function (frame) {
+var ff_copyout_frame_video_imagedata = Module.ff_copyout_frame_video_imagedata = function(frame) {
     var width = AVFrame_width(frame);
     var height = AVFrame_height(frame);
     var id = new ImageData(width, height);
@@ -326,7 +326,7 @@ var ff_copyout_frame_video_imagedata = Module.ff_copyout_frame_video_imagedata =
  * Copy "out" a video frame by just allocating another frame in libav.
  * @param frame  AVFrame
  */
-var ff_copyout_frame_ptr = Module.ff_copyout_frame_ptr = function (frame) {
+var ff_copyout_frame_ptr = Module.ff_copyout_frame_ptr = function(frame) {
     var ret = av_frame_clone(frame);
     if (!ret)
         throw new Error("Failed to allocate new frame");
@@ -348,7 +348,7 @@ var ff_copyout_frame_versions = {
  * @param frame  Frame to copy in, as either a Frame or an AVFrame pointer
  */
 /// @types ff_copyin_frame@sync(framePtr: number, frame: Frame | number): @promise@void@
-var ff_copyin_frame = Module.ff_copyin_frame = function (framePtr, frame) {
+var ff_copyin_frame = Module.ff_copyin_frame = function(framePtr, frame) {
     if (typeof frame === "number") {
         // This is a frame pointer, not a libav.js Frame
         av_frame_unref(framePtr);
@@ -370,8 +370,8 @@ var ff_copyin_frame = Module.ff_copyin_frame = function (framePtr, frame) {
         var channel_layout = frame.channel_layout;
         channels = 0;
         while (channel_layout) {
-            if (channel_layout & 1) channels++;
-            channel_layout >>>= 1;
+            if (channel_layout&1) channels++;
+            channel_layout>>>=1;
         }
     }
 
@@ -379,7 +379,7 @@ var ff_copyin_frame = Module.ff_copyin_frame = function (framePtr, frame) {
         "channel_layout", "channels", "format", "pts", "ptshi", "sample_rate",
         "best_effort_timestamp", "best_effort_timestamphi",
         "time_base_num", "time_base_den"
-    ].forEach(function (key) {
+    ].forEach(function(key) {
         if (key in frame)
             CAccessors["AVFrame_" + key + "_s"](framePtr, frame[key]);
     });
@@ -453,12 +453,12 @@ var ff_copyin_frame = Module.ff_copyin_frame = function (framePtr, frame) {
 };
 
 // Copy in a video frame. Used internally by ff_copyin_frame.
-var ff_copyin_frame_video = Module.ff_copyin_frame_video = function (framePtr, frame) {
+var ff_copyin_frame_video = Module.ff_copyin_frame_video = function(framePtr, frame) {
     [
         "format", "height", "key_frame", "flags", "pict_type", "pts", "ptshi", "width",
         "best_effort_timestamp", "best_effort_timestamphi",
         "time_base_num", "time_base_den"
-    ].forEach(function (key) {
+    ].forEach(function(key) {
         if (key in frame)
             CAccessors["AVFrame_" + key + "_s"](framePtr, frame[key]);
     });
@@ -468,7 +468,7 @@ var ff_copyin_frame_video = Module.ff_copyin_frame_video = function (framePtr, f
             frame.sample_aspect_ratio[1]);
     }
 
-    var crop = frame.crop || { top: 0, bottom: 0, left: 0, right: 0 };
+    var crop = frame.crop || {top: 0, bottom: 0, left: 0, right: 0};
     AVFrame_crop_top_s(framePtr, crop.top);
     AVFrame_crop_bottom_s(framePtr, crop.bottom);
     AVFrame_crop_left_s(framePtr, crop.left);
