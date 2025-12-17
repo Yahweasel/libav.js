@@ -799,16 +799,17 @@ var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
  * Returns [AVFormatContext, Stream[]]
  * @param filename  Filename to open
  * @param fmt  Format to use (optional)
+ * @param options  Extra options to pass to avformat_open_input (optional)
  */
 /* @types
  * ff_init_demuxer_file@sync(
- *     filename: string, fmt?: string
+ *     filename: string, fmt?: string, options?: number
  * ): @promsync@[number, Stream[]]@
  */
-function ff_init_demuxer_file(filename, fmt) {
+function ff_init_demuxer_file(filename, fmt, options) {
     var fmt_ctx;
 
-    return avformat_open_input_js(filename, fmt?fmt:null, null).then(function(ret) {
+    return avformat_open_input_js(filename, fmt?fmt:null, options?options:null).then(function(ret) {
         fmt_ctx = ret;
         if (fmt_ctx === 0)
             throw new Error("Could not open source file");
