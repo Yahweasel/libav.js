@@ -798,18 +798,30 @@ var ff_free_muxer = Module.ff_free_muxer = function(oc, pb) {
  * codecs/types.
  * Returns [AVFormatContext, Stream[]]
  * @param filename  Filename to open
- * @param fmt  Format to use (optional)
- * @param options  Extra options to pass to avformat_open_input (optional)
+ * @param opts  Options to use when opening. If a string, then the string
+ *              format.
  */
 /* @types
  * ff_init_demuxer_file@sync(
- *     filename: string, fmt?: string, options?: number
+ *     filename: string, opts?: string | {
+ *         format?: string,
+ *         open_input_options?: number
+ *     }
  * ): @promsync@[number, Stream[]]@
  */
-function ff_init_demuxer_file(filename, fmt, options) {
+function ff_init_demuxer_file(filename, opts) {
     var fmt_ctx;
 
-    return avformat_open_input_js(filename, fmt?fmt:null, options?options:null).then(function(ret) {
+    if (typeof opts === "string")
+        opts = {format: opts};
+    else if (typeof opts === "undefined")
+        opts = {};
+
+    return avformat_open_input_js(
+        filename,
+        opts.format||null,
+        opts.open_input_options||null
+    ).then(function(ret) {
         fmt_ctx = ret;
         if (fmt_ctx === 0)
             throw new Error("Could not open source file");
