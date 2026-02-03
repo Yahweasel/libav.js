@@ -1,10 +1,6 @@
 name: Build LibAV h264-aac-mp3
 
 on:
-  push:
-    branches: [ main, patched-h264-aac-mp3 ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
