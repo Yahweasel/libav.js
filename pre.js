@@ -14,6 +14,7 @@
  */
 
 // Import LibAV.base if applicable
+let _scriptName;
 if (typeof _scriptName === "undefined") {
     if (typeof LibAV === "object" && LibAV && LibAV.base)
         _scriptName = LibAV.base + "/libav-@VER-@VARIANT.@DBG@TARGET.@JS";
@@ -21,7 +22,9 @@ if (typeof _scriptName === "undefined") {
         _scriptName = self.location.href;
 }
 
-Module.locateFile = function(path, prefix) {
+Module.printErr = console.log.bind(console);
+
+Module.locateFile = function (path, prefix) {
     // if it's the wasm file
     if (path.lastIndexOf(".wasm") === path.length - 5 &&
         path.indexOf("libav-") !== -1) {

@@ -1,0 +1,19 @@
+--enable-protocol=data --enable-protocol=file
+--enable-filter=aresample
+--enable-filter=asetnsamples
+--enable-muxer=mp4
+--enable-demuxer=aac
+--enable-parser=aac
+--enable-decoder=aac
+--enable-parser=h264
+--enable-bsf=h264_metadata
+--enable-bsf=extract_extradata
+--enable-demuxer=mpegts
+--enable-demuxer=mp3
+--enable-demuxer=mov
+--enable-muxer=mp3
+--enable-decoder=mp3
+--enable-libmp3lame
+--enable-encoder=libmp3lame
+--enable-bsf=h264_metadata
+--enable-bsf=extract_extradata

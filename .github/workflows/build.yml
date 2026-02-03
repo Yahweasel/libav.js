@@ -1,0 +1,50 @@
+name: Build LibAV h264-aac-mp3
+
+on:
+  push:
+    branches: [ main, patched-h264-aac-mp3 ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build Docker image
+      run: docker build -t libav-builder .
+      
+    - name: Run build in Docker
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}/dist:/libav.js/dist \
+          libav-builder \
+          make build-h264-aac-mp3
+          
+    - name: List build outputs
+      run: ls -la dist/
+      
+    - name: Calculate SHA256 checksums
+      run: |
+        cd dist
+        sha256sum *.wasm > checksums.sha256
+        sha256sum *.mjs >> checksums.sha256
+        cat checksums.sha256
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: libav-h264-aac-mp3-wasm
+        path: |
+          dist/*.wasm
+          dist/*.mjs
+          dist/*.js
+          dist/checksums.sha256
+        retention-days: 30
