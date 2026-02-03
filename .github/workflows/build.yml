@@ -10,19 +10,41 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
+    - name: Cache Build Artifacts
+      uses: actions/cache@v4
+      with:
+        path: .build-cache
+        key: build-artifacts-${{ hashFiles('configs/**', 'mk/**', 'patches/**', 'Makefile') }}
+        restore-keys: |
+          build-artifacts-
+      
     - name: Build Docker image
-      run: docker build -t libav-builder .
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        load: true
+        tags: libav-builder
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Create cache directory
+      run: mkdir -p .build-cache
       
     - name: Run build in Docker
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/dist:/libav.js/dist \
+          -v ${{ github.workspace }}/.build-cache:/libav.js/build \
           libav-builder \
           make build-h264-aac-mp3
+
+    - name: Fix Cache Permissions
+      if: always()
+      run: sudo chown -R $USER:$USER .build-cache dist
           
     - name: List build outputs
       run: ls -la dist/
