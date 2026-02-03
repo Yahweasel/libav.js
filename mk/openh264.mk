@@ -7,6 +7,7 @@ build/inst/%/lib/pkgconfig/openh264.pc: build/openh264-$(OPENH264_VERSION)/PATCH
 		install-static OS=linux ARCH=mips LIBDIR_NAME=lib \
 		CFLAGS="$(OPTFLAGS) -fno-stack-protector `cat $(PWD)/build/inst/$*/cflags.txt`" \
 		PREFIX="$(PWD)/build/inst/$*"
+		ls -R build/inst/$*
 
 extract: build/openh264-$(OPENH264_VERSION)/PATCHED
 
