@@ -30,7 +30,7 @@ build/libaom-$(LIBAOM_VERSION)/build-base/Makefile: build/libaom-$(LIBAOM_VERSIO
 		-DENABLE_EXAMPLES=0 \
 		-DCONFIG_RUNTIME_CPU_DETECT=0 \
 		-DCONFIG_WEBM_IO=0 \
-                -DCONFIG_MULTITHREAD=0
+		-DCONFIG_MULTITHREAD=0
 	touch $(@)
 
 # Threaded
@@ -49,7 +49,7 @@ build/libaom-$(LIBAOM_VERSION)/build-thr/Makefile: build/libaom-$(LIBAOM_VERSION
 		-DENABLE_EXAMPLES=0 \
 		-DCONFIG_RUNTIME_CPU_DETECT=0 \
 		-DCONFIG_WEBM_IO=0 \
-                
+		
 	touch $(@)
 
 
@@ -60,14 +60,17 @@ build/libaom-$(LIBAOM_VERSION)/PATCHED: build/libaom-$(LIBAOM_VERSION)/CMakeList
 	touch $@
 
 build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt: build/libaom-$(LIBAOM_VERSION).tar.gz
-	mkdir -p build/libaom-$(LIBAOM_VERSION)
-	cd build/libaom-$(LIBAOM_VERSION) && \
-		tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
+	#mkdir -p build/libaom-$(LIBAOM_VERSION)
+	#cd build/libaom-$(LIBAOM_VERSION) && \
+	#	tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
+	mkdir -p build
+	cd build && tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
 	touch $@
 
 build/libaom-$(LIBAOM_VERSION).tar.gz:
 	mkdir -p build
-	curl https://aomedia.googlesource.com/aom/+archive/$(LIBAOM_VERSION).tar.gz -L -o $@
+	#curl https://aomedia.googlesource.com/aom/+archive/$(LIBAOM_VERSION).tar.gz -L -o $@
+	curl https://gitlab.com/webmproject/libaom/-/archive/fc5cf6a13/libaom-fc5cf6a13.tar.gz -L -o $@
 
 libaom-release:
 	cp build/libaom-$(LIBAOM_VERSION).tar.gz $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources/
