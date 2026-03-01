@@ -47,7 +47,7 @@ build/libaom-$(LIBAOM_VERSION)/CMakeLists.txt: build/libaom-$(LIBAOM_VERSION).ta
 	#cd build/libaom-$(LIBAOM_VERSION) && \
 	#	tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
 	mkdir -p build
-	cd build && tar zxf ../libaom-$(LIBAOM_VERSION).tar.gz
+	cd build && tar zxf libaom-$(LIBAOM_VERSION).tar.gz
 	touch $@
 
 build/libaom-$(LIBAOM_VERSION).tar.gz:
