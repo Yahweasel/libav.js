@@ -30,6 +30,7 @@ const formatCodecs = {
     "mpegts": mp4,
     "rawvideo": ["rawvideo", null, {nocheck: true}],
     "wav": [null, "pcm_s16le"],
+    "webvtt": [null, null],
     "wv": [null, "wavpack"]
 };
 

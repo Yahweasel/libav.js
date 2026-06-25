@@ -8,7 +8,7 @@ FFMPEG_CONFIG=--prefix=/opt/ffmpeg \
 	--enable-cross-compile \
 	--disable-x86asm --disable-inline-asm \
 	--disable-runtime-cpudetect \
-	--cc=emcc --ranlib=emranlib \
+	--cc=emcc --cxx=em++ --ranlib=emranlib \
 	--disable-doc \
 	--disable-stripping \
 	--disable-programs \
