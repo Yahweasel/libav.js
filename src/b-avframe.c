@@ -42,9 +42,6 @@ BL(int64_t, pts)
 BL(int64_t, best_effort_timestamp)
 B(int, sample_rate)
 B(int, width)
-#undef B
-#undef BL
-#undef BA
 
 RAT(AVFrame, sample_aspect_ratio)
 
@@ -54,10 +51,20 @@ RAT(AVFrame, time_base)
 RAT_FAKE(AVFrame, time_base, 1, 1000)
 #endif
 
+#ifdef AV_FRAME_FLAG_KEY
 int AVFrame_key_frame(AVFrame *a) { return !!(a->flags & AV_FRAME_FLAG_KEY); }
 void AVFrame_key_frame_s(AVFrame *a, int b) {
     a->flags = (a->flags & ~AV_FRAME_FLAG_KEY) | (b ? AV_FRAME_FLAG_KEY : 0);
 }
+
+#else
+B(int, key_frame)
+
+#endif
+
+#undef B
+#undef BL
+#undef BA
 
 CHL(AVFrame)
 
