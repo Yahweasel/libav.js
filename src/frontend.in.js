@@ -152,7 +152,7 @@
 
     // Some enumerations lifted directly from FFmpeg
     function enume(vals, first) {
-        if (typeof first === undefined)
+        if (typeof first === "undefined")
             first = 0;
         var i = first;
         vals.forEach(function(val) {
@@ -415,7 +415,7 @@
                             ret.worker.postMessage(msg, transfer);
                         });
                     };
-                    function onworkermessage(e) {
+                    function onworkermessage(e) { 
                         var id = e.data[0];
                         var h = ret.handlers[id];
                         if (h) {
@@ -556,7 +556,7 @@
 
             }
 
-        }).then(function() {
+        }).then(function() { 
             // Step three: Add wrappers to the instance(s)
 
             function indirectors(funcs) {
