@@ -34,6 +34,7 @@
 --enable-decoder=qtrle
 --enable-encoder=qtrle
 --enable-demuxer=hls
+--enable-muxer=mp4
 --enable-muxer=hls
 --enable-protocol=jsfetch
 --enable-bsf=null
