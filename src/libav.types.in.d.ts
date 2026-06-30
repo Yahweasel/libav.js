@@ -208,6 +208,34 @@ declare namespace LibAV {
          * Duration of this stream in seconds.
          */
         duration: number;
+
+        /**
+         * Stream-level metadata.
+         */
+        metadata?: Record<string, string>;
+    }
+
+    /**
+     * Chapter information, as returned by ff_get_demuxer_chapters.
+     */
+    export interface Chapter {
+        /** Pointer to the underlying AVChapter. */
+        ptr: number;
+
+        /** Chapter identifier. */
+        id: number;
+
+        /** Time base for this chapter. */
+        time_base_num: number; time_base_den: number;
+
+        /** Start/end in time_base units. */
+        start_time_base: number; end_time_base: number;
+
+        /** Start/end in seconds. */
+        start: number; end: number;
+
+        /** Chapter-level metadata. */
+        metadata?: Record<string, string>;
     }
 
     /**
