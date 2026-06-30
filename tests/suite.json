@@ -48,5 +48,6 @@
  "626-time-base.js",
  "627-bsf.js",
  "628-jsfetch-seek.js",
+ "629-metadata-chapters.js",
  "650-all-to-all.js"
 ]

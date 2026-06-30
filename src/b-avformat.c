@@ -20,10 +20,13 @@
 BL(int64_t, duration)
 B(int, flags)
 B(unsigned int, nb_streams)
+B(unsigned int, nb_chapters)
 B(const struct AVOutputFormat *, oformat)
 B(AVIOContext *, pb)
+B(AVDictionary *, metadata)
 BL(int64_t, start_time)
 BA(AVStream *, streams)
+BA(AVChapter *, chapters)
 #undef B
 #undef BA
 #undef BL
@@ -33,11 +36,24 @@ BA(AVStream *, streams)
 #define BL(type, field) AL(AVStream, type, field)
 B(AVCodecParameters *, codecpar)
 B(enum AVDiscard, discard)
+B(AVDictionary *, metadata)
 BL(int64_t, duration)
 #undef B
 #undef BL
 
 RAT(AVStream, time_base)
+
+/* AVChapter */
+#define B(type, field) A(AVChapter, type, field)
+#define BL(type, field) AL(AVChapter, type, field)
+B(int, id)
+BL(int64_t, start)
+BL(int64_t, end)
+B(AVDictionary *, metadata)
+#undef B
+#undef BL
+
+RAT(AVChapter, time_base)
 
 int avformat_seek_file_min(
     AVFormatContext *s, int stream_index, int64_t ts, int flags
