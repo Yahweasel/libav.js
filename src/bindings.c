@@ -28,6 +28,7 @@
 #include "libavfilter/avfilter.h"
 #include "libavfilter/buffersink.h"
 #include "libavutil/avutil.h"
+#include "libavutil/dict.h"
 #include "libavutil/opt.h"
 #include "libavutil/pixdesc.h"
 #include "libavutil/version.h"
@@ -59,6 +60,12 @@
     void struc ## _ ## field ## _num_s(struc *a, int b) { (void) a; (void) b; } \
     void struc ## _ ## field ## _den_s(struc *a, int b) { (void) a; (void) b; } \
     void struc ## _ ## field ## _s(struc *a, int n, int d) { (void) a; (void) n; (void) d; }
+
+/* AVDictionaryEntry */
+#define B(type, field) A(AVDictionaryEntry, type, field)
+B(char *, key)
+B(char *, value)
+#undef B
 
 /* Either way we expose the old channel layout API, but if the new channel
  * layout API is available, we use it */

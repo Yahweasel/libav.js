@@ -249,6 +249,12 @@ actually used to copy out packets. See the documentation of `ff_copyout_packet`
 below for how to use the `copyoutPacket` option.
 
 
+### `ff_get_demuxer_chapters`
+
+This function copies the chapter data out of a demuxer, as an array of `Chapter`
+objects. Read the types for more information.
+
+
 ## Data manipulation
 
 ### `ff_copyout_packet` and variants

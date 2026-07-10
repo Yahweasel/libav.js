@@ -850,8 +850,14 @@ function ff_init_demuxer_file(filename, opts) {
             outStream.duration_time_base = AVStream_duration(inStream) + (AVStream_durationhi(inStream)*0x100000000);
             outStream.duration = outStream.duration_time_base * outStream.time_base_num / outStream.time_base_den;
 
+            // Metadata
+            var md = AVStream_metadata(inStream);
+            if (md)
+                outStream.metadata = ff_copyout_dict(md);
+
             streams.push(outStream);
         }
+
         return [fmt_ctx, streams];
 
     });
@@ -861,6 +867,42 @@ Module.ff_init_demuxer_file = function() {
     return serially(function() {
         return ff_init_demuxer_file.apply(void 0, args);
     });
+};
+
+/**
+ * Extract chapter information from a demuxer.
+ * @param fmt_ctx  AVFormatContext
+ */
+/* @types
+ * ff_get_demuxer_chapters@sync(
+ *     fmt_ctx: number
+ * ): @promise@Chapter[]@
+ */
+var ff_get_demuxer_chapters = Module.ff_get_demuxer_chapters = function(fmt_ctx) {
+    var nb_chapters = AVFormatContext_nb_chapters(fmt_ctx);
+    var chapters = [];
+    for (var ci = 0; ci < nb_chapters; ci++) {
+        var inCh = AVFormatContext_chapters_a(fmt_ctx, ci);
+        var start_tb = AVChapter_start(inCh) + (AVChapter_starthi(inCh) * 0x100000000);
+        var end_tb = AVChapter_end(inCh) + (AVChapter_endhi(inCh) * 0x100000000);
+        var tbNum = AVChapter_time_base_num(inCh);
+        var tbDen = AVChapter_time_base_den(inCh);
+        var ch = {
+            ptr: inCh,
+            id: AVChapter_id(inCh),
+            time_base_num: tbNum,
+            time_base_den: tbDen,
+            start_time_base: start_tb,
+            end_time_base: end_tb,
+            start: start_tb * tbNum / tbDen,
+            end: end_tb * tbNum / tbDen
+        };
+        var chmd = AVChapter_metadata(inCh);
+        if (chmd)
+            ch.metadata = ff_copyout_dict(chmd);
+        chapters.push(ch);
+    }
+    return chapters;
 };
 
 /**
