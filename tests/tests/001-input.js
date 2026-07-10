@@ -17,6 +17,7 @@
 for (const file of [
     ["bbb.mp4", "bbb_input.mp4"],
     ["bbb.webm", "bbb_input.webm"],
+    ["bbb_chapters.mp4", "bbb_chapters.mp4"],
     ["bitrate.webm", "bbb_bitrate.webm"],
     ["example-bad-ffprobe.mov", "sandwich-av-mp4a.40.5.mov"]
 ]) {
