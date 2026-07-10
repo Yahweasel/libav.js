@@ -28,10 +28,10 @@
 #include "libavfilter/avfilter.h"
 #include "libavfilter/buffersink.h"
 #include "libavutil/avutil.h"
+#include "libavutil/dict.h"
 #include "libavutil/opt.h"
 #include "libavutil/pixdesc.h"
 #include "libavutil/version.h"
-#include "libavutil/dict.h"
 
 #define A(struc, type, field) \
     type struc ## _ ## field(struc *a) { return a->field; } \

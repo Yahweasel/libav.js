@@ -32,8 +32,8 @@
             ["av_compare_ts_js", "number", ["number", "number", "number", "number", "number", "number", "number", "number"]],
             ["av_dict_copy_js", "number", ["number", "number", "number"]],
             ["av_dict_free", null, ["number"]],
-            ["av_dict_set_js", "number", ["number", "string", "string", "number"]],
             ["av_dict_iterate", "number", ["number", "number"]],
+            ["av_dict_set_js", "number", ["number", "string", "string", "number"]],
             ["av_log_get_level", "number", []],
             ["av_log_set_level", null, ["number"]],
             ["av_opt_set", "number", ["number", "string", "string", "number"]],
@@ -308,8 +308,8 @@
         "meta": [
             "ff_init_muxer",
             "ff_free_muxer",
-            "ff_init_demuxer_file",
             "ff_get_demuxer_chapters",
+            "ff_init_demuxer_file",
             "ff_write_multi",
             "ff_read_frame_multi",
             "ff_read_multi"
@@ -317,35 +317,35 @@
 
         "accessors": [
             ["AVFormatContext", [
+                {"name": "chapters", "array": true},
                 "duration",
                 "durationhi",
                 "flags",
-                "nb_streams",
+                "metadata",
                 "nb_chapters",
+                "nb_streams",
                 "oformat",
                 "pb",
-                "metadata",
                 "start_time",
                 "start_timehi",
-                {"name": "streams", "array": true},
-                {"name": "chapters", "array": true}
+                {"name": "streams", "array": true}
             ]],
             ["AVStream", [
                 "codecpar",
                 "discard",
                 "duration",
                 "durationhi",
-                {"name": "time_base", "rational": true},
-                "metadata"
+                "metadata",
+                {"name": "time_base", "rational": true}
             ]],
             ["AVChapter", [
-                "id",
-                "start",
-                "starthi",
                 "end",
                 "endhi",
-                {"name": "time_base", "rational": true},
-                "metadata"
+                "id",
+                "metadata",
+                "start",
+                "starthi",
+                {"name": "time_base", "rational": true}
             ]]
         ],
 

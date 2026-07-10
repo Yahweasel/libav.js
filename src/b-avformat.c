@@ -17,16 +17,16 @@
 #define B(type, field) A(AVFormatContext, type, field)
 #define BA(type, field) AA(AVFormatContext, type, field)
 #define BL(type, field) AL(AVFormatContext, type, field)
+BA(AVChapter *, chapters)
 BL(int64_t, duration)
 B(int, flags)
-B(unsigned int, nb_streams)
+B(AVDictionary *, metadata)
 B(unsigned int, nb_chapters)
+B(unsigned int, nb_streams)
 B(const struct AVOutputFormat *, oformat)
 B(AVIOContext *, pb)
-B(AVDictionary *, metadata)
 BL(int64_t, start_time)
 BA(AVStream *, streams)
-BA(AVChapter *, chapters)
 #undef B
 #undef BA
 #undef BL
@@ -36,8 +36,8 @@ BA(AVChapter *, chapters)
 #define BL(type, field) AL(AVStream, type, field)
 B(AVCodecParameters *, codecpar)
 B(enum AVDiscard, discard)
-B(AVDictionary *, metadata)
 BL(int64_t, duration)
+B(AVDictionary *, metadata)
 #undef B
 #undef BL
 
@@ -46,10 +46,10 @@ RAT(AVStream, time_base)
 /* AVChapter */
 #define B(type, field) A(AVChapter, type, field)
 #define BL(type, field) AL(AVChapter, type, field)
-B(int, id)
-BL(int64_t, start)
 BL(int64_t, end)
+B(int, id)
 B(AVDictionary *, metadata)
+BL(int64_t, start)
 #undef B
 #undef BL
 
