@@ -22,8 +22,7 @@ let dict = await libav.av_dict_set_js(0, "foo", "bar");
 const jsDict = await libav.ff_copyout_dict(dict);
 if (!jsDict.foo || jsDict.foo !== "bar")
     throw new Error("Dictionary copyout failed");
-// (skip av_dict_free -- it takes AVDictionary** but is wrapped as number,
-// causing memory access errors in the all variant wasm)
+await libav.av_dict_free_js(dict);
 
 // Initialize demuxer and check stream metadata
 const [fmt_ctx, streams] = await libav.ff_init_demuxer_file("bbb.mp4");
