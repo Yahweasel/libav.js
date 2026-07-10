@@ -224,3 +224,18 @@ var ff_copyin_codecpar_side_data = Module.ff_copyin_codecpar_side_data = functio
         copyin_u8(data, elem.data);
     });
 };
+
+/**
+ * Copy out a dictionary.
+ * @param dict  AVDictionary pointer
+ */
+/// @types ff_copyout_dict@sync(dict: number): @promise@Record<string, string>@
+var ff_copyout_dict = Module.ff_copyout_dict = function(dict) {
+    if (!dict) return null;
+    var ret = {};
+    var ent = 0;
+    while ((ent = av_dict_iterate(dict, ent))) {
+        ret[AVDictionaryEntry_key(ent)] = AVDictionaryEntry_value(ent);
+    }
+    return ret;
+};
