@@ -1,8 +1,14 @@
 --enable-protocol=data --enable-protocol=file
 --enable-demuxer=mov
+--enable-muxer=avif
+--enable-muxer=f4v
 --enable-muxer=ipod
+--enable-muxer=ismv
 --enable-muxer=mov
 --enable-muxer=mp4
+--enable-muxer=psp
+--enable-muxer=tg2
+--enable-muxer=tgp
 --enable-demuxer=aac
 --enable-muxer=adts
 --enable-demuxer=matroska
