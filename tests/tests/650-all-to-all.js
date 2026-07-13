@@ -17,17 +17,23 @@
 
 const mp4 = ["libopenh264", "aac"];
 const formatCodecs = {
+    "3g2": mp4,
+    "3gp": mp4,
     "adts": [null, "aac"],
+    "avif": [null, null],
     "f32le": [null, "pcm_f32le", {nocheck: true}],
+    "f4v": mp4,
     "flac": [null, "flac"],
     "hls": [null, null],
     "image2": [null, null],
     "ipod": mp4,
+    "ismv": mp4,
     "latm": [null, null],
     "mov": mp4,
     "mp3": [null, "libmp3lame"],
     "mp4": mp4,
     "mpegts": mp4,
+    "psp": mp4,
     "rawvideo": ["rawvideo", null, {nocheck: true}],
     "wav": [null, "pcm_s16le"],
     "webvtt": [null, null],
