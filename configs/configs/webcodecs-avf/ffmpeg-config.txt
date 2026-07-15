@@ -10,7 +10,6 @@
 --enable-muxer=ismv
 --enable-muxer=mov
 --enable-muxer=mp4
---enable-muxer=psp
 --enable-muxer=tg2
 --enable-muxer=tgp
 --enable-parser=opus
