@@ -689,6 +689,24 @@ Index: ffmpeg-9.0/fftools/ffmpeg_sched.c
      av_assert0(ret == 0);
  
      task->thread_running = 0;
+@@ -2828,7 +2828,7 @@ int sch_stop(Scheduler *sch, int64_t *fi
+ 
+     // Ensure no other thread is currently in schedule_update_locked while
+     // we are choking all demuxers
+-    pthread_mutex_lock(&sch->schedule_lock);
++    EMFT(pthread_mutex_lock)(&sch->schedule_lock);
+ 
+     for (unsigned type = 0; type < 2; type++)
+         for (unsigned i = 0; i < (type ? sch->nb_demux : sch->nb_filters); i++) {
+@@ -2841,7 +2841,7 @@ int sch_stop(Scheduler *sch, int64_t *fi
+     for (unsigned i = 0; i < sch->nb_dec; i++)
+         waiter_set(&sch->dec[i].waiter, 0); // unfreeze to allow draining
+ 
+-    pthread_mutex_unlock(&sch->schedule_lock);
++    EMFT(pthread_mutex_unlock)(&sch->schedule_lock);
+ 
+     for (unsigned i = 0; i < sch->nb_demux; i++) {
+         SchDemux *d = &sch->demux[i];
 Index: ffmpeg-9.0/fftools/thread_queue.c
 ===================================================================
 --- ffmpeg-9.0.orig/fftools/thread_queue.c
