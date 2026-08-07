@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2025 Yahweasel and contributors
+ * Copyright (C) 2019-2026 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -19,11 +19,51 @@
 #define BA(type, field) AA(AVCodec, type, field)
 B(const char *, name)
 B(const char *, long_name)
+B(enum AVMediaType, type)
+
+#if (LIBAVCODEC_VERSION_MAJOR < 62) || \
+    (LIBAVCODEC_VERSION_MAJOR == 62 && LIBAVCODEC_VERSION_MINOR < 36) || \
+    (LIBAVCODEC_VERSION_MAJOR == 62 && LIBAVCODEC_VERSION_MINOR == 36 && LIBAVCODEC_VERSION_MICRO < 101)
 B(const enum AVSampleFormat *, sample_fmts)
 BA(enum AVSampleFormat, sample_fmts)
 B(const int *, supported_samplerates)
 BA(int, supported_samplerates)
-B(enum AVMediaType, type)
+
+#else
+const enum AVSampleFormat *AVCodec_sample_fmts(AVCodec *c) {
+    enum AVSampleFormat *out;
+    avcodec_get_supported_config(
+        NULL, c, AV_CODEC_CONFIG_SAMPLE_FORMAT, 0, (const void **) &out, NULL
+    );
+    return out;
+}
+
+void AVCodec_sample_fmts_s(AVCodec *_1, enum AVSampleFormat *_2) {}
+
+enum AVSampleFormat AVCodec_sample_fmts_a(AVCodec *c, size_t idx) {
+    return AVCodec_sample_fmts(c)[idx];
+}
+
+void AVCodec_sample_fmts_a_s(AVCodec *_1, size_t _2, enum AVSampleFormat _3) {}
+
+const int *AVCodec_supported_samplerates(AVCodec *c) {
+    int *out;
+    avcodec_get_supported_config(
+        NULL, c, AV_CODEC_CONFIG_SAMPLE_RATE, 0, (const void **) &out, NULL
+    );
+    return out;
+}
+
+void AVCodec_supported_samplerates_s(AVCodec *_1, int _2) {}
+
+int AVCodec_supported_samplerates_a(AVCodec *c, size_t idx) {
+    return AVCodec_supported_samplerates(c)[idx];
+}
+
+void AVCodec_supported_samplerates_a_s(AVCodec *_1, size_t _2, int _3) {}
+
+#endif
+
 #undef B
 #undef BA
 

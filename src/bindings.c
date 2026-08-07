@@ -167,10 +167,12 @@ void ff_nothing() {}
 int av_opt_set_int_list_js(void *obj, const char *name, int width, void *val, int term, int flags)
 {
     switch (width) {
+#if (LIBAVUTIL_VERSION_MAJOR < 61)
         case 4:
             return av_opt_set_int_list(obj, name, ((int32_t *) val), term, flags);
         case 8:
             return av_opt_set_int_list(obj, name, ((int64_t *) val), term, flags);
+#endif
         default:
             return AVERROR(EINVAL);
     }
@@ -202,6 +204,18 @@ int av_compare_ts_js(
                tb_b = {tb_b_num, tb_b_den};
     return av_compare_ts(ts_a, tb_a, ts_b, tb_b);
 }
+
+#if LIBAVUTIL_VERSION_MAJOR < 57 || \
+    (LIBAVUTIL_VERSION_MAJOR == 57 && LIBAVUTIL_VERSION_MINOR < 42) || \
+    (LIBAVUTIL_VERSION_MAJOR == 57 && LIBAVUTIL_VERSION_MINOR == 42 && LIBAVUTIL_VERSION_MICRO < 101)
+/* 57.42.100 introduced av_dict_iterate */
+const AVDictionaryEntry *av_dict_iterate(
+    const AVDictionary *m, const AVDictionaryEntry **prev
+) {
+    *((void **) NULL) = NULL;
+    return NULL;
+}
+#endif
 
 
 /****************************************************************
