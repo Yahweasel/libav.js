@@ -40,6 +40,8 @@ function runMain(main, name, args) {
     var ret = null;
     try {
         ret = main(args.length, argv);
+        if (typeof ret === "undefined")
+            ret = EXITSTATUS;
     } catch (ex) {
         if (ex && ex.name === "ExitStatus")
             ret = ex.status;
@@ -55,6 +57,8 @@ function runMain(main, name, args) {
 
     if (ret && ret.then) {
         return ret.then(function(ret) {
+            if (typeof ret === "undefined")
+                ret = EXITSTATUS;
             cleanup();
             return ret;
         }).catch(function(ex) {
