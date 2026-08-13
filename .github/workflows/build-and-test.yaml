@@ -13,7 +13,7 @@ jobs:
 
       - uses: mymindstorm/setup-emsdk@v16
         with:
-          version: 5.0.7
+          version: 6.0.5
           actions-cache-folder: 'cache-emsdk'
 
       - uses: actions/cache@v3
