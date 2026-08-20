@@ -1,0 +1,5 @@
+--enable-parser=av1
+--enable-libdav1d
+--enable-decoder=libdav1d
+--enable-bsf=av1_metadata
+--enable-bsf=extract_extradata

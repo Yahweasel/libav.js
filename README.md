@@ -274,6 +274,9 @@ The included variants and their codecs and formats are:
    these variants are effectively unusable. `-avf` additionally includes audio
    and video filters.
 
+ * decoder-dav1d-av1: Modular AV1 decoder using dav1d. This is an additional,
+   decoder-only variant; the existing AV1 variants continue to use libaom.
+
  * aac², aac-af²: Reprobate codec AAC in MP4 or AAC/ADTS. `-af` additionally
    includes audio filters.
 

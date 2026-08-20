@@ -153,7 +153,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-bas
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -194,7 +195,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -235,7 +237,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -276,7 +279,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.asm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.asm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -318,7 +322,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/build-ba
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -359,7 +364,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-b
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -400,7 +406,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.js: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -441,7 +448,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.wasm.mjs: build/ffmpeg-$(FFMPEG_VERSION)/bui
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.wasm.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -483,7 +491,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build-thr
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -524,7 +533,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/build-th
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -565,7 +575,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.js: build/ffmpeg-$(FFMPEG_VERSION)/build
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -606,7 +617,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.dbg.thr.mjs: build/ffmpeg-$(FFMPEG_VERSION)/buil
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).dbg.thr.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -680,7 +692,7 @@ MODULAR_VARIANTS_ENCUMBERED=\
 	decoder-aac decoder-h264 decoder-hevc
 	
 MODULAR_VARIANTS=\
-	decoder-ac3 decoder-alac decoder-av1 decoder-cinepak decoder-cook \
+	decoder-ac3 decoder-alac decoder-av1 decoder-dav1d-av1 decoder-cinepak decoder-cook \
 	decoder-dvaudio decoder-dvvideo decoder-flac decoder-flashsv \
 	decoder-flashsv2 decoder-flv1 decoder-h261 decoder-h263 decoder-h263p \
 	decoder-indeo2 decoder-indeo3 decoder-indeo4 decoder-indeo5 decoder-mp1 \
@@ -717,7 +729,7 @@ release: extract
 	done
 	cp dist/libav.types.d.ts $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/dist/
 	mkdir $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources
-	for t in ffmpeg emfiberthreads lame libaom libogg libvorbis libvpx opus zlib; \
+	for t in dav1d ffmpeg emfiberthreads lame libaom libogg libvorbis libvpx opus zlib; \
 	do \
 		$(MAKE) $$t-release; \
 	done
@@ -771,6 +783,7 @@ clean: halfclean
 	-rm -rf build/inst
 	-rm -rf build/emfiberthreads
 	-rm -rf build/opus-$(OPUS_VERSION)
+	-rm -rf build/dav1d-$(DAV1D_VERSION)
 	-rm -rf build/libaom-$(LIBAOM_VERSION)
 	-rm -rf build/libvorbis-$(LIBVORBIS_VERSION)
 	-rm -rf build/libogg-$(LIBOGG_VERSION)

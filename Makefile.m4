@@ -126,7 +126,8 @@ dist/libav-$(LIBAVJS_VERSION)-%.$2$1.$5: build/ffmpeg-$(FFMPEG_VERSION)/build-$3
 		./tools/adjust-sourcemap.js $(@).d/libav-$(LIBAVJS_VERSION)-$(*).$2$1.wasm.map \
 			ffmpeg $(FFMPEG_VERSION) \
 			libvpx $(LIBVPX_VERSION) \
-			libaom $(LIBAOM_VERSION); \
+			libaom $(LIBAOM_VERSION) \
+			dav1d $(DAV1D_VERSION); \
 	fi || ( rm -f $(@) ; false )
 	sed " \
 		s/^\/\/.*include:.*// ; \
@@ -216,7 +217,7 @@ MODULAR_VARIANTS_ENCUMBERED=\
 	decoder-aac decoder-h264 decoder-hevc
 	
 MODULAR_VARIANTS=\
-	decoder-ac3 decoder-alac decoder-av1 decoder-cinepak decoder-cook \
+	decoder-ac3 decoder-alac decoder-av1 decoder-dav1d-av1 decoder-cinepak decoder-cook \
 	decoder-dvaudio decoder-dvvideo decoder-flac decoder-flashsv \
 	decoder-flashsv2 decoder-flv1 decoder-h261 decoder-h263 decoder-h263p \
 	decoder-indeo2 decoder-indeo3 decoder-indeo4 decoder-indeo5 decoder-mp1 \
@@ -253,7 +254,7 @@ release: extract
 	done
 	cp dist/libav.types.d.ts $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/dist/
 	mkdir $(RELEASE_DIR)/libav.js-$(LIBAVJS_VERSION)$(RELEASE_SUFFIX)/sources
-	for t in ffmpeg emfiberthreads lame libaom libogg libvorbis libvpx opus zlib; \
+	for t in dav1d ffmpeg emfiberthreads lame libaom libogg libvorbis libvpx opus zlib; \
 	do \
 		$(MAKE) $$t-release; \
 	done
@@ -307,6 +308,7 @@ clean: halfclean
 	-rm -rf build/inst
 	-rm -rf build/emfiberthreads
 	-rm -rf build/opus-$(OPUS_VERSION)
+	-rm -rf build/dav1d-$(DAV1D_VERSION)
 	-rm -rf build/libaom-$(LIBAOM_VERSION)
 	-rm -rf build/libvorbis-$(LIBVORBIS_VERSION)
 	-rm -rf build/libogg-$(LIBOGG_VERSION)

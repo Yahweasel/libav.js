@@ -122,6 +122,7 @@ const configsRaw = [
 
     // Single-format decoders
     ["decoder-av1", ["avcodec", "parser-av1", "decoder-libaom_av1"], {noAll: true}],
+    ["decoder-dav1d-av1", ["avcodec", "parser-av1", "decoder-libdav1d_av1"], {excludeFromAll: true}],
     ["decoder-cinepak", ["avcodec", "decoder-cinepak"], {noAll: true}],
     ["decoder-dvvideo", ["avcodec", "decoder-dvvideo"], {noAll: true}],
     ["decoder-flashsv", ["avcodec", "zlib", "decoder-flashsv"], {noAll: true}],
@@ -263,7 +264,9 @@ for (const config of configsRaw) {
     if (extra && extra.cli)
         configGroup(toAdd, "cli", ["avfilter", "cli"]);
 
-    configs.push.apply(configs, toAdd);
+    configs.push.apply(configs, toAdd.map(([groupName, groupParts]) =>
+        [groupName, groupParts, extra]
+    ));
 }
 
 // Process arguments
@@ -280,7 +283,7 @@ for (const arg of process.argv.slice(2)) {
 async function main() {
     for (let [name, config, extra] of configs) {
         if (name !== "all") {
-            if (!extra || !extra.noAll) {
+            if (!extra || !extra.excludeFromAll) {
                 for (const fragment of config)
                     all[fragment] = true;
             }
