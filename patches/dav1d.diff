@@ -1,0 +1,26 @@
+diff --git a/meson.build b/meson.build
+index d82269d..4357987 100644
+--- a/meson.build
++++ b/meson.build
+@@ -148,7 +148,11 @@
+     rc_data.set('API_VERSION_REVISION', dav1d_api_version_revision)
+     rc_data.set('COPYRIGHT_YEARS', '2018-2026')
+ else
+-    thread_dependency = dependency('threads')
++    if host_machine.system() == 'emscripten'
++        thread_dependency = []
++    else
++        thread_dependency = dependency('threads')
++    endif
+     thread_compat_dep = []
+ 
+     rt_dependency = []
+@@ -219,7 +223,7 @@
+     endif
+ endif
+ 
+-if host_machine.cpu_family().startswith('wasm')
++if host_machine.cpu_family().startswith('wasm') and host_machine.system() != 'emscripten'
+     # enable atomics + bulk-memory features
+     stdatomic_dependencies += thread_dependency.partial_dependency(compile_args: true)
+ endif

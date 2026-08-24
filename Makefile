@@ -692,8 +692,8 @@ MODULAR_VARIANTS_ENCUMBERED=\
 	decoder-aac decoder-h264 decoder-hevc
 	
 MODULAR_VARIANTS=\
-	decoder-ac3 decoder-alac decoder-av1 decoder-dav1d-av1 decoder-cinepak decoder-cook \
-	decoder-dvaudio decoder-dvvideo decoder-flac decoder-flashsv \
+	decoder-ac3 decoder-alac decoder-av1 decoder-cinepak decoder-cook \
+	decoder-dav1d decoder-dvaudio decoder-dvvideo decoder-flac decoder-flashsv \
 	decoder-flashsv2 decoder-flv1 decoder-h261 decoder-h263 decoder-h263p \
 	decoder-indeo2 decoder-indeo3 decoder-indeo4 decoder-indeo5 decoder-mp1 \
 	decoder-mp2 decoder-mp3 decoder-mpeg1video decoder-mpeg2video \
