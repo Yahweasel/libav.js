@@ -123,6 +123,7 @@ const configsRaw = [
     // Single-format decoders
     ["decoder-av1", ["avcodec", "parser-av1", "decoder-libaom_av1"], {noAll: true}],
     ["decoder-cinepak", ["avcodec", "decoder-cinepak"], {noAll: true}],
+    ["decoder-dav1d", ["avcodec", "parser-av1", "decoder-libdav1d"], {noAll: true}],
     ["decoder-dvvideo", ["avcodec", "decoder-dvvideo"], {noAll: true}],
     ["decoder-flashsv", ["avcodec", "zlib", "decoder-flashsv"], {noAll: true}],
     ["decoder-flashsv2", ["avcodec", "zlib", "decoder-flashsv2"], {noAll: true}],
