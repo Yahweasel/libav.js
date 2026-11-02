@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2025 Yahweasel and contributors
+ * Copyright (C) 2019-2026 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -271,6 +271,12 @@ void sws_scale_frame() {}
 EM_JS(void *, libavjs_main_thread, (void *ignore), {
     // Avoid exiting the runtime so we can receive normal requests
     noExitRuntime = Module.noExitRuntime = true;
+
+    /* Perform our own initialization. This is in post.js, and in non-threaded
+     * circumstances it runs during post.js itself. Because thread
+     * initialization is more complicated, we run it now, while creating the
+     * main thread. */
+    libavjsInitialize();
 
     // Hijack the event handler
     var origOnmessage = onmessage;

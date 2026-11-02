@@ -520,7 +520,8 @@
                         ret.PThread.unusedWorkers
                         .concat(ret.PThread.runningWorkers)
                         .forEach(function(worker) {
-                            worker.terminate()
+                            if (worker)
+                                worker.terminate()
                         });
                     };
 

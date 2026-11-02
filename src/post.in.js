@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2025 Yahweasel and contributors
+ * Copyright (C) 2019-2026 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -32,85 +32,99 @@ function serially(f) {
     return p;
 }
 
-// A global error passed through filesystem operations
-Module.fsThrownError = null;
-
-var ERRNO_CODES = {
-    EPERM: 1,
-    EIO: 5,
-    EAGAIN: 6,
-    ECANCELED: 11,
-    ESPIPE: 29
-};
-
 /* Original versions of all our functions, since the Module version is replaced
  * if we're a Worker */
 var CAccessors = {};
 
-/**
- * Allocate and copy in a 32-bit int list.
- * @param list  List of numbers to copy in
- */
-/// @types ff_malloc_int32_list@sync(list: number[]): @promise@number@
-var ff_malloc_int32_list = Module.ff_malloc_int32_list = function(list) {
-    var ptr = malloc(list.length * 4);
-    if (ptr === 0)
-        throw new Error("Failed to malloc");
-    var arr = new Uint32Array(Module.HEAPU8.buffer, ptr, list.length);
-    for (var i = 0; i < list.length; i++)
-        arr[i] = list[i];
-    return ptr;
-};
+var ERRNO_CODES;
+var ff_malloc_int32_list, ff_malloc_int64_list;
+var ff_malloc_string_array, ff_free_string_array;
+@VARS
 
-/**
- * Allocate and copy in a 64-bit int list.
- * @param list  List of numbers to copy in
- */
-/// @types ff_malloc_int64_list@sync(list: number[]): @promise@number@
-var ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
-    var ptr = malloc(list.length * 8);
-    if (ptr === 0)
-        throw new Error("Failed to malloc");
-    var arr = new Int32Array(Module.HEAPU8.buffer, ptr, list.length*2);
-    for (var i = 0; i < list.length; i++) {
-        arr[i*2] = list[i];
-        arr[i*2+1] = (list[i]<0)?-1:0;
-    }
-    return ptr;
-};
+function libavjsInitialize() {
+    // A global error passed through filesystem operations
+    Module.fsThrownError = null;
 
-/**
- * Allocate and copy in a string array. The resulting array will be
- * NULL-terminated.
- * @param arr  Array of strings to copy in.
- */
-/// @types ff_malloc_string_array@sync(arr: string[]): @promise@number@
-var ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
-    var ptr = malloc((arr.length + 1) * 4);
-    if (ptr === 0)
-        throw new Error("Failed to malloc");
-    var inArr = new Uint32Array(Module.HEAPU8.buffer, ptr, arr.length + 1);
-    var i;
-    for (i = 0; i < arr.length; i++)
-        inArr[i] = av_strdup(arr[i]);
-    inArr[i] = 0;
-    return ptr;
-};
+    ERRNO_CODES = {
+        EPERM: 1,
+        EIO: 5,
+        EAGAIN: 6,
+        ECANCELED: 11,
+        ESPIPE: 29
+    };
 
-/**
- * Free a string array allocated by ff_malloc_string_array.
- * @param ptr  Pointer to the array to free.
- */
-/// @types ff_free_string_array@sync(ptr: number): @promise@void@
-var ff_free_string_array = Module.ff_free_string_array = function(ptr) {
-    var iPtr = ptr / 4;
-    for (;; iPtr++) {
-        var elPtr = Module.HEAPU32[iPtr];
-        if (!elPtr)
-            break;
-        free(elPtr);
-    }
-    free(ptr);
-};
+    /**
+     * Allocate and copy in a 32-bit int list.
+     * @param list  List of numbers to copy in
+     */
+    /// @types ff_malloc_int32_list@sync(list: number[]): @promise@number@
+    ff_malloc_int32_list = Module.ff_malloc_int32_list = function(list) {
+        var ptr = malloc(list.length * 4);
+        if (ptr === 0)
+            throw new Error("Failed to malloc");
+        var arr = new Uint32Array(Module.HEAPU8.buffer, ptr, list.length);
+        for (var i = 0; i < list.length; i++)
+            arr[i] = list[i];
+        return ptr;
+    };
 
-@FUNCS
+    /**
+     * Allocate and copy in a 64-bit int list.
+     * @param list  List of numbers to copy in
+     */
+    /// @types ff_malloc_int64_list@sync(list: number[]): @promise@number@
+    ff_malloc_int64_list = Module.ff_malloc_int64_list = function(list) {
+        var ptr = malloc(list.length * 8);
+        if (ptr === 0)
+            throw new Error("Failed to malloc");
+        var arr = new Int32Array(Module.HEAPU8.buffer, ptr, list.length*2);
+        for (var i = 0; i < list.length; i++) {
+            arr[i*2] = list[i];
+            arr[i*2+1] = (list[i]<0)?-1:0;
+        }
+        return ptr;
+    };
+
+    /**
+     * Allocate and copy in a string array. The resulting array will be
+     * NULL-terminated.
+     * @param arr  Array of strings to copy in.
+     */
+    /// @types ff_malloc_string_array@sync(arr: string[]): @promise@number@
+    ff_malloc_string_array = Module.ff_malloc_string_array = function(arr) {
+        var ptr = malloc((arr.length + 1) * 4);
+        if (ptr === 0)
+            throw new Error("Failed to malloc");
+        var inArr = new Uint32Array(Module.HEAPU8.buffer, ptr, arr.length + 1);
+        var i;
+        for (i = 0; i < arr.length; i++)
+            inArr[i] = av_strdup(arr[i]);
+        inArr[i] = 0;
+        return ptr;
+    };
+
+    /**
+     * Free a string array allocated by ff_malloc_string_array.
+     * @param ptr  Pointer to the array to free.
+     */
+    /// @types ff_free_string_array@sync(ptr: number): @promise@void@
+    ff_free_string_array = Module.ff_free_string_array = function(ptr) {
+        var iPtr = ptr / 4;
+        for (;; iPtr++) {
+            var elPtr = Module.HEAPU32[iPtr];
+            if (!elPtr)
+                break;
+            free(elPtr);
+        }
+        free(ptr);
+    };
+
+    @FUNCS
+}
+
+if (typeof ENVIRONMENT_IS_PTHREAD === "undefined" || !ENVIRONMENT_IS_PTHREAD) {
+    /* In a pthread environment, we need to wait for the wasm to be received and
+     * initialized before we can initialize libav.js, so we handle it in
+     * libavjs_create_main_thread */
+    libavjsInitialize();
+}

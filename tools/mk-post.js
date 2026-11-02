@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Copyright (C) 2019-2025 Yahweasel and contributors
+ * Copyright (C) 2019-2026 Yahweasel and contributors
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted.
@@ -22,6 +22,7 @@ async function main() {
     const funcs = JSON.parse(await fs.readFile("funcs.json", "utf8"));
     let inp = await fs.readFile("src/post.in.js", "utf8");
     let out = "";
+    let vars = "";
     const components = (
         await fs.readFile(`configs/configs/${process.argv[2]}/components.txt`, "utf8")
     ).trim().split("\n");
@@ -66,7 +67,8 @@ async function main() {
         }
 
         for (const decl of fc.functions) {
-            out += `var ${decl[0]} = ` +
+            vars += `var ${decl[0]};\n`;
+            out += `${decl[0]} = ` +
                 `Module.${decl[0]} = ` +
                 `CAccessors.${decl[0]} = ` +
                 `Module.cwrap(${s(decl[0])}, ${s(decl[1])}, ${s(decl[2])}`;
@@ -104,7 +106,8 @@ async function main() {
         }
 
         for (const freer of (fc.freers || [])) {
-            out += `var ${freer}_js = ` +
+            vars += `var ${freer}_js;\n`;
+            out += `${freer}_js = ` +
                 `Module.${freer}_js = ` +
                 `CAccessors.${freer}_js = ` +
                 "function(p) { " +
@@ -119,14 +122,15 @@ async function main() {
         for (const copier of (fc.copiers || [])) {
             const type = copier[0];
             const typedArr = copier[1];
-            out += `var copyin_${type} = ` +
+            vars += `var copyin_${type};\nvar copyout_${type};\n`;
+            out += `copyin_${type} = ` +
                 `Module.copyin_${type} = ` +
                 `CAccessors.copyin_${type} = ` +
                 "function(ptr, arr) { " +
                 `var buf = new ${typedArr}(Module.HEAPU8.buffer, ptr); ` +
                 "buf.set(arr); " +
                 "};\n" +
-                `var copyout_${type} = ` +
+                `copyout_${type} = ` +
                 `Module.copyout_${type} = ` +
                 `CAccessors.copyout_${type} = ` +
                 "function(ptr, len) { " +
@@ -140,7 +144,7 @@ async function main() {
     for (const part of parts)
         inp += await fs.readFile(`src/p-${part}.in.js`, "utf8");
 
-    out = inp.replace("@FUNCS", out);
+    out = inp.replace("@VARS", vars).replace("@FUNCS", out);
 
     process.stdout.write(out);
 }
